@@ -35,47 +35,57 @@ const PackagingCalculations: React.FC<PackagingCalculationsProps> = React.memo(
         // Calculate total weight
         let totalWeightInKg = 0;
 
-        if (packagingHierarchy.length > 0) {
-          const smallestLevel = packagingHierarchy[0];
-          const smallestWeightField = `weightPer${
-            smallestLevel.from.charAt(0).toUpperCase() +
-            smallestLevel.from.slice(1)
-          }`;
-          const smallestWeightUnitField = `${smallestWeightField}Unit`;
+        // Get unit weight and unit type
+        const unitWeight = parseFloat(values.unitWeight) || 0;
+        const unitWeightUnit = values.unitWeightUnit || 'kg';
+        const weightUnitType = values.weightUnitType || '';
 
-          const smallestWeight = parseFloat(values[smallestWeightField]) || 0;
-          const smallestUnit = values[smallestWeightUnitField] || 'kg';
+        if (unitWeight > 0 && weightUnitType) {
+          // Convert unit weight to kg
+          const weightInKg = convertToKg(unitWeight, unitWeightUnit);
+          
+          // Calculate multiplier based on unit type
+          let multiplier = 1;
+          
+          if (weightUnitType === 'Pieces') {
+            multiplier = totalPieces;
+          } else if (weightUnitType === 'Package') {
+            const packagesPerBox = parseInt(values.packagePerBox) || 
+                                 parseInt(values.packagesPerBox) || 
+                                 parseInt(values.PackagePerBox) || 1;
+            multiplier = packagesPerBox * totalBoxes;
 
-          if (smallestWeight > 0) {
-            const weightInKg = convertToKg(smallestWeight, smallestUnit);
-            const netWeightInKg = weightInKg * totalPieces;
-
-            // Add packaging material weight
-            const packWeight = parseFloat(values.packagingMaterialWeight) || 0;
-            const packUnit = values.packagingMaterialWeightUnit || 'kg';
-            const packWeightInKg =
-              convertToKg(packWeight, packUnit) * totalBoxes;
-
-            totalWeightInKg = netWeightInKg + packWeightInKg;
+          } else if (weightUnitType === 'Box') {
+            multiplier = totalBoxes;
           } else {
-            // Use gross weight
-            const grossWeight = parseFloat(values.grossWeightPerBox) || 0;
-            const grossUnit = values.grossWeightUnit || 'kg';
-            totalWeightInKg = convertToKg(grossWeight, grossUnit) * totalBoxes;
+            multiplier = totalPieces;
           }
+          
+          const netWeightInKg = weightInKg * multiplier;
+
+
+          // Add packaging material weight
+          const packWeight = parseFloat(values.packagingMaterialWeight) || 0;
+          const packUnit = values.packagingMaterialWeightUnit || 'kg';
+          const packWeightInKg = convertToKg(packWeight, packUnit) * totalBoxes;
+
+          totalWeightInKg = netWeightInKg + packWeightInKg;
+
         } else {
-          // Fallback to gross weight
+          // Fallback to gross weight if unit weight not provided
           const grossWeight = parseFloat(values.grossWeightPerBox) || 0;
           const grossUnit = values.grossWeightUnit || 'kg';
           totalWeightInKg = convertToKg(grossWeight, grossUnit) * totalBoxes;
         }
 
-        // Convert total weight to display unit
-        const outputUnit = 'kg';
+        // Convert total weight to display unit (use user's selected unit)
+        const outputUnit = values.unitWeightUnit || 'g';
         const totalWeightInSelectedUnit = convertFromKg(
           totalWeightInKg,
           outputUnit
         );
+
+
 
         setFieldValue('totalGrossWeight', totalWeightInSelectedUnit.toFixed(2));
         setFieldValue('totalGrossWeightUnit', outputUnit);

@@ -13,6 +13,8 @@ import { AuthProvider } from './context/AuthContext';
 
 import SignIn from './pages/AuthPages/SignIn';
 import SignUp from './pages/AuthPages/SignUp';
+import ForgotPassword from './pages/AuthPages/ForgotPassword';
+import ResetPassword from './pages/AuthPages/ResetPassword';
 import NotFound from './pages/OtherPage/NotFound';
 import UserProfiles from './pages/UserProfiles';
 import Videos from './pages/UiElements/Videos';
@@ -89,6 +91,8 @@ function AppContent() {
       <Route element={<PublicRoute />}>
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="*" element={<NotFound />} />
       </Route>
       <Route element={<ProtectedRoute />}>
@@ -166,6 +170,15 @@ export default function App() {
   useEffect(() => {
     const loadBasicDetails = async () => {
       try {
+        // Check for Google OAuth callback tokens in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasGoogleTokens = authService.handleGoogleCallback(urlParams);
+        
+        if (hasGoogleTokens) {
+          // Clean up URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
         const accessToken = localStorage.getItem('accessToken');
         const refreshToken = localStorage.getItem('refreshToken');
 
