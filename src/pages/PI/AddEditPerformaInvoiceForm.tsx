@@ -1819,14 +1819,19 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                 const selectedProductId = e.target.value;
                 onChange(idx, 'productId', selectedProductId);
                 onChange(idx, 'unit', '');
-                
+
                 // Auto-populate rate from product data
                 if (selectedProductId) {
                   const selectedProduct = products.find(
                     (p) => p.id.toString() === selectedProductId.toString()
                   );
                   if (selectedProduct) {
-                    const productRate = selectedProduct.rate || selectedProduct.price || selectedProduct.unitPrice || selectedProduct.sellingPrice || '';
+                    const productRate =
+                      selectedProduct.rate ||
+                      selectedProduct.price ||
+                      selectedProduct.unitPrice ||
+                      selectedProduct.sellingPrice ||
+                      '';
                     if (productRate) {
                       onChange(idx, 'rate', productRate.toString());
                     }

@@ -119,16 +119,18 @@ const AddEditPurchaseOrderForm: React.FC = () => {
       try {
         const [formResponse, productsData] = await Promise.all([
           purchaseOrderService.getFormData(),
-          productService.getAllProducts()
+          productService.getAllProducts(),
         ]);
-        
+
         setCompany(formResponse.data.company);
         setVendors(formResponse.data.vendors);
         console.log('Products API Response:', productsData);
         console.log('Products Data:', productsData?.data);
         setProducts(Array.isArray(productsData?.data) ? productsData.data : []);
         // Filter only suppliers
-        const supplierList = formResponse.data.vendors.filter(vendor => vendor.role === 'Supplier');
+        const supplierList = formResponse.data.vendors.filter(
+          (vendor) => vendor.role === 'Supplier'
+        );
         setSuppliers(supplierList);
 
         if (isEdit && id) {
@@ -146,9 +148,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
           setSgstRate(poData.sgstRate || 6);
 
           if (poData.vendorId) {
-            const vendor = supplierList.find(
-              (v) => v.id === poData.vendorId
-            );
+            const vendor = supplierList.find((v) => v.id === poData.vendorId);
             setSelectedVendor(vendor || null);
           }
         }
@@ -201,7 +201,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
   };
 
   const handleProductSelect = (key: string, productId: string) => {
-    const product = products.find(p => p.id.toString() === productId);
+    const product = products.find((p) => p.id.toString() === productId);
     if (product) {
       setItems(
         items.map((item) => {
@@ -212,7 +212,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
               itemDescription: product.name,
               hsnSac: product.category?.hsnCode || '',
               rate: product.price || 0,
-              amount: item.quantity * (product.price || 0)
+              amount: item.quantity * (product.price || 0),
             };
           }
           return item;
@@ -233,8 +233,6 @@ const AddEditPurchaseOrderForm: React.FC = () => {
     const total = subTotal + cgst + sgst;
     setTotals({ subTotal, cgst, sgst, total });
   };
-
-
 
   const handleCompanyFieldChange = (field: keyof Company, value: string) => {
     if (company) {
@@ -277,8 +275,6 @@ const AddEditPurchaseOrderForm: React.FC = () => {
     setLoading(true);
     setSubmitting(true);
 
-
-
     try {
       const submitData = {
         companyName: values.companyName,
@@ -316,8 +312,6 @@ const AddEditPurchaseOrderForm: React.FC = () => {
         // Add gstin field
         gstin: values.gstin,
       };
-
-
 
       if (isEdit) {
         await purchaseOrderService.updatePurchaseOrder(id, submitData);
@@ -623,12 +617,15 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                               (v) => v.id === parseInt(vendorId)
                             );
                             setSelectedVendor(vendor || null);
-                            
+
                             if (vendor) {
                               console.log('Selected vendor:', vendor); // Debug log
                               setFieldValue('supplierName', vendor.companyName);
                               setFieldValue('supplierAddress', vendor.address);
-                              setFieldValue('supplierGstNumber', vendor.gstNumber);
+                              setFieldValue(
+                                'supplierGstNumber',
+                                vendor.gstNumber
+                              );
                             } else {
                               setFieldValue('supplierName', '');
                               setFieldValue('supplierAddress', '');
@@ -756,12 +753,20 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                               <div className="space-y-2">
                                 <select
                                   value={item.productId?.toString() || ''}
-                                  onChange={(e) => handleProductSelect(item.key!, e.target.value)}
+                                  onChange={(e) =>
+                                    handleProductSelect(
+                                      item.key!,
+                                      e.target.value
+                                    )
+                                  }
                                   className="w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                                 >
                                   <option value="">Select product</option>
-                                  {products.map(product => (
-                                    <option key={product.id} value={product.id.toString()}>
+                                  {products.map((product) => (
+                                    <option
+                                      key={product.id}
+                                      value={product.id.toString()}
+                                    >
                                       {product.name}
                                     </option>
                                   ))}

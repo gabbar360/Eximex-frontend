@@ -43,26 +43,26 @@ const PackagingCalculations: React.FC<PackagingCalculationsProps> = React.memo(
         if (unitWeight > 0 && weightUnitType) {
           // Convert unit weight to kg
           const weightInKg = convertToKg(unitWeight, unitWeightUnit);
-          
+
           // Calculate multiplier based on unit type
           let multiplier = 1;
-          
+
           if (weightUnitType === 'Pieces') {
             multiplier = totalPieces;
           } else if (weightUnitType === 'Package') {
-            const packagesPerBox = parseInt(values.packagePerBox) || 
-                                 parseInt(values.packagesPerBox) || 
-                                 parseInt(values.PackagePerBox) || 1;
+            const packagesPerBox =
+              parseInt(values.packagePerBox) ||
+              parseInt(values.packagesPerBox) ||
+              parseInt(values.PackagePerBox) ||
+              1;
             multiplier = packagesPerBox * totalBoxes;
-
           } else if (weightUnitType === 'Box') {
             multiplier = totalBoxes;
           } else {
             multiplier = totalPieces;
           }
-          
-          const netWeightInKg = weightInKg * multiplier;
 
+          const netWeightInKg = weightInKg * multiplier;
 
           // Add packaging material weight
           const packWeight = parseFloat(values.packagingMaterialWeight) || 0;
@@ -70,7 +70,6 @@ const PackagingCalculations: React.FC<PackagingCalculationsProps> = React.memo(
           const packWeightInKg = convertToKg(packWeight, packUnit) * totalBoxes;
 
           totalWeightInKg = netWeightInKg + packWeightInKg;
-
         } else {
           // Fallback to gross weight if unit weight not provided
           const grossWeight = parseFloat(values.grossWeightPerBox) || 0;
@@ -84,8 +83,6 @@ const PackagingCalculations: React.FC<PackagingCalculationsProps> = React.memo(
           totalWeightInKg,
           outputUnit
         );
-
-
 
         setFieldValue('totalGrossWeight', totalWeightInSelectedUnit.toFixed(2));
         setFieldValue('totalGrossWeightUnit', outputUnit);

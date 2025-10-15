@@ -377,16 +377,24 @@ const AppSidebar: React.FC = () => {
       >
         <Link to="/">
           {isExpanded || isHovered || isMobileOpen ? (
-            <img 
-              src={theme === 'dark' ? '/dark-theme-logo.png' : '/light-theme-logo.png'} 
-              alt="Exim-Ex Logo" 
-              className="h-28 w-52" 
+            <img
+              src={
+                theme === 'dark'
+                  ? '/dark-theme-logo.png'
+                  : '/light-theme-logo.png'
+              }
+              alt="Exim-Ex Logo"
+              className="h-28 w-52"
             />
           ) : (
-            <img 
-              src={theme === 'dark' ? '/dark-theme-logo.png' : '/light-theme-logo.png'} 
-              alt="Exim-Ex Logo" 
-              className="h-12 w-30" 
+            <img
+              src={
+                theme === 'dark'
+                  ? '/dark-theme-logo.png'
+                  : '/light-theme-logo.png'
+              }
+              alt="Exim-Ex Logo"
+              className="h-12 w-30"
             />
           )}
         </Link>

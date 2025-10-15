@@ -73,8 +73,8 @@ const PackagingPreview: React.FC<PackagingPreviewProps> = ({
               {packagingHierarchy[packagingHierarchy.length - 1].to}
             </span>
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-{values.totalGrossWeight || '0.00'}{' '}
-{values.totalGrossWeightUnit || 'g'}
+              {values.totalGrossWeight || '0.00'}{' '}
+              {values.totalGrossWeightUnit || 'g'}
               {parseFloat(values.packagingMaterialWeight) > 0 && (
                 <span className="text-xs text-gray-500 ml-2">
                   (Net + {values.packagingMaterialWeight}{' '}

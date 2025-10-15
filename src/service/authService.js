@@ -105,7 +105,8 @@ const verifyToken = async () => {
 
 // Google OAuth
 const googleLogin = () => {
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+  const apiBaseUrl =
+    import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
   const apiUrl = apiBaseUrl.replace('/api/v1', '');
   window.location.href = `${apiUrl}/api/v1/auth/google`;
 };
@@ -113,7 +114,7 @@ const googleLogin = () => {
 const handleGoogleCallback = (urlParams) => {
   const token = urlParams.get('token');
   const refresh = urlParams.get('refresh');
-  
+
   if (token && refresh) {
     localStorage.setItem('accessToken', token);
     localStorage.setItem('refreshToken', refresh);
@@ -124,9 +125,13 @@ const handleGoogleCallback = (urlParams) => {
 
 const forgotPassword = async (email) => {
   try {
-    const { data } = await axiosInstance.post('/forgot-password', { email }, {
-      skipAuthRefresh: true,
-    });
+    const { data } = await axiosInstance.post(
+      '/forgot-password',
+      { email },
+      {
+        skipAuthRefresh: true,
+      }
+    );
     return data;
   } catch (error) {
     const message = error.response?.data?.message || error.message;
