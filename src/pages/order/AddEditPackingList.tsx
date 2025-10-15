@@ -414,6 +414,77 @@ const AddEditPackingList = () => {
     setPackagingList(calculatedData);
   };
 
+  const calculateProductValues = (
+    containerIndex,
+    productIndex,
+    packedQuantity,
+    productData
+  ) => {
+    if (!packedQuantity || !productData || !productData.product) {
+      return;
+    }
+
+    const qty = parseFloat(packedQuantity);
+    const product = productData.product;
+
+    // Get packaging hierarchy data
+    const packagingData = product.packagingHierarchyData?.dynamicFields || {};
+    const piecesPerPackage = packagingData.PiecesPerPackage || 50; // Default from your data
+    const packagePerBox = packagingData.PackagePerBox || 40; // Default from your data
+    const unitWeight = product.unitWeight || 7; // Weight per piece in grams
+    const packagingWeight = product.packagingMaterialWeight || 700; // Packaging weight in grams
+
+    // Calculate boxes needed
+    const piecesPerBox = piecesPerPackage * packagePerBox;
+    const boxesNeeded = Math.ceil(qty / piecesPerBox);
+
+    // Calculate net weight (product weight only)
+    const netWeightGrams = qty * unitWeight;
+    const netWeightKg = netWeightGrams / 1000;
+
+    // Calculate gross weight (net weight + packaging)
+    const packagingWeightTotal = boxesNeeded * packagingWeight;
+    const grossWeightGrams = netWeightGrams + packagingWeightTotal;
+    const grossWeightKg = grossWeightGrams / 1000;
+
+    // Calculate volume if available
+    let volumeM3 = 0;
+    if (product.packagingVolume) {
+      volumeM3 = boxesNeeded * product.packagingVolume;
+    }
+
+    console.log('📊 Auto-calculation for', product.name, ':', {
+      packedQuantity: qty,
+      piecesPerPackage,
+      packagePerBox,
+      piecesPerBox,
+      boxesNeeded,
+      unitWeight: unitWeight + 'g',
+      netWeightKg: netWeightKg.toFixed(2) + 'kg',
+      grossWeightKg: grossWeightKg.toFixed(2) + 'kg',
+      volumeM3: volumeM3.toFixed(4) + 'm³',
+    });
+
+    // Update the product with calculated values
+    const updatedContainers = [...packagingList.containers];
+    const productToUpdate =
+      updatedContainers[containerIndex].products[productIndex];
+
+    productToUpdate.noOfBoxes = boxesNeeded.toString();
+    productToUpdate.netWeight = netWeightKg.toFixed(2);
+    productToUpdate.grossWeight = grossWeightKg.toFixed(2);
+    if (volumeM3 > 0) {
+      productToUpdate.measurement = volumeM3.toFixed(4);
+    }
+
+    const calculatedData = calculateTotals({
+      ...packagingList,
+      containers: updatedContainers,
+    });
+
+    setPackagingList(calculatedData);
+  };
+
   const calculateTotals = (data) => {
     let totalBoxes = 0;
     let totalNetWeight = 0;
@@ -764,18 +835,41 @@ const AddEditPackingList = () => {
                         <div className="flex justify-between items-center mb-3">
                           <span className="font-medium text-gray-900 dark:text-white">
                             Product {productIndex + 1}
+                            {product.productName && (
+                              <span className="text-sm text-gray-500 ml-2">
+                                ({product.productName})
+                              </span>
+                            )}
                           </span>
-                          <button
-                            onClick={() =>
-                              removeProductFromContainer(
-                                containerIndex,
-                                productIndex
-                              )
-                            }
-                            className="text-red-600 hover:text-red-800 text-sm font-medium"
-                          >
-                            Remove
-                          </button>
+                          <div className="flex gap-2">
+                            {product.productData && product.packedQuantity && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  calculateProductValues(
+                                    containerIndex,
+                                    productIndex,
+                                    product.packedQuantity,
+                                    product.productData
+                                  )
+                                }
+                                className="text-blue-600 hover:text-blue-800 text-xs font-medium px-2 py-1 rounded border border-blue-600 hover:bg-blue-50"
+                              >
+                                🧮 Calculate
+                              </button>
+                            )}
+                            <button
+                              onClick={() =>
+                                removeProductFromContainer(
+                                  containerIndex,
+                                  productIndex
+                                )
+                              }
+                              className="text-red-600 hover:text-red-800 text-sm font-medium"
+                            >
+                              Remove
+                            </button>
+                          </div>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -805,6 +899,25 @@ const AddEditPackingList = () => {
                                       selectedProduct.qty ||
                                       ''
                                   );
+                                  // Auto-populate HSN code
+                                  const hsnCode =
+                                    selectedProduct.category?.hsnCode ||
+                                    selectedProduct.subcategory?.hsnCode ||
+                                    selectedProduct.hsCode ||
+                                    '';
+                                  updateProductInContainer(
+                                    containerIndex,
+                                    productIndex,
+                                    'hsnCode',
+                                    hsnCode
+                                  );
+                                  // Store product data for calculations
+                                  updateProductInContainer(
+                                    containerIndex,
+                                    productIndex,
+                                    'productData',
+                                    selectedProduct
+                                  );
                                   // Initialize packed quantity as 0
                                   updateProductInContainer(
                                     containerIndex,
@@ -825,14 +938,37 @@ const AddEditPackingList = () => {
                                   `Product ${idx + 1}`;
                                 const quantity =
                                   piProduct.quantity || piProduct.qty || '';
+                                const unitWeight =
+                                  piProduct.product?.unitWeight || 0;
+                                const hsnCode =
+                                  piProduct.category?.hsnCode ||
+                                  piProduct.subcategory?.hsnCode ||
+                                  '';
                                 return (
                                   <option key={idx} value={productName}>
-                                    {productName}{' '}
-                                    {quantity && `(Qty: ${quantity})`}
+                                    {productName} (Qty: {quantity}, {unitWeight}
+                                    g/pc, HSN: {hsnCode})
                                   </option>
                                 );
                               })}
                             </select>
+                          </div>
+                          <div>
+                            <Label>HSN Code</Label>
+                            <InputField
+                              type="text"
+                              value={product.hsnCode || ''}
+                              onChange={(e) =>
+                                updateProductInContainer(
+                                  containerIndex,
+                                  productIndex,
+                                  'hsnCode',
+                                  e.target.value
+                                )
+                              }
+                              placeholder="HSN Code"
+                              className="bg-gray-100 dark:bg-gray-800"
+                            />
                           </div>
                           <div>
                             <Label>PI Quantity ➡️ Packed</Label>
@@ -844,18 +980,26 @@ const AddEditPackingList = () => {
                                 className="bg-gray-100 dark:bg-gray-800 flex-1"
                                 placeholder="PI Qty"
                               />
-                              <span className="text-gray-500">vs</span>
+                              <span className="text-gray-500">➡️</span>
                               <InputField
                                 type="number"
                                 value={product.packedQuantity || ''}
-                                onChange={(e) =>
+                                onChange={(e) => {
+                                  const packedQty = e.target.value;
                                   updateProductInContainer(
                                     containerIndex,
                                     productIndex,
                                     'packedQuantity',
-                                    e.target.value
-                                  )
-                                }
+                                    packedQty
+                                  );
+                                  // Auto-calculate based on packed quantity
+                                  calculateProductValues(
+                                    containerIndex,
+                                    productIndex,
+                                    packedQty,
+                                    product.productData
+                                  );
+                                }}
                                 placeholder="Packed"
                                 className="flex-1"
                               />
@@ -1018,132 +1162,124 @@ const AddEditPackingList = () => {
               />
             </div>
 
-            {/* Quantity Tracking Summary */}
-            {piProducts.length > 0 && (
-              <div className="mt-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-                <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  📊 Quantity Tracking Summary
-                </h4>
-                <div className="space-y-3">
-                  {piProducts.map((piProduct, idx) => {
-                    const productName =
-                      piProduct.name ||
-                      piProduct.productName ||
-                      piProduct.description ||
-                      `Product ${idx + 1}`;
-                    const piQuantity = parseFloat(
-                      piProduct.quantity || piProduct.qty || 0
-                    );
-
-                    // Calculate total packed quantity across all containers
-                    let totalPacked = 0;
-                    packagingList.containers.forEach((container) => {
-                      container.products.forEach((product) => {
-                        if (product.productName === productName) {
-                          totalPacked += parseFloat(
-                            product.packedQuantity || 0
-                          );
-                        }
-                      });
-                    });
-
-                    const remaining = piQuantity - totalPacked;
-                    const isComplete = totalPacked === piQuantity;
-                    const isOver = totalPacked > piQuantity;
-
-                    return (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded border"
-                      >
-                        <div className="flex-1">
-                          <div className="font-medium text-gray-900 dark:text-white">
-                            {productName}
-                          </div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">
-                            PI Quantity: {piQuantity} | Packed:{' '}
-                            {totalPacked.toFixed(2)}
-                          </div>
-                        </div>
-                        <div
-                          className={`text-right ${
-                            isOver
-                              ? 'text-red-600'
-                              : isComplete
-                                ? 'text-green-600'
-                                : 'text-yellow-600'
-                          }`}
-                        >
-                          <div className="font-bold">
-                            {isOver
-                              ? `⚠️ Over by ${Math.abs(remaining).toFixed(2)}`
-                              : isComplete
-                                ? '✅ Complete'
-                                : `📦 Remaining: ${remaining.toFixed(2)}`}
-                          </div>
-                          <div className="text-xs">
-                            {((totalPacked / piQuantity) * 100).toFixed(1)}%
-                            packed
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Totals Summary */}
-            <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <h4 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Summary Totals
+            {/* Table Preview */}
+            <div className="mt-6 p-4 bg-white dark:bg-gray-800 rounded-lg border">
+              <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Packing List Preview
               </h4>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-                <div className="text-center">
-                  <div className="text-lg sm:text-2xl font-bold text-blue-600 dark:text-blue-400">
-                    {packagingList.totalContainers}
-                    {piData?.numberOfContainers && (
-                      <span className="text-xs sm:text-sm text-gray-500">
-                        /{piData.numberOfContainers}
-                      </span>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse border border-gray-300 dark:border-gray-600">
+                  <thead>
+                    <tr className="bg-gray-50 dark:bg-gray-700">
+                      <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left text-sm font-medium">
+                        Container
+                      </th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left text-sm font-medium">
+                        Product Name
+                      </th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-left text-sm font-medium">
+                        HSN Code
+                      </th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right text-sm font-medium">
+                        Quantity
+                      </th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right text-sm font-medium">
+                        Boxes
+                      </th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right text-sm font-medium">
+                        Net Wt (kg)
+                      </th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right text-sm font-medium">
+                        Gross Wt (kg)
+                      </th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right text-sm font-medium">
+                        Volume (m³)
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {packagingList.containers.map((container, containerIndex) =>
+                      container.products.map((product, productIndex) => (
+                        <tr
+                          key={`${containerIndex}-${productIndex}`}
+                          className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                        >
+                          <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm">
+                            {productIndex === 0 ? (
+                              <div>
+                                <div className="font-medium">
+                                  {container.containerNumber ||
+                                    `Container ${containerIndex + 1}`}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  {container.sealType} - {container.sealNumber}
+                                </div>
+                              </div>
+                            ) : (
+                              ''
+                            )}
+                          </td>
+                          <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm">
+                            {product.productName || '-'}
+                          </td>
+                          <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm">
+                            {product.hsnCode || '-'}
+                          </td>
+                          <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right">
+                            {product.packedQuantity || product.quantity || '-'}
+                          </td>
+                          <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right">
+                            {product.noOfBoxes || '-'}
+                          </td>
+                          <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right">
+                            {product.netWeight || '-'}
+                          </td>
+                          <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right">
+                            {product.grossWeight || '-'}
+                          </td>
+                          <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right">
+                            {product.measurement || '-'}
+                          </td>
+                        </tr>
+                      ))
                     )}
-                  </div>
-                  <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                    Containers
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="text-lg sm:text-2xl font-bold text-green-600 dark:text-green-400">
-                    {packagingList.totalBoxes}
-                  </div>
-                  <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                    Boxes
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="text-lg sm:text-2xl font-bold text-purple-600 dark:text-purple-400">
-                    {packagingList.totalNetWeight}
-                  </div>
-                  <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                    Net (kg)
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="text-lg sm:text-2xl font-bold text-orange-600 dark:text-orange-400">
-                    {packagingList.totalGrossWeight}
-                  </div>
-                  <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                    Gross (kg)
-                  </div>
-                </div>
-                <div className="text-center sm:col-span-3 lg:col-span-1">
-                  <div className="text-lg sm:text-2xl font-bold text-red-600 dark:text-red-400">
-                    {packagingList.totalVolume}
-                  </div>
-                  <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                    Volume (m³)
-                  </div>
-                </div>
+                    {packagingList.containers.every(
+                      (c) => c.products.length === 0
+                    ) && (
+                      <tr>
+                        <td
+                          colSpan={8}
+                          className="border border-gray-300 dark:border-gray-600 px-3 py-8 text-center text-gray-500"
+                        >
+                          No products added yet. Add products to containers to
+                          see preview.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                  <tfoot>
+                    <tr className="bg-gray-100 dark:bg-gray-600 font-medium">
+                      <td
+                        colSpan={4}
+                        className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm font-semibold"
+                      >
+                        TOTAL
+                      </td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right font-semibold">
+                        {packagingList.totalBoxes}
+                      </td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right font-semibold">
+                        {packagingList.totalNetWeight}
+                      </td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right font-semibold">
+                        {packagingList.totalGrossWeight}
+                      </td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right font-semibold">
+                        {packagingList.totalVolume}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
               </div>
             </div>
           </div>

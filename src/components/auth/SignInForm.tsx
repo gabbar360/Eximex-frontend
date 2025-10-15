@@ -5,6 +5,7 @@ import Label from '../form/Label';
 import Input from '../form/input/InputField';
 import Checkbox from '../form/input/Checkbox';
 import Button from '../ui/button/Button';
+import { FcGoogle } from 'react-icons/fc';
 import authService from '../../service/authService.js';
 import { useDispatch } from 'react-redux';
 import { setUser } from '../../features/userSlice.js';
@@ -50,22 +51,20 @@ export default function SignInForm() {
             <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
               Sign In
             </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Enter your email and password to sign in!
-            </p>
           </div>
-          {/* Social buttons */}
-          {/* ... (unchanged social login buttons) */}
+          {/* Google Sign-In Button */}
+          <button
+            type="button"
+            onClick={() => authService.googleLogin()}
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-colors dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+          >
+            <FcGoogle className="w-5 h-5" />
+            Continue with Google
+          </button>
 
           {/* OR Divider */}
           <div className="relative py-3 sm:py-5">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200 dark:border-gray-800"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="p-2 text-gray-400 bg-white dark:bg-gray-900 sm:px-5 sm:py-2">
-                Or
-              </span>
             </div>
           </div>
 
@@ -126,7 +125,7 @@ export default function SignInForm() {
                 </span>
               </div>
               <Link
-                to="/reset-password"
+                to="/forgot-password"
                 className="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400"
               >
                 Forgot password?

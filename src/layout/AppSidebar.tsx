@@ -380,7 +380,7 @@ const AppSidebar: React.FC = () => {
             <img 
               src={theme === 'dark' ? '/dark-theme-logo.png' : '/light-theme-logo.png'} 
               alt="Exim-Ex Logo" 
-              className="h-32 w-52" 
+              className="h-28 w-52" 
             />
           ) : (
             <img 

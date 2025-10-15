@@ -105,8 +105,18 @@ export const getUserFriendlyError = (
     error.response?.data?.error ||
     error.message;
 
-  // For auth login, prioritize backend message
-  if (context === 'auth' && operation === 'login' && serverMessage) {
+  // Debug logging
+  console.log('Error extraction debug:', {
+    serverMessage,
+    responseData: error.response?.data,
+    context,
+    operation,
+    status: statusCode
+  });
+
+  // For auth operations, always prioritize backend message
+  if (context === 'auth' && serverMessage) {
+    console.log('Returning auth error message:', serverMessage);
     return serverMessage;
   }
 
