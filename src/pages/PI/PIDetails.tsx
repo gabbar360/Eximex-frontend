@@ -126,9 +126,9 @@ const PIDetails: React.FC = () => {
 
       // Update PI status to "confirmed" via API
       await updatePiStatus(id, 'confirmed');
-      
+
       // Update local state to reflect confirmed status
-      setPiData(prev => ({ ...prev, status: 'confirmed' }));
+      setPiData((prev) => ({ ...prev, status: 'confirmed' }));
 
       // Show confetti animation and confirmation overlay
       setShowConfetti(true);

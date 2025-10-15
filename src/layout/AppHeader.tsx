@@ -85,10 +85,14 @@ const AppHeader: React.FC = () => {
           </button>
 
           <Link to="/" className="lg:hidden">
-            <img 
-              src={theme === 'dark' ? '/dark-theme-logo.png' : '/light-theme-logo.png'} 
-              alt="Logo" 
-              className="h-12 w-30" 
+            <img
+              src={
+                theme === 'dark'
+                  ? '/dark-theme-logo.png'
+                  : '/light-theme-logo.png'
+              }
+              alt="Logo"
+              className="h-12 w-30"
             />
           </Link>
 

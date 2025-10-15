@@ -17,7 +17,9 @@ const Switch: React.FC<SwitchProps> = ({
   onChange,
   color = 'blue', // Default to blue color
 }) => {
-  const [isChecked, setIsChecked] = useState(checked !== undefined ? checked : defaultChecked);
+  const [isChecked, setIsChecked] = useState(
+    checked !== undefined ? checked : defaultChecked
+  );
 
   // Update internal state when checked prop changes
   useEffect(() => {

@@ -21,9 +21,11 @@ import * as Yup from 'yup';
 // Fetch currencies from API
 const fetchCurrencies = async () => {
   try {
-    const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+    const response = await fetch(
+      'https://api.exchangerate-api.com/v4/latest/USD'
+    );
     const data = await response.json();
-    return Object.keys(data.rates).map(code => ({ code, name: code }));
+    return Object.keys(data.rates).map((code) => ({ code, name: code }));
   } catch (error) {
     console.error('Error fetching currencies:', error);
     return [];
@@ -33,7 +35,9 @@ const fetchCurrencies = async () => {
 // Fetch countries from API
 const fetchCountries = async () => {
   try {
-    const response = await fetch('https://countriesnow.space/api/v0.1/countries');
+    const response = await fetch(
+      'https://countriesnow.space/api/v0.1/countries'
+    );
     const data = await response.json();
     return data.data || [];
   } catch (error) {
@@ -45,15 +49,18 @@ const fetchCountries = async () => {
 // Fetch states from CountriesNow API
 const fetchStates = async (countryName) => {
   try {
-    const response = await fetch('https://countriesnow.space/api/v0.1/countries/states', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        country: countryName
-      })
-    });
+    const response = await fetch(
+      'https://countriesnow.space/api/v0.1/countries/states',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          country: countryName,
+        }),
+      }
+    );
     const data = await response.json();
     return data.data?.states || [];
   } catch (error) {
@@ -89,7 +96,7 @@ const AddEditPartyForm = () => {
     const loadData = async () => {
       const [countriesData, currenciesData] = await Promise.all([
         fetchCountries(),
-        fetchCurrencies()
+        fetchCurrencies(),
       ]);
       setCountries(countriesData);
       setCurrencies(currenciesData);
@@ -123,8 +130,6 @@ const AddEditPartyForm = () => {
           setLoading(true);
           const response = await getPartyById(Number(id));
           const responseData = response.data;
-
-
 
           setParty(responseData);
         } catch (err) {
@@ -209,8 +214,6 @@ const AddEditPartyForm = () => {
       status: party.status !== undefined ? Boolean(party.status) : false,
     };
 
-
-
     return initialValues;
   };
 
@@ -242,8 +245,11 @@ const AddEditPartyForm = () => {
                 .email('Invalid email')
                 .required('Email is required'),
               phone: Yup.string()
-  .required('Phone number is required')
-  .matches(/^(?:\d{10}|\d{12})$/, 'Phone number must be exactly 10 or 12 digits'),
+                .required('Phone number is required')
+                .matches(
+                  /^(?:\d{10}|\d{12})$/,
+                  'Phone number must be exactly 10 or 12 digits'
+                ),
 
               address: Yup.string().required('Address is required'),
               city: Yup.string().required('City is required'),
@@ -263,8 +269,6 @@ const AddEditPartyForm = () => {
               errors,
               setFieldValue,
             }) => {
-
-
               return (
                 <Form
                   onSubmit={handleSubmit}
@@ -309,7 +313,6 @@ const AddEditPartyForm = () => {
                         placeholder: 'Enter city',
                       },
 
-
                       {
                         name: 'pincode',
                         label: 'Pincode',
@@ -324,30 +327,38 @@ const AddEditPartyForm = () => {
                       },
                     ].map(({ name, label, type, placeholder }) => (
                       <div className="col-span-1" key={name}>
-      <Label htmlFor={name}>{label}</Label>
-      <Input
-        id={name}
-        name={name}
-        type={type}
-        placeholder={placeholder}
-        value={values[name]}
-        onChange={(e) => {
-          // ✅ Allow only numbers for phone & pincode
-          if (name === 'phone' || name === 'pincode') {
-            const numericValue = e.target.value.replace(/\D/g, '');
-            setFieldValue(name, numericValue);
-          } else {
-            handleChange(e);
-          }
-        }}
-        onBlur={handleBlur}
-        inputMode={name === 'phone' || name === 'pincode' ? 'numeric' : undefined} // mobile numeric keyboard
-      />
-      {touched[name] && errors[name] && (
-        <div className="text-sm text-red-500 mt-1">{errors[name]}</div>
-      )}
-    </div>
-
+                        <Label htmlFor={name}>{label}</Label>
+                        <Input
+                          id={name}
+                          name={name}
+                          type={type}
+                          placeholder={placeholder}
+                          value={values[name]}
+                          onChange={(e) => {
+                            // ✅ Allow only numbers for phone & pincode
+                            if (name === 'phone' || name === 'pincode') {
+                              const numericValue = e.target.value.replace(
+                                /\D/g,
+                                ''
+                              );
+                              setFieldValue(name, numericValue);
+                            } else {
+                              handleChange(e);
+                            }
+                          }}
+                          onBlur={handleBlur}
+                          inputMode={
+                            name === 'phone' || name === 'pincode'
+                              ? 'numeric'
+                              : undefined
+                          } // mobile numeric keyboard
+                        />
+                        {touched[name] && errors[name] && (
+                          <div className="text-sm text-red-500 mt-1">
+                            {errors[name]}
+                          </div>
+                        )}
+                      </div>
                     ))}
 
                     <div className="col-span-1 relative country-dropdown">
@@ -355,7 +366,9 @@ const AddEditPartyForm = () => {
                       <div className="relative">
                         <input
                           type="text"
-                          value={showCountryDropdown ? countrySearch : values.country}
+                          value={
+                            showCountryDropdown ? countrySearch : values.country
+                          }
                           onChange={(e) => {
                             setCountrySearch(e.target.value);
                             setShowCountryDropdown(true);
@@ -368,38 +381,71 @@ const AddEditPartyForm = () => {
                           className="w-full rounded-lg border border-gray-300 bg-white px-2 sm:px-3 py-2 pr-8 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                         />
                         <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          <svg
+                            className="w-4 h-4 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 9l-7 7-7-7"
+                            />
                           </svg>
                         </div>
                         {showCountryDropdown && (
                           <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                             {loadingCountries ? (
                               <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                <svg
+                                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <circle
+                                    className="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                  ></circle>
+                                  <path
+                                    className="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                  ></path>
                                 </svg>
                                 Loading countries...
                               </div>
                             ) : (
                               <>
                                 {countries
-                                  .filter(country => 
-                                    country.country.toLowerCase().includes(countrySearch.toLowerCase())
+                                  .filter((country) =>
+                                    country.country
+                                      .toLowerCase()
+                                      .includes(countrySearch.toLowerCase())
                                   )
                                   .map((country) => (
                                     <div
                                       key={country.country}
                                       onClick={async () => {
-                                        setFieldValue('country', country.country);
+                                        setFieldValue(
+                                          'country',
+                                          country.country
+                                        );
                                         setFieldValue('state', ''); // Clear state when country changes
                                         setShowCountryDropdown(false);
                                         setCountrySearch('');
-                                        
+
                                         // Fetch states from API
                                         setLoadingStates(true);
-                                        const states = await fetchStates(country.country);
+                                        const states = await fetchStates(
+                                          country.country
+                                        );
                                         setAvailableStates(states);
                                         setLoadingStates(false);
                                       }}
@@ -407,10 +453,11 @@ const AddEditPartyForm = () => {
                                     >
                                       <span>{country.country}</span>
                                     </div>
-                                  ))
-                                }
-                                {countries.filter(country => 
-                                  country.country.toLowerCase().includes(countrySearch.toLowerCase())
+                                  ))}
+                                {countries.filter((country) =>
+                                  country.country
+                                    .toLowerCase()
+                                    .includes(countrySearch.toLowerCase())
                                 ).length === 0 && (
                                   <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
                                     No countries found
@@ -432,9 +479,25 @@ const AddEditPartyForm = () => {
                       <Label htmlFor="state">State</Label>
                       {loadingStates ? (
                         <div className="w-full rounded-lg border border-gray-300 bg-white px-2 sm:px-3 py-2 text-sm text-gray-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white flex items-center">
-                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          <svg
+                            className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
                           </svg>
                           Loading states...
                         </div>
@@ -442,7 +505,9 @@ const AddEditPartyForm = () => {
                         <div className="relative">
                           <input
                             type="text"
-                            value={showStateDropdown ? stateSearch : values.state}
+                            value={
+                              showStateDropdown ? stateSearch : values.state
+                            }
                             onChange={(e) => {
                               setStateSearch(e.target.value);
                               setShowStateDropdown(true);
@@ -455,15 +520,27 @@ const AddEditPartyForm = () => {
                             className="w-full rounded-lg border border-gray-300 bg-white px-2 sm:px-3 py-2 pr-8 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                           />
                           <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            <svg
+                              className="w-4 h-4 text-gray-400"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 9l-7 7-7-7"
+                              />
                             </svg>
                           </div>
                           {showStateDropdown && (
                             <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                               {availableStates
-                                .filter(state => 
-                                  state.name.toLowerCase().includes(stateSearch.toLowerCase())
+                                .filter((state) =>
+                                  state.name
+                                    .toLowerCase()
+                                    .includes(stateSearch.toLowerCase())
                                 )
                                 .map((state) => (
                                   <div
@@ -477,10 +554,11 @@ const AddEditPartyForm = () => {
                                   >
                                     {state.name}
                                   </div>
-                                ))
-                              }
-                              {availableStates.filter(state => 
-                                state.name.toLowerCase().includes(stateSearch.toLowerCase())
+                                ))}
+                              {availableStates.filter((state) =>
+                                state.name
+                                  .toLowerCase()
+                                  .includes(stateSearch.toLowerCase())
                               ).length === 0 && (
                                 <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
                                   No states found
@@ -494,7 +572,11 @@ const AddEditPartyForm = () => {
                           id="state"
                           name="state"
                           type="text"
-                          placeholder={values.country ? "Enter state/province" : "Select country first"}
+                          placeholder={
+                            values.country
+                              ? 'Enter state/province'
+                              : 'Select country first'
+                          }
                           value={values.state}
                           onChange={handleChange}
                           onBlur={handleBlur}
@@ -537,7 +619,11 @@ const AddEditPartyForm = () => {
                       <div className="relative">
                         <input
                           type="text"
-                          value={showCurrencyDropdown ? currencySearch : values.currency}
+                          value={
+                            showCurrencyDropdown
+                              ? currencySearch
+                              : values.currency
+                          }
                           onChange={(e) => {
                             setCurrencySearch(e.target.value);
                             setShowCurrencyDropdown(true);
@@ -550,31 +636,62 @@ const AddEditPartyForm = () => {
                           className="w-full rounded-lg border border-gray-300 bg-white px-2 sm:px-3 py-2 pr-8 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                         />
                         <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          <svg
+                            className="w-4 h-4 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 9l-7 7-7-7"
+                            />
                           </svg>
                         </div>
                         {showCurrencyDropdown && (
                           <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                             {loadingCurrencies ? (
                               <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                <svg
+                                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <circle
+                                    className="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                  ></circle>
+                                  <path
+                                    className="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                  ></path>
                                 </svg>
                                 Loading currencies...
                               </div>
                             ) : (
                               <>
                                 {currencies
-                                  .filter(currency => 
-                                    currency.code.toLowerCase().includes(currencySearch.toLowerCase())
+                                  .filter((currency) =>
+                                    currency.code
+                                      .toLowerCase()
+                                      .includes(currencySearch.toLowerCase())
                                   )
                                   .map((currency) => (
                                     <div
                                       key={currency.code}
                                       onClick={() => {
-                                        setFieldValue('currency', currency.code);
+                                        setFieldValue(
+                                          'currency',
+                                          currency.code
+                                        );
                                         setShowCurrencyDropdown(false);
                                         setCurrencySearch('');
                                       }}
@@ -582,10 +699,11 @@ const AddEditPartyForm = () => {
                                     >
                                       <span>{currency.code}</span>
                                     </div>
-                                  ))
-                                }
-                                {currencies.filter(currency => 
-                                  currency.code.toLowerCase().includes(currencySearch.toLowerCase())
+                                  ))}
+                                {currencies.filter((currency) =>
+                                  currency.code
+                                    .toLowerCase()
+                                    .includes(currencySearch.toLowerCase())
                                 ).length === 0 && (
                                   <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
                                     No currencies found

@@ -168,8 +168,6 @@ const EditOrder = () => {
                   />
                 </div>
 
-
-
                 {/* Delivery Terms */}
                 <div>
                   <Label>Delivery Terms</Label>
