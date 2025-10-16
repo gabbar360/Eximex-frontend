@@ -713,40 +713,93 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
     if (!quantity || !product) return 0;
 
     const qty = parseFloat(quantity);
+    if (isNaN(qty) || qty <= 0) return 0;
 
     // If unit is already kg, return quantity directly
     if (unit === 'kg') {
       return qty;
     }
 
-    // Use product's direct weight data from API
-    if (product.grossWeightPerBox) {
-      let weightPerUnit = 0;
+    // Enhanced weight calculation using API data structure
+    console.log('Calculating weight for:', {
+      productId,
+      quantity,
+      unit,
+      product,
+    });
 
-      // Convert grossWeightPerBox from grams to kg if needed
-      let grossWeightKg = product.grossWeightPerBox;
-      if (product.grossWeightUnit === 'g' || product.grossWeightPerBox > 1000) {
-        grossWeightKg = product.grossWeightPerBox / 1000; // Convert grams to kg
-      }
+    // Get packaging hierarchy data from product
+    const packagingData = product.packagingHierarchyData?.dynamicFields;
 
-      // Get pieces per box from multiple possible sources
-      const piecesPerBox =
-        product.totalPieces ||
-        product.packagingHierarchyData?.dynamicFields?.PiecesPerBox ||
-        product.piecesPerBox ||
-        1;
-
-      if (unit === 'pcs' || unit === 'pieces') {
-        // Weight per piece = grossWeightPerBox / piecesPerBox
-        weightPerUnit = grossWeightKg / piecesPerBox;
-        return qty * weightPerUnit;
-      } else if (unit === 'box') {
-        // Weight per box = grossWeightPerBox
-        return qty * grossWeightKg;
-      }
+    // Convert gross weight to kg if needed
+    let grossWeightKg = product.grossWeightPerBox || 0;
+    if (product.grossWeightUnit === 'g' && grossWeightKg > 0) {
+      grossWeightKg = grossWeightKg / 1000; // Convert grams to kg
     }
 
-    // Fallback: use packaging hierarchy from category if available
+    // Get unit weight in grams and convert to kg
+    let unitWeightKg = product.unitWeight || 0;
+    if (product.unitWeightUnit === 'g' && unitWeightKg > 0) {
+      unitWeightKg = unitWeightKg / 1000; // Convert grams to kg
+    }
+
+    // Get packaging conversion factors
+    const piecesPerPackage =
+      packagingData?.PiecesPerPackage || product.totalPieces || 1;
+    const packagePerBox = packagingData?.PackagePerBox || 1;
+    const totalPiecesPerBox = piecesPerPackage * packagePerBox;
+
+    console.log('Weight calculation data:', {
+      grossWeightKg,
+      unitWeightKg,
+      piecesPerPackage,
+      packagePerBox,
+      totalPiecesPerBox,
+      unit,
+    });
+
+    // Calculate weight based on selected unit
+    switch (unit.toLowerCase()) {
+      case 'pcs':
+      case 'pieces':
+        if (unitWeightKg > 0) {
+          // Use unit weight directly
+          return qty * unitWeightKg;
+        } else if (grossWeightKg > 0 && totalPiecesPerBox > 0) {
+          // Calculate from gross weight per box
+          const weightPerPiece = grossWeightKg / totalPiecesPerBox;
+          return qty * weightPerPiece;
+        }
+        break;
+
+      case 'box':
+        if (grossWeightKg > 0) {
+          return qty * grossWeightKg;
+        }
+        break;
+
+      case 'package':
+      case 'pack':
+        if (unitWeightKg > 0 && piecesPerPackage > 0) {
+          return qty * unitWeightKg * piecesPerPackage;
+        } else if (grossWeightKg > 0 && packagePerBox > 0) {
+          const weightPerPackage = grossWeightKg / packagePerBox;
+          return qty * weightPerPackage;
+        }
+        break;
+
+      case 'kg':
+        return qty;
+
+      default:
+        // For any other unit, try to use unit weight
+        if (unitWeightKg > 0) {
+          return qty * unitWeightKg;
+        }
+        break;
+    }
+
+    // Fallback calculation using category hierarchy if available
     const category = categories.find(
       (c) => c.id.toString() === product?.categoryId?.toString()
     );
@@ -759,72 +812,44 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         (a, b) => a.level - b.level
       );
 
-      // Find the hierarchy level that matches the unit
-      const unitHierarchy = hierarchy.find(
-        (h) => h.childUnit?.name === unit || h.parentUnit?.name === unit
-      );
+      // Find matching unit in hierarchy
+      for (const level of hierarchy) {
+        if (level.from === unit || level.to === unit) {
+          // Use hierarchy-based calculation
+          const baseWeight = unitWeightKg || 0.01; // 10g default per piece
+          let multiplier = 1;
 
-      if (unitHierarchy) {
-        // Calculate weight based on hierarchy levels
-        let totalWeight = 0;
+          // Calculate multiplier based on hierarchy level
+          if (level.from === 'pcs' && level.to === 'package') {
+            multiplier = level.conversionQuantity || piecesPerPackage;
+          } else if (level.from === 'package' && level.to === 'box') {
+            multiplier =
+              (level.conversionQuantity || packagePerBox) * piecesPerPackage;
+          }
 
-        // Get base weight (usually from level 1 - smallest unit)
-        const baseLevel = hierarchy[0]; // Level 1: pcs -> pack
-        const level2 = hierarchy[1]; // Level 2: pack -> box
-        const level3 = hierarchy[2]; // Level 3: box -> pallet (if exists)
-
-        // Calculate weight based on selected unit
-        if (unit === baseLevel.parentUnit?.name) {
-          // e.g., "pcs"
-          const baseUnitWeight = product?.unitWeight || 0.1; // Default 0.1kg per piece
-          totalWeight = qty * baseUnitWeight;
-        } else if (unit === baseLevel.childUnit?.name) {
-          // e.g., "pack"
-          const baseUnitWeight = product?.unitWeight || 0.1;
-          const pcsPerPack = baseLevel.conversionQuantity;
-          totalWeight = qty * pcsPerPack * baseUnitWeight;
-        } else if (level2 && unit === level2.childUnit?.name) {
-          // e.g., "box"
-          const baseUnitWeight = product?.unitWeight || 0.1;
-          const pcsPerPack = baseLevel.conversionQuantity;
-          const packsPerBox = level2.conversionQuantity;
-          totalWeight = qty * packsPerBox * pcsPerPack * baseUnitWeight;
-        } else if (level3 && unit === level3.childUnit?.name) {
-          // e.g., "pallet"
-          const baseUnitWeight = product?.unitWeight || 0.1;
-          const pcsPerPack = baseLevel.conversionQuantity;
-          const packsPerBox = level2.conversionQuantity;
-          const boxesPerPallet = level3.conversionQuantity;
-          totalWeight =
-            qty * boxesPerPallet * packsPerBox * pcsPerPack * baseUnitWeight;
+          if (unit === level.to) {
+            return qty * baseWeight * multiplier;
+          } else if (unit === level.from) {
+            return qty * baseWeight;
+          }
         }
-
-        return totalWeight;
       }
     }
 
-    // Final fallback: use basic weight calculation
-    if (product.grossWeightPerBox) {
-      // Convert to kg if needed
-      let grossWeightKg = product.grossWeightPerBox;
-      if (product.grossWeightUnit === 'g' || product.grossWeightPerBox > 1000) {
-        grossWeightKg = product.grossWeightPerBox / 1000;
-      }
+    // Final fallback: use a reasonable default based on unit
+    const defaultWeights = {
+      pcs: unitWeightKg || 0.02, // 20g per piece
+      pieces: unitWeightKg || 0.02,
+      box: grossWeightKg || 1.0, // 1kg per box
+      package: (unitWeightKg || 0.02) * (piecesPerPackage || 25), // 25 pieces per package
+      pack: (unitWeightKg || 0.02) * (piecesPerPackage || 25),
+    };
 
-      // Get pieces per box from available sources
-      const piecesPerBox =
-        product.totalPieces ||
-        product.packagingHierarchyData?.dynamicFields?.PiecesPerBox ||
-        1;
+    const defaultWeight =
+      defaultWeights[unit.toLowerCase()] || unitWeightKg || 0.1;
+    console.log('Using default weight:', defaultWeight, 'for unit:', unit);
 
-      // Assume pieces if no specific unit match
-      const weightPerPiece = grossWeightKg / piecesPerBox;
-      return qty * weightPerPiece;
-    }
-
-    // Last resort: use product's unitWeight or default
-    const unitWeight = product?.unitWeight || product?.weightPerUnitKg || 0.1;
-    return qty * unitWeight;
+    return qty * defaultWeight;
   };
 
   // Enhanced calculation functions for packing hierarchy
@@ -1735,7 +1760,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
     };
 
     const totalWeight =
-      data.productId && data.quantity
+      data.productId && data.quantity && data.unit
         ? calculateTotalWeight(data.productId, data.quantity, data.unit)
         : 0;
 
@@ -1819,14 +1844,19 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                 const selectedProductId = e.target.value;
                 onChange(idx, 'productId', selectedProductId);
                 onChange(idx, 'unit', '');
-                
+
                 // Auto-populate rate from product data
                 if (selectedProductId) {
                   const selectedProduct = products.find(
                     (p) => p.id.toString() === selectedProductId.toString()
                   );
                   if (selectedProduct) {
-                    const productRate = selectedProduct.rate || selectedProduct.price || selectedProduct.unitPrice || selectedProduct.sellingPrice || '';
+                    const productRate =
+                      selectedProduct.rate ||
+                      selectedProduct.price ||
+                      selectedProduct.unitPrice ||
+                      selectedProduct.sellingPrice ||
+                      '';
                     if (productRate) {
                       onChange(idx, 'rate', productRate.toString());
                     }
@@ -1854,6 +1884,48 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
               {prod.category?.hsnCode || prod.hsCode || 'N/A'} |{' '}
               <strong>Description:</strong> {prod.description || 'N/A'}
             </div>
+            {/* Weight Information Display */}
+            <div className="mt-2 pt-2 border-t border-blue-200 dark:border-blue-700">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                <div>
+                  <span className="text-blue-600 dark:text-blue-400 font-medium">
+                    Unit Weight:
+                  </span>
+                  <br />
+                  {prod.unitWeight
+                    ? `${prod.unitWeight}${prod.unitWeightUnit || 'g'}`
+                    : 'N/A'}
+                </div>
+                <div>
+                  <span className="text-blue-600 dark:text-blue-400 font-medium">
+                    Box Weight:
+                  </span>
+                  <br />
+                  {prod.grossWeightPerBox
+                    ? `${prod.grossWeightPerBox}${prod.grossWeightUnit || 'g'}`
+                    : 'N/A'}
+                </div>
+                <div>
+                  <span className="text-blue-600 dark:text-blue-400 font-medium">
+                    Pieces/Box:
+                  </span>
+                  <br />
+                  {prod.totalPieces ||
+                    prod.packagingHierarchyData?.dynamicFields
+                      ?.PiecesPerPackage ||
+                    'N/A'}
+                </div>
+                <div>
+                  <span className="text-blue-600 dark:text-blue-400 font-medium">
+                    Total Weight:
+                  </span>
+                  <br />
+                  {prod.totalGrossWeight
+                    ? `${prod.totalGrossWeight} ${prod.totalGrossWeightUnit || 'kg'}`
+                    : 'N/A'}
+                </div>
+              </div>
+            </div>
           </div>
         )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -1876,63 +1948,100 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                 const category = categories.find(
                   (c) => c.id.toString() === data.categoryId
                 );
-                console.log(
-                  `Units dropdown for item ${idx}: categoryId=${data.categoryId}, category found:`,
-                  category?.name,
-                  'hierarchy:',
-                  category?.packagingHierarchy
-                );
 
-                // Only show category hierarchy units, no other units
-                if (
-                  !category?.packagingHierarchy ||
-                  category.packagingHierarchy.length === 0
-                ) {
-                  // Fallback to basic units if no hierarchy is set
-                  const basicUnits = ['pcs', 'kg', 'box'];
-                  console.log(
-                    `Using basic units for category ${category?.name}:`,
-                    basicUnits
+                // Get packaging hierarchy from category - same as PackagingDetails component
+                const packagingHierarchy = category?.packagingHierarchy || [];
+
+                console.log('Category data:', category);
+                console.log('Packaging hierarchy:', packagingHierarchy);
+
+                const availableUnits = [];
+
+                // Use packaging hierarchy like PackagingDetails component
+                if (packagingHierarchy.length > 0) {
+                  // Add all 'from' units from hierarchy
+                  packagingHierarchy.forEach((level, levelIdx) => {
+                    availableUnits.push(
+                      <option key={`from-${levelIdx}`} value={level.from}>
+                        {level.from}
+                      </option>
+                    );
+                  });
+
+                  // Add the final 'to' unit from the last level
+                  const lastLevel =
+                    packagingHierarchy[packagingHierarchy.length - 1];
+                  if (lastLevel?.to) {
+                    availableUnits.push(
+                      <option key={`to-final`} value={lastLevel.to}>
+                        {lastLevel.to}
+                      </option>
+                    );
+                  }
+                } else {
+                  // Fallback to category/subcategory units if no packaging hierarchy
+                  const subcategory = category?.subcategories?.find(
+                    (s) => s.id.toString() === data.subcategoryId
                   );
-                  return basicUnits.map((unit) => (
-                    <option key={unit} value={unit}>
-                      {unit}
-                    </option>
-                  ));
+
+                  const unitSet = new Set();
+
+                  // Get units from category
+                  if (category?.primary_unit) {
+                    unitSet.add(category.primary_unit);
+                  }
+                  if (category?.secondary_unit) {
+                    unitSet.add(category.secondary_unit);
+                  }
+
+                  // Get units from subcategory
+                  if (subcategory?.primary_unit) {
+                    unitSet.add(subcategory.primary_unit);
+                  }
+                  if (subcategory?.secondary_unit) {
+                    unitSet.add(subcategory.secondary_unit);
+                  }
+
+                  // If still no units, use fallback
+                  if (unitSet.size === 0) {
+                    ['pcs', 'box', 'kg'].forEach((unit) => unitSet.add(unit));
+                  }
+
+                  Array.from(unitSet).forEach((unit) => {
+                    availableUnits.push(
+                      <option key={unit} value={unit}>
+                        {unit.charAt(0).toUpperCase() + unit.slice(1)}
+                      </option>
+                    );
+                  });
                 }
 
-                const hierarchyUnits = [];
-                const hierarchySet = new Set();
-
-                // Sort by level to maintain hierarchy order
-                const sortedHierarchy = [...category.packagingHierarchy].sort(
-                  (a, b) => a.level - b.level
-                );
-
-                sortedHierarchy.forEach((level) => {
-                  // Add units in hierarchy order (from -> to)
-                  if (!hierarchySet.has(level.from)) {
-                    hierarchySet.add(level.from);
-                    hierarchyUnits.push(level.from);
-                  }
-                  if (!hierarchySet.has(level.to)) {
-                    hierarchySet.add(level.to);
-                    hierarchyUnits.push(level.to);
-                  }
-                });
-
                 console.log(
-                  `Using hierarchy units for category ${category?.name}:`,
-                  hierarchyUnits
+                  'Final available units count:',
+                  availableUnits.length
                 );
-                // Return only hierarchy units
-                return hierarchyUnits.map((unit) => (
-                  <option key={unit} value={unit}>
-                    {unit}
-                  </option>
-                ));
+
+                return availableUnits;
               })()}
             </select>
+            {/* Unit Weight Helper */}
+            {data.unit && data.productId && prod && (
+              <div className="text-xs mt-1 p-2 bg-gray-50 dark:bg-gray-800 rounded border">
+                <span className="text-gray-600 dark:text-gray-400">
+                  📊 Weight per {data.unit}:
+                </span>
+                <span className="font-mono font-bold text-gray-900 dark:text-gray-100 ml-1">
+                  {(() => {
+                    const weightPer1Unit = calculateTotalWeight(
+                      data.productId,
+                      '1',
+                      data.unit
+                    );
+                    return `${weightPer1Unit.toFixed(4)} KG`;
+                  })()}
+                </span>
+              </div>
+            )}
           </div>
           <div>
             <Label>Quantity Input Method</Label>
@@ -1987,6 +2096,29 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                 required
                 className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm py-2 px-3 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
               />
+              {/* Real-time weight calculation display */}
+              {data.productId && data.quantity && data.unit && (
+                <div className="text-xs bg-blue-50 dark:bg-blue-900 p-2 rounded mt-2 border border-blue-200 dark:border-blue-700">
+                  <div className="text-blue-700 dark:text-blue-300">
+                    <strong>📊 Weight Calculation:</strong>
+                    <br />
+                    <span className="font-mono">
+                      {data.quantity} {data.unit} ={' '}
+                      <strong>{totalWeight.toFixed(3)} KG</strong>
+                    </span>
+                    <br />
+                    <span className="text-xs opacity-75">
+                      Rate:{' '}
+                      {totalWeight > 0
+                        ? (
+                            totalWeight / parseFloat(data.quantity || '1')
+                          ).toFixed(4)
+                        : '0'}{' '}
+                      KG per {data.unit}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div>

@@ -111,7 +111,7 @@ export const getUserFriendlyError = (
     responseData: error.response?.data,
     context,
     operation,
-    status: statusCode
+    status: statusCode,
   });
 
   // For auth operations, always prioritize backend message

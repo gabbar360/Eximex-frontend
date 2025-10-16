@@ -3,9 +3,11 @@ import productService from '../service/productService';
 
 export const fetchProducts = createAsyncThunk(
   'product/fetchProducts',
-  async (_, { rejectWithValue }) => {
+  async (params = {}, { rejectWithValue }) => {
     try {
-      return await productService.getAllProducts();
+      // Set default limit to 100 to show more products
+      const queryParams = { limit: 100, ...params };
+      return await productService.getAllProducts(queryParams);
     } catch (err) {
       return rejectWithValue(err.message);
     }

@@ -173,10 +173,14 @@ export default function App() {
         // Check for Google OAuth callback tokens in URL
         const urlParams = new URLSearchParams(window.location.search);
         const hasGoogleTokens = authService.handleGoogleCallback(urlParams);
-        
+
         if (hasGoogleTokens) {
           // Clean up URL
-          window.history.replaceState({}, document.title, window.location.pathname);
+          window.history.replaceState(
+            {},
+            document.title,
+            window.location.pathname
+          );
         }
 
         const accessToken = localStorage.getItem('accessToken');

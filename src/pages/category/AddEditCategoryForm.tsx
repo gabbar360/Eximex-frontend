@@ -74,7 +74,7 @@ const UnitDropdown: React.FC<{
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
-}> = ({ id, name, value, onChange, placeholder = "Select unit" }) => {
+}> = ({ id, name, value, onChange, placeholder = 'Select unit' }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -112,16 +112,20 @@ const UnitDropdown: React.FC<{
     { value: 'unit', label: 'Unit' },
   ];
 
-  const filteredUnits = units.filter(unit =>
-    unit.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    unit.value.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredUnits = units.filter(
+    (unit) =>
+      unit.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      unit.value.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const selectedUnit = units.find(unit => unit.value === value);
+  const selectedUnit = units.find((unit) => unit.value === value);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
         setSearchTerm('');
       }
@@ -145,7 +149,13 @@ const UnitDropdown: React.FC<{
         className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2.5 pr-11 text-sm shadow-theme-xs text-left focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <span className={selectedUnit ? 'text-gray-900 dark:text-white/90' : 'text-gray-400 dark:text-white/30'}>
+        <span
+          className={
+            selectedUnit
+              ? 'text-gray-900 dark:text-white/90'
+              : 'text-gray-400 dark:text-white/30'
+          }
+        >
           {selectedUnit ? selectedUnit.label : placeholder}
         </span>
         <svg
@@ -154,7 +164,12 @@ const UnitDropdown: React.FC<{
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
         </svg>
       </button>
 
@@ -177,7 +192,9 @@ const UnitDropdown: React.FC<{
                   key={unit.value}
                   type="button"
                   className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-800 ${
-                    value === unit.value ? 'bg-brand-50 text-brand-600 dark:bg-brand-900/20 dark:text-brand-400' : 'text-gray-900 dark:text-white/90'
+                    value === unit.value
+                      ? 'bg-brand-50 text-brand-600 dark:bg-brand-900/20 dark:text-brand-400'
+                      : 'text-gray-900 dark:text-white/90'
                   }`}
                   onClick={() => handleSelect(unit.value)}
                 >
@@ -192,7 +209,7 @@ const UnitDropdown: React.FC<{
           </div>
         </div>
       )}
-      
+
       <input type="hidden" name={name} value={value} />
     </div>
   );
@@ -559,7 +576,9 @@ const AddEditCategoryForm: React.FC = () => {
                       id="secondary_unit"
                       name="secondary_unit"
                       value={values.secondary_unit || ''}
-                      onChange={(value) => setFieldValue('secondary_unit', value)}
+                      onChange={(value) =>
+                        setFieldValue('secondary_unit', value)
+                      }
                       placeholder="Select Secondary Unit"
                     />
                     {touched.secondary_unit && errors.secondary_unit && (

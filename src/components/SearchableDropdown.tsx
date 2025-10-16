@@ -19,25 +19,29 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
   options,
   value,
   onChange,
-  placeholder = "Select an option",
-  className = "",
+  placeholder = 'Select an option',
+  className = '',
   id,
-  name
+  name,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const filteredOptions = options.filter(option =>
-    option.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    option.value.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredOptions = options.filter(
+    (option) =>
+      option.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      option.value.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const selectedOption = options.find(option => option.value === value);
+  const selectedOption = options.find((option) => option.value === value);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
         setSearchTerm('');
       }
@@ -61,7 +65,13 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
         className={`h-11 w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2.5 pr-11 text-sm shadow-theme-xs text-left focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800 ${className}`}
         onClick={() => setIsOpen(!isOpen)}
       >
-        <span className={selectedOption ? 'text-gray-900 dark:text-white/90' : 'text-gray-400 dark:text-white/30'}>
+        <span
+          className={
+            selectedOption
+              ? 'text-gray-900 dark:text-white/90'
+              : 'text-gray-400 dark:text-white/30'
+          }
+        >
           {selectedOption ? selectedOption.label : placeholder}
         </span>
         <svg
@@ -70,7 +80,12 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
         </svg>
       </button>
 
@@ -93,7 +108,9 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
                   key={option.value}
                   type="button"
                   className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-800 ${
-                    value === option.value ? 'bg-brand-50 text-brand-600 dark:bg-brand-900/20 dark:text-brand-400' : 'text-gray-900 dark:text-white/90'
+                    value === option.value
+                      ? 'bg-brand-50 text-brand-600 dark:bg-brand-900/20 dark:text-brand-400'
+                      : 'text-gray-900 dark:text-white/90'
                   }`}
                   onClick={() => handleSelect(option.value)}
                 >
@@ -108,7 +125,7 @@ const SearchableDropdown: React.FC<SearchableDropdownProps> = ({
           </div>
         </div>
       )}
-      
+
       <input type="hidden" name={name} value={value} />
     </div>
   );

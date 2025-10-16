@@ -123,7 +123,10 @@ const PICard: React.FC<{ pi: any; onDelete: (id: string) => void }> = ({
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setShowDropdown(false);
       }
     };
@@ -214,7 +217,7 @@ const PICard: React.FC<{ pi: any; onDelete: (id: string) => void }> = ({
             >
               <FontAwesomeIcon icon={faEllipsisV} className="w-4 h-4" />
             </button>
-            
+
             {showDropdown && (
               <div className="absolute top-full right-0 mt-1 w-56 sm:w-60 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-50 transform sm:transform-none -translate-x-2 sm:translate-x-0">
                 <button
@@ -224,7 +227,10 @@ const PICard: React.FC<{ pi: any; onDelete: (id: string) => void }> = ({
                   }}
                   className="w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-600"
                 >
-                  <FontAwesomeIcon icon={faEye} className="w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
+                  <FontAwesomeIcon
+                    icon={faEye}
+                    className="w-3 h-3 sm:w-4 sm:h-4 text-green-600"
+                  />
                   View & Confirm Order
                 </button>
                 <button
@@ -234,7 +240,10 @@ const PICard: React.FC<{ pi: any; onDelete: (id: string) => void }> = ({
                   }}
                   className="w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-600"
                 >
-                  <FontAwesomeIcon icon={faEdit} className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" />
+                  <FontAwesomeIcon
+                    icon={faEdit}
+                    className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600"
+                  />
                   Edit
                 </button>
                 <button
@@ -244,7 +253,10 @@ const PICard: React.FC<{ pi: any; onDelete: (id: string) => void }> = ({
                   }}
                   className="w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-600"
                 >
-                  <FontAwesomeIcon icon={faHistory} className="w-3 h-3 sm:w-4 sm:h-4 text-gray-600" />
+                  <FontAwesomeIcon
+                    icon={faHistory}
+                    className="w-3 h-3 sm:w-4 sm:h-4 text-gray-600"
+                  />
                   History
                 </button>
                 <button
@@ -254,7 +266,10 @@ const PICard: React.FC<{ pi: any; onDelete: (id: string) => void }> = ({
                   }}
                   className="w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-600"
                 >
-                  <FontAwesomeIcon icon={faEnvelope} className="w-3 h-3 sm:w-4 sm:h-4 text-indigo-600" />
+                  <FontAwesomeIcon
+                    icon={faEnvelope}
+                    className="w-3 h-3 sm:w-4 sm:h-4 text-indigo-600"
+                  />
                   Email
                 </button>
                 <button
@@ -268,7 +283,10 @@ const PICard: React.FC<{ pi: any; onDelete: (id: string) => void }> = ({
                   {downloading ? (
                     <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-purple-500"></div>
                   ) : (
-                    <FontAwesomeIcon icon={faDownload} className="w-3 h-3 sm:w-4 sm:h-4 text-purple-600" />
+                    <FontAwesomeIcon
+                      icon={faDownload}
+                      className="w-3 h-3 sm:w-4 sm:h-4 text-purple-600"
+                    />
                   )}
                   {downloading ? 'Downloading...' : 'Download PDF'}
                 </button>
@@ -279,7 +297,10 @@ const PICard: React.FC<{ pi: any; onDelete: (id: string) => void }> = ({
                   }}
                   className="w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                 >
-                  <FontAwesomeIcon icon={faTrash} className="w-3 h-3 sm:w-4 sm:h-4 text-red-600" />
+                  <FontAwesomeIcon
+                    icon={faTrash}
+                    className="w-3 h-3 sm:w-4 sm:h-4 text-red-600"
+                  />
                   Delete
                 </button>
               </div>
@@ -342,8 +363,6 @@ const PICard: React.FC<{ pi: any; onDelete: (id: string) => void }> = ({
           </div>
         </div>
       </div>
-
-
 
       {/* Email Modal */}
       <EmailInvoiceModal

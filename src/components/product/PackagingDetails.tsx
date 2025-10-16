@@ -22,11 +22,17 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
     const width = parseFloat(values.packagingWidth) || 0;
     const height = parseFloat(values.packagingHeight) || 0;
     const volume = length * width * height;
-    
+
     if (volume !== (parseFloat(values.packagingVolume) || 0)) {
       setFieldValue('packagingVolume', volume);
     }
-  }, [values.packagingLength, values.packagingWidth, values.packagingHeight, setFieldValue, values.packagingVolume]);
+  }, [
+    values.packagingLength,
+    values.packagingWidth,
+    values.packagingHeight,
+    setFieldValue,
+    values.packagingVolume,
+  ]);
 
   if (packagingHierarchy.length === 0) return null;
 
@@ -140,7 +146,9 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
                       : 'box'
                   } weight`}
                   className="w-full rounded-l-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                  onChange={(e) => setFieldValue('packagingMaterialWeight', e.target.value)}
+                  onChange={(e) =>
+                    setFieldValue('packagingMaterialWeight', e.target.value)
+                  }
                 />
                 <Field
                   as="select"
@@ -169,7 +177,9 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
                   min="0"
                   placeholder="Length (m)"
                   className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                  onChange={(e) => setFieldValue('packagingLength', e.target.value)}
+                  onChange={(e) =>
+                    setFieldValue('packagingLength', e.target.value)
+                  }
                 />
                 <Field
                   type="number"
@@ -178,7 +188,9 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
                   min="0"
                   placeholder="Width (m)"
                   className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                  onChange={(e) => setFieldValue('packagingWidth', e.target.value)}
+                  onChange={(e) =>
+                    setFieldValue('packagingWidth', e.target.value)
+                  }
                 />
                 <Field
                   type="number"
@@ -187,24 +199,28 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
                   min="0"
                   placeholder="Height (m)"
                   className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                  onChange={(e) => setFieldValue('packagingHeight', e.target.value)}
+                  onChange={(e) =>
+                    setFieldValue('packagingHeight', e.target.value)
+                  }
                 />
               </div>
               <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                Volume: {(
-                  (values.packagingLength || 0) * 
-                  (values.packagingWidth || 0) * 
+                Volume:{' '}
+                {(
+                  (values.packagingLength || 0) *
+                  (values.packagingWidth || 0) *
                   (values.packagingHeight || 0)
-                ).toFixed(3)} m³
+                ).toFixed(3)}{' '}
+                m³
               </div>
               <Field
                 type="hidden"
                 name="packagingVolume"
-                value={(
-                  (values.packagingLength || 0) * 
-                  (values.packagingWidth || 0) * 
+                value={
+                  (values.packagingLength || 0) *
+                  (values.packagingWidth || 0) *
                   (values.packagingHeight || 0)
-                )}
+                }
               />
             </div>
             {/* Additional packaging hierarchy fields if more than 2 */}
@@ -244,7 +260,9 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
                     min="0"
                     placeholder="Length"
                     className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                    onChange={(e) => setFieldValue('volumeLength', e.target.value)}
+                    onChange={(e) =>
+                      setFieldValue('volumeLength', e.target.value)
+                    }
                   />
                 </div>
                 <div className="flex items-center">
@@ -256,7 +274,9 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
                     min="0"
                     placeholder="Width"
                     className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                    onChange={(e) => setFieldValue('volumeWidth', e.target.value)}
+                    onChange={(e) =>
+                      setFieldValue('volumeWidth', e.target.value)
+                    }
                   />
                 </div>
                 <div className="flex items-center">
@@ -268,7 +288,9 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
                     min="0"
                     placeholder="Height"
                     className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                    onChange={(e) => setFieldValue('volumeHeight', e.target.value)}
+                    onChange={(e) =>
+                      setFieldValue('volumeHeight', e.target.value)
+                    }
                   />
                 </div>
               </div>
