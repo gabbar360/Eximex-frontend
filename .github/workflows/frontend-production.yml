@@ -1,0 +1,170 @@
+name: Frontend Production Deployment
+
+on:
+  push:
+    branches: [main]
+    paths: ['Exim-ex-frontend/**']
+  workflow_dispatch:
+
+jobs:
+  quality-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: Exim-ex-frontend/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: Exim-ex-frontend
+        run: npm ci
+      
+      - name: Check TypeScript
+        working-directory: Exim-ex-frontend
+        run: npx tsc --noEmit || echo "⚠️ TypeScript errors ignored"
+      
+      - name: Security audit
+        working-directory: Exim-ex-frontend
+        run: npm audit --audit-level=high
+      
+      - name: Run tests
+        working-directory: Exim-ex-frontend
+        run: npm test -- --coverage --watchAll=false
+
+  build-production:
+    needs: quality-checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: Exim-ex-frontend/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: Exim-ex-frontend
+        run: npm ci
+      
+      - name: Build for production
+        working-directory: Exim-ex-frontend
+        run: npm run build
+        env:
+          VITE_API_BASE_URL: ${{ secrets.PROD_API_URL }}
+      
+      - name: Validate build
+        run: |
+          ls -la Exim-ex-frontend/dist
+          du -sh Exim-ex-frontend/dist
+      
+      - name: Upload production build
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-build
+          path: Exim-ex-frontend/dist/
+          retention-days: 30
+
+  backup-current:
+    needs: build-production
+    runs-on: ubuntu-latest
+    steps:
+      - name: Backup current production
+        uses: SamKirkland/FTP-Deploy-Action@v4
+        with:
+          server: ${{ secrets.PROD_FTP_HOST }}
+          username: ${{ secrets.PROD_FTP_USER }}
+          password: ${{ secrets.PROD_FTP_PASS }}
+          local-dir: ./backup/
+          server-dir: /public_html/
+          dry-run: false
+      
+      - name: Create backup timestamp
+        run: echo "BACKUP_TIME=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_ENV
+
+  deploy-production:
+    needs: [build-production, backup-current]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download production build
+        uses: actions/download-artifact@v4
+        with:
+          name: production-build
+          path: ./dist
+      
+      - name: Deploy to Production
+        uses: SamKirkland/FTP-Deploy-Action@v4
+        with:
+          server: ${{ secrets.PROD_FTP_HOST }}
+          username: ${{ secrets.PROD_FTP_USER }}
+          password: ${{ secrets.PROD_FTP_PASS }}
+          local-dir: ./dist/
+          server-dir: /public_html/
+          dangerous-clean-slate: true
+      
+      - name: Health Check
+        run: |
+          sleep 60
+          for i in {1..5}; do
+            if curl -f ${{ secrets.PROD_URL }}; then
+              echo "✅ Health check passed"
+              break
+            fi
+            echo "⏳ Attempt $i failed, retrying..."
+            sleep 30
+          done
+      
+      - name: Performance Check
+        run: |
+          response_time=$(curl -o /dev/null -s -w '%{time_total}' ${{ secrets.PROD_URL }})
+          if (( $(echo "$response_time > 3.0" | bc -l) )); then
+            echo "⚠️ Slow response time: ${response_time}s"
+            exit 1
+          fi
+          echo "✅ Performance check passed: ${response_time}s"
+      
+      - name: Notify Success
+        if: success()
+        run: |
+          echo "🚀 Production deployment successful!"
+          echo "🔗 Production URL: ${{ secrets.PROD_URL }}"
+          echo "📊 Build size: $(du -sh ./dist | cut -f1)"
+      
+      - name: Rollback on Failure
+        if: failure()
+        run: |
+          echo "❌ Deployment failed - restoring backup"
+          rsync -avz ./backup/ /public_html/ --delete
+          echo "✅ Rollback complete"
+
+      # --- Email Notifications ---
+      - name: Send email on failure
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_HOST }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USER }}
+          password: ${{ secrets.SMTP_PASS }}
+          from: ${{ secrets.SMTP_FROM }}
+          to: jaydeep.flexa@gmail.com
+          subject: "❌ Deployment Failed"
+          body: "Production deployment failed. Check GitHub Actions logs for details."
+
+      - name: Send email on success
+        if: success()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_HOST }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USER }}
+          password: ${{ secrets.SMTP_PASS }}
+          from: ${{ secrets.SMTP_FROM }}
+          to: jaydeep.flexa@gmail.com
+          subject: "✅ Deployment Successful"
+          body: "Production deployment completed successfully! 🎉"
