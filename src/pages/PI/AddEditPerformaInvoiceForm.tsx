@@ -720,71 +720,49 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
       return qty;
     }
 
-    // Enhanced weight calculation using API data structure
-    console.log('Calculating weight for:', {
-      productId,
-      quantity,
-      unit,
-      product,
-    });
-
     // Get packaging hierarchy data from product
     const packagingData = product.packagingHierarchyData?.dynamicFields;
-
-    // Convert gross weight to kg if needed
-    let grossWeightKg = product.grossWeightPerBox || 0;
-    if (product.grossWeightUnit === 'g' && grossWeightKg > 0) {
-      grossWeightKg = grossWeightKg / 1000; // Convert grams to kg
-    }
-
-    // Get unit weight in grams and convert to kg
-    let unitWeightKg = product.unitWeight || 0;
-    if (product.unitWeightUnit === 'g' && unitWeightKg > 0) {
-      unitWeightKg = unitWeightKg / 1000; // Convert grams to kg
-    }
-
+    
+    // Use the stored weight values from packagingHierarchyData (in grams, convert to kg)
+    const weightPerPieces = packagingData?.weightPerPieces ? packagingData.weightPerPieces / 1000 : 0;
+    const weightPerPackage = packagingData?.weightPerPackage ? packagingData.weightPerPackage / 1000 : 0;
+    const weightPerBox = packagingData?.weightPerBox ? packagingData.weightPerBox / 1000 : 0;
+    
     // Get packaging conversion factors
-    const piecesPerPackage =
-      packagingData?.PiecesPerPackage || product.totalPieces || 1;
+    const piecesPerPackage = packagingData?.PiecesPerPackage || 1;
     const packagePerBox = packagingData?.PackagePerBox || 1;
-    const totalPiecesPerBox = piecesPerPackage * packagePerBox;
 
-    console.log('Weight calculation data:', {
-      grossWeightKg,
-      unitWeightKg,
-      piecesPerPackage,
-      packagePerBox,
-      totalPiecesPerBox,
-      unit,
-    });
-
-    // Calculate weight based on selected unit
+    // Calculate weight based on selected unit using stored values
     switch (unit.toLowerCase()) {
       case 'pcs':
       case 'pieces':
-        if (unitWeightKg > 0) {
-          // Use unit weight directly
-          return qty * unitWeightKg;
-        } else if (grossWeightKg > 0 && totalPiecesPerBox > 0) {
-          // Calculate from gross weight per box
-          const weightPerPiece = grossWeightKg / totalPiecesPerBox;
-          return qty * weightPerPiece;
-        }
-        break;
-
-      case 'box':
-        if (grossWeightKg > 0) {
-          return qty * grossWeightKg;
+        if (weightPerPieces > 0) {
+          return qty * weightPerPieces;
         }
         break;
 
       case 'package':
       case 'pack':
-        if (unitWeightKg > 0 && piecesPerPackage > 0) {
-          return qty * unitWeightKg * piecesPerPackage;
-        } else if (grossWeightKg > 0 && packagePerBox > 0) {
-          const weightPerPackage = grossWeightKg / packagePerBox;
+        if (weightPerPackage > 0) {
           return qty * weightPerPackage;
+        }
+        // Fallback: calculate from pieces
+        if (weightPerPieces > 0 && piecesPerPackage > 0) {
+          return qty * weightPerPieces * piecesPerPackage;
+        }
+        break;
+
+      case 'box':
+        if (weightPerBox > 0) {
+          return qty * weightPerBox;
+        }
+        // Fallback: calculate from packages
+        if (weightPerPackage > 0 && packagePerBox > 0) {
+          return qty * weightPerPackage * packagePerBox;
+        }
+        // Fallback: calculate from pieces
+        if (weightPerPieces > 0 && piecesPerPackage > 0 && packagePerBox > 0) {
+          return qty * weightPerPieces * piecesPerPackage * packagePerBox;
         }
         break;
 
@@ -792,63 +770,23 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         return qty;
 
       default:
-        // For any other unit, try to use unit weight
-        if (unitWeightKg > 0) {
-          return qty * unitWeightKg;
+        // For any other unit, try to match with stored weights
+        if (weightPerPieces > 0) {
+          return qty * weightPerPieces;
         }
         break;
     }
 
-    // Fallback calculation using category hierarchy if available
-    const category = categories.find(
-      (c) => c.id.toString() === product?.categoryId?.toString()
-    );
-
-    if (
-      category?.packagingHierarchy &&
-      category.packagingHierarchy.length > 0
-    ) {
-      const hierarchy = category.packagingHierarchy.sort(
-        (a, b) => a.level - b.level
-      );
-
-      // Find matching unit in hierarchy
-      for (const level of hierarchy) {
-        if (level.from === unit || level.to === unit) {
-          // Use hierarchy-based calculation
-          const baseWeight = unitWeightKg || 0.01; // 10g default per piece
-          let multiplier = 1;
-
-          // Calculate multiplier based on hierarchy level
-          if (level.from === 'pcs' && level.to === 'package') {
-            multiplier = level.conversionQuantity || piecesPerPackage;
-          } else if (level.from === 'package' && level.to === 'box') {
-            multiplier =
-              (level.conversionQuantity || packagePerBox) * piecesPerPackage;
-          }
-
-          if (unit === level.to) {
-            return qty * baseWeight * multiplier;
-          } else if (unit === level.from) {
-            return qty * baseWeight;
-          }
-        }
-      }
-    }
-
-    // Final fallback: use a reasonable default based on unit
+    // Final fallback: use minimal default weights
     const defaultWeights = {
-      pcs: unitWeightKg || 0.02, // 20g per piece
-      pieces: unitWeightKg || 0.02,
-      box: grossWeightKg || 1.0, // 1kg per box
-      package: (unitWeightKg || 0.02) * (piecesPerPackage || 25), // 25 pieces per package
-      pack: (unitWeightKg || 0.02) * (piecesPerPackage || 25),
+      pcs: 0.014, // 14g per piece in kg
+      pieces: 0.014,
+      package: 0.7, // 700g per package in kg
+      pack: 0.7,
+      box: 7.0, // 7000g per box in kg
     };
 
-    const defaultWeight =
-      defaultWeights[unit.toLowerCase()] || unitWeightKg || 0.1;
-    console.log('Using default weight:', defaultWeight, 'for unit:', unit);
-
+    const defaultWeight = defaultWeights[unit.toLowerCase()] || 0.014;
     return qty * defaultWeight;
   };
 
@@ -1884,45 +1822,91 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
               {prod.category?.hsnCode || prod.hsCode || 'N/A'} |{' '}
               <strong>Description:</strong> {prod.description || 'N/A'}
             </div>
-            {/* Weight Information Display */}
+            {/* Enhanced Weight Information Display */}
             <div className="mt-2 pt-2 border-t border-blue-200 dark:border-blue-700">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
                 <div>
                   <span className="text-blue-600 dark:text-blue-400 font-medium">
-                    Unit Weight:
+                    Weight per Piece:
                   </span>
                   <br />
-                  {prod.unitWeight
-                    ? `${prod.unitWeight}${prod.unitWeightUnit || 'g'}`
-                    : 'N/A'}
+                  <span className="font-bold text-green-600 dark:text-green-400">
+                    {(() => {
+                      const packagingData = prod.packagingHierarchyData?.dynamicFields;
+                      const weightPerPieces = packagingData?.weightPerPieces;
+                      if (weightPerPieces) {
+                        // Convert to grams for display since values are actually in grams
+                        return `${weightPerPieces} g`;
+                      }
+                      // Fallback to unitWeight only if weightUnitType is Pieces
+                      if (prod.weightUnitType === 'Pieces' && prod.unitWeight) {
+                        return `${prod.unitWeight} ${prod.unitWeightUnit || 'g'}`;
+                      }
+                      return 'N/A';
+                    })()}
+                  </span>
                 </div>
                 <div>
                   <span className="text-blue-600 dark:text-blue-400 font-medium">
-                    Box Weight:
+                    Weight per Package:
                   </span>
                   <br />
-                  {prod.grossWeightPerBox
-                    ? `${prod.grossWeightPerBox}${prod.grossWeightUnit || 'g'}`
-                    : 'N/A'}
+                  <span className="font-bold text-orange-600 dark:text-orange-400">
+                    {(() => {
+                      const packagingData = prod.packagingHierarchyData?.dynamicFields;
+                      const weightPerPackage = packagingData?.weightPerPackage;
+                      if (weightPerPackage) {
+                        // Convert to grams for display since values are actually in grams
+                        return `${weightPerPackage} g`;
+                      }
+                      // Fallback to unitWeight only if weightUnitType is Package
+                      if (prod.weightUnitType === 'Package' && prod.unitWeight) {
+                        return `${prod.unitWeight} ${prod.unitWeightUnit || 'g'}`;
+                      }
+                      return 'N/A';
+                    })()}
+                  </span>
                 </div>
                 <div>
                   <span className="text-blue-600 dark:text-blue-400 font-medium">
-                    Pieces/Box:
+                    Weight per Box:
                   </span>
                   <br />
-                  {prod.totalPieces ||
-                    prod.packagingHierarchyData?.dynamicFields
-                      ?.PiecesPerPackage ||
-                    'N/A'}
+                  <span className="font-bold text-purple-600 dark:text-purple-400">
+                    {(() => {
+                      const packagingData = prod.packagingHierarchyData?.dynamicFields;
+                      const weightPerBox = packagingData?.weightPerBox;
+                      if (weightPerBox) {
+                        // Convert to grams for display since values are actually in grams
+                        return `${weightPerBox} g`;
+                      }
+                      // Fallback to unitWeight only if weightUnitType is Box
+                      if (prod.weightUnitType === 'Box' && prod.unitWeight) {
+                        return `${prod.unitWeight} ${prod.unitWeightUnit || 'g'}`;
+                      }
+                      return 'N/A';
+                    })()}
+                  </span>
                 </div>
                 <div>
                   <span className="text-blue-600 dark:text-blue-400 font-medium">
-                    Total Weight:
+                    Pieces/Package:
                   </span>
                   <br />
-                  {prod.totalGrossWeight
-                    ? `${prod.totalGrossWeight} ${prod.totalGrossWeightUnit || 'kg'}`
-                    : 'N/A'}
+                  <span className="font-bold text-indigo-600 dark:text-indigo-400">
+                    {prod.packagingHierarchyData?.dynamicFields?.PiecesPerPackage ||
+                      'N/A'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-blue-600 dark:text-blue-400 font-medium">
+                    Packages/Box:
+                  </span>
+                  <br />
+                  <span className="font-bold text-teal-600 dark:text-teal-400">
+                    {prod.packagingHierarchyData?.dynamicFields?.PackagePerBox ||
+                      'N/A'}
+                  </span>
                 </div>
               </div>
             </div>
