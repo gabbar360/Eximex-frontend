@@ -50,7 +50,7 @@ export default function SignInForm() {
             className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-colors dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
           >
             <FcGoogle className="w-5 h-5" />
-            Continue with Google........................
+            Continue with Google
           </button>
 
           {/* OR Divider */}
