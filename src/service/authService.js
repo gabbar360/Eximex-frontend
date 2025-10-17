@@ -106,7 +106,7 @@ const verifyToken = async () => {
 // Google OAuth
 const googleLogin = () => {
   const apiBaseUrl =
-    import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+    import.meta.env.VITE_API_BASE_URL;
   const apiUrl = apiBaseUrl.replace('/api/v1', '');
   window.location.href = `${apiUrl}/api/v1/auth/google`;
 };
@@ -114,13 +114,25 @@ const googleLogin = () => {
 const handleGoogleCallback = (urlParams) => {
   const token = urlParams.get('token');
   const refresh = urlParams.get('refresh');
+  const userParam = urlParams.get('user');
 
   if (token && refresh) {
     localStorage.setItem('accessToken', token);
     localStorage.setItem('refreshToken', refresh);
-    return true;
+    
+    // If user data is provided in URL, return it
+    if (userParam) {
+      try {
+        const userData = JSON.parse(decodeURIComponent(userParam));
+        return { success: true, userData };
+      } catch (error) {
+        console.warn('Failed to parse user data from URL:', error);
+      }
+    }
+    
+    return { success: true };
   }
-  return false;
+  return { success: false };
 };
 
 const forgotPassword = async (email) => {

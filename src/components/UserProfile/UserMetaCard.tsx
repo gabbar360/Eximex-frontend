@@ -15,6 +15,9 @@ interface UserData {
   role: string;
   status: string;
   companyId?: number;
+  profilePicture?: string;
+  googleId?: string;
+  isEmailVerified?: boolean;
   company?: {
     id: number;
     name: string;
@@ -61,11 +64,32 @@ export default function UserMetaCard({
       <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex flex-col items-center w-full gap-6 xl:flex-row">
-            <div className="w-20 h-20 flex items-center justify-center border border-gray-200 rounded-full dark:border-gray-800 bg-gray-100 dark:bg-gray-700">
-              <FontAwesomeIcon
-                icon={faUser}
-                className="text-2xl text-gray-500 dark:text-gray-400"
-              />
+            <div className="w-20 h-20 flex items-center justify-center border border-gray-200 rounded-full dark:border-gray-800 bg-gray-100 dark:bg-gray-700 overflow-hidden relative">
+              {userData?.profilePicture ? (
+                <>
+                  <img
+                    src={userData.profilePicture}
+                    alt={userData.name || 'User'}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      const fallback = e.currentTarget.parentElement?.querySelector('.fallback-icon');
+                      if (fallback) fallback.classList.remove('hidden');
+                    }}
+                  />
+                  <div className="fallback-icon hidden absolute inset-0 flex items-center justify-center">
+                    <FontAwesomeIcon
+                      icon={faUser}
+                      className="text-2xl text-gray-500 dark:text-gray-400"
+                    />
+                  </div>
+                </>
+              ) : (
+                <FontAwesomeIcon
+                  icon={faUser}
+                  className="text-2xl text-gray-500 dark:text-gray-400"
+                />
+              )}
             </div>
             <div className="order-3 xl:order-2">
               <h4 className="mb-2 text-lg font-semibold text-center text-gray-800 dark:text-white/90 xl:text-left">
