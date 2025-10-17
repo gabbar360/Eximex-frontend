@@ -549,7 +549,35 @@ const AddEditProductForm = () => {
             : null,
       };
 
-      // console.log("Submitting product data:", productData);
+      // Build packagingHierarchyData with dynamicFields
+      const dynamicFields = {};
+      
+      // Add all weight fields to dynamicFields
+      packagingHierarchy.forEach((level) => {
+        const quantityField = `${level.from}Per${level.to}`;
+        const weightField = `weightPer${level.from.charAt(0).toUpperCase() + level.from.slice(1)}`;
+        const weightUnitField = `${weightField}Unit`;
+        const toWeightField = `weightPer${level.to.charAt(0).toUpperCase() + level.to.slice(1)}`;
+        const toWeightUnitField = `${toWeightField}Unit`;
+        
+        if (values[quantityField]) dynamicFields[quantityField] = parseInt(values[quantityField]);
+        if (values[weightField]) dynamicFields[weightField] = parseFloat(values[weightField]);
+        if (values[weightUnitField]) dynamicFields[weightUnitField] = values[weightUnitField];
+        if (values[toWeightField]) dynamicFields[toWeightField] = parseFloat(values[toWeightField]);
+        if (values[toWeightUnitField]) dynamicFields[toWeightUnitField] = values[toWeightUnitField];
+      });
+      
+      // Add grossWeightPerBox to dynamicFields if it exists
+      if (values.grossWeightPerBox) {
+        dynamicFields.grossWeightPerBox = parseFloat(values.grossWeightPerBox);
+      }
+      
+      // Add packagingHierarchyData to productData
+      if (Object.keys(dynamicFields).length > 0) {
+        productData.packagingHierarchyData = { dynamicFields };
+      }
+
+      console.log("Submitting product data:", productData);
 
       if (isEdit) {
         const result = await productService.updateProduct(
