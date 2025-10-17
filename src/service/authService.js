@@ -106,7 +106,7 @@ const verifyToken = async () => {
 // Google OAuth
 const googleLogin = () => {
   const apiBaseUrl =
-    import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+    import.meta.env.VITE_API_BASE_URL;
   const apiUrl = apiBaseUrl.replace('/api/v1', '');
   window.location.href = `${apiUrl}/api/v1/auth/google`;
 };
