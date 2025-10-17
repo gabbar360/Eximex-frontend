@@ -172,9 +172,14 @@ export default function App() {
       try {
         // Check for Google OAuth callback tokens in URL
         const urlParams = new URLSearchParams(window.location.search);
-        const hasGoogleTokens = authService.handleGoogleCallback(urlParams);
+        const googleCallback = authService.handleGoogleCallback(urlParams);
 
-        if (hasGoogleTokens) {
+        if (googleCallback.success) {
+          // If user data is provided, set it immediately
+          if (googleCallback.userData) {
+            dispatch(setUser(googleCallback.userData));
+          }
+          
           // Clean up URL
           window.history.replaceState(
             {},
@@ -187,10 +192,13 @@ export default function App() {
         const refreshToken = localStorage.getItem('refreshToken');
 
         if (accessToken || refreshToken) {
-          // Try to get current user, which will trigger token refresh if needed
-          const res = await authService.getCurrentUser();
-          if (res?.data) {
-            dispatch(setUser(res.data));
+          // Only fetch user if not already set from Google callback
+          if (!googleCallback.userData) {
+            // Try to get current user, which will trigger token refresh if needed
+            const res = await authService.getCurrentUser();
+            if (res?.data) {
+              dispatch(setUser(res.data));
+            }
           }
         }
       } catch (err) {

@@ -7,6 +7,7 @@ interface UserAvatarProps {
     name?: string;
     email?: string;
     avatar?: string;
+    profilePicture?: string;
   };
   size?: 'sm' | 'md' | 'lg';
   showName?: boolean;
@@ -33,11 +34,25 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
     lg: 'text-base',
   };
 
+  const profileImage = user?.profilePicture || user?.avatar;
+
   return (
     <div className={`flex items-center gap-3 ${className}`}>
       <div className="flex-shrink-0">
+        {profileImage ? (
+          <img
+            src={profileImage}
+            alt={user?.name || 'User'}
+            className={`${sizeClasses[size]} rounded-full object-cover border border-gray-200 dark:border-gray-600`}
+            onError={(e) => {
+              // Fallback to default avatar if image fails to load
+              e.currentTarget.style.display = 'none';
+              e.currentTarget.nextElementSibling?.classList.remove('hidden');
+            }}
+          />
+        ) : null}
         <div
-          className={`${sizeClasses[size]} rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center border border-gray-200 dark:border-gray-600`}
+          className={`${profileImage ? 'hidden' : ''} ${sizeClasses[size]} rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center border border-gray-200 dark:border-gray-600`}
         >
           <FontAwesomeIcon
             icon={faUser}

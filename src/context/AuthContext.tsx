@@ -9,6 +9,9 @@ interface User {
   email: string;
   role: 'SUPER_ADMIN' | 'ADMIN' | 'STAFF';
   companyId: number;
+  profilePicture?: string;
+  googleId?: string;
+  isEmailVerified?: boolean;
   company?: {
     id: number;
     name: string;
