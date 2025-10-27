@@ -83,31 +83,10 @@ jobs:
           port: 22
           script: |
             cd /var/www/Eximex-frontend
-            rm -rf dist/*
-            mkdir -p dist
-            
-      - name: Copy files to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.PROD_FTP_HOST }}
-          username: ${{ secrets.PROD_FTP_USER }}
-          password: ${{ secrets.PROD_FTP_PASS }}
-          port: 22
-          source: "./dist/*"
-          target: "/var/www/Eximex-frontend/dist/"
-          strip_components: 1
-          overwrite: true
-          rm: true
-
-      - name: Restart services
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.PROD_FTP_HOST }}
-          username: ${{ secrets.PROD_FTP_USER }}
-          password: ${{ secrets.PROD_FTP_PASS }}
-          port: 22
-          script: |
-            systemctl reload nginx || true
+            git pull origin main
+            npm ci
+            npm run build
+            sudo systemctl reload nginx || true
 
       - name: Health Check
         run: |
