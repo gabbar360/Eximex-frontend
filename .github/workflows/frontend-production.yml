@@ -81,8 +81,7 @@ jobs:
           username: ${{ secrets.PROD_FTP_USER }}
           password: ${{ secrets.PROD_FTP_PASS }}
           local-dir: ./dist/
-          server-dir: /
-          dangerous-clean-slate: true
+          server-dir: public_html
 
       - name: Health Check
         run: |
