@@ -82,7 +82,9 @@ jobs:
           password: ${{ secrets.PROD_FTP_PASS }}
           port: 22
           script: |
-            rm -rf /var/www/Eximex-frontend/*
+            sudo rm -rf /var/www/Eximex-frontend/* || true
+            sudo mkdir -p /var/www/Eximex-frontend
+            sudo chown -R $USER:$USER /var/www/Eximex-frontend
 
       - name: Deploy to Production
         uses: appleboy/scp-action@v0.1.7
