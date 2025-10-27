@@ -102,7 +102,7 @@ export default function SignUpForm() {
 
                 <div>
                   <Label>
-                    Mobile Number........ <span className="text-error-500">*</span>
+                    Mobile Number <span className="text-error-500">*</span>
                   </Label>
                   <Field
                     name="mobileNum"
