@@ -83,9 +83,9 @@ jobs:
           password: ${{ secrets.PROD_FTP_PASS }}
           port: 22
           script: |
-            sudo rm -rf /var/www/Eximex-frontend/* 2>/dev/null || true
-            sudo mkdir -p /var/www/Eximex-frontend
-            sudo chown -R $USER:$USER /var/www/Eximex-frontend
+            sudo -S rm -rf /var/www/Eximex-frontend/* 2>/dev/null || true
+            sudo -S mkdir -p /var/www/Eximex-frontend
+            sudo -S chown -R $USER:$USER /var/www/Eximex-frontend
 
       # 🚀 Deploy build (disable rm to prevent folder deletion error)
       - name: Deploy to Production
