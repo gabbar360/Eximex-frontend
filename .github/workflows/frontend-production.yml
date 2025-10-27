@@ -112,13 +112,6 @@ jobs:
           echo "🔗 Production URL: ${{ secrets.PROD_URL }}"
           echo "📊 Build size: $(du -sh ./dist | cut -f1)"
 
-      - name: Rollback on Failure
-        if: failure()
-        run: |
-          echo "❌ Deployment failed - restoring backup"
-          rsync -avz ./backup/ /public_html/ --delete
-          echo "✅ Rollback complete"
-
       - name: Send email on failure
         if: failure()
         uses: dawidd6/action-send-mail@v3
