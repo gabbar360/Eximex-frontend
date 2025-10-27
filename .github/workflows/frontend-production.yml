@@ -83,9 +83,8 @@ jobs:
           port: 22
           script: |
             cd /var/www/Eximex-frontend
-            sudo rm -rf dist/*
-            sudo mkdir -p dist
-            sudo chown -R $USER:$USER dist
+            rm -rf dist/*
+            mkdir -p dist
             
       - name: Copy files to server
         uses: appleboy/scp-action@v0.1.7
@@ -106,7 +105,7 @@ jobs:
           password: ${{ secrets.PROD_FTP_PASS }}
           port: 22
           script: |
-            sudo systemctl reload nginx || true
+            systemctl reload nginx || true
 
       - name: Health Check
         run: |
