@@ -74,7 +74,18 @@ jobs:
           name: production-build
           path: ./dist
 
-      - name: Deploy to Production
+      - name: Copy files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.PROD_FTP_HOST }}
+          username: ${{ secrets.PROD_FTP_USER }}
+          password: ${{ secrets.PROD_FTP_PASS }}
+          port: 22
+          source: "./dist/*"
+          target: "/var/www/Eximex-frontend/"
+          strip_components: 1
+
+      - name: Restart services
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.PROD_FTP_HOST }}
@@ -82,10 +93,6 @@ jobs:
           password: ${{ secrets.PROD_FTP_PASS }}
           port: 22
           script: |
-            cd /var/www/Eximex-frontend
-            git pull origin main
-            npm ci
-            npm run build
             sudo systemctl reload nginx || true
 
       - name: Health Check
