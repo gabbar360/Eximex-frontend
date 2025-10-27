@@ -75,13 +75,18 @@ jobs:
           path: ./dist
 
       - name: Deploy to Production
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          server: ${{ secrets.PROD_FTP_HOST }}
+          host: ${{ secrets.PROD_FTP_HOST }}
           username: ${{ secrets.PROD_FTP_USER }}
           password: ${{ secrets.PROD_FTP_PASS }}
-          local-dir: ./dist/
-          server-dir: public_html/
+          port: 22
+          script: |
+            cd /var/www/Eximex-frontend
+            git pull origin main
+            npm ci
+            npm run build
+            sudo systemctl reload nginx || true
 
       - name: Health Check
         run: |
