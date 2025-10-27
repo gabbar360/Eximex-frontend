@@ -81,7 +81,9 @@ jobs:
           username: ${{ secrets.PROD_FTP_USER }}
           password: ${{ secrets.PROD_FTP_PASS }}
           local-dir: ./dist/
-          server-dir: public_html/
+          server-dir: /
+          protocol: ftp
+          port: 22
 
       - name: Health Check
         run: |
