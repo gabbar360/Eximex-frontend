@@ -3,7 +3,6 @@ name: Frontend Production Deployment
 on:
   push:
     branches: [main]
-    paths: ['Exim-ex-frontend/**']
   workflow_dispatch:
 
 jobs:
@@ -20,19 +19,15 @@ jobs:
           cache-dependency-path: '**/package-lock.json'
 
       - name: Install dependencies
-        working-directory: Exim-ex-frontend
         run: npm ci
 
       - name: Check TypeScript
-        working-directory: Exim-ex-frontend
         run: npx tsc --noEmit || true
 
       - name: Security audit
-        working-directory: Exim-ex-frontend
         run: npm audit --audit-level=high || echo "⚠️ Audit warnings ignored"
 
       - name: Run tests
-        working-directory: Exim-ex-frontend
         run: CI=true npm test -- --coverage --watchAll=false
 
   build-production:
