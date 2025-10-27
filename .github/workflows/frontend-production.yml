@@ -63,27 +63,8 @@ jobs:
           retention-days: 30
 
 
-  backup-current:
-    needs: build-production
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Backup current production
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.PROD_FTP_HOST }}
-          username: ${{ secrets.PROD_FTP_USER }}
-          password: ${{ secrets.PROD_FTP_PASS }}
-          local-dir: ./backup/
-          server-dir: /public_html/
-          dry-run: false
-
-      - name: Create backup timestamp
-        run: echo "BACKUP_TIME=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_ENV
-
-
   deploy-production:
-    needs: [build-production, backup-current]
+    needs: build-production
     runs-on: ubuntu-latest
 
     steps:
