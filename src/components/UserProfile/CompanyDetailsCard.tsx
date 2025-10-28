@@ -110,7 +110,7 @@ export default function CompanyDetailsCard({
           <div className="flex items-center gap-4 mb-6">
             <div className="flex-shrink-0">
               <Image
-                src={`http://localhost:8000${companyData?.logo || '/uploads/logos/logo-1758172153913-500170623.webp'}`}
+                src={`${import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || 'http://localhost:8000'}${companyData?.logo || '/uploads/logos/logo-1758172153913-500170623.webp'}`}
                 alt="Company Logo"
                 width={96}
                 height={96}
