@@ -723,10 +723,17 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
     // Get packaging hierarchy data from product
     const packagingData = product.packagingHierarchyData?.dynamicFields;
     
-    // Use the stored weight values from packagingHierarchyData (in grams, convert to kg)
-    const weightPerPieces = packagingData?.weightPerPieces ? packagingData.weightPerPieces / 1000 : 0;
-    const weightPerPackage = packagingData?.weightPerPackage ? packagingData.weightPerPackage / 1000 : 0;
-    const weightPerBox = packagingData?.weightPerBox ? packagingData.weightPerBox / 1000 : 0;
+    // Use the stored weight values from packagingHierarchyData - check units before converting
+    const weightPerPiecesUnit = packagingData?.weightPerPiecesUnit || 'g';
+    const weightPerPackageUnit = packagingData?.weightPerPackageUnit || 'g';
+    const weightPerBoxUnit = packagingData?.weightPerBoxUnit || 'kg';
+    
+    const weightPerPieces = packagingData?.weightPerPieces ? 
+      (weightPerPiecesUnit === 'kg' ? packagingData.weightPerPieces : packagingData.weightPerPieces / 1000) : 0;
+    const weightPerPackage = packagingData?.weightPerPackage ? 
+      (weightPerPackageUnit === 'kg' ? packagingData.weightPerPackage : packagingData.weightPerPackage / 1000) : 0;
+    const weightPerBox = packagingData?.weightPerBox ? 
+      (weightPerBoxUnit === 'kg' ? packagingData.weightPerBox : packagingData.weightPerBox / 1000) : 0;
     
     // Get packaging conversion factors
     const piecesPerPackage = packagingData?.PiecesPerPackage || 1;
@@ -1822,94 +1829,136 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
               {prod.category?.hsnCode || prod.hsCode || 'N/A'} |{' '}
               <strong>Description:</strong> {prod.description || 'N/A'}
             </div>
-            {/* Enhanced Weight Information Display */}
+            {/* Dynamic Weight Information Display */}
             <div className="mt-2 pt-2 border-t border-blue-200 dark:border-blue-700">
               <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
-                <div>
-                  <span className="text-blue-600 dark:text-blue-400 font-medium">
-                    Weight per Piece:
-                  </span>
-                  <br />
-                  <span className="font-bold text-green-600 dark:text-green-400">
-                    {(() => {
-                      const packagingData = prod.packagingHierarchyData?.dynamicFields;
-                      const weightPerPieces = packagingData?.weightPerPieces;
-                      if (weightPerPieces) {
-                        // Convert to grams for display since values are actually in grams
-                        return `${weightPerPieces} g`;
+                {(() => {
+                  const displayItems = [];
+                  
+                  // Get all unique units from packaging hierarchy and weights
+                  const allUnits = new Set();
+                  
+                  // From packagingPreview weights
+                  if (prod.packagingPreview?.weights) {
+                    Object.keys(prod.packagingPreview.weights).forEach(key => {
+                      if (!key.endsWith('Unit')) {
+                        allUnits.add(key);
                       }
-                      // Fallback to unitWeight only if weightUnitType is Pieces
-                      if (prod.weightUnitType === 'Pieces' && prod.unitWeight) {
-                        return `${prod.unitWeight} ${prod.unitWeightUnit || 'g'}`;
+                    });
+                  }
+                  
+                  // From packagingPreview hierarchy
+                  if (prod.packagingPreview?.hierarchy) {
+                    prod.packagingPreview.hierarchy.forEach(level => {
+                      allUnits.add(level.from);
+                      allUnits.add(level.to);
+                    });
+                  }
+                  
+                  // From packagingHierarchyData (fallback)
+                  if (prod.packagingHierarchyData?.dynamicFields) {
+                    const dynamicFields = prod.packagingHierarchyData.dynamicFields;
+                    Object.keys(dynamicFields).forEach(key => {
+                      if (key.startsWith('weightPer') && !key.endsWith('Unit')) {
+                        const unit = key.replace('weightPer', '');
+                        allUnits.add(unit);
                       }
-                      return 'N/A';
-                    })()}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-blue-600 dark:text-blue-400 font-medium">
-                    Weight per Package:
-                  </span>
-                  <br />
-                  <span className="font-bold text-orange-600 dark:text-orange-400">
-                    {(() => {
-                      const packagingData = prod.packagingHierarchyData?.dynamicFields;
-                      const weightPerPackage = packagingData?.weightPerPackage;
-                      if (weightPerPackage) {
-                        // Convert to grams for display since values are actually in grams
-                        return `${weightPerPackage} g`;
+                    });
+                  }
+                  
+                  // Display weight for each unit
+                  Array.from(allUnits).forEach(unit => {
+                    let weight = 'N/A';
+                    let weightUnit = 'g';
+                    
+                    // Try packagingPreview first
+                    if (prod.packagingPreview?.weights) {
+                      const weightValue = prod.packagingPreview.weights[unit];
+                      const unitValue = prod.packagingPreview.weights[unit + 'Unit'];
+                      if (weightValue) {
+                        weight = weightValue;
+                        weightUnit = unitValue || 'g';
                       }
-                      // Fallback to unitWeight only if weightUnitType is Package
-                      if (prod.weightUnitType === 'Package' && prod.unitWeight) {
-                        return `${prod.unitWeight} ${prod.unitWeightUnit || 'g'}`;
+                    }
+                    
+                    // Fallback to packagingHierarchyData
+                    if (weight === 'N/A' && prod.packagingHierarchyData?.dynamicFields) {
+                      const dynamicFields = prod.packagingHierarchyData.dynamicFields;
+                      const weightKey = `weightPer${unit}`;
+                      const unitKey = `${weightKey}Unit`;
+                      
+                      if (dynamicFields[weightKey]) {
+                        weight = dynamicFields[weightKey];
+                        weightUnit = dynamicFields[unitKey] || 'g';
                       }
-                      return 'N/A';
-                    })()}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-blue-600 dark:text-blue-400 font-medium">
-                    Weight per Box:
-                  </span>
-                  <br />
-                  <span className="font-bold text-purple-600 dark:text-purple-400">
-                    {(() => {
-                      const packagingData = prod.packagingHierarchyData?.dynamicFields;
-                      const weightPerBox = packagingData?.weightPerBox;
-                      if (weightPerBox) {
-                        // Convert to grams for display since values are actually in grams
-                        return `${weightPerBox} g`;
+                    }
+                    
+                    // Final fallback to unitWeight
+                    if (weight === 'N/A' && prod.weightUnitType === unit && prod.unitWeight) {
+                      weight = prod.unitWeight;
+                      weightUnit = prod.unitWeightUnit || 'g';
+                    }
+                    
+                    if (weight !== 'N/A') {
+                      displayItems.push(
+                        <div key={`weight-${unit}`}>
+                          <span className="text-blue-600 dark:text-blue-400 font-medium">
+                            Weight per {unit}:
+                          </span>
+                          <br />
+                          <span className="font-bold text-green-600 dark:text-green-400">
+                            {weight} {weightUnit}
+                          </span>
+                        </div>
+                      );
+                    }
+                  });
+                  
+                  // Display hierarchy relationships
+                  if (prod.packagingPreview?.hierarchy) {
+                    prod.packagingPreview.hierarchy.forEach((level, index) => {
+                      displayItems.push(
+                        <div key={`hierarchy-${index}`}>
+                          <span className="text-blue-600 dark:text-blue-400 font-medium">
+                            {level.from}/{level.to}:
+                          </span>
+                          <br />
+                          <span className="font-bold text-indigo-600 dark:text-indigo-400">
+                            {level.quantity}
+                          </span>
+                        </div>
+                      );
+                    });
+                  } else if (prod.packagingHierarchyData?.dynamicFields) {
+                    // Fallback to packagingHierarchyData for hierarchy
+                    const dynamicFields = prod.packagingHierarchyData.dynamicFields;
+                    Object.keys(dynamicFields).forEach(key => {
+                      if (key.includes('Per') && !key.startsWith('weight')) {
+                        const [from, to] = key.split('Per');
+                        displayItems.push(
+                          <div key={`hierarchy-${key}`}>
+                            <span className="text-blue-600 dark:text-blue-400 font-medium">
+                              {from}/{to}:
+                            </span>
+                            <br />
+                            <span className="font-bold text-indigo-600 dark:text-indigo-400">
+                              {dynamicFields[key]}
+                            </span>
+                          </div>
+                        );
                       }
-                      // Fallback to unitWeight only if weightUnitType is Box
-                      if (prod.weightUnitType === 'Box' && prod.unitWeight) {
-                        return `${prod.unitWeight} ${prod.unitWeightUnit || 'g'}`;
-                      }
-                      return 'N/A';
-                    })()}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-blue-600 dark:text-blue-400 font-medium">
-                    Pieces/Package:
-                  </span>
-                  <br />
-                  <span className="font-bold text-indigo-600 dark:text-indigo-400">
-                    {prod.packagingHierarchyData?.dynamicFields?.PiecesPerPackage ||
-                      'N/A'}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-blue-600 dark:text-blue-400 font-medium">
-                    Packages/Box:
-                  </span>
-                  <br />
-                  <span className="font-bold text-teal-600 dark:text-teal-400">
-                    {prod.packagingHierarchyData?.dynamicFields?.PackagePerBox ||
-                      'N/A'}
-                  </span>
-                </div>
+                    });
+                  }
+                  
+                  return displayItems.length > 0 ? displayItems : (
+                    <div className="col-span-5 text-center text-gray-500">
+                      No packaging information available
+                    </div>
+                  );
+                })()}
               </div>
             </div>
+
           </div>
         )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
