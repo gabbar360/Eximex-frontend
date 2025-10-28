@@ -110,7 +110,7 @@ export default function CompanyDetailsCard({
           <div className="flex items-center gap-4 mb-6">
             <div className="flex-shrink-0">
               <Image
-                src={`http://localhost:8000${companyData?.logo || '/uploads/logos/logo-1758172153913-500170623.webp'}`}
+                src={`${import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || 'http://localhost:8000'}${companyData?.logo || '/uploads/logos/logo-1758172153913-500170623.webp'}`}
                 alt="Company Logo"
                 width={96}
                 height={96}
@@ -318,9 +318,6 @@ export default function CompanyDetailsCard({
                     <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
                       Company Information
                     </h4>
-                    {/* <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Basic company details and contact information
-                    </p> */}
                   </div>
                 </div>
 
@@ -334,7 +331,7 @@ export default function CompanyDetailsCard({
                             src={
                               logoPreview.startsWith('http')
                                 ? logoPreview
-                                : `http://localhost:8000${logoPreview}`
+                                : `${import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || 'http://localhost:8000'}${logoPreview}`
                             }
                             alt="Logo Preview"
                             className="w-16 h-16 rounded-lg object-cover border border-gray-200 dark:border-gray-700"
