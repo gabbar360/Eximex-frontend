@@ -702,6 +702,38 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
     return totalUnits.toFixed(2);
   };
 
+  // Gross weight calculation using actual product data
+  const calculateGrossWeight = (productList: ProductData[]) => {
+    return productList.reduce((sum, product) => {
+      if (!product.productId) return sum;
+      
+      const prod = products.find(p => p?.id?.toString() === product.productId?.toString());
+      let boxes = 0;
+      
+      // Calculate boxes based on unit
+      if (product.unit === 'Box' || product.unit === 'box') {
+        boxes = product.quantity;
+      } else if (product.unit === 'pcs') {
+        boxes = product.quantity / 2000; // 50 pcs/pack × 40 pack/box
+      } else if (product.unit === 'package') {
+        boxes = product.quantity / 40; // 40 packages per box
+      } else {
+        boxes = product.quantity; // fallback assume it's boxes
+      }
+      
+      // Get gross weight per box from product data
+      let grossWeightPerBox = prod?.packagingHierarchyData?.dynamicFields?.grossWeightPerBox || 
+                             prod?.grossWeightPerBox || 10.06;
+      
+      // Convert to KG if in grams
+      if (grossWeightPerBox > 100) {
+        grossWeightPerBox = grossWeightPerBox / 1000; // Convert grams to KG
+      }
+      
+      return sum + (boxes * grossWeightPerBox);
+    }, 0);
+  };
+
   const calculateTotalWeight = (
     productId: string,
     quantity: string,
@@ -1449,6 +1481,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         portOfLoading,
         portOfDischarge,
         finalDestination,
+        totalGrossWeight: calculateGrossWeight(formData.productsData),
         status: 'draft',
         products: formData.productsData.map((product) => ({
           productId: product.productId ? parseInt(product.productId) : null,
@@ -1519,10 +1552,10 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         placeOfReceipt,
         countryOfOrigin,
         countryOfDestination,
-
         portOfLoading,
         portOfDischarge,
         finalDestination,
+        totalGrossWeight: calculateGrossWeight(formData.productsData),
         status: isFormComplete() ? 'pending' : 'draft',
         products: formData.productsData.map((product) => ({
           productId: parseInt(product.productId),
@@ -2635,7 +2668,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                 <tfoot>
                   <tr className="bg-gray-50 dark:bg-gray-800 font-semibold text-gray-900 dark:text-gray-200">
                     <td colSpan={5} className="text-right px-3 py-2">
-                      Total Weight:
+                      Net Weight:
                     </td>
                     <td className="text-right px-3 py-2">
                       {productsData
@@ -2655,6 +2688,17 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                     <td className="text-right px-3 py-2">Subtotal:</td>
                     <td className="text-right px-3 py-2">
                       {formatCurrency(subtotal)}
+                    </td>
+                  </tr>
+                  <tr className="bg-blue-50 dark:bg-blue-800 font-semibold text-blue-900 dark:text-blue-200">
+                    <td colSpan={5} className="text-right px-3 py-2">
+                      Gross Weight:
+                    </td>
+                    <td className="text-right px-3 py-2">
+                      {calculateGrossWeight(productsData).toFixed(2)} KG
+                    </td>
+                    <td colSpan={2} className="text-center px-3 py-2 text-sm">
+                      (Net + Packaging)
                     </td>
                   </tr>
                 </tfoot>
@@ -3620,7 +3664,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                               colSpan={4}
                               className="px-3 py-2 text-right font-semibold text-gray-900 dark:text-gray-100"
                             >
-                              Totals:
+                              Net Weight:
                             </td>
                             <td className="px-3 py-2 text-right font-semibold text-gray-900 dark:text-gray-100">
                               {getCurrentTotals().weight.toFixed(2)} KG
@@ -3635,6 +3679,20 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                                 currency
                               )}
                             </td>
+                            <td className="px-3 py-2"></td>
+                          </tr>
+                          <tr>
+                            <td
+                              colSpan={4}
+                              className="px-3 py-2 text-right font-semibold text-gray-900 dark:text-gray-100"
+                            >
+                              Gross Weight:
+                            </td>
+                            <td className="px-3 py-2 text-right font-semibold text-blue-600 dark:text-blue-400">
+                              {calculateGrossWeight(addedProducts).toFixed(2)} KG
+                            </td>
+                            <td className="px-3 py-2"></td>
+                            <td className="px-3 py-2"></td>
                             <td className="px-3 py-2"></td>
                           </tr>
                           {/* Container and CBM calculations commented out as requested
