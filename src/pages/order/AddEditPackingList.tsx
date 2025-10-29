@@ -420,46 +420,84 @@ const AddEditPackingList = () => {
     packedQuantity,
     productData
   ) => {
-    if (!packedQuantity || !productData || !productData.product) {
+    if (!packedQuantity || !productData) {
       return;
     }
 
     const qty = parseFloat(packedQuantity);
-    const product = productData.product;
-
-    // Get packaging hierarchy data
-    const packagingData = product.packagingHierarchyData?.dynamicFields || {};
-    const piecesPerPackage = packagingData.PiecesPerPackage || 50; // Default from your data
-    const packagePerBox = packagingData.PackagePerBox || 40; // Default from your data
-    const unitWeight = product.unitWeight || 7; // Weight per piece in grams
-    const packagingWeight = product.packagingMaterialWeight || 700; // Packaging weight in grams
-
-    // Calculate boxes needed
-    const piecesPerBox = piecesPerPackage * packagePerBox;
-    const boxesNeeded = Math.ceil(qty / piecesPerBox);
-
-    // Calculate net weight (product weight only)
-    const netWeightGrams = qty * unitWeight;
-    const netWeightKg = netWeightGrams / 1000;
-
-    // Calculate gross weight (net weight + packaging)
-    const packagingWeightTotal = boxesNeeded * packagingWeight;
-    const grossWeightGrams = netWeightGrams + packagingWeightTotal;
-    const grossWeightKg = grossWeightGrams / 1000;
-
-    // Calculate volume if available
+    const unit = productData.unit || 'Box';
+    
+    // Get current product from containers
+    const currentProduct = packagingList.containers[containerIndex].products[productIndex];
+    
+    let boxesNeeded = 1;
+    let netWeightKg = 0;
+    let grossWeightKg = 0;
     let volumeM3 = 0;
-    if (product.packagingVolume) {
-      volumeM3 = boxesNeeded * product.packagingVolume;
+
+    // Calculate based on unit type
+    if (unit.toLowerCase() === 'box') {
+      // If unit is Box, then packed quantity is number of boxes
+      boxesNeeded = qty;
+      
+      // Calculate weight from PI data
+      const totalWeightFromPI = productData.totalWeight || 0; // Net weight in kg from PI
+      const piQuantity = productData.quantity || 1;
+      
+      // Calculate per box net weight
+      const netWeightPerBox = totalWeightFromPI / piQuantity;
+      netWeightKg = qty * netWeightPerBox;
+      
+      // Get gross weight from product data (in grams, convert to kg)
+      const product = productData.product || productData;
+      const grossWeightPerBoxGrams = product.grossWeightPerBox || product.totalGrossWeight || 0;
+      const grossWeightPerBoxKg = grossWeightPerBoxGrams / 1000; // Convert grams to kg
+      
+      if (grossWeightPerBoxKg > 0) {
+        grossWeightKg = qty * grossWeightPerBoxKg;
+      } else {
+        // Fallback: use net weight + 10% packaging
+        grossWeightKg = netWeightKg * 1.1;
+      }
+      
+    } else {
+      // If unit is Pcs, calculate boxes needed
+      const product = productData.product || productData;
+      const packagingData = product.packagingHierarchyData?.dynamicFields || {};
+      const piecesPerPackage = packagingData.PiecesPerPackage || 50;
+      const packagePerBox = packagingData.PackagePerBox || 40;
+      const unitWeight = product.unitWeight || 8; // Weight per piece in grams
+      
+      const piecesPerBox = piecesPerPackage * packagePerBox;
+      boxesNeeded = Math.ceil(qty / piecesPerBox);
+      
+      // Calculate net weight (product weight only)
+      const netWeightGrams = qty * unitWeight;
+      netWeightKg = netWeightGrams / 1000;
+      
+      // Calculate gross weight (net weight + packaging)
+      const packagingWeightPerBox = 700; // grams
+      const packagingWeightTotal = boxesNeeded * packagingWeightPerBox;
+      const grossWeightGrams = netWeightGrams + packagingWeightTotal;
+      grossWeightKg = grossWeightGrams / 1000;
     }
 
-    console.log('📊 Auto-calculation for', product.name, ':', {
+    // Calculate volume if available
+    const product = productData.product || productData;
+    if (product.packagingVolume) {
+      volumeM3 = boxesNeeded * product.packagingVolume;
+    } else {
+      // Default volume calculation (0.0055 m³ per box as shown in your data)
+      volumeM3 = boxesNeeded * 0.0055;
+    }
+
+    console.log('📊 Auto-calculation for', productData.productName || productData.name, ':', {
       packedQuantity: qty,
-      piecesPerPackage,
-      packagePerBox,
-      piecesPerBox,
+      unit: unit,
       boxesNeeded,
-      unitWeight: unitWeight + 'g',
+      piTotalWeight: productData.totalWeight,
+      piTotalGrossWeight: productData.totalGrossWeight,
+      productData: productData,
       netWeightKg: netWeightKg.toFixed(2) + 'kg',
       grossWeightKg: grossWeightKg.toFixed(2) + 'kg',
       volumeM3: volumeM3.toFixed(4) + 'm³',
@@ -473,9 +511,7 @@ const AddEditPackingList = () => {
     productToUpdate.noOfBoxes = boxesNeeded.toString();
     productToUpdate.netWeight = netWeightKg.toFixed(2);
     productToUpdate.grossWeight = grossWeightKg.toFixed(2);
-    if (volumeM3 > 0) {
-      productToUpdate.measurement = volumeM3.toFixed(4);
-    }
+    productToUpdate.measurement = volumeM3.toFixed(4);
 
     const calculatedData = calculateTotals({
       ...packagingList,
@@ -899,6 +935,13 @@ const AddEditPackingList = () => {
                                       selectedProduct.qty ||
                                       ''
                                   );
+                                  // Store unit information
+                                  updateProductInContainer(
+                                    containerIndex,
+                                    productIndex,
+                                    'unit',
+                                    selectedProduct.unit || 'Box'
+                                  );
                                   // Auto-populate HSN code
                                   const hsnCode =
                                     selectedProduct.category?.hsnCode ||
@@ -938,6 +981,7 @@ const AddEditPackingList = () => {
                                   `Product ${idx + 1}`;
                                 const quantity =
                                   piProduct.quantity || piProduct.qty || '';
+                                const unit = piProduct.unit || 'Box';
                                 const unitWeight =
                                   piProduct.product?.unitWeight || 0;
                                 const hsnCode =
@@ -946,7 +990,7 @@ const AddEditPackingList = () => {
                                   '';
                                 return (
                                   <option key={idx} value={productName}>
-                                    {productName} (Qty: {quantity}, {unitWeight}
+                                    {productName} (Qty: {quantity} {unit}, {unitWeight}
                                     g/pc, HSN: {hsnCode})
                                   </option>
                                 );
@@ -973,36 +1017,42 @@ const AddEditPackingList = () => {
                           <div>
                             <Label>PI Quantity ➡️ Packed</Label>
                             <div className="flex items-center gap-2">
-                              <InputField
-                                type="text"
-                                value={product.quantity}
-                                readOnly
-                                className="bg-gray-100 dark:bg-gray-800 flex-1"
-                                placeholder="PI Qty"
-                              />
+                              <div className="flex-1">
+                                <InputField
+                                  type="text"
+                                  value={`${product.quantity || ''} ${product.unit || 'Box'}`}
+                                  readOnly
+                                  className="bg-gray-100 dark:bg-gray-800"
+                                  placeholder="PI Qty"
+                                />
+                              </div>
                               <span className="text-gray-500">➡️</span>
-                              <InputField
-                                type="number"
-                                value={product.packedQuantity || ''}
-                                onChange={(e) => {
-                                  const packedQty = e.target.value;
-                                  updateProductInContainer(
-                                    containerIndex,
-                                    productIndex,
-                                    'packedQuantity',
-                                    packedQty
-                                  );
-                                  // Auto-calculate based on packed quantity
-                                  calculateProductValues(
-                                    containerIndex,
-                                    productIndex,
-                                    packedQty,
-                                    product.productData
-                                  );
-                                }}
-                                placeholder="Packed"
-                                className="flex-1"
-                              />
+                              <div className="flex-1">
+                                <InputField
+                                  type="number"
+                                  value={product.packedQuantity || ''}
+                                  onChange={(e) => {
+                                    const packedQty = e.target.value;
+                                    updateProductInContainer(
+                                      containerIndex,
+                                      productIndex,
+                                      'packedQuantity',
+                                      packedQty
+                                    );
+                                    // Auto-calculate based on packed quantity
+                                    calculateProductValues(
+                                      containerIndex,
+                                      productIndex,
+                                      packedQty,
+                                      product.productData
+                                    );
+                                  }}
+                                  placeholder="Packed"
+                                />
+                                <div className="text-xs text-gray-500 mt-1">
+                                  Unit: {product.unit || 'Box'}
+                                </div>
+                              </div>
                             </div>
                             {product.quantity && product.packedQuantity && (
                               <div
@@ -1032,22 +1082,7 @@ const AddEditPackingList = () => {
                               </div>
                             )}
                           </div>
-                          <div>
-                            <Label>No of Boxes</Label>
-                            <InputField
-                              type="number"
-                              value={product.noOfBoxes}
-                              onChange={(e) =>
-                                updateProductInContainer(
-                                  containerIndex,
-                                  productIndex,
-                                  'noOfBoxes',
-                                  e.target.value
-                                )
-                              }
-                              placeholder="Enter number of boxes"
-                            />
-                          </div>
+
                           <div>
                             <Label>Net Weight (kg)</Label>
                             <InputField
@@ -1187,6 +1222,9 @@ const AddEditPackingList = () => {
                         Boxes
                       </th>
                       <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right text-sm font-medium">
+                        Unit Wt (kg)
+                      </th>
+                      <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right text-sm font-medium">
                         Net Wt (kg)
                       </th>
                       <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right text-sm font-medium">
@@ -1226,10 +1264,20 @@ const AddEditPackingList = () => {
                             {product.hsnCode || '-'}
                           </td>
                           <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right">
-                            {product.packedQuantity || product.quantity || '-'}
+                            {product.packedQuantity ? `${product.packedQuantity} ${product.unit || 'Box'}` : (product.quantity ? `${product.quantity} ${product.unit || 'Box'}` : '-')}
                           </td>
                           <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right">
-                            {product.noOfBoxes || '-'}
+                            {product.unit && product.unit.toLowerCase() === 'box' 
+                              ? (product.packedQuantity || product.quantity || '-')
+                              : (product.noOfBoxes || '-')
+                            }
+                          </td>
+                          <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right">
+                            {(() => {
+                              const boxes = parseFloat(product.noOfBoxes || (product.unit && product.unit.toLowerCase() === 'box' ? (product.packedQuantity || product.quantity) : 0));
+                              const netWeight = parseFloat(product.netWeight || 0);
+                              return boxes > 0 && netWeight > 0 ? (netWeight / boxes).toFixed(2) : '-';
+                            })()}
                           </td>
                           <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right">
                             {product.netWeight || '-'}
@@ -1248,7 +1296,7 @@ const AddEditPackingList = () => {
                     ) && (
                       <tr>
                         <td
-                          colSpan={8}
+                          colSpan={9}
                           className="border border-gray-300 dark:border-gray-600 px-3 py-8 text-center text-gray-500"
                         >
                           No products added yet. Add products to containers to
@@ -1267,6 +1315,14 @@ const AddEditPackingList = () => {
                       </td>
                       <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right font-semibold">
                         {packagingList.totalBoxes}
+                      </td>
+                      <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right font-semibold">
+                        {(() => {
+                          const avgUnitWeight = packagingList.totalBoxes > 0 && packagingList.totalNetWeight > 0 
+                            ? (packagingList.totalNetWeight / packagingList.totalBoxes).toFixed(2) 
+                            : '-';
+                          return avgUnitWeight;
+                        })()}
                       </td>
                       <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right font-semibold">
                         {packagingList.totalNetWeight}
