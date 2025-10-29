@@ -110,7 +110,7 @@ export default function CompanyDetailsCard({
           <div className="flex items-center gap-4 mb-6">
             <div className="flex-shrink-0">
               <Image
-                src={companyData?.logo ? `${import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || window.location.origin}${companyData.logo}` : `${import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || window.location.origin}/uploads/logos/logo-1760687264518-14262321.jpg`}
+                src={companyData?.logo ? `${import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || window.location.origin}${companyData.logo}` : '/images/default-company-logo.png'}
                 alt="Company Logo"
                 width={96}
                 height={96}
@@ -121,7 +121,8 @@ export default function CompanyDetailsCard({
                   ),
                 }}
                 onError={(e) => {
-                  e.currentTarget.src = `${import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || window.location.origin}/uploads/logos/logo-1760687264518-14262321.jpg`;
+                  e.currentTarget.src = '/images/default-company-logo.png';
+                  e.currentTarget.onerror = null; // Prevent infinite loop
                 }}
               />
             </div>
