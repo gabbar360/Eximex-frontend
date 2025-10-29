@@ -136,4 +136,38 @@ export const userService = {
     const response = await axiosInstance.get('/super-admin/dashboard/stats');
     return response.data.data;
   },
+
+  // Enhanced Super Admin functions
+  getAllDatabaseData: async (params = {}) => {
+    const response = await axiosInstance.get('/super-admin/database/all-data', { params });
+    return response.data.data;
+  },
+
+  resetUserPassword: async (userId, passwordData) => {
+    const response = await axiosInstance.patch(
+      `/super-admin/users/${userId}/reset-password`,
+      passwordData
+    );
+    return { message: response.data.message };
+  },
+
+  getAllCompanies: async (params = {}) => {
+    const response = await axiosInstance.get('/super-admin/companies', { params });
+    return response.data.data;
+  },
+
+  getCompanyDetails: async (companyId) => {
+    const response = await axiosInstance.get(`/super-admin/companies/${companyId}`);
+    return response.data.data;
+  },
+
+  getAllTables: async () => {
+    const response = await axiosInstance.get('/super-admin/database/tables');
+    return response.data.data;
+  },
+
+  getTableData: async (tableName, params = {}) => {
+    const response = await axiosInstance.get(`/super-admin/database/tables/${tableName}`, { params });
+    return response.data.data;
+  },
 };

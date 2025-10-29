@@ -10,9 +10,8 @@ import { useSelector } from 'react-redux';
 
 const LayoutContent: React.FC = () => {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
-  const isProfileComplete = useSelector(
-    (state: any) => state.user.user.companyId
-  );
+  const user = useSelector((state: any) => state.user.user);
+  const isProfileComplete = user?.companyId || user?.role === 'SUPER_ADMIN';
 
   return (
     <div className="min-h-screen xl:flex">

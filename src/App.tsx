@@ -58,6 +58,9 @@ import StaffManagement from './components/StaffManagement';
 import ActivityLogComponent from './components/ActivityLog';
 import RoleBasedDashboard from './components/RoleBasedDashboard';
 import UserManagement from './pages/SuperAdmin/UserManagement';
+import SuperAdminDashboard from './pages/SuperAdmin/SuperAdminDashboard';
+import PasswordManagement from './pages/SuperAdmin/PasswordManagement';
+import CompanyManagement from './pages/SuperAdmin/CompanyManagement';
 import PurchaseOrders from './pages/PO/PurchaseOrders';
 import AddEditPurchaseOrderForm from './pages/PO/AddEditPurchaseOrderForm';
 import PaymentTracking from './pages/PaymentTracking';
@@ -142,6 +145,9 @@ function AppContent() {
           <Route path="/staff-management" element={<StaffManagement />} />
           <Route path="/activity-logs" element={<ActivityLogComponent />} />
           <Route path="/super-admin/users" element={<UserManagement />} />
+          <Route path="/super-admin/dashboard" element={<SuperAdminDashboard />} />
+          <Route path="/super-admin/passwords" element={<PasswordManagement />} />
+          <Route path="/super-admin/companies" element={<CompanyManagement />} />
           <Route path="/payments" element={<PaymentTracking />} />
 
           <Route path="/calendar" element={<Calendar />} />
