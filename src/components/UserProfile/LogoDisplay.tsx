@@ -38,7 +38,7 @@ const LogoDisplay: React.FC<LogoDisplayProps> = ({
 
   const fullUrl = logoUrl.startsWith('http')
     ? logoUrl
-    : `http://localhost:8000${logoUrl}`;
+    : `${window.location.origin}${logoUrl}`;
   console.log('Logo URL constructed:', { logoUrl, fullUrl });
 
   return (
