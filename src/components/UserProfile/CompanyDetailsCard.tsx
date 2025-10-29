@@ -110,7 +110,7 @@ export default function CompanyDetailsCard({
           <div className="flex items-center gap-4 mb-6">
             <div className="flex-shrink-0">
               <Image
-                src={companyData?.logo ? `${import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || window.location.origin}${companyData.logo}` : '/uploads/logos/logo-1758172153913-500170623.webp'}
+                src={companyData?.logo ? `${import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || window.location.origin}${companyData.logo}` : `${import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || window.location.origin}/uploads/logos/logo-1760687264518-14262321.jpg`}
                 alt="Company Logo"
                 width={96}
                 height={96}
@@ -121,10 +121,7 @@ export default function CompanyDetailsCard({
                   ),
                 }}
                 onError={(e) => {
-                  console.log('Company logo failed to load:', companyData?.logo);
-                  console.log('Environment VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL);
-                  console.log('Window origin:', window.location.origin);
-                  console.log('Final URL:', companyData?.logo ? `${import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || window.location.origin}${companyData.logo}` : 'fallback');
+                  e.currentTarget.src = `${import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || window.location.origin}/uploads/logos/logo-1760687264518-14262321.jpg`;
                 }}
               />
             </div>
@@ -341,11 +338,7 @@ export default function CompanyDetailsCard({
                             }
                             alt="Logo Preview"
                             className="w-16 h-16 rounded-lg object-cover border border-gray-200 dark:border-gray-700"
-                            onError={(e) => {
-                              console.log('Logo preview failed to load:', logoPreview);
-                              console.log('Environment VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL);
-                              console.log('Window origin:', window.location.origin);
-                            }}
+                            onError={() => {}}
                           />
                         ) : (
                           <div className="w-16 h-16 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center border border-gray-200 dark:border-gray-700">
