@@ -1216,10 +1216,10 @@ const AddEditPackingList = () => {
                         HSN Code
                       </th>
                       <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right text-sm font-medium">
-                        Quantity
+                        Unit
                       </th>
                       <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right text-sm font-medium">
-                        Boxes
+                        Quantity
                       </th>
                       <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right text-sm font-medium">
                         Unit Wt (kg)
@@ -1264,7 +1264,7 @@ const AddEditPackingList = () => {
                             {product.hsnCode || '-'}
                           </td>
                           <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right">
-                            {product.packedQuantity ? `${product.packedQuantity} ${product.unit || 'Box'}` : (product.quantity ? `${product.quantity} ${product.unit || 'Box'}` : '-')}
+                            {product.unit || 'Box'}
                           </td>
                           <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right">
                             {product.unit && product.unit.toLowerCase() === 'box' 
