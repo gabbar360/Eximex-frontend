@@ -6,9 +6,9 @@ import Input from '../form/input/InputField';
 import Checkbox from '../form/input/Checkbox';
 import Button from '../ui/button/Button';
 import { FcGoogle } from 'react-icons/fc';
-import authService from '../../service/authService.js';
 import { useDispatch } from 'react-redux';
-import { setUser } from '../../features/userSlice.js';
+import { loginUser } from '../../features/authSlice';
+import authService from '../../service/authService';
 import { toast } from 'react-toastify';
 
 export default function SignInForm() {
@@ -23,10 +23,9 @@ export default function SignInForm() {
   const handleLogin = async () => {
     setIsSubmitting(true);
     try {
-      const data = await authService.login(email, password);
-      dispatch(setUser(data.data.user));
+      const data = await dispatch(loginUser({ email, password })).unwrap();
       toast.success(data.message);
-      navigate('/admin/dashboard');
+      navigate('/dashboard');
     } catch (err) {
       toast.error(err.message);
     } finally {

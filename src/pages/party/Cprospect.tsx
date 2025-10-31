@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { getAllParties, deleteParty } from '../../service/partyService';
+import { fetchParties, deleteParty } from '../../features/partySlice';
+import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom'; // ✅ Correct import
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faEye, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 
 const Cprospect = () => {
+  const dispatch = useDispatch();
   const [parties, setParties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,9 +17,9 @@ const Cprospect = () => {
   const itemsPerPage = 10;
 
   useEffect(() => {
-    const fetchParties = async () => {
+    const loadParties = async () => {
       try {
-        const response = await getAllParties();
+        const response = await dispatch(fetchParties()).unwrap();
         setParties(response?.data || []);
       } catch (err) {
         setError('Failed to fetch parties');
@@ -25,8 +27,8 @@ const Cprospect = () => {
         setLoading(false);
       }
     };
-    fetchParties();
-  }, []);
+    loadParties();
+  }, [dispatch]);
 
   const handleDeleteClick = (id) => {
     setConfirmDelete(id);
@@ -36,7 +38,7 @@ const Cprospect = () => {
     if (!confirmDelete) return;
 
     try {
-      const response = await deleteParty(confirmDelete);
+      const response = await dispatch(deleteParty(confirmDelete)).unwrap();
       setParties((prev) => prev.filter((p) => p.id !== confirmDelete));
       setConfirmDelete(null);
 

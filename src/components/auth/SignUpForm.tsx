@@ -9,7 +9,6 @@ import Label from '../form/Label';
 import Input from '../form/input/InputField';
 import Checkbox from '../form/input/Checkbox';
 import GoogleSignInButton from './GoogleSignInButton';
-import authService from '../../service/authService.js';
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -40,7 +39,7 @@ export default function SignUpForm() {
   ) => {
     try {
       setStatus(null);
-      const response = await authService.register(values);
+      const response = await // TODO: Use Redux registerUser action(values);
       toast.success(response.message);
       navigate('/signin');
     } catch (err) {

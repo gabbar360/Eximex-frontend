@@ -1,5 +1,6 @@
+import { useDispatch, useSelector } from 'react-redux';
 import React, { useState, useEffect } from 'react';
-import { userService } from '../../service/userService';
+import { getSuperAdminDashboardStats, getAllDatabaseData } from '../../features/userSlice';
 import { toast } from 'react-toastify';
 
 interface DashboardStats {
@@ -42,9 +43,11 @@ const SuperAdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedTable, setSelectedTable] = useState('users');
 
+  const dispatch = useDispatch();
+
   const fetchDashboardStats = async () => {
     try {
-      const response = await userService.getSuperAdminDashboardStats();
+      const response = await dispatch(getSuperAdminDashboardStats()).unwrap();
       setStats(response);
     } catch (error) {
       toast.error('Failed to fetch dashboard stats');
@@ -54,7 +57,7 @@ const SuperAdminDashboard: React.FC = () => {
 
   const fetchDatabaseData = async () => {
     try {
-      const response = await userService.getAllDatabaseData({ limit: 50, page: 1 });
+      const response = await dispatch(getAllDatabaseData({ limit: 50, page: 1 })).unwrap();
       setDatabaseData(response);
     } catch (error) {
       toast.error('Failed to fetch database data');

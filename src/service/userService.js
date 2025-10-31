@@ -171,3 +171,5 @@ export const userService = {
     return response.data.data;
   },
 };
+
+export default userService;

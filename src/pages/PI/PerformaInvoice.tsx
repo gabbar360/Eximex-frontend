@@ -1,3 +1,4 @@
+import { useDispatch, useSelector } from 'react-redux';
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -413,32 +414,38 @@ const PerformaInvoice: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [loading, setLoading] = useState<boolean>(true);
   const [deleting, setDeleting] = useState<boolean>(false);
+  const fetchPiInvoicesData = async () => {
+    try {
+      setLoading(true);
+      const response = await getAllPiInvoices();
+      
+      if (response && response.piInvoices && Array.isArray(response.piInvoices)) {
+        setPiList(response.piInvoices);
+      } else if (Array.isArray(response)) {
+        setPiList(response);
+      } else {
+        setPiList([]);
+      }
+    } catch (error) {
+      console.error('Error fetching PI invoices:', error);
+      setPiList([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchPiInvoices = async () => {
-      try {
-        setLoading(true);
-        const response = await getAllPiInvoices();
-        console.log('API Response:', response); // Debug log
+    fetchPiInvoicesData();
+  }, []);
 
-        // Based on the piService.js, the response is already data.data
-        if (response && response.piInvoices) {
-          setPiList(response.piInvoices);
-        } else if (Array.isArray(response)) {
-          setPiList(response);
-        } else {
-          console.error('Unexpected API response structure:', response);
-          toast.error('Invalid data format received from server');
-        }
-      } catch (error) {
-        console.error('Error fetching PI invoices:', error);
-        toast.error('Failed to load Proforma Invoices');
-      } finally {
-        setLoading(false);
-      }
+  // Add refresh function for when returning from add/edit
+  useEffect(() => {
+    const handleFocus = () => {
+      fetchPiInvoicesData();
     };
-
-    fetchPiInvoices();
+    
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
   }, []);
 
   // Debug the piList

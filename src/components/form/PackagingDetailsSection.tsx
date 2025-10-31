@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import Label from './Label';
 import Select from './Select';
 import Input from './input/InputField';
-import { getAllPackagingUnits } from '../../service/packagingService';
+import { fetchAllPackagingUnits } from '../../features/packagingSlice';
+import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
 interface PackagingLevel {

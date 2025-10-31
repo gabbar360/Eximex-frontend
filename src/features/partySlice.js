@@ -12,6 +12,17 @@ export const fetchParties = createAsyncThunk(
   }
 );
 
+export const fetchPartyById = createAsyncThunk(
+  'party/fetchPartyById',
+  async (id, { rejectWithValue }) => {
+    try {
+      return await partyService.getPartyById(id);
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
 export const addParty = createAsyncThunk(
   'party/addParty',
   async (party, { rejectWithValue }) => {

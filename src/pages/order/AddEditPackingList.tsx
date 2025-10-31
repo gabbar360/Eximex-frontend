@@ -1,3 +1,4 @@
+import { useDispatch, useSelector } from 'react-redux';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -8,9 +9,12 @@ import {
   faTrash,
 } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
-import orderService from '../../service/orderService';
-import packingListService from '../../service/packingListService';
-import piService from '../../service/piService';
+import { getOrderById, updateOrder } from '../../features/orderSlice';
+import { getPiInvoiceById } from '../../features/piSlice';
+import { getPackingListById, updatePackingList, createPackingList } from '../../features/packingListSlice';
+
+
+
 import PageBreadCrumb from '../../components/common/PageBreadCrumb';
 import InputField from '../../components/form/input/InputField';
 import TextArea from '../../components/form/input/TextArea';
@@ -20,6 +24,7 @@ import DatePicker from '../../components/form/DatePicker';
 const AddEditPackingList = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
   const [orderDetails, setOrderDetails] = useState(null);
   const [piProducts, setPiProducts] = useState([]);
@@ -68,7 +73,7 @@ const AddEditPackingList = () => {
   const fetchOrderDetails = async () => {
     try {
       setLoading(true);
-      const response = await orderService.getOrderById(id);
+      const response = await dispatch(getOrderById(id)).unwrap();
       const order = response.data || response; // Handle both response formats
 
       console.log('🔍 Order Details Loaded:', {
@@ -96,7 +101,7 @@ const AddEditPackingList = () => {
 
   const fetchPIProducts = async (piId) => {
     try {
-      const response = await piService.getPiInvoiceById(piId);
+      const response = await dispatch(getPiInvoiceById(piId)).unwrap();
       const piDataResponse = response.data || response;
       setPiData(piDataResponse);
 
@@ -161,7 +166,7 @@ const AddEditPackingList = () => {
       );
 
       const rawPackingResponse =
-        await packingListService.getPackingListById(packingId);
+        await dispatch(getPackingListById(packingId)).unwrap();
       const rawPackingData = rawPackingResponse.data || rawPackingResponse;
 
       let containerData = [];
@@ -596,15 +601,15 @@ const AddEditPackingList = () => {
 
       if (hasExistingData) {
         const updateId = packagingList.id || orderDetails.piInvoiceId;
-        const result = await packingListService.updatePackingList(
-          updateId,
-          packagingData
-        );
+        const result = await dispatch(updatePackingList({
+          id: updateId,
+          packingData: packagingData
+        })).unwrap();
         toast.success(result.message);
       } else {
         try {
           const result =
-            await packingListService.createPackingList(packagingData);
+            await dispatch(createPackingList(packagingData)).unwrap();
           const createdId = result.data?.id || result.data;
 
           setPackagingList((prev) => ({
@@ -616,9 +621,10 @@ const AddEditPackingList = () => {
           // Update order with packingListId for future updates
           if (createdId && orderDetails?.id) {
             try {
-              await orderService.updateOrder(orderDetails.id, {
-                packingListId: createdId,
-              });
+              await dispatch(updateOrder({
+                id: orderDetails.id,
+                data: { packingListId: createdId }
+              })).unwrap();
               console.log('✅ Order updated with packingListId:', createdId);
 
               // Update local orderDetails state
@@ -638,10 +644,10 @@ const AddEditPackingList = () => {
         } catch (createError) {
           if (createError.response?.data?.existingPackingListId) {
             const existingId = createError.response.data.existingPackingListId;
-            const updateResult = await packingListService.updatePackingList(
-              existingId,
-              packagingData
-            );
+            const updateResult = await dispatch(updatePackingList({
+              id: existingId,
+              packingData: packagingData
+            })).unwrap();
             setPackagingList((prev) => ({
               ...prev,
               id: existingId,

@@ -1,7 +1,8 @@
+import { useDispatch, useSelector } from 'react-redux';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import authService from '../../service/authService';
+
 import { handleAxiosError } from '../../utils/handleAxiosError';
 
 const ForgotPassword: React.FC = () => {
@@ -19,7 +20,7 @@ const ForgotPassword: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const response = await authService.forgotPassword(email);
+      const response = await dispatch(forgotPassword(email)).unwrap();
       toast.success(
         response.message || 'Password reset link sent to your email address'
       );

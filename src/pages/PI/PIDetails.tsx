@@ -17,11 +17,14 @@ import {
   updatePiInvoice,
   downloadPiInvoicePdf,
 } from '../../service/piService';
+import { useDispatch } from 'react-redux';
+import { updatePiAmount } from '../../features/piSlice';
 import EmailInvoiceModal from '../../components/EmailInvoiceModal';
 
 const PIDetails: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [piData, setPiData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showPayment, setShowPayment] = useState(false);
@@ -74,37 +77,23 @@ const PIDetails: React.FC = () => {
         setPiData(updatedData);
         console.log('After update - piData:', updatedData);
 
-        // Force update totalAmount and advanceAmount in backend
+        // Update totalAmount and advanceAmount in backend using Redux
         try {
           console.log(
-            'Force updating totalAmount and advanceAmount in backend:',
+            'Updating totalAmount and advanceAmount in backend:',
             {
               totalAmount: updatedTotalAmount,
               advanceAmount: payment,
             }
           );
-          // Use a direct API call to update totalAmount and advanceAmount
-          const response = await fetch(
-            `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:8000'}/api/v1/${id}/update-amount`,
-            {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-              },
-              body: JSON.stringify({
-                totalAmount: updatedTotalAmount,
-                advanceAmount: payment,
-              }),
+          await dispatch(updatePiAmount({
+            id,
+            amountData: {
+              totalAmount: updatedTotalAmount,
+              advanceAmount: payment,
             }
-          );
-
-          if (!response.ok) {
-            throw new Error('Failed to update amount');
-          }
-
-          const backendResponse = await response.json();
-          console.log('Backend amount update response:', backendResponse);
+          })).unwrap();
+          console.log('Backend amount update successful');
         } catch (backendError) {
           console.error('Backend amount update failed:', backendError);
           // Fallback to regular update

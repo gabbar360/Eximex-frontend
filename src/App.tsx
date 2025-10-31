@@ -36,6 +36,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import PublicRoute from './components/auth/PublicRoute';
 import { useEffect, useState } from 'react';
 import { setUser } from './features/userSlice';
+import { getCurrentUser } from './features/authSlice';
 import authService from './service/authService';
 import Cprospect from '../src/pages/party/Cprospect';
 import AddEditPartyForm from './pages/party/AddEditPartyForm';
@@ -201,7 +202,7 @@ export default function App() {
           // Only fetch user if not already set from Google callback
           if (!googleCallback.userData) {
             // Try to get current user, which will trigger token refresh if needed
-            const res = await authService.getCurrentUser();
+            const res = await dispatch(getCurrentUser()).unwrap();
             if (res?.data) {
               dispatch(setUser(res.data));
             }

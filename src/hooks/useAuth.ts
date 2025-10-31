@@ -1,8 +1,8 @@
+import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
-import authService from '../service/authService';
 import { setUser, clearUser } from '../features/userSlice';
 
 export const useAuth = () => {
@@ -12,7 +12,7 @@ export const useAuth = () => {
 
   const logout = async () => {
     try {
-      const response = await authService.logout();
+      const response = await dispatch(logout()).unwrap();
       dispatch(clearUser());
       toast.success(response.message);
       navigate('/signin');
@@ -24,7 +24,7 @@ export const useAuth = () => {
 
   const fetchCurrentUser = async () => {
     try {
-      const userData = await authService.getCurrentUser();
+      const userData = await dispatch(getCurrentUser()).unwrap();
       if (userData?.data) {
         dispatch(setUser(userData.data));
         return userData.data;

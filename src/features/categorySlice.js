@@ -46,6 +46,19 @@ export const deleteCategory = createAsyncThunk(
   }
 );
 
+export const getCategoryById = createAsyncThunk(
+  'category/getCategoryById',
+  async (id, { rejectWithValue }) => {
+    try {
+      return await categoryService.getCategoryById(id);
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
+export const getAllCategories = fetchCategories;
+
 const categorySlice = createSlice({
   name: 'category',
   initialState: {

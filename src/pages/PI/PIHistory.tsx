@@ -6,7 +6,8 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 // Import service
-import { getPiInvoiceHistory } from '../../service/piService';
+import { fetchPiInvoiceHistory } from '../../features/piSlice';
+import { useDispatch } from 'react-redux';
 
 // Import components
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
