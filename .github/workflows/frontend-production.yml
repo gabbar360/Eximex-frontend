@@ -96,6 +96,8 @@ jobs:
           script: |
             rm -rf /var/www/Eximex-frontend/* 2>/dev/null || true
             mkdir -p /var/www/Eximex-frontend
+            chown -R $USER:$USER /var/www/Eximex-frontend 2>/dev/null || true
+            chmod -R 755 /var/www/Eximex-frontend 2>/dev/null || true
 
       - name: Deploy to Production
         uses: appleboy/scp-action@v0.1.7
