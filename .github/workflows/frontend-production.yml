@@ -94,9 +94,8 @@ jobs:
           password: ${{ secrets.PROD_FTP_PASS }}
           port: 22
           script: |
-            sudo rm -rf /var/www/Eximex-frontend/* 2>/dev/null || true
-            sudo mkdir -p /var/www/Eximex-frontend
-            sudo chown -R $USER:$USER /var/www/Eximex-frontend
+            rm -rf /var/www/Eximex-frontend/* 2>/dev/null || true
+            mkdir -p /var/www/Eximex-frontend
 
       - name: Deploy to Production
         uses: appleboy/scp-action@v0.1.7
@@ -119,7 +118,7 @@ jobs:
           password: ${{ secrets.PROD_FTP_PASS }}
           port: 22
           script: |
-            sudo systemctl reload nginx 2>/dev/null || sudo service nginx reload 2>/dev/null || true
+            systemctl reload nginx 2>/dev/null || service nginx reload 2>/dev/null || echo "Nginx reload skipped - no sudo access"
 
       - name: Health Check
         run: |
