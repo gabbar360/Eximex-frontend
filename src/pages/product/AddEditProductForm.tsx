@@ -393,26 +393,54 @@ const AddEditProductForm = () => {
         product?.packagingHierarchyData?.dynamicFields?.[weightField] ??
         '';
       // Set appropriate default unit based on packaging level
-      const defaultFromUnit = level.from.toLowerCase() === 'pieces' || level.from.toLowerCase() === 'pack' ? 'g' : 'kg';
-      const defaultToUnit = level.to.toLowerCase() === 'box' || level.to.toLowerCase() === 'carton' ? 'kg' : 'g';
-      
+      const defaultFromUnit =
+        level.from.toLowerCase() === 'pieces' ||
+        level.from.toLowerCase() === 'pack'
+          ? 'g'
+          : 'kg';
+      const defaultToUnit =
+        level.to.toLowerCase() === 'box' || level.to.toLowerCase() === 'carton'
+          ? 'kg'
+          : 'g';
+
       // Get existing unit from product data
-      const existingFromUnit = product?.[weightUnitField] ?? product?.packagingHierarchyData?.dynamicFields?.[weightUnitField];
-      const existingToUnit = product?.[toWeightUnitField] ?? product?.packagingHierarchyData?.dynamicFields?.[toWeightUnitField];
-      
+      const existingFromUnit =
+        product?.[weightUnitField] ??
+        product?.packagingHierarchyData?.dynamicFields?.[weightUnitField];
+      const existingToUnit =
+        product?.[toWeightUnitField] ??
+        product?.packagingHierarchyData?.dynamicFields?.[toWeightUnitField];
+
       // Override incorrect units: if pieces/pack weight is in kg but value is small (< 100), it should be grams
-      const fromWeight = product?.[weightField] ?? product?.packagingHierarchyData?.dynamicFields?.[weightField];
-      const shouldOverrideFromUnit = existingFromUnit === 'kg' && fromWeight && fromWeight < 100 && (level.from.toLowerCase() === 'pieces' || level.from.toLowerCase() === 'pack');
-      
-      baseValues[weightUnitField] = shouldOverrideFromUnit ? 'g' : (existingFromUnit ?? defaultFromUnit);
+      const fromWeight =
+        product?.[weightField] ??
+        product?.packagingHierarchyData?.dynamicFields?.[weightField];
+      const shouldOverrideFromUnit =
+        existingFromUnit === 'kg' &&
+        fromWeight &&
+        fromWeight < 100 &&
+        (level.from.toLowerCase() === 'pieces' ||
+          level.from.toLowerCase() === 'pack');
+
+      baseValues[weightUnitField] = shouldOverrideFromUnit
+        ? 'g'
+        : (existingFromUnit ?? defaultFromUnit);
 
       // Add 'to' unit weight fields
-      const toWeight = product?.[toWeightField] ?? product?.packagingHierarchyData?.dynamicFields?.[toWeightField];
+      const toWeight =
+        product?.[toWeightField] ??
+        product?.packagingHierarchyData?.dynamicFields?.[toWeightField];
       baseValues[toWeightField] = toWeight ?? '';
-      
+
       // Override incorrect Box units: if box weight is in kg but value is very large (> 100), it should be grams
-      const shouldOverrideToUnit = existingToUnit === 'kg' && toWeight && toWeight > 100 && level.to.toLowerCase() === 'box';
-      baseValues[toWeightUnitField] = shouldOverrideToUnit ? 'g' : (existingToUnit ?? defaultToUnit);
+      const shouldOverrideToUnit =
+        existingToUnit === 'kg' &&
+        toWeight &&
+        toWeight > 100 &&
+        level.to.toLowerCase() === 'box';
+      baseValues[toWeightUnitField] = shouldOverrideToUnit
+        ? 'g'
+        : (existingToUnit ?? defaultToUnit);
     });
 
     // If editing and unitWeight is empty, try to populate from packaging hierarchy data
@@ -519,27 +547,52 @@ const AddEditProductForm = () => {
           acc[weightField] = values[weightField]
             ? parseFloat(values[weightField])
             : null;
-          
+
           // Set appropriate default unit based on packaging level
-          const defaultFromUnit = level.from.toLowerCase() === 'pieces' || level.from.toLowerCase() === 'pack' ? 'g' : 'kg';
-          const defaultToUnit = level.to.toLowerCase() === 'box' || level.to.toLowerCase() === 'carton' ? 'kg' : 'g';
-          
+          const defaultFromUnit =
+            level.from.toLowerCase() === 'pieces' ||
+            level.from.toLowerCase() === 'pack'
+              ? 'g'
+              : 'kg';
+          const defaultToUnit =
+            level.to.toLowerCase() === 'box' ||
+            level.to.toLowerCase() === 'carton'
+              ? 'kg'
+              : 'g';
+
           // Apply unit correction logic for both create and edit modes
-          const fromWeight = values[weightField] ? parseFloat(values[weightField]) : null;
-          const shouldOverrideFromUnit = values[weightUnitField] === 'kg' && fromWeight && fromWeight < 100 && (level.from.toLowerCase() === 'pieces' || level.from.toLowerCase() === 'pack');
-          
-          acc[weightUnitField] = shouldOverrideFromUnit ? 'g' : (values[weightUnitField] || defaultFromUnit);
+          const fromWeight = values[weightField]
+            ? parseFloat(values[weightField])
+            : null;
+          const shouldOverrideFromUnit =
+            values[weightUnitField] === 'kg' &&
+            fromWeight &&
+            fromWeight < 100 &&
+            (level.from.toLowerCase() === 'pieces' ||
+              level.from.toLowerCase() === 'pack');
+
+          acc[weightUnitField] = shouldOverrideFromUnit
+            ? 'g'
+            : values[weightUnitField] || defaultFromUnit;
 
           // Add 'to' unit weight fields
           acc[toWeightField] = values[toWeightField]
             ? parseFloat(values[toWeightField])
             : null;
-          
+
           // Apply unit correction for 'to' units as well
-          const toWeight = values[toWeightField] ? parseFloat(values[toWeightField]) : null;
-          const shouldOverrideToUnit = values[toWeightUnitField] === 'kg' && toWeight && toWeight > 100 && level.to.toLowerCase() === 'box';
-          
-          acc[toWeightUnitField] = shouldOverrideToUnit ? 'g' : (values[toWeightUnitField] || defaultToUnit);
+          const toWeight = values[toWeightField]
+            ? parseFloat(values[toWeightField])
+            : null;
+          const shouldOverrideToUnit =
+            values[toWeightUnitField] === 'kg' &&
+            toWeight &&
+            toWeight > 100 &&
+            level.to.toLowerCase() === 'box';
+
+          acc[toWeightUnitField] = shouldOverrideToUnit
+            ? 'g'
+            : values[toWeightUnitField] || defaultToUnit;
 
           return acc;
         }, {}),

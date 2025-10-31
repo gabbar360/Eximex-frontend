@@ -44,7 +44,9 @@ const PasswordManagement: React.FC = () => {
 
       const response = await userService.getAllUsersForSuperAdmin(params);
       // Filter out SUPER_ADMIN users for password reset
-      const filteredUsers = (response.data || []).filter(user => user.role !== 'SUPER_ADMIN');
+      const filteredUsers = (response.data || []).filter(
+        (user) => user.role !== 'SUPER_ADMIN'
+      );
       setUsers(filteredUsers);
       setPagination((prev) => ({
         ...prev,
@@ -81,9 +83,7 @@ const PasswordManagement: React.FC = () => {
       setConfirmPassword('');
       setSelectedUser(null);
     } catch (error: any) {
-      toast.error(
-        error.response?.data?.message || 'Failed to reset password'
-      );
+      toast.error(error.response?.data?.message || 'Failed to reset password');
     } finally {
       setResetting(false);
     }
@@ -146,7 +146,9 @@ const PasswordManagement: React.FC = () => {
         <h1 className="text-2xl font-bold text-gray-900 mb-2">
           Password Management
         </h1>
-        <p className="text-gray-600">Reset passwords for users across all companies</p>
+        <p className="text-gray-600">
+          Reset passwords for users across all companies
+        </p>
       </div>
 
       {/* Filters */}
@@ -230,7 +232,10 @@ const PasswordManagement: React.FC = () => {
                 </tr>
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
+                  <td
+                    colSpan={5}
+                    className="px-6 py-4 text-center text-gray-500"
+                  >
                     No users found
                   </td>
                 </tr>
@@ -309,14 +314,21 @@ const PasswordManagement: React.FC = () => {
                   </span>{' '}
                   to{' '}
                   <span className="font-medium">
-                    {Math.min(pagination.page * pagination.limit, pagination.total)}
+                    {Math.min(
+                      pagination.page * pagination.limit,
+                      pagination.total
+                    )}
                   </span>{' '}
-                  of <span className="font-medium">{pagination.total}</span> results
+                  of <span className="font-medium">{pagination.total}</span>{' '}
+                  results
                 </p>
               </div>
               <div>
                 <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                  {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((page) => (
+                  {Array.from(
+                    { length: pagination.totalPages },
+                    (_, i) => i + 1
+                  ).map((page) => (
                     <button
                       key={page}
                       onClick={() => handlePageChange(page)}
