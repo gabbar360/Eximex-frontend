@@ -145,9 +145,18 @@ function AppContent() {
           <Route path="/staff-management" element={<StaffManagement />} />
           <Route path="/activity-logs" element={<ActivityLogComponent />} />
           <Route path="/super-admin/users" element={<UserManagement />} />
-          <Route path="/super-admin/dashboard" element={<SuperAdminDashboard />} />
-          <Route path="/super-admin/passwords" element={<PasswordManagement />} />
-          <Route path="/super-admin/companies" element={<CompanyManagement />} />
+          <Route
+            path="/super-admin/dashboard"
+            element={<SuperAdminDashboard />}
+          />
+          <Route
+            path="/super-admin/passwords"
+            element={<PasswordManagement />}
+          />
+          <Route
+            path="/super-admin/companies"
+            element={<CompanyManagement />}
+          />
           <Route path="/payments" element={<PaymentTracking />} />
 
           <Route path="/calendar" element={<Calendar />} />
@@ -185,7 +194,7 @@ export default function App() {
           if (googleCallback.userData) {
             dispatch(setUser(googleCallback.userData));
           }
-          
+
           // Clean up URL
           window.history.replaceState(
             {},
