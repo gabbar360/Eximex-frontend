@@ -34,7 +34,9 @@ interface CompanyDetails extends Company {
 const CompanyManagement: React.FC = () => {
   const dispatch = useDispatch();
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompany, setSelectedCompany] = useState<CompanyDetails | null>(null);
+  const [selectedCompany, setSelectedCompany] = useState<CompanyDetails | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -142,7 +144,9 @@ const CompanyManagement: React.FC = () => {
         <h1 className="text-2xl font-bold text-gray-900 mb-2">
           Company Management
         </h1>
-        <p className="text-gray-600">View and manage all companies in the system</p>
+        <p className="text-gray-600">
+          View and manage all companies in the system
+        </p>
       </div>
 
       {/* Filters */}
@@ -195,7 +199,10 @@ const CompanyManagement: React.FC = () => {
                 </tr>
               ) : companies.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
+                  <td
+                    colSpan={5}
+                    className="px-6 py-4 text-center text-gray-500"
+                  >
                     No companies found
                   </td>
                 </tr>
@@ -279,14 +286,21 @@ const CompanyManagement: React.FC = () => {
                   </span>{' '}
                   to{' '}
                   <span className="font-medium">
-                    {Math.min(pagination.page * pagination.limit, pagination.total)}
+                    {Math.min(
+                      pagination.page * pagination.limit,
+                      pagination.total
+                    )}
                   </span>{' '}
-                  of <span className="font-medium">{pagination.total}</span> results
+                  of <span className="font-medium">{pagination.total}</span>{' '}
+                  results
                 </p>
               </div>
               <div>
                 <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                  {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((page) => (
+                  {Array.from(
+                    { length: pagination.totalPages },
+                    (_, i) => i + 1
+                  ).map((page) => (
                     <button
                       key={page}
                       onClick={() => handlePageChange(page)}
@@ -319,8 +333,18 @@ const CompanyManagement: React.FC = () => {
                   onClick={closeModal}
                   className="text-gray-400 hover:text-gray-600"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
@@ -328,21 +352,37 @@ const CompanyManagement: React.FC = () => {
               {/* Company Info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="font-medium text-gray-900 mb-2">Company Information</h4>
+                  <h4 className="font-medium text-gray-900 mb-2">
+                    Company Information
+                  </h4>
                   <div className="space-y-2 text-sm">
-                    <div><span className="font-medium">Email:</span> {selectedCompany.email}</div>
+                    <div>
+                      <span className="font-medium">Email:</span>{' '}
+                      {selectedCompany.email}
+                    </div>
                     {selectedCompany.phone && (
-                      <div><span className="font-medium">Phone:</span> {selectedCompany.phone}</div>
+                      <div>
+                        <span className="font-medium">Phone:</span>{' '}
+                        {selectedCompany.phone}
+                      </div>
                     )}
                     {selectedCompany.address && (
-                      <div><span className="font-medium">Address:</span> {selectedCompany.address}</div>
+                      <div>
+                        <span className="font-medium">Address:</span>{' '}
+                        {selectedCompany.address}
+                      </div>
                     )}
-                    <div><span className="font-medium">Created:</span> {formatDate(selectedCompany.createdAt)}</div>
+                    <div>
+                      <span className="font-medium">Created:</span>{' '}
+                      {formatDate(selectedCompany.createdAt)}
+                    </div>
                   </div>
                 </div>
 
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="font-medium text-gray-900 mb-2">Data Statistics</h4>
+                  <h4 className="font-medium text-gray-900 mb-2">
+                    Data Statistics
+                  </h4>
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div>Users: {selectedCompany._count.users}</div>
                     <div>Products: {selectedCompany._count.products}</div>
@@ -355,7 +395,9 @@ const CompanyManagement: React.FC = () => {
 
               {/* Users Table */}
               <div>
-                <h4 className="font-medium text-gray-900 mb-3">Company Users</h4>
+                <h4 className="font-medium text-gray-900 mb-3">
+                  Company Users
+                </h4>
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
@@ -405,7 +447,9 @@ const CompanyManagement: React.FC = () => {
                             </span>
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
-                            {user.lastLogin ? formatDate(user.lastLogin) : 'Never'}
+                            {user.lastLogin
+                              ? formatDate(user.lastLogin)
+                              : 'Never'}
                           </td>
                           <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
                             {formatDate(user.createdAt)}

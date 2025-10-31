@@ -431,10 +431,11 @@ const AddEditPackingList = () => {
 
     const qty = parseFloat(packedQuantity);
     const unit = productData.unit || 'Box';
-    
+
     // Get current product from containers
-    const currentProduct = packagingList.containers[containerIndex].products[productIndex];
-    
+    const currentProduct =
+      packagingList.containers[containerIndex].products[productIndex];
+
     let boxesNeeded = 1;
     let netWeightKg = 0;
     let grossWeightKg = 0;
@@ -444,27 +445,27 @@ const AddEditPackingList = () => {
     if (unit.toLowerCase() === 'box') {
       // If unit is Box, then packed quantity is number of boxes
       boxesNeeded = qty;
-      
+
       // Calculate weight from PI data
       const totalWeightFromPI = productData.totalWeight || 0; // Net weight in kg from PI
       const piQuantity = productData.quantity || 1;
-      
+
       // Calculate per box net weight
       const netWeightPerBox = totalWeightFromPI / piQuantity;
       netWeightKg = qty * netWeightPerBox;
-      
+
       // Get gross weight from product data (in grams, convert to kg)
       const product = productData.product || productData;
-      const grossWeightPerBoxGrams = product.grossWeightPerBox || product.totalGrossWeight || 0;
+      const grossWeightPerBoxGrams =
+        product.grossWeightPerBox || product.totalGrossWeight || 0;
       const grossWeightPerBoxKg = grossWeightPerBoxGrams / 1000; // Convert grams to kg
-      
+
       if (grossWeightPerBoxKg > 0) {
         grossWeightKg = qty * grossWeightPerBoxKg;
       } else {
         // Fallback: use net weight + 10% packaging
         grossWeightKg = netWeightKg * 1.1;
       }
-      
     } else {
       // If unit is Pcs, calculate boxes needed
       const product = productData.product || productData;
@@ -472,14 +473,14 @@ const AddEditPackingList = () => {
       const piecesPerPackage = packagingData.PiecesPerPackage || 50;
       const packagePerBox = packagingData.PackagePerBox || 40;
       const unitWeight = product.unitWeight || 8; // Weight per piece in grams
-      
+
       const piecesPerBox = piecesPerPackage * packagePerBox;
       boxesNeeded = Math.ceil(qty / piecesPerBox);
-      
+
       // Calculate net weight (product weight only)
       const netWeightGrams = qty * unitWeight;
       netWeightKg = netWeightGrams / 1000;
-      
+
       // Calculate gross weight (net weight + packaging)
       const packagingWeightPerBox = 700; // grams
       const packagingWeightTotal = boxesNeeded * packagingWeightPerBox;
@@ -496,17 +497,22 @@ const AddEditPackingList = () => {
       volumeM3 = boxesNeeded * 0.0055;
     }
 
-    console.log('📊 Auto-calculation for', productData.productName || productData.name, ':', {
-      packedQuantity: qty,
-      unit: unit,
-      boxesNeeded,
-      piTotalWeight: productData.totalWeight,
-      piTotalGrossWeight: productData.totalGrossWeight,
-      productData: productData,
-      netWeightKg: netWeightKg.toFixed(2) + 'kg',
-      grossWeightKg: grossWeightKg.toFixed(2) + 'kg',
-      volumeM3: volumeM3.toFixed(4) + 'm³',
-    });
+    console.log(
+      '📊 Auto-calculation for',
+      productData.productName || productData.name,
+      ':',
+      {
+        packedQuantity: qty,
+        unit: unit,
+        boxesNeeded,
+        piTotalWeight: productData.totalWeight,
+        piTotalGrossWeight: productData.totalGrossWeight,
+        productData: productData,
+        netWeightKg: netWeightKg.toFixed(2) + 'kg',
+        grossWeightKg: grossWeightKg.toFixed(2) + 'kg',
+        volumeM3: volumeM3.toFixed(4) + 'm³',
+      }
+    );
 
     // Update the product with calculated values
     const updatedContainers = [...packagingList.containers];
@@ -996,7 +1002,8 @@ const AddEditPackingList = () => {
                                   '';
                                 return (
                                   <option key={idx} value={productName}>
-                                    {productName} (Qty: {quantity} {unit}, {unitWeight}
+                                    {productName} (Qty: {quantity} {unit},{' '}
+                                    {unitWeight}
                                     g/pc, HSN: {hsnCode})
                                   </option>
                                 );
@@ -1222,10 +1229,10 @@ const AddEditPackingList = () => {
                         HSN Code
                       </th>
                       <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right text-sm font-medium">
-                        Quantity
+                        Unit
                       </th>
                       <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right text-sm font-medium">
-                        Boxes
+                        Quantity
                       </th>
                       <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right text-sm font-medium">
                         Unit Wt (kg)
@@ -1270,19 +1277,31 @@ const AddEditPackingList = () => {
                             {product.hsnCode || '-'}
                           </td>
                           <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right">
-                            {product.packedQuantity ? `${product.packedQuantity} ${product.unit || 'Box'}` : (product.quantity ? `${product.quantity} ${product.unit || 'Box'}` : '-')}
+                            {product.unit || 'Box'}
                           </td>
                           <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right">
-                            {product.unit && product.unit.toLowerCase() === 'box' 
-                              ? (product.packedQuantity || product.quantity || '-')
-                              : (product.noOfBoxes || '-')
-                            }
+                            {product.unit &&
+                            product.unit.toLowerCase() === 'box'
+                              ? product.packedQuantity ||
+                                product.quantity ||
+                                '-'
+                              : product.noOfBoxes || '-'}
                           </td>
                           <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right">
                             {(() => {
-                              const boxes = parseFloat(product.noOfBoxes || (product.unit && product.unit.toLowerCase() === 'box' ? (product.packedQuantity || product.quantity) : 0));
-                              const netWeight = parseFloat(product.netWeight || 0);
-                              return boxes > 0 && netWeight > 0 ? (netWeight / boxes).toFixed(2) : '-';
+                              const boxes = parseFloat(
+                                product.noOfBoxes ||
+                                  (product.unit &&
+                                  product.unit.toLowerCase() === 'box'
+                                    ? product.packedQuantity || product.quantity
+                                    : 0)
+                              );
+                              const netWeight = parseFloat(
+                                product.netWeight || 0
+                              );
+                              return boxes > 0 && netWeight > 0
+                                ? (netWeight / boxes).toFixed(2)
+                                : '-';
                             })()}
                           </td>
                           <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right">
@@ -1324,9 +1343,14 @@ const AddEditPackingList = () => {
                       </td>
                       <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right font-semibold">
                         {(() => {
-                          const avgUnitWeight = packagingList.totalBoxes > 0 && packagingList.totalNetWeight > 0 
-                            ? (packagingList.totalNetWeight / packagingList.totalBoxes).toFixed(2) 
-                            : '-';
+                          const avgUnitWeight =
+                            packagingList.totalBoxes > 0 &&
+                            packagingList.totalNetWeight > 0
+                              ? (
+                                  packagingList.totalNetWeight /
+                                  packagingList.totalBoxes
+                                ).toFixed(2)
+                              : '-';
                           return avgUnitWeight;
                         })()}
                       </td>

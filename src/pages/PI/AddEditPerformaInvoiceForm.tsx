@@ -716,10 +716,12 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   const calculateGrossWeight = (productList: ProductData[]) => {
     return productList.reduce((sum, product) => {
       if (!product.productId) return sum;
-      
-      const prod = products.find(p => p?.id?.toString() === product.productId?.toString());
+
+      const prod = products.find(
+        (p) => p?.id?.toString() === product.productId?.toString()
+      );
       let boxes = 0;
-      
+
       // Calculate boxes based on unit
       if (product.unit === 'Box' || product.unit === 'box') {
         boxes = product.quantity;
@@ -730,17 +732,19 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
       } else {
         boxes = product.quantity; // fallback assume it's boxes
       }
-      
+
       // Get gross weight per box from product data
-      let grossWeightPerBox = prod?.packagingHierarchyData?.dynamicFields?.grossWeightPerBox || 
-                             prod?.grossWeightPerBox || 10.06;
-      
+      let grossWeightPerBox =
+        prod?.packagingHierarchyData?.dynamicFields?.grossWeightPerBox ||
+        prod?.grossWeightPerBox ||
+        10.06;
+
       // Convert to KG if in grams
       if (grossWeightPerBox > 100) {
         grossWeightPerBox = grossWeightPerBox / 1000; // Convert grams to KG
       }
-      
-      return sum + (boxes * grossWeightPerBox);
+
+      return sum + boxes * grossWeightPerBox;
     }, 0);
   };
 
@@ -764,19 +768,28 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
 
     // Get packaging hierarchy data from product
     const packagingData = product.packagingHierarchyData?.dynamicFields;
-    
+
     // Use the stored weight values from packagingHierarchyData - check units before converting
     const weightPerPiecesUnit = packagingData?.weightPerPiecesUnit || 'g';
     const weightPerPackageUnit = packagingData?.weightPerPackageUnit || 'g';
     const weightPerBoxUnit = packagingData?.weightPerBoxUnit || 'kg';
-    
-    const weightPerPieces = packagingData?.weightPerPieces ? 
-      (weightPerPiecesUnit === 'kg' ? packagingData.weightPerPieces : packagingData.weightPerPieces / 1000) : 0;
-    const weightPerPackage = packagingData?.weightPerPackage ? 
-      (weightPerPackageUnit === 'kg' ? packagingData.weightPerPackage : packagingData.weightPerPackage / 1000) : 0;
-    const weightPerBox = packagingData?.weightPerBox ? 
-      (weightPerBoxUnit === 'kg' ? packagingData.weightPerBox : packagingData.weightPerBox / 1000) : 0;
-    
+
+    const weightPerPieces = packagingData?.weightPerPieces
+      ? weightPerPiecesUnit === 'kg'
+        ? packagingData.weightPerPieces
+        : packagingData.weightPerPieces / 1000
+      : 0;
+    const weightPerPackage = packagingData?.weightPerPackage
+      ? weightPerPackageUnit === 'kg'
+        ? packagingData.weightPerPackage
+        : packagingData.weightPerPackage / 1000
+      : 0;
+    const weightPerBox = packagingData?.weightPerBox
+      ? weightPerBoxUnit === 'kg'
+        ? packagingData.weightPerBox
+        : packagingData.weightPerBox / 1000
+      : 0;
+
     // Get packaging conversion factors
     const piecesPerPackage = packagingData?.PiecesPerPackage || 1;
     const packagePerBox = packagingData?.PackagePerBox || 1;
@@ -1913,71 +1926,86 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
               <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
                 {(() => {
                   const displayItems = [];
-                  
+
                   // Get all unique units from packaging hierarchy and weights
                   const allUnits = new Set();
-                  
+
                   // From packagingPreview weights
                   if (prod.packagingPreview?.weights) {
-                    Object.keys(prod.packagingPreview.weights).forEach(key => {
-                      if (!key.endsWith('Unit')) {
-                        allUnits.add(key);
+                    Object.keys(prod.packagingPreview.weights).forEach(
+                      (key) => {
+                        if (!key.endsWith('Unit')) {
+                          allUnits.add(key);
+                        }
                       }
-                    });
+                    );
                   }
-                  
+
                   // From packagingPreview hierarchy
                   if (prod.packagingPreview?.hierarchy) {
-                    prod.packagingPreview.hierarchy.forEach(level => {
+                    prod.packagingPreview.hierarchy.forEach((level) => {
                       allUnits.add(level.from);
                       allUnits.add(level.to);
                     });
                   }
-                  
+
                   // From packagingHierarchyData (fallback)
                   if (prod.packagingHierarchyData?.dynamicFields) {
-                    const dynamicFields = prod.packagingHierarchyData.dynamicFields;
-                    Object.keys(dynamicFields).forEach(key => {
-                      if (key.startsWith('weightPer') && !key.endsWith('Unit')) {
+                    const dynamicFields =
+                      prod.packagingHierarchyData.dynamicFields;
+                    Object.keys(dynamicFields).forEach((key) => {
+                      if (
+                        key.startsWith('weightPer') &&
+                        !key.endsWith('Unit')
+                      ) {
                         const unit = key.replace('weightPer', '');
                         allUnits.add(unit);
                       }
                     });
                   }
-                  
+
                   // Display weight for each unit
-                  Array.from(allUnits).forEach(unit => {
+                  Array.from(allUnits).forEach((unit) => {
                     let weight = 'N/A';
                     let weightUnit = 'g';
-                    
+
                     // Try packagingPreview first
                     if (prod.packagingPreview?.weights) {
                       const weightValue = prod.packagingPreview.weights[unit];
-                      const unitValue = prod.packagingPreview.weights[unit + 'Unit'];
+                      const unitValue =
+                        prod.packagingPreview.weights[unit + 'Unit'];
                       if (weightValue) {
                         weight = weightValue;
                         weightUnit = unitValue || 'g';
                       }
                     }
-                    
+
                     // Fallback to packagingHierarchyData
-                    if (weight === 'N/A' && prod.packagingHierarchyData?.dynamicFields) {
-                      const dynamicFields = prod.packagingHierarchyData.dynamicFields;
+                    if (
+                      weight === 'N/A' &&
+                      prod.packagingHierarchyData?.dynamicFields
+                    ) {
+                      const dynamicFields =
+                        prod.packagingHierarchyData.dynamicFields;
                       const weightKey = `weightPer${unit}`;
                       const unitKey = `${weightKey}Unit`;
-                      
+
                       if (dynamicFields[weightKey]) {
                         weight = dynamicFields[weightKey];
                         weightUnit = dynamicFields[unitKey] || 'g';
                       }
                     }
-                    
+
                     // Final fallback to unitWeight
-                    if (weight === 'N/A' && prod.weightUnitType === unit && prod.unitWeight) {
+                    if (
+                      weight === 'N/A' &&
+                      prod.weightUnitType === unit &&
+                      prod.unitWeight
+                    ) {
                       weight = prod.unitWeight;
                       weightUnit = prod.unitWeightUnit || 'g';
                     }
-                    
+
                     if (weight !== 'N/A') {
                       displayItems.push(
                         <div key={`weight-${unit}`}>
@@ -1992,7 +2020,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                       );
                     }
                   });
-                  
+
                   // Display hierarchy relationships
                   if (prod.packagingPreview?.hierarchy) {
                     prod.packagingPreview.hierarchy.forEach((level, index) => {
@@ -2010,8 +2038,9 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                     });
                   } else if (prod.packagingHierarchyData?.dynamicFields) {
                     // Fallback to packagingHierarchyData for hierarchy
-                    const dynamicFields = prod.packagingHierarchyData.dynamicFields;
-                    Object.keys(dynamicFields).forEach(key => {
+                    const dynamicFields =
+                      prod.packagingHierarchyData.dynamicFields;
+                    Object.keys(dynamicFields).forEach((key) => {
                       if (key.includes('Per') && !key.startsWith('weight')) {
                         const [from, to] = key.split('Per');
                         displayItems.push(
@@ -2028,8 +2057,10 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                       }
                     });
                   }
-                  
-                  return displayItems.length > 0 ? displayItems : (
+
+                  return displayItems.length > 0 ? (
+                    displayItems
+                  ) : (
                     <div className="col-span-5 text-center text-gray-500">
                       No packaging information available
                     </div>
@@ -2037,7 +2068,6 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                 })()}
               </div>
             </div>
-
           </div>
         )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -3732,7 +3762,8 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                               Gross Weight:
                             </td>
                             <td className="px-3 py-2 text-right font-semibold text-blue-600 dark:text-blue-400">
-                              {calculateGrossWeight(addedProducts).toFixed(2)} KG
+                              {calculateGrossWeight(addedProducts).toFixed(2)}{' '}
+                              KG
                             </td>
                             <td className="px-3 py-2"></td>
                             <td className="px-3 py-2"></td>
