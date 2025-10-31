@@ -100,6 +100,17 @@ jobs:
             chmod -R 755 /var/www/Eximex-frontend 2>/dev/null || true
 
       - name: Deploy to Production
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_FTP_HOST }}
+          username: ${{ secrets.PROD_FTP_USER }}
+          password: ${{ secrets.PROD_FTP_PASS }}
+          port: 22
+          script: |
+            # Create temp directory
+            mkdir -p /tmp/deploy
+            
+      - name: Copy files to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.PROD_FTP_HOST }}
@@ -107,10 +118,25 @@ jobs:
           password: ${{ secrets.PROD_FTP_PASS }}
           port: 22
           source: './dist/*'
-          target: '/var/www/Eximex-frontend/'
+          target: '/tmp/deploy/'
           strip_components: 1
           overwrite: true
-          rm: false
+          
+      - name: Move files to final location
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_FTP_HOST }}
+          username: ${{ secrets.PROD_FTP_USER }}
+          password: ${{ secrets.PROD_FTP_PASS }}
+          port: 22
+          script: |
+            # Move files from temp to final location
+            cp -r /tmp/deploy/* /var/www/Eximex-frontend/ 2>/dev/null || true
+            # Cleanup temp
+            rm -rf /tmp/deploy
+            # Set permissions
+            chmod -R 644 /var/www/Eximex-frontend/* 2>/dev/null || true
+            find /var/www/Eximex-frontend -type d -exec chmod 755 {} \; 2>/dev/null || true
 
       - name: Restart Services
         uses: appleboy/ssh-action@v1.0.3
