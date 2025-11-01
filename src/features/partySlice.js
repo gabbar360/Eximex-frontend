@@ -133,7 +133,11 @@ const partySlice = createSlice({
       })
       .addCase(addParty.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.parties.unshift(payload.data);
+        if (Array.isArray(state.parties)) {
+          state.parties.unshift(payload.data);
+        } else {
+          state.parties = [payload.data];
+        }
         state.successMessage = payload.message;
       })
       .addCase(addParty.rejected, (state, { payload }) => {
@@ -146,9 +150,13 @@ const partySlice = createSlice({
       })
       .addCase(updateParty.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.parties = state.parties.map((p) =>
-          p.id === payload.data.id ? payload.data : p
-        );
+        if (Array.isArray(state.parties)) {
+          state.parties = state.parties.map((p) =>
+            p.id === payload.data.id ? payload.data : p
+          );
+        } else {
+          state.parties = [];
+        }
         state.successMessage = payload.message;
       })
       .addCase(updateParty.rejected, (state, { payload }) => {
@@ -161,7 +169,11 @@ const partySlice = createSlice({
       })
       .addCase(deleteParty.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.parties = state.parties.filter((p) => p.id !== payload.id);
+        if (Array.isArray(state.parties)) {
+          state.parties = state.parties.filter((p) => p.id !== payload.id);
+        } else {
+          state.parties = [];
+        }
         state.successMessage = payload.message;
       })
       .addCase(deleteParty.rejected, (state, { payload }) => {
@@ -198,7 +210,11 @@ const partySlice = createSlice({
       })
       .addCase(createParty.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.parties.unshift(payload?.data || payload);
+        if (Array.isArray(state.parties)) {
+          state.parties.unshift(payload?.data || payload);
+        } else {
+          state.parties = [payload?.data || payload];
+        }
         state.successMessage = payload.message;
       })
       .addCase(createParty.rejected, (state, { payload }) => {
