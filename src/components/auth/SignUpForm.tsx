@@ -49,8 +49,8 @@ const handleSubmit = async (
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto">
-      <div className="grid lg:grid-cols-2 gap-32 items-center">
+    <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-16 xl:gap-32 items-center min-h-screen py-4 sm:py-8 lg:py-0">
         {/* Left Side - Branding */}
         <div className="hidden lg:flex flex-col items-center justify-center text-white text-center">
           <div className="mb-4">
@@ -106,9 +106,9 @@ const handleSubmit = async (
         </div>
 
         {/* Right Side - Form */}
-        <div className="w-full max-w-md mx-auto lg:mx-0">
+        <div className="w-full max-w-xs xs:max-w-sm sm:max-w-md mx-auto lg:mx-0 order-first lg:order-last">
           {/* Mobile Header */}
-          <div className="lg:hidden text-center mb-8">
+          <div className="lg:hidden text-center mb-6 sm:mb-8">
             <img 
               src="/logo.png" 
               alt="Eximex" 
@@ -119,8 +119,8 @@ const handleSubmit = async (
           </div>
 
           {/* Form Card */}
-          <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20 dark:bg-gray-900/95 dark:border-gray-700/30">
-            <div className="hidden lg:block text-center mb-8">
+          <div className="bg-white/95 backdrop-blur-xl rounded-lg sm:rounded-xl lg:rounded-2xl shadow-2xl p-3 xs:p-4 sm:p-6 border border-white/20 dark:bg-gray-900/95 dark:border-gray-700/30">
+            <div className="hidden lg:block text-center mb-4 sm:mb-6">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Create Business Account</h2>
               <p className="text-gray-600 dark:text-gray-300">Start trading globally today</p>
             </div>
@@ -131,7 +131,7 @@ const handleSubmit = async (
               onSubmit={handleSubmit}
             >
               {({ isSubmitting, status }) => (
-                <Form className="space-y-5">
+                <Form className="space-y-2 sm:space-y-3">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                       Full Name
@@ -140,7 +140,7 @@ const handleSubmit = async (
                       name="name"
                       type="text"
                       placeholder="Enter your full name"
-                      className="w-full px-4 py-3.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 transition-all duration-200"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 transition-all duration-200 text-sm sm:text-base"
                     />
                     <ErrorMessage
                       name="name"
@@ -157,7 +157,7 @@ const handleSubmit = async (
                       name="email"
                       type="email"
                       placeholder="Enter your business email"
-                      className="w-full px-4 py-3.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 transition-all duration-200"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 transition-all duration-200 text-sm sm:text-base"
                     />
                     <ErrorMessage
                       name="email"
@@ -174,7 +174,7 @@ const handleSubmit = async (
                       name="mobileNum"
                       type="text"
                       placeholder="Enter 10-digit mobile number"
-                      className="w-full px-4 py-3.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 transition-all duration-200"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 transition-all duration-200 text-sm sm:text-base"
                     />
                     <ErrorMessage
                       name="mobileNum"
@@ -192,7 +192,7 @@ const handleSubmit = async (
                         name="password"
                         type={showPassword ? 'text' : 'password'}
                         placeholder="Create a strong password"
-                        className="w-full px-4 py-3.5 pr-12 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 transition-all duration-200"
+                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-10 sm:pr-12 border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 transition-all duration-200 text-sm sm:text-base"
                       />
                       <button
                         type="button"
@@ -212,7 +212,7 @@ const handleSubmit = async (
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-4 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all duration-200 disabled:cursor-not-allowed transform hover:scale-[1.01] active:scale-[0.99] mb-6"
+                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-2.5 sm:py-3 rounded-lg sm:rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all duration-200 disabled:cursor-not-allowed transform hover:scale-[1.01] active:scale-[0.99] mb-2 sm:mb-3 text-sm sm:text-base"
                   >
                     {isSubmitting ? (
                       <div className="flex items-center justify-center gap-2">

@@ -93,8 +93,8 @@ const ForgotPassword: React.FC = () => {
         description="Reset your Eximex account password securely"
       />
       <AuthLayout>
-        <div className="w-full max-w-5xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-32 items-center">
+        <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-16 xl:gap-32 items-center min-h-screen py-4 sm:py-8 lg:py-0">
             {/* Left Side - Branding */}
             <div className="hidden lg:flex flex-col items-center justify-center text-white text-center">
               <div className="mb-8">
@@ -134,9 +134,9 @@ const ForgotPassword: React.FC = () => {
             </div>
 
             {/* Right Side - Form */}
-            <div className="w-full max-w-md mx-auto lg:mx-0">
+            <div className="w-full max-w-xs xs:max-w-sm sm:max-w-md mx-auto lg:mx-0 order-first lg:order-last">
               {/* Mobile Header */}
-              <div className="lg:hidden text-center mb-8">
+              <div className="lg:hidden text-center mb-6 sm:mb-8">
                 <img 
                   src="/logo.png" 
                   alt="Eximex" 
@@ -147,8 +147,8 @@ const ForgotPassword: React.FC = () => {
               </div>
 
               {/* Form Card */}
-              <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20 dark:bg-gray-900/95 dark:border-gray-700/30">
-                <div className="text-center mb-8">
+              <div className="bg-white/95 backdrop-blur-xl rounded-lg sm:rounded-xl lg:rounded-2xl shadow-2xl p-3 xs:p-4 sm:p-6 lg:p-8 border border-white/20 dark:bg-gray-900/95 dark:border-gray-700/30">
+                <div className="text-center mb-6 sm:mb-8">
                   <div className="mx-auto h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
                     <svg
                       className="h-8 w-8 text-blue-600"
@@ -170,7 +170,7 @@ const ForgotPassword: React.FC = () => {
                   </p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                       Business Email
@@ -180,7 +180,7 @@ const ForgotPassword: React.FC = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="Enter your registered email"
-                      className="w-full px-4 py-3.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 transition-all duration-200"
+                      className="w-full px-3 sm:px-4 py-3 sm:py-3.5 border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 transition-all duration-200 text-sm sm:text-base"
                       disabled={isLoading}
                       required
                     />
@@ -189,7 +189,7 @@ const ForgotPassword: React.FC = () => {
                   <button
                     type="submit"
                     disabled={isLoading || !email}
-                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-4 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all duration-200 disabled:cursor-not-allowed transform hover:scale-[1.01] active:scale-[0.99] mb-6"
+                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-2.5 sm:py-3 rounded-lg sm:rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all duration-200 disabled:cursor-not-allowed transform hover:scale-[1.01] active:scale-[0.99] mb-3 sm:mb-4 text-sm sm:text-base"
                   >
                     {isLoading ? (
                       <div className="flex items-center justify-center gap-2">

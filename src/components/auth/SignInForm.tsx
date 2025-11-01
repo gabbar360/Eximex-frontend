@@ -44,8 +44,8 @@ export default function SignInForm() {
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto">
-      <div className="grid lg:grid-cols-2 gap-32 items-center">
+    <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-16 xl:gap-32 items-center min-h-screen py-4 sm:py-8 lg:py-0">
         {/* Left Side - Branding */}
         <div className="hidden lg:flex flex-col items-center justify-center text-white text-center">
           <div className="mb-4">
@@ -101,50 +101,50 @@ export default function SignInForm() {
         </div>
 
         {/* Right Side - Form */}
-        <div className="w-full max-w-md mx-auto lg:mx-0">
+        <div className="w-full max-w-xs xs:max-w-sm sm:max-w-md mx-auto lg:mx-0 order-first lg:order-last">
           {/* Mobile Header */}
-          <div className="lg:hidden text-center mb-8">
+          <div className="lg:hidden text-center mb-4 sm:mb-6">
             <img 
               src="/logo.png" 
               alt="Eximex" 
-              className="h-12 mx-auto mb-4"
+              className="h-10 sm:h-12 mx-auto mb-3 sm:mb-4"
             />
-            <h2 className="text-2xl font-bold text-white mb-2">Welcome Back</h2>
-            <p className="text-blue-200">Sign in to your trading account</p>
+            <h2 className="text-xl sm:text-2xl font-bold text-white mb-1 sm:mb-2">Welcome Back</h2>
+            <p className="text-sm sm:text-base text-blue-200">Sign in to your trading account</p>
           </div>
 
           {/* Form Card */}
-          <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-white/20 dark:bg-gray-900/95 dark:border-gray-700/30">
-            <div className="hidden lg:block text-center mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Sign In</h2>
-              <p className="text-gray-600 dark:text-gray-300">Access your trading dashboard</p>
+          <div className="bg-white/95 backdrop-blur-xl rounded-lg sm:rounded-xl lg:rounded-2xl shadow-2xl p-3 xs:p-4 sm:p-6 lg:p-8 border border-white/20 dark:bg-gray-900/95 dark:border-gray-700/30">
+            <div className="hidden lg:block text-center mb-4 lg:mb-6">
+              <h2 className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-white mb-2">Sign In</h2>
+              <p className="text-sm lg:text-base text-gray-600 dark:text-gray-300">Access your trading dashboard</p>
             </div>
 
             {/* Google Sign-In */}
             <button
               onClick={() => dispatch(googleLogin())}
-              className="w-full flex items-center justify-center gap-3 px-4 py-3.5 border-2 border-gray-200 dark:border-gray-600 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-500 focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all duration-200 mb-6 group"
+              className="w-full flex items-center justify-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-500 focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all duration-200 mb-3 sm:mb-4 group"
             >
               <FcGoogle className="w-5 h-5 group-hover:scale-110 transition-transform" />
               Continue with Google
             </button>
 
             {/* Divider */}
-            <div className="relative mb-6">
+            <div className="relative mb-3 sm:mb-4">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-200"></div>
               </div>
               <div className="relative flex justify-center">
-                <span className="px-4 bg-white dark:bg-gray-900 text-sm text-gray-500 dark:text-gray-400 font-medium">
+                <span className="px-3 sm:px-4 bg-white dark:bg-gray-900 text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-medium">
                   Or sign in with email
                 </span>
               </div>
             </div>
 
             {/* Form Fields */}
-            <div className="space-y-5">
+            <div className="space-y-3 sm:space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1 sm:mb-2">
                   Business Email
                 </label>
                 <input
@@ -153,12 +153,12 @@ export default function SignInForm() {
                   onChange={(e) => setEmail(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
                   placeholder="Enter your business email"
-                  className="w-full px-4 py-3.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 transition-all duration-200"
+                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 transition-all duration-200 text-sm sm:text-base"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1 sm:mb-2">
                   Password
                 </label>
                 <div className="relative">
@@ -168,7 +168,7 @@ export default function SignInForm() {
                     onChange={(e) => setPassword(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
                     placeholder="Enter your password"
-                    className="w-full px-4 py-3.5 pr-12 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 transition-all duration-200"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-10 sm:pr-12 border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 transition-all duration-200 text-sm sm:text-base"
                   />
                   <button
                     type="button"
