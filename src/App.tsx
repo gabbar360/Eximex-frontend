@@ -65,6 +65,7 @@ import CompanyManagement from './pages/SuperAdmin/CompanyManagement';
 import PurchaseOrders from './pages/PO/PurchaseOrders';
 import AddEditPurchaseOrderForm from './pages/PO/AddEditPurchaseOrderForm';
 import PaymentTracking from './pages/PaymentTracking';
+import CompanySetup from './pages/Comanyform';
 
 function AppContent() {
   const location = useLocation();
@@ -102,6 +103,7 @@ function AppContent() {
       <Route element={<ProtectedRoute />}>
         {/* <Route path="/" element={<Navigate to="/admin/dashboard" replace />} /> */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/company-setup" element={<CompanySetup />} />
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<RoleBasedDashboard />} />
           {/* <Route path="/admin/dashboard" element={<Home />} /> */}
@@ -214,6 +216,13 @@ export default function App() {
             const res = await dispatch(getCurrentUser()).unwrap();
             if (res?.data) {
               dispatch(setUser(res.data));
+              
+              // Check if user needs company setup
+              const userData = res.data;
+              if (userData && (!userData.company && !userData.companyId) && window.location.pathname !== '/company-setup') {
+                window.location.replace('/company-setup');
+                return;
+              }
             }
           }
         }

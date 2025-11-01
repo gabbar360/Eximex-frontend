@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { fetchPartyById } from '../../features/partySlice';
+import { getPartyById } from '../../features/partySlice';
 import { useDispatch } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faEdit } from '@fortawesome/free-solid-svg-icons';
@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 const ViewParty = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [party, setParty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -16,8 +17,8 @@ const ViewParty = () => {
   useEffect(() => {
     const fetchParty = async () => {
       try {
-        const response = await getPartyById(id);
-        setParty(response?.data);
+        const response = await dispatch(getPartyById(id)).unwrap();
+        setParty(response?.data || response);
       } catch (err) {
         setError(err.message || 'Failed to fetch party details');
       } finally {

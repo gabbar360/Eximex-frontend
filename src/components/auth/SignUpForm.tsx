@@ -3,17 +3,19 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { toast } from 'react-toastify';
+import { useDispatch } from 'react-redux';
+import { registerUser } from '../../features/authSlice';
 
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from '../../icons';
 import Label from '../form/Label';
 import Input from '../form/input/InputField';
 import Checkbox from '../form/input/Checkbox';
-import GoogleSignInButton from './GoogleSignInButton';
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const initialValues = {
     name: '',
@@ -39,8 +41,8 @@ export default function SignUpForm() {
   ) => {
     try {
       setStatus(null);
-      const response = await // TODO: Use Redux registerUser action(values);
-      toast.success(response.message);
+      const response = await dispatch(registerUser(values)).unwrap();
+      toast.success(response.message || 'Registration successful');
       navigate('/signin');
     } catch (err) {
       console.error('Registration error:', err);

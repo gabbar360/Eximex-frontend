@@ -64,12 +64,12 @@ type PI = {
   data: PIData;
 };
 
-// Import API service
+// Import Redux actions
 import {
   getAllPiInvoices,
   deletePiInvoice,
   downloadPiInvoicePdf,
-} from '../../service/piService';
+} from '../../features/piSlice';
 import EmailInvoiceModal from '../../components/EmailInvoiceModal';
 
 // --- Helper functions ---
@@ -115,6 +115,7 @@ const PICard: React.FC<{ pi: any; onDelete: (id: string) => void }> = ({
   onDelete,
 }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [downloading, setDownloading] = useState<boolean>(false);
   const [showEmailModal, setShowEmailModal] = useState<boolean>(false);
@@ -181,7 +182,7 @@ const PICard: React.FC<{ pi: any; onDelete: (id: string) => void }> = ({
   const handleDownloadPdf = async () => {
     try {
       setDownloading(true);
-      await downloadPiInvoicePdf(id);
+      await dispatch(downloadPiInvoicePdf(id)).unwrap();
       toast.success('PDF downloaded successfully');
     } catch (error) {
       console.error('Error downloading PDF:', error);
@@ -409,6 +410,7 @@ const PICard: React.FC<{ pi: any; onDelete: (id: string) => void }> = ({
 
 const PerformaInvoice: React.FC = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [piList, setPiList] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -417,7 +419,7 @@ const PerformaInvoice: React.FC = () => {
   const fetchPiInvoicesData = async () => {
     try {
       setLoading(true);
-      const response = await getAllPiInvoices();
+      const response = await dispatch(getAllPiInvoices()).unwrap();
       
       if (response && response.piInvoices && Array.isArray(response.piInvoices)) {
         setPiList(response.piInvoices);
@@ -457,7 +459,7 @@ const PerformaInvoice: React.FC = () => {
   const handleDelete = async (id: string) => {
     try {
       setDeleting(true);
-      const result = await deletePiInvoice(id);
+      const result = await dispatch(deletePiInvoice(id)).unwrap();
       setPiList((prevList) => prevList.filter((pi) => pi.id !== id));
       toast.success(result.message);
     } catch (error) {

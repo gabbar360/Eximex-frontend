@@ -57,6 +57,17 @@ export const getCategoryById = createAsyncThunk(
   }
 );
 
+export const createCategory = createAsyncThunk(
+  'category/createCategory',
+  async (categoryData, { rejectWithValue }) => {
+    try {
+      return await categoryService.createCategory(categoryData);
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
 export const getAllCategories = fetchCategories;
 
 const categorySlice = createSlice({
@@ -124,6 +135,18 @@ const categorySlice = createSlice({
         state.categories = state.categories.filter((c) => c.id !== payload.id);
       })
       .addCase(deleteCategory.rejected, (state, { payload }) => {
+        state.loading = false;
+        state.error = payload;
+      })
+      .addCase(createCategory.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createCategory.fulfilled, (state, { payload }) => {
+        state.loading = false;
+        state.categories.unshift(payload?.data || payload);
+      })
+      .addCase(createCategory.rejected, (state, { payload }) => {
         state.loading = false;
         state.error = payload;
       });

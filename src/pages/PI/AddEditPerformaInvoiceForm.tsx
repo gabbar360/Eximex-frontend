@@ -34,13 +34,11 @@ import PageMeta from '../../components/common/PageMeta';
 import TextArea from '../../components/form/input/TextArea';
 
 import { fetchParties, getAllParties } from '../../features/partySlice';
-
-
 import {
   createPiInvoice,
   updatePiInvoice,
   getPiInvoiceById,
-} from '../../service/piService';
+} from '../../features/piSlice';
 
 // --- Types ---
 type Company = {
@@ -537,7 +535,8 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
       setLoading(true);
       try {
         // Fetch from API
-        getPiInvoiceById(parseInt(id!))
+        dispatch(getPiInvoiceById(parseInt(id!)))
+          .unwrap()
           .then((response) => {
             const pi = response.data;
             if (pi) {
@@ -1546,12 +1545,12 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
 
       if (isEditMode) {
         // Update existing PI as draft
-        const result = await updatePiInvoice(parseInt(id!), apiData);
+        const result = await dispatch(updatePiInvoice({ id: parseInt(id!), piData: apiData })).unwrap();
         toast.success(result.message);
         navigate(`/proforma-invoices/${result.data.id}/edit`);
       } else {
         // Create new PI as draft
-        const result = await createPiInvoice(apiData);
+        const result = await dispatch(createPiInvoice(apiData)).unwrap();
         toast.success(result.message);
         navigate(`/proforma-invoices/${result.data.id}/edit`);
       }
@@ -1620,11 +1619,11 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
 
       if (isEditMode) {
         // Update existing PI
-        const result = await updatePiInvoice(parseInt(id!), apiData);
+        const result = await dispatch(updatePiInvoice({ id: parseInt(id!), piData: apiData })).unwrap();
         toast.success(result.message);
       } else {
         // Create new PI
-        const result = await createPiInvoice(apiData);
+        const result = await dispatch(createPiInvoice(apiData)).unwrap();
         toast.success(result.message);
       }
 

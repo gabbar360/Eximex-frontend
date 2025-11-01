@@ -60,7 +60,8 @@ export const updatePiStatus = createAsyncThunk(
   'pi/updatePiStatus',
   async ({ id, status }, { rejectWithValue }) => {
     try {
-      return await piService.updatePiStatus(id, status);
+      const result = await piService.updatePiStatus(id, status);
+      return { id, status, ...result };
     } catch (err) {
       return rejectWithValue(err.message);
     }
@@ -105,6 +106,17 @@ export const emailInvoice = createAsyncThunk(
   async ({ id, email }, { rejectWithValue }) => {
     try {
       return await piService.emailInvoice(id, email);
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
+export const getAllPiInvoices = createAsyncThunk(
+  'pi/getAllPiInvoices',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await piService.getAllPiInvoices();
     } catch (err) {
       return rejectWithValue(err.message);
     }
@@ -253,6 +265,18 @@ const piSlice = createSlice({
         state.successMessage = payload.message || 'Amount updated successfully';
       })
       .addCase(updatePiAmount.rejected, (state, { payload }) => {
+        state.loading = false;
+        state.error = payload;
+      })
+      .addCase(getAllPiInvoices.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getAllPiInvoices.fulfilled, (state, { payload }) => {
+        state.loading = false;
+        state.piInvoices = payload?.piInvoices || payload || [];
+      })
+      .addCase(getAllPiInvoices.rejected, (state, { payload }) => {
         state.loading = false;
         state.error = payload;
       });

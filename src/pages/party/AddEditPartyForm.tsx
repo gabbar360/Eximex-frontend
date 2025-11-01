@@ -6,7 +6,8 @@ import {
   getPartyById,
   updateParty,
   createParty,
-} from '../../service/partyService';
+} from '../../features/partySlice';
+import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Form from '../../components/form/Form';
@@ -71,6 +72,7 @@ const fetchStates = async (countryName) => {
 
 const AddEditPartyForm = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { id } = useParams();
   const isEditMode = Boolean(id);
 
@@ -128,8 +130,8 @@ const AddEditPartyForm = () => {
       const fetchParty = async () => {
         try {
           setLoading(true);
-          const response = await getPartyById(Number(id));
-          const responseData = response.data;
+          const response = await dispatch(getPartyById(Number(id))).unwrap();
+          const responseData = response.data || response;
 
           setParty(responseData);
         } catch (err) {
@@ -155,9 +157,9 @@ const AddEditPartyForm = () => {
     try {
       let response;
       if (isEditMode) {
-        response = await updateParty(Number(id), values);
+        response = await dispatch(updateParty({ id: Number(id), party: values })).unwrap();
       } else {
-        response = await createParty(values);
+        response = await dispatch(createParty(values)).unwrap();
       }
 
       // Use backend response message

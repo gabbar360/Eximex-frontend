@@ -117,8 +117,8 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({
 
       toast.success(resultAction.message || 'Company created successfully!');
 
-      // Force immediate navigation
-      window.location.replace('/cprospect');
+      // Force immediate navigation to dashboard
+      window.location.replace('/dashboard');
     } catch (error: any) {
       console.error('Error submitting form:', error);
 

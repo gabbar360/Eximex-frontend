@@ -1,9 +1,8 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
 import { setUser, clearUser } from '../features/userSlice';
+import { logoutUser, getCurrentUser } from '../features/authSlice';
 
 export const useAuth = () => {
   const dispatch = useDispatch();
@@ -12,13 +11,15 @@ export const useAuth = () => {
 
   const logout = async () => {
     try {
-      const response = await dispatch(logout()).unwrap();
+      const response = await dispatch(logoutUser()).unwrap();
       dispatch(clearUser());
-      toast.success(response.message);
+      toast.success(response.message || 'Logged out successfully');
       navigate('/signin');
     } catch (error) {
       console.error('Logout failed:', error);
-      toast.error(error.message);
+      dispatch(clearUser());
+      navigate('/signin');
+      toast.error(error.message || 'Logout failed');
     }
   };
 
