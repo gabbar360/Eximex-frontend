@@ -34,7 +34,6 @@ const PaymentTracking: React.FC = () => {
       setPayments(response.data.data || []);
     } catch (error) {
       console.error('Payment error:', error);
-      toast.error('Failed to load payments');
       setPayments([]);
     } finally {
       setLoading(false);
