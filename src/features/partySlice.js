@@ -59,6 +59,17 @@ export const deleteParty = createAsyncThunk(
   }
 );
 
+export const getAllParties = createAsyncThunk(
+  'party/getAllParties',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await partyService.getAllParties();
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
 const partySlice = createSlice({
   name: 'party',
   initialState: {

@@ -33,7 +33,7 @@ import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import PageMeta from '../../components/common/PageMeta';
 import TextArea from '../../components/form/input/TextArea';
 
-import { fetchParties } from '../../features/partySlice';
+import { fetchParties, getAllParties } from '../../features/partySlice';
 
 
 import {
@@ -513,7 +513,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
 
   const loadDefaultData = async () => {
     try {
-      const partiesResponse = await getAllParties();
+      const partiesResponse = await dispatch(getAllParties()).unwrap();
       setCompanies(partiesResponse?.data || []);
       
       // Dispatch Redux actions for categories and products

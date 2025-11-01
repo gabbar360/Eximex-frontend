@@ -7,6 +7,9 @@ export const getCurrentUser = async () => {
 };
 
 export const userService = {
+  // Get current user
+  getCurrentUser,
+
   // Get user by ID
   getUser: async (id) => {
     const response = await axiosInstance.get(`/users/${id}`);
