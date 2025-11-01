@@ -105,8 +105,7 @@ const verifyToken = async () => {
 
 // Google OAuth
 const googleLogin = () => {
-  const apiBaseUrl =
-    import.meta.env.VITE_API_BASE_URL;
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   const apiUrl = apiBaseUrl.replace('/api/v1', '');
   window.location.href = `${apiUrl}/api/v1/auth/google`;
 };
@@ -119,7 +118,7 @@ const handleGoogleCallback = (urlParams) => {
   if (token && refresh) {
     localStorage.setItem('accessToken', token);
     localStorage.setItem('refreshToken', refresh);
-    
+
     // If user data is provided in URL, return it
     if (userParam) {
       try {
@@ -129,7 +128,7 @@ const handleGoogleCallback = (urlParams) => {
         console.warn('Failed to parse user data from URL:', error);
       }
     }
-    
+
     return { success: true };
   }
   return { success: false };

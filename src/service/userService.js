@@ -7,6 +7,9 @@ export const getCurrentUser = async () => {
 };
 
 export const userService = {
+  // Get current user
+  getCurrentUser,
+
   // Get user by ID
   getUser: async (id) => {
     const response = await axiosInstance.get(`/users/${id}`);
@@ -139,7 +142,9 @@ export const userService = {
 
   // Enhanced Super Admin functions
   getAllDatabaseData: async (params = {}) => {
-    const response = await axiosInstance.get('/super-admin/database/all-data', { params });
+    const response = await axiosInstance.get('/super-admin/database/all-data', {
+      params,
+    });
     return response.data.data;
   },
 
@@ -152,12 +157,16 @@ export const userService = {
   },
 
   getAllCompanies: async (params = {}) => {
-    const response = await axiosInstance.get('/super-admin/companies', { params });
+    const response = await axiosInstance.get('/super-admin/companies', {
+      params,
+    });
     return response.data.data;
   },
 
   getCompanyDetails: async (companyId) => {
-    const response = await axiosInstance.get(`/super-admin/companies/${companyId}`);
+    const response = await axiosInstance.get(
+      `/super-admin/companies/${companyId}`
+    );
     return response.data.data;
   },
 
@@ -167,7 +176,12 @@ export const userService = {
   },
 
   getTableData: async (tableName, params = {}) => {
-    const response = await axiosInstance.get(`/super-admin/database/tables/${tableName}`, { params });
+    const response = await axiosInstance.get(
+      `/super-admin/database/tables/${tableName}`,
+      { params }
+    );
     return response.data.data;
   },
 };
+
+export default userService;

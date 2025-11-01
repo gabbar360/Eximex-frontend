@@ -19,20 +19,7 @@ export const addProduct = createAsyncThunk(
   async (product, { rejectWithValue }) => {
     try {
       console.log('Redux thunk: Calling createProduct with:', product);
-      // Ensure the product data matches the Prisma schema
-      const productData = {
-        name: product.name,
-        categoryId: product.categoryId,
-        subcategoryId: product.subcategoryId || null,
-        hasSubcategory: product.hasSubcategory,
-        productType: product.productType,
-        attributes: product.attributes,
-        pricePerUnit: product.pricePerUnit,
-        unit: product.unit,
-        customFields: product.customFields,
-      };
-
-      const response = await productService.createProduct(productData);
+      const response = await productService.createProduct(product);
       console.log('Redux thunk: createProduct response:', response);
       return response;
     } catch (err) {
@@ -46,7 +33,8 @@ export const updateProduct = createAsyncThunk(
   'product/updateProduct',
   async ({ id, product }, { rejectWithValue }) => {
     try {
-      return await productService.updateProduct(id, product);
+      const response = await productService.updateProduct(id, product);
+      return response;
     } catch (err) {
       return rejectWithValue(err.message);
     }
@@ -59,6 +47,17 @@ export const deleteProduct = createAsyncThunk(
     try {
       const response = await productService.deleteProduct(id);
       return response;
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
+export const getProductById = createAsyncThunk(
+  'product/getProductById',
+  async (id, { rejectWithValue }) => {
+    try {
+      return await productService.getProductById(id);
     } catch (err) {
       return rejectWithValue(err.message);
     }

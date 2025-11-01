@@ -6,7 +6,10 @@
  * Get the base API URL without the /api/v1 suffix
  */
 export const getBaseUrl = (): string => {
-  return import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || window.location.origin;
+  return (
+    import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') ||
+    window.location.origin
+  );
 };
 
 /**
@@ -16,12 +19,12 @@ export const getBaseUrl = (): string => {
  */
 export const getAssetUrl = (path: string | null | undefined): string | null => {
   if (!path) return null;
-  
+
   // If it's already a full URL (http/https) or data URL, return as is
   if (path.startsWith('http') || path.startsWith('data:')) {
     return path;
   }
-  
+
   // Construct full URL with base URL
   const baseUrl = getBaseUrl();
   return `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`;
@@ -33,9 +36,12 @@ export const getAssetUrl = (path: string | null | undefined): string | null => {
  * @param fallback - Fallback image path
  * @returns Full logo URL or fallback
  */
-export const getLogoUrl = (logoPath: string | null | undefined, fallback?: string): string => {
+export const getLogoUrl = (
+  logoPath: string | null | undefined,
+  fallback?: string
+): string => {
   const logoUrl = getAssetUrl(logoPath);
   if (logoUrl) return logoUrl;
-  
+
   return fallback || '/images/default-logo.png';
 };

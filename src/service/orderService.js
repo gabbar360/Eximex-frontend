@@ -4,7 +4,7 @@ import handleAxiosError from '../utils/handleAxiosError';
 export const getAllOrders = async (params = {}) => {
   try {
     const { data } = await axiosInstance.get('/get/all-orders', { params });
-    return data.data;
+    return data;
   } catch (error) {
     throw handleAxiosError(error, 'order', 'fetch');
   }
@@ -13,7 +13,7 @@ export const getAllOrders = async (params = {}) => {
 export const getOrderById = async (id) => {
   try {
     const { data } = await axiosInstance.get(`/get/order-by-id/${id}`);
-    return data.data;
+    return data;
   } catch (error) {
     throw handleAxiosError(error, 'order', 'fetch');
   }

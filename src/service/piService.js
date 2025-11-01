@@ -26,10 +26,17 @@ export const getAllPiInvoices = async (
     const { data } = await axiosInstance.get(
       `/get-all/pi-invoices${queryString}`
     );
-    return data.data;
+    return {
+      piInvoices: data?.data?.piInvoices || [],
+      message: data?.message || 'Success'
+    };
   } catch (error) {
+    console.error('Error in getAllPiInvoices:', error);
     handleAxiosError(error);
-    throw error;
+    return {
+      piInvoices: [],
+      message: 'Error fetching invoices'
+    };
   }
 };
 
@@ -133,6 +140,16 @@ export const updatePiStatus = async (id, status) => {
   }
 };
 
+export const updatePiAmount = async (id, amountData) => {
+  try {
+    const response = await axiosInstance.put(`/${id}/update-amount`, amountData);
+    return response.data;
+  } catch (error) {
+    handleAxiosError(error);
+    throw error;
+  }
+};
+
 export const emailInvoice = async (id, email) => {
   try {
     const response = await axiosInstance.post(`/${id}/email`, { email });
@@ -150,6 +167,7 @@ const piService = {
   getPiInvoiceById,
   getPiInvoiceHistory,
   updatePiInvoice,
+  updatePiAmount,
   deletePiInvoice,
   downloadPiInvoicePdf,
   updatePiStatus,

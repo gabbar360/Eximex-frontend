@@ -110,7 +110,11 @@ export default function CompanyDetailsCard({
           <div className="flex items-center gap-4 mb-6">
             <div className="flex-shrink-0">
               <Image
-                src={companyData?.logo ? `${import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || window.location.origin}${companyData.logo}` : '/images/default-company-logo.png'}
+                src={
+                  companyData?.logo
+                    ? `${import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || window.location.origin}${companyData.logo}`
+                    : '/images/default-company-logo.png'
+                }
                 alt="Company Logo"
                 width={96}
                 height={96}
@@ -333,7 +337,8 @@ export default function CompanyDetailsCard({
                         {logoPreview ? (
                           <img
                             src={
-                              logoPreview.startsWith('http') || logoPreview.startsWith('data:')
+                              logoPreview.startsWith('http') ||
+                              logoPreview.startsWith('data:')
                                 ? logoPreview
                                 : `${import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || window.location.origin}${logoPreview}`
                             }

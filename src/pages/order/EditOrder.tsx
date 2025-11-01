@@ -1,9 +1,11 @@
+import { useDispatch, useSelector } from 'react-redux';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faSave } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
-import orderService from '../../service/orderService';
+import { getOrderById, updateOrder } from '../../features/orderSlice';
+
 import PageBreadCrumb from '../../components/common/PageBreadCrumb';
 import InputField from '../../components/form/input/InputField';
 import Select from '../../components/form/Select';
@@ -11,6 +13,7 @@ import Label from '../../components/form/Label';
 import DatePicker from '../../components/form/DatePicker';
 
 const EditOrder = () => {
+  const dispatch = useDispatch();
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -32,7 +35,7 @@ const EditOrder = () => {
   const fetchOrderDetails = async () => {
     try {
       setLoading(true);
-      const response = await orderService.getOrderById(id);
+      const response = await dispatch(getOrderById(id)).unwrap();
       const order = response;
 
       setOrderData({
@@ -79,7 +82,7 @@ const EditOrder = () => {
         truckNumber: orderData.truckNumber || null,
       };
 
-      const result = await orderService.updateOrder(id, updateData);
+      const result = await dispatch(updateOrder({ id, orderData: updateData })).unwrap();
       console.log('Update response:', result);
       toast.success(result.message);
 

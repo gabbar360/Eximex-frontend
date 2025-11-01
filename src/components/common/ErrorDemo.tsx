@@ -1,14 +1,13 @@
+import { useDispatch, useSelector } from 'react-redux';
 import React from 'react';
 import { toast } from 'react-toastify';
-import productService from '../../service/productService';
-import categoryService from '../../service/categoryService';
 
 // Demo component to test user-friendly error messages
 const ErrorDemo: React.FC = () => {
   const testProductError = async () => {
     try {
       // This will likely cause a 404 error
-      await productService.getProductById('nonexistent-id');
+      await dispatch(getProductById('nonexistent-id')).unwrap();
     } catch (error) {
       toast.error(error.message);
     }
@@ -17,7 +16,7 @@ const ErrorDemo: React.FC = () => {
   const testCategoryError = async () => {
     try {
       // This will likely cause a validation error
-      await categoryService.createCategory({});
+      await dispatch(createCategory({})).unwrap();
     } catch (error) {
       toast.error(error.message);
     }

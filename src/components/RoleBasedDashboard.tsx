@@ -1,7 +1,8 @@
+import { useDispatch, useSelector } from 'react-redux';
 import React, { useState, useEffect } from 'react';
 import { useAuth, RoleGuard, PermissionGuard } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { userService } from '../service/userService';
+import { getUserDataSummary, getSuperAdminDashboardStats, getCompanyDashboardStats, getUserStats, getActivityLogs } from '../features/userSlice';
 
 import {
   FiUsers,
@@ -29,6 +30,7 @@ interface DashboardStats {
 const RoleBasedDashboard: React.FC = () => {
   const { user, permissions } = useAuth();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -46,7 +48,7 @@ const RoleBasedDashboard: React.FC = () => {
       // For staff, show only their own data
       if (user?.role === 'STAFF') {
         try {
-          const summary = await userService.getUserDataSummary(user.id);
+          const summary = await dispatch(getUserDataSummary(user.id)).unwrap();
           console.log('Staff data summary:', summary);
           dashboardStats.parties = summary.parties || 0;
           dashboardStats.products = summary.products || 0;
@@ -59,7 +61,7 @@ const RoleBasedDashboard: React.FC = () => {
         // For super admin, get global stats across all companies
         try {
           const superAdminStats =
-            await userService.getSuperAdminDashboardStats();
+            await dispatch(getSuperAdminDashboardStats()).unwrap();
           console.log('Super admin dashboard stats:', superAdminStats);
           dashboardStats.parties = superAdminStats.parties || 0;
           dashboardStats.products = superAdminStats.products || 0;
@@ -71,7 +73,7 @@ const RoleBasedDashboard: React.FC = () => {
       } else {
         // For admins, get company-wide stats (includes admin + all staff data)
         try {
-          const companyStats = await userService.getCompanyDashboardStats();
+          const companyStats = await dispatch(getCompanyDashboardStats()).unwrap();
           console.log('Company dashboard stats:', companyStats);
           dashboardStats.parties = companyStats.parties || 0;
           dashboardStats.products = companyStats.products || 0;
@@ -84,7 +86,7 @@ const RoleBasedDashboard: React.FC = () => {
 
       if (permissions.canManageStaff) {
         try {
-          const userStats = await userService.getUserStats();
+          const userStats = await dispatch(getUserStats()).unwrap();
           dashboardStats.staff = userStats.totalUsers || 0;
         } catch (error) {
           console.error('Failed to fetch user stats:', error);
@@ -295,6 +297,7 @@ const StaffDashboardSection: React.FC = () => {
 // Recent Activity Section
 const RecentActivitySection: React.FC = () => {
   const { permissions } = useAuth();
+  const dispatch = useDispatch();
   const [recentActivity, setRecentActivity] = useState([]);
 
   useEffect(() => {
@@ -302,7 +305,7 @@ const RecentActivitySection: React.FC = () => {
     const fetchRecentActivity = async () => {
       try {
         if (permissions.canViewActivityLogs) {
-          const data = await userService.getActivityLogs({ limit: 5 });
+          const data = await dispatch(getActivityLogs({ limit: 5 })).unwrap();
           setRecentActivity(data.data || []);
         }
       } catch (error) {

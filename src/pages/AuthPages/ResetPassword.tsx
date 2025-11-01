@@ -1,9 +1,12 @@
+import { useDispatch, useSelector } from 'react-redux';
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { resetPassword } from '../../features/authSlice';
 import { toast } from 'react-toastify';
-import authService from '../../service/authService';
+
 
 const ResetPassword: React.FC = () => {
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     newPassword: '',
     confirmPassword: '',
@@ -71,11 +74,11 @@ const ResetPassword: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const response = await authService.resetPassword({
+      const response = await dispatch(resetPassword({
         token,
         newPassword: formData.newPassword,
         confirmPassword: formData.confirmPassword,
-      });
+      })).unwrap();
 
       toast.success(response.message || 'Password reset successfully!');
 

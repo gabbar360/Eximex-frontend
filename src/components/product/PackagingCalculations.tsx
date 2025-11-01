@@ -47,7 +47,7 @@ const PackagingCalculations: React.FC<PackagingCalculationsProps> = React.memo(
           // Calculate multiplier dynamically based on unit type and hierarchy
           let multiplier = 1;
           const lastLevel = packagingHierarchy[packagingHierarchy.length - 1];
-          
+
           if (weightUnitType === packagingHierarchy[0].from) {
             // Base unit selected - multiply by total units
             multiplier = totalPieces;
@@ -59,7 +59,10 @@ const PackagingCalculations: React.FC<PackagingCalculationsProps> = React.memo(
             let foundUnit = false;
             for (let i = 0; i < packagingHierarchy.length; i++) {
               const level = packagingHierarchy[i];
-              if (level.from === weightUnitType || level.to === weightUnitType) {
+              if (
+                level.from === weightUnitType ||
+                level.to === weightUnitType
+              ) {
                 // Calculate how many of this unit type per box
                 let unitsPerBox = 1;
                 for (let j = i; j < packagingHierarchy.length; j++) {
@@ -104,27 +107,27 @@ const PackagingCalculations: React.FC<PackagingCalculationsProps> = React.memo(
 
         setFieldValue('totalGrossWeight', totalWeightInSelectedUnit.toFixed(2));
         setFieldValue('totalGrossWeightUnit', outputUnit);
-        
+
         // Calculate weights for all levels dynamically
         if (unitWeight > 0 && weightUnitType && packagingHierarchy.length > 0) {
           const baseWeightInKg = convertToKg(unitWeight, unitWeightUnit);
-          
+
           // Find the base unit (first level)
           const baseUnit = packagingHierarchy[0].from;
-          
+
           // Calculate weight per base unit
           let weightPerBaseUnitInKg = baseWeightInKg;
-          
+
           // If selected unit type is not the base unit, calculate base unit weight
           if (weightUnitType !== baseUnit) {
             let divisionFactor = 1;
-            
+
             // Find the selected unit in hierarchy and calculate division factor
             for (let i = 0; i < packagingHierarchy.length; i++) {
               const level = packagingHierarchy[i];
               const quantityField = `${level.from}Per${level.to}`;
               const quantity = parseInt(values[quantityField]) || 1;
-              
+
               if (level.from === weightUnitType) {
                 // Found the selected unit, calculate how many base units it contains
                 break;
@@ -137,26 +140,36 @@ const PackagingCalculations: React.FC<PackagingCalculationsProps> = React.memo(
                 divisionFactor *= quantity;
               }
             }
-            
+
             weightPerBaseUnitInKg = baseWeightInKg / divisionFactor;
           }
-          
+
           // Calculate and store weight for each level
           let cumulativeMultiplier = 1;
-          
+
           // Store base unit weight
-          const weightPerBaseUnit = convertFromKg(weightPerBaseUnitInKg, outputUnit);
+          const weightPerBaseUnit = convertFromKg(
+            weightPerBaseUnitInKg,
+            outputUnit
+          );
           setFieldValue(`weightPer${baseUnit}`, weightPerBaseUnit.toFixed(2));
-          
+
           // Calculate weights for each packaging level
           packagingHierarchy.forEach((level, index) => {
             const quantityField = `${level.from}Per${level.to}`;
             const quantity = parseInt(values[quantityField]) || 1;
             cumulativeMultiplier *= quantity;
-            
-            const weightForThisLevelInKg = weightPerBaseUnitInKg * cumulativeMultiplier;
-            const weightForThisLevel = convertFromKg(weightForThisLevelInKg, outputUnit);
-            setFieldValue(`weightPer${level.to}`, weightForThisLevel.toFixed(2));
+
+            const weightForThisLevelInKg =
+              weightPerBaseUnitInKg * cumulativeMultiplier;
+            const weightForThisLevel = convertFromKg(
+              weightForThisLevelInKg,
+              outputUnit
+            );
+            setFieldValue(
+              `weightPer${level.to}`,
+              weightForThisLevel.toFixed(2)
+            );
           });
         }
 

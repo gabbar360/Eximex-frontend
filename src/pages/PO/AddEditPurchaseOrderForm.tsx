@@ -1,11 +1,15 @@
+import { useDispatch, useSelector } from 'react-redux';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import { toast } from 'react-toastify';
+import { getPurchaseOrderById, updatePurchaseOrder, createPurchaseOrder, getFormData } from '../../features/purchaseOrderSlice';
+import { fetchProducts } from '../../features/productSlice';
+
 import PageBreadCrumb from '../../components/common/PageBreadCrumb';
-import purchaseOrderService from '../../service/purchaseOrderService';
-import productService from '../../service/productService';
+
+
 import DatePicker from '../../components/form/DatePicker';
 import SearchableDropdown from '../../components/SearchableDropdown';
 
@@ -50,6 +54,7 @@ interface Vendor {
 
 const AddEditPurchaseOrderForm: React.FC = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { id } = useParams();
   const isEdit = !!id;
 
@@ -117,25 +122,33 @@ const AddEditPurchaseOrderForm: React.FC = () => {
     const loadData = async () => {
       setLoading(true);
       try {
-        const [formResponse, productsData] = await Promise.all([
-          purchaseOrderService.getFormData(),
-          productService.getAllProducts(),
+        const [formResponse, productsResponse] = await Promise.all([
+          dispatch(getFormData()).unwrap(),
+          dispatch(fetchProducts()).unwrap(),
         ]);
 
+        // Set company and vendors data (same as old working code)
         setCompany(formResponse.data.company);
         setVendors(formResponse.data.vendors);
-        console.log('Products API Response:', productsData);
-        console.log('Products Data:', productsData?.data);
-        setProducts(Array.isArray(productsData?.data) ? productsData.data : []);
-        // Filter only suppliers
+        console.log('Form Data Response:', formResponse);
+        console.log('Vendors Data:', formResponse.data.vendors);
+        
+        // Set products data
+        console.log('Products API Response:', productsResponse);
+        const productsData = productsResponse?.products || productsResponse?.data || [];
+        setProducts(Array.isArray(productsData) ? productsData : []);
+        
+        // Filter only suppliers (same as old working code)
         const supplierList = formResponse.data.vendors.filter(
           (vendor) => vendor.role === 'Supplier'
         );
         setSuppliers(supplierList);
+        console.log('Filtered Suppliers:', supplierList);
+
 
         if (isEdit && id) {
           const { data: poData } =
-            await purchaseOrderService.getPurchaseOrderById(id);
+            await dispatch(getPurchaseOrderById(id)).unwrap();
           setFormData(poData);
           setItems(
             poData.items?.map((item) => ({
@@ -279,7 +292,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
       const submitData = {
         companyName: values.companyName,
         companyAddress: values.companyAddress,
-        poNumber: values.poNumber,
+        ...(isEdit ? {} : { poNumber: values.poNumber }), // Only include poNumber for creation
         poDate: values.poDate ? new Date(values.poDate).toISOString() : null,
         deliveryDate: values.deliveryDate
           ? new Date(values.deliveryDate).toISOString()
@@ -309,25 +322,26 @@ const AddEditPurchaseOrderForm: React.FC = () => {
           rate: item.rate,
           amount: item.quantity * item.rate,
         })),
-        // Add gstin field
         gstin: values.gstin,
       };
 
       if (isEdit) {
-        await purchaseOrderService.updatePurchaseOrder(id, submitData);
+        await dispatch(updatePurchaseOrder({ id, data: submitData })).unwrap();
         toast.success('Purchase order updated successfully');
       } else {
-        await purchaseOrderService.createPurchaseOrder(submitData);
+        await dispatch(createPurchaseOrder(submitData)).unwrap();
         toast.success('Purchase order created successfully');
       }
 
       navigate('/purchase-orders');
     } catch (error) {
-      toast.error(
-        error.response?.data?.message ||
-          error.message ||
-          'Failed to save purchase order'
-      );
+      console.error('Purchase Order Save Error:', error);
+      console.error('Error response:', error.response);
+      console.error('Error message:', error.message);
+      console.error('Submit data:', submitData);
+      
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to save purchase order';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
       setSubmitting(false);

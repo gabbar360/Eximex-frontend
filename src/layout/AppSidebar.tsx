@@ -63,43 +63,45 @@ const getNavItems = (userRole: string): NavItem[] => [
     name: 'Dashboard',
     path: '/dashboard',
   },
-  ...(userRole !== 'SUPER_ADMIN' ? [
-    {
-      icon: <FontAwesomeIcon icon={faUsers} />,
-      name: 'Customer&prospect',
-      path: '/cprospect',
-    },
-    {
-      icon: <FontAwesomeIcon icon={faBox} />,
-      name: 'Categories',
-      path: '/categories',
-    },
-    {
-      icon: <FontAwesomeIcon icon={faCube} />,
-      name: 'Products',
-      path: '/products',
-    },
-    {
-      icon: <FontAwesomeIcon icon={faFileAlt} />,
-      name: 'Proforma Invoices',
-      path: '/proforma-invoices',
-    },
-    {
-      icon: <FontAwesomeIcon icon={faShoppingCart} />,
-      name: 'Orders',
-      path: '/orders',
-    },
-    {
-      icon: <FontAwesomeIcon icon={faFileContract} />,
-      name: 'Purchase Orders',
-      path: '/purchase-orders',
-    },
-    {
-      icon: <FontAwesomeIcon icon={faCreditCard} />,
-      name: 'Payment Tracking',
-      path: '/payments',
-    },
-  ] : []),
+  ...(userRole !== 'SUPER_ADMIN'
+    ? [
+        {
+          icon: <FontAwesomeIcon icon={faUsers} />,
+          name: 'Customer&prospect',
+          path: '/cprospect',
+        },
+        {
+          icon: <FontAwesomeIcon icon={faBox} />,
+          name: 'Categories',
+          path: '/categories',
+        },
+        {
+          icon: <FontAwesomeIcon icon={faCube} />,
+          name: 'Products',
+          path: '/products',
+        },
+        {
+          icon: <FontAwesomeIcon icon={faFileAlt} />,
+          name: 'Proforma Invoices',
+          path: '/proforma-invoices',
+        },
+        {
+          icon: <FontAwesomeIcon icon={faShoppingCart} />,
+          name: 'Orders',
+          path: '/orders',
+        },
+        {
+          icon: <FontAwesomeIcon icon={faFileContract} />,
+          name: 'Purchase Orders',
+          path: '/purchase-orders',
+        },
+        {
+          icon: <FontAwesomeIcon icon={faCreditCard} />,
+          name: 'Payment Tracking',
+          path: '/payments',
+        },
+      ]
+    : []),
   ...(['ADMIN', 'SUPER_ADMIN'].includes(userRole)
     ? [
         {

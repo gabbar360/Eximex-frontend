@@ -1,5 +1,6 @@
+import { useDispatch, useSelector } from 'react-redux';
 import React, { useState, useEffect } from 'react';
-import { userService } from '../../service/userService';
+import { getSuperAdminDashboardStats, getAllDatabaseData } from '../../features/userSlice';
 import { toast } from 'react-toastify';
 
 interface DashboardStats {
@@ -42,9 +43,11 @@ const SuperAdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedTable, setSelectedTable] = useState('users');
 
+  const dispatch = useDispatch();
+
   const fetchDashboardStats = async () => {
     try {
-      const response = await userService.getSuperAdminDashboardStats();
+      const response = await dispatch(getSuperAdminDashboardStats()).unwrap();
       setStats(response);
     } catch (error) {
       toast.error('Failed to fetch dashboard stats');
@@ -54,7 +57,7 @@ const SuperAdminDashboard: React.FC = () => {
 
   const fetchDatabaseData = async () => {
     try {
-      const response = await userService.getAllDatabaseData({ limit: 50, page: 1 });
+      const response = await dispatch(getAllDatabaseData({ limit: 50, page: 1 })).unwrap();
       setDatabaseData(response);
     } catch (error) {
       toast.error('Failed to fetch database data');
@@ -71,12 +74,24 @@ const SuperAdminDashboard: React.FC = () => {
     loadData();
   }, []);
 
-  const StatCard = ({ title, value, icon, color }: { title: string; value: number; icon: string; color: string }) => (
+  const StatCard = ({
+    title,
+    value,
+    icon,
+    color,
+  }: {
+    title: string;
+    value: number;
+    icon: string;
+    color: string;
+  }) => (
     <div className={`bg-white p-6 rounded-lg shadow-md border-l-4 ${color}`}>
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="text-3xl font-bold text-gray-900">{value.toLocaleString()}</p>
+          <p className="text-3xl font-bold text-gray-900">
+            {value.toLocaleString()}
+          </p>
         </div>
         <div className={`text-4xl ${color.replace('border-l-', 'text-')}`}>
           {icon}
@@ -95,8 +110,8 @@ const SuperAdminDashboard: React.FC = () => {
     }
 
     const firstItem = data[0];
-    const columns = Object.keys(firstItem).filter(key => 
-      !['password', 'createdAt', 'updatedAt'].includes(key)
+    const columns = Object.keys(firstItem).filter(
+      (key) => !['password', 'createdAt', 'updatedAt'].includes(key)
     );
 
     return (
@@ -118,7 +133,10 @@ const SuperAdminDashboard: React.FC = () => {
             {data.slice(0, 10).map((item, index) => (
               <tr key={index} className="hover:bg-gray-50">
                 {columns.map((column) => (
-                  <td key={column} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td
+                    key={column}
+                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                  >
                     {typeof item[column] === 'object' && item[column] !== null
                       ? JSON.stringify(item[column])
                       : String(item[column] || 'N/A')}
@@ -146,7 +164,9 @@ const SuperAdminDashboard: React.FC = () => {
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
           Super Admin Dashboard
         </h1>
-        <p className="text-gray-600">Complete system overview and database management</p>
+        <p className="text-gray-600">
+          Complete system overview and database management
+        </p>
       </div>
 
       {/* Navigation Tabs */}
@@ -241,14 +261,30 @@ const SuperAdminDashboard: React.FC = () => {
               className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="users">Users ({databaseData.counts.users})</option>
-              <option value="companies">Companies ({databaseData.counts.companies})</option>
-              <option value="parties">Parties ({databaseData.counts.parties})</option>
-              <option value="products">Products ({databaseData.counts.products})</option>
-              <option value="piInvoices">PI Invoices ({databaseData.counts.piInvoices})</option>
-              <option value="orders">Orders ({databaseData.counts.orders})</option>
-              <option value="vgmDocuments">VGM Documents ({databaseData.counts.vgmDocuments})</option>
-              <option value="categories">Categories ({databaseData.counts.categories})</option>
-              <option value="packagingUnits">Packaging Units ({databaseData.counts.packagingUnits})</option>
+              <option value="companies">
+                Companies ({databaseData.counts.companies})
+              </option>
+              <option value="parties">
+                Parties ({databaseData.counts.parties})
+              </option>
+              <option value="products">
+                Products ({databaseData.counts.products})
+              </option>
+              <option value="piInvoices">
+                PI Invoices ({databaseData.counts.piInvoices})
+              </option>
+              <option value="orders">
+                Orders ({databaseData.counts.orders})
+              </option>
+              <option value="vgmDocuments">
+                VGM Documents ({databaseData.counts.vgmDocuments})
+              </option>
+              <option value="categories">
+                Categories ({databaseData.counts.categories})
+              </option>
+              <option value="packagingUnits">
+                Packaging Units ({databaseData.counts.packagingUnits})
+              </option>
             </select>
           </div>
 
@@ -259,10 +295,19 @@ const SuperAdminDashboard: React.FC = () => {
                 {selectedTable.replace(/([A-Z])/g, ' $1').trim()} Data
               </h3>
               <p className="text-sm text-gray-500">
-                Showing first 10 records out of {databaseData.counts[selectedTable as keyof typeof databaseData.counts]} total
+                Showing first 10 records out of{' '}
+                {
+                  databaseData.counts[
+                    selectedTable as keyof typeof databaseData.counts
+                  ]
+                }{' '}
+                total
               </p>
             </div>
-            {renderTableData(selectedTable, databaseData[selectedTable as keyof DatabaseData] as any[])}
+            {renderTableData(
+              selectedTable,
+              databaseData[selectedTable as keyof DatabaseData] as any[]
+            )}
           </div>
         </div>
       )}

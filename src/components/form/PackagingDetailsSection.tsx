@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import Label from './Label';
 import Select from './Select';
 import Input from './input/InputField';
-import { getAllPackagingUnits } from '../../service/packagingService';
+import { fetchAllPackagingUnits } from '../../features/packagingSlice';
+import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 
 interface PackagingLevel {
@@ -146,6 +147,7 @@ const PackagingDetailsSection: React.FC<PackagingDetailsSectionProps> = ({
   onPackagingLevelsChange,
   primaryUnit,
 }) => {
+  const dispatch = useDispatch();
   const [packagingUnits, setPackagingUnits] = useState<PackagingUnit[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -153,8 +155,8 @@ const PackagingDetailsSection: React.FC<PackagingDetailsSectionProps> = ({
     const fetchPackagingUnits = async () => {
       try {
         setLoading(true);
-        const response = await getAllPackagingUnits();
-        setPackagingUnits(response.data || []);
+        const response = await dispatch(fetchAllPackagingUnits()).unwrap();
+        setPackagingUnits(response.data || response || []);
       } catch (error: any) {
         console.error('Failed to fetch packaging units:', error);
         toast.error('Failed to load packaging units');

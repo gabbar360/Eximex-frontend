@@ -36,6 +36,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import PublicRoute from './components/auth/PublicRoute';
 import { useEffect, useState } from 'react';
 import { setUser } from './features/userSlice';
+import { getCurrentUser } from './features/authSlice';
 import authService from './service/authService';
 import Cprospect from '../src/pages/party/Cprospect';
 import AddEditPartyForm from './pages/party/AddEditPartyForm';
@@ -64,6 +65,7 @@ import CompanyManagement from './pages/SuperAdmin/CompanyManagement';
 import PurchaseOrders from './pages/PO/PurchaseOrders';
 import AddEditPurchaseOrderForm from './pages/PO/AddEditPurchaseOrderForm';
 import PaymentTracking from './pages/PaymentTracking';
+import CompanySetup from './pages/Comanyform';
 
 function AppContent() {
   const location = useLocation();
@@ -101,6 +103,7 @@ function AppContent() {
       <Route element={<ProtectedRoute />}>
         {/* <Route path="/" element={<Navigate to="/admin/dashboard" replace />} /> */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/company-setup" element={<CompanySetup />} />
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<RoleBasedDashboard />} />
           {/* <Route path="/admin/dashboard" element={<Home />} /> */}
@@ -145,9 +148,18 @@ function AppContent() {
           <Route path="/staff-management" element={<StaffManagement />} />
           <Route path="/activity-logs" element={<ActivityLogComponent />} />
           <Route path="/super-admin/users" element={<UserManagement />} />
-          <Route path="/super-admin/dashboard" element={<SuperAdminDashboard />} />
-          <Route path="/super-admin/passwords" element={<PasswordManagement />} />
-          <Route path="/super-admin/companies" element={<CompanyManagement />} />
+          <Route
+            path="/super-admin/dashboard"
+            element={<SuperAdminDashboard />}
+          />
+          <Route
+            path="/super-admin/passwords"
+            element={<PasswordManagement />}
+          />
+          <Route
+            path="/super-admin/companies"
+            element={<CompanyManagement />}
+          />
           <Route path="/payments" element={<PaymentTracking />} />
 
           <Route path="/calendar" element={<Calendar />} />
@@ -185,7 +197,7 @@ export default function App() {
           if (googleCallback.userData) {
             dispatch(setUser(googleCallback.userData));
           }
-          
+
           // Clean up URL
           window.history.replaceState(
             {},
@@ -201,9 +213,16 @@ export default function App() {
           // Only fetch user if not already set from Google callback
           if (!googleCallback.userData) {
             // Try to get current user, which will trigger token refresh if needed
-            const res = await authService.getCurrentUser();
+            const res = await dispatch(getCurrentUser()).unwrap();
             if (res?.data) {
               dispatch(setUser(res.data));
+              
+              // Check if user needs company setup
+              const userData = res.data;
+              if (userData && (!userData.company && !userData.companyId) && window.location.pathname !== '/company-setup') {
+                window.location.replace('/company-setup');
+                return;
+              }
             }
           }
         }

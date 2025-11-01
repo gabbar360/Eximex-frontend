@@ -6,11 +6,12 @@ import {
   getCategoryById,
   updateCategory,
   getAllCategories,
-} from '../../service/categoryService';
+} from '../../features/categorySlice';
 import {
   createPackagingHierarchy,
-  getPackagingHierarchy,
-} from '../../service/packagingService';
+  fetchPackagingHierarchy,
+} from '../../features/packagingSlice';
+import { useDispatch } from 'react-redux';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import PageMeta from '../../components/common/PageMeta';
 import Form from '../../components/form/Form';
@@ -217,6 +218,7 @@ const UnitDropdown: React.FC<{
 
 const AddEditCategoryForm: React.FC = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { id } = useParams<{ id: string }>();
   const isEditMode = Boolean(id);
   const user = useSelector((state: any) => state.user.user);
@@ -234,11 +236,11 @@ const AddEditCategoryForm: React.FC = () => {
   useEffect(() => {
     const fetchParentCategories = async () => {
       try {
-        const data = await getAllCategories();
+        const data = await dispatch(getAllCategories()).unwrap();
         // Filter out categories that could create circular references
         const filteredCategories = isEditMode
-          ? data.data.filter((cat: any) => cat.id !== id)
-          : data.data;
+          ? (data.data || data).filter((cat: any) => cat.id !== id)
+          : (data.data || data);
         setParentCategories(filteredCategories || []);
       } catch (err: any) {
         console.error('Failed to fetch parent categories:', err);
@@ -251,7 +253,7 @@ const AddEditCategoryForm: React.FC = () => {
       const fetchCategory = async () => {
         try {
           setLoading(true);
-          const response = await getCategoryById(id);
+          const response = await dispatch(getCategoryById(id)).unwrap();
           const data = response.data || response;
           console.log('Category data:', data); // Debug log to see the structure
 
@@ -292,7 +294,7 @@ const AddEditCategoryForm: React.FC = () => {
           } else {
             // Fallback to separate API call if not included in category data
             try {
-              const packagingResponse = await getPackagingHierarchy(id);
+              const packagingResponse = await dispatch(fetchPackagingHierarchy(id)).unwrap();
               if (
                 packagingResponse.success &&
                 packagingResponse.data.length > 0
@@ -375,7 +377,7 @@ const AddEditCategoryForm: React.FC = () => {
         };
 
         console.log('Updating category:', categoryData);
-        const result = await updateCategory(id, categoryData);
+        const result = await dispatch(updateCategory({ id, category: categoryData })).unwrap();
 
         toast.success(result.message);
 
@@ -415,7 +417,7 @@ const AddEditCategoryForm: React.FC = () => {
           'Sending category data with packaging levels:',
           categoryData
         );
-        const result = await createCategory(categoryData);
+        const result = await dispatch(createCategory(categoryData)).unwrap();
 
         // We've already included packaging levels in the category data,
         // so we don't need to make a separate API call here.

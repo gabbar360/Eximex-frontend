@@ -1,6 +1,7 @@
+import { useDispatch, useSelector } from 'react-redux';
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
-import piService from '../service/piService';
+
 
 interface EmailInvoiceModalProps {
   isOpen: boolean;
@@ -27,7 +28,7 @@ const EmailInvoiceModal: React.FC<EmailInvoiceModalProps> = ({
 
     setLoading(true);
     try {
-      await piService.emailInvoice(invoiceId, email);
+      await dispatch(emailInvoice(invoiceId, email)).unwrap();
       toast.success('Invoice sent successfully');
       onClose();
     } catch (error) {
