@@ -7,7 +7,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900 relative">
+    <div className="h-screen overflow-hidden bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900 relative">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: 'radial-gradient(circle at 30px 30px, rgba(255,255,255,0.1) 2px, transparent 2px)', backgroundSize: '60px 60px'}}></div>
@@ -18,7 +18,7 @@ export default function AuthLayout({
       <div className="absolute bottom-20 right-10 w-24 h-24 bg-blue-400/10 rounded-full blur-lg animate-pulse delay-1000"></div>
       <div className="absolute top-1/2 right-1/4 w-16 h-16 bg-indigo-400/10 rounded-full blur-md animate-pulse delay-500"></div>
       
-      <div className="relative min-h-screen flex items-center justify-center p-2 sm:p-4">
+      <div className="relative h-full flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
         {children}
         
         {/* Theme Toggle */}

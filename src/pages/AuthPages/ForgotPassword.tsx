@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import { forgotPassword } from '../../features/authSlice';
 import AuthLayout from './AuthPageLayout';
 import PageMeta from '../../components/common/PageMeta';
+import AuthSlider from '../../components/auth/AuthSlider';
 
 const ForgotPassword: React.FC = () => {
   const dispatch = useDispatch();
@@ -93,45 +94,10 @@ const ForgotPassword: React.FC = () => {
         description="Reset your Eximex account password securely"
       />
       <AuthLayout>
-        <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-16 xl:gap-32 items-center min-h-screen py-4 sm:py-8 lg:py-0">
-            {/* Left Side - Branding */}
-            <div className="hidden lg:flex flex-col items-center justify-center text-white text-center">
-              <div className="mb-8">
-                <img 
-                  src="/sidelogo3.png" 
-                  alt="Eximex" 
-                  className="h-40 mb-2 mx-auto"
-                />
-                <h1 className="text-5xl font-bold mb-6 leading-tight">
-                  Secure Account
-                  <span className="block text-blue-300">Recovery</span>
-                </h1>
-                <p className="text-xl text-blue-100 mb-8 leading-relaxed">
-                  Don't worry! It happens to the best of us. Enter your email and we'll send you a secure link to reset your password.
-                </p>
-              </div>
-              
-              {/* Security Features */}
-              <div className="space-y-4 mb-8">
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <span className="text-blue-100">Secure Password Reset</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <span className="text-blue-100">Email Verification</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <span className="text-blue-100">Account Protection</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <span className="text-blue-100">Quick Recovery Process</span>
-                </div>
-              </div>
-            </div>
+        <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-full">
+          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-16 xl:gap-32 items-center h-full py-4 sm:py-8 lg:py-0">
+            {/* Left Side - Slider */}
+            <AuthSlider />
 
             {/* Right Side - Form */}
             <div className="w-full max-w-xs xs:max-w-sm sm:max-w-md mx-auto lg:mx-0 order-first lg:order-last">
