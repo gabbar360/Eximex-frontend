@@ -1,3 +1,4 @@
+import { useDispatch, useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
 import PageBreadcrumb from '../components/common/PageBreadCrumb';
 import UserMetaCard from '../components/UserProfile/UserMetaCard';
@@ -5,7 +6,8 @@ import UserInfoCard from '../components/UserProfile/UserInfoCard';
 import UserAddressCard from '../components/UserProfile/UserAddressCard';
 import CompanyDetailsCard from '../components/UserProfile/CompanyDetailsCard';
 import PageMeta from '../components/common/PageMeta';
-import { getCurrentUser, userService } from '../service/userService';
+import { fetchCurrentUser, updateUser } from '../features/userSlice';
+import { updateCompany } from '../features/companySlice';
 
 interface UserData {
   id: number;
@@ -28,6 +30,7 @@ interface UserData {
 }
 
 export default function UserProfiles() {
+  const dispatch = useDispatch();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,8 +38,8 @@ export default function UserProfiles() {
   const fetchUserData = async () => {
     try {
       setLoading(true);
-      const data = await getCurrentUser();
-      setUserData(data);
+      const result = await dispatch(fetchCurrentUser()).unwrap();
+      setUserData(result.data || result);
       setError(null);
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -49,7 +52,7 @@ export default function UserProfiles() {
   const handleUpdateUser = async (updatedData: Partial<UserData>) => {
     if (!userData) return;
     try {
-      const result = await userService.updateUser(userData.id, updatedData);
+      const result = await dispatch(updateUser({ id: userData.id, userData: updatedData })).unwrap();
       setUserData({ ...userData, ...result.data });
     } catch (error) {
       console.error('Error updating user:', error);
@@ -60,8 +63,6 @@ export default function UserProfiles() {
   const handleUpdateCompany = async (updatedData: any) => {
     if (!userData?.company) return;
     try {
-      const { updateCompany } = await import('../service/company');
-
       console.log('Updating company with data:', updatedData);
       console.log('Company ID:', userData.company.id);
 
@@ -77,7 +78,7 @@ export default function UserProfiles() {
         }
       });
 
-      const result = await updateCompany(userData.company.id, formData);
+      const result = await dispatch(updateCompany({ id: userData.company.id, companyData: formData })).unwrap();
       console.log('Update result:', result);
 
       // Refresh user data to get updated company info

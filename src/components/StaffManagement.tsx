@@ -1,6 +1,7 @@
+import { useDispatch, useSelector } from 'react-redux';
 import React, { useState, useEffect } from 'react';
 import { useAuth, PermissionGuard } from '../context/AuthContext';
-import { userService } from '../service/userService';
+import { getCompanyStaff, getUserDataSummary, createUser, deleteStaffAndReassign } from '../features/userSlice';
 import { toast } from 'react-toastify';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import DataAssignment from './DataAssignment';
@@ -35,9 +36,11 @@ const StaffManagement: React.FC = () => {
   const [showReassignModal, setShowReassignModal] = useState(false);
   const [showDataAssignment, setShowDataAssignment] = useState(false);
 
+  const dispatch = useDispatch();
+
   const fetchStaff = async () => {
     try {
-      const data = await userService.getCompanyStaff();
+      const data = await dispatch(getCompanyStaff()).unwrap();
       setStaff(data.data || []);
     } catch (error) {
       console.error('Failed to fetch staff:', error);
@@ -49,7 +52,7 @@ const StaffManagement: React.FC = () => {
 
   const fetchDataSummary = async (userId: number) => {
     try {
-      const data = await userService.getUserDataSummary(userId);
+      const data = await dispatch(getUserDataSummary(userId)).unwrap();
       setDataSummary(data);
     } catch (error) {
       console.error('Failed to fetch data summary:', error);
@@ -63,7 +66,7 @@ const StaffManagement: React.FC = () => {
         ...formData,
         companyId: currentUser?.companyId,
       };
-      const result = await userService.createUser(userData);
+      const result = await dispatch(createUser(userData)).unwrap();
       setShowCreateForm(false);
       fetchStaff();
       toast.success(result.message);
@@ -78,10 +81,10 @@ const StaffManagement: React.FC = () => {
     reassignToUserId: number
   ) => {
     try {
-      const result = await userService.deleteStaffAndReassign(
+      const result = await dispatch(deleteStaffAndReassign({
         staffId,
         reassignToUserId
-      );
+      })).unwrap();
       setShowReassignModal(false);
       setSelectedStaff(null);
       fetchStaff();

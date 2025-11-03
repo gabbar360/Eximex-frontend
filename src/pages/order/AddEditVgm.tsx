@@ -1,7 +1,9 @@
+import { useDispatch, useSelector } from 'react-redux';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import vgmService from '../../service/vgmService';
+import { fetchVgmById, createVgm, updateVgm } from '../../features/vgmSlice';
+
 import DatePicker from '../../components/form/DatePicker';
 
 interface VgmFormData {
@@ -23,6 +25,7 @@ interface VgmFormData {
 }
 
 const AddEditVgm: React.FC = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { id } = useParams();
@@ -57,7 +60,7 @@ const AddEditVgm: React.FC = () => {
   const fetchVgmData = async () => {
     try {
       setLoading(true);
-      const data = await vgmService.getVgmById(id);
+      const data = await dispatch(fetchVgmById(id)).unwrap();
 
       if (data.success) {
         const vgm = data.data;
@@ -143,9 +146,9 @@ const AddEditVgm: React.FC = () => {
 
       let data;
       if (isEdit) {
-        data = await vgmService.updateVgm(id, submitData);
+        data = await dispatch(updateVgm({ id, vgmData: submitData })).unwrap();
       } else {
-        data = await vgmService.createVgm(submitData);
+        data = await dispatch(createVgm(submitData)).unwrap();
       }
 
       if (data.success) {

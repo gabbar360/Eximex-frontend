@@ -1,4 +1,7 @@
+import { useDispatch, useSelector } from 'react-redux';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { fetchCategories } from '../../features/categorySlice';
+import { fetchProducts } from '../../features/productSlice';
 
 // Extend Window interface for timeout handling
 declare global {
@@ -30,14 +33,12 @@ import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import PageMeta from '../../components/common/PageMeta';
 import TextArea from '../../components/form/input/TextArea';
 
-import { getAllParties } from '../../service/partyService';
-import productService from '../../service/productService';
-import categoryService from '../../service/categoryService';
+import { fetchParties, getAllParties } from '../../features/partySlice';
 import {
   createPiInvoice,
   updatePiInvoice,
   getPiInvoiceById,
-} from '../../service/piService';
+} from '../../features/piSlice';
 
 // --- Types ---
 type Company = {
@@ -390,9 +391,14 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   );
   const [showPIPreview, setShowPIPreview] = useState<boolean>(false);
   const [currency, setCurrency] = useState<string>('USD');
+  const dispatch = useDispatch();
+  const { categories } = useSelector((state: any) => state.category);
+  const { products } = useSelector((state: any) => state.product);
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState<any[]>([]);
+  
+  // Debug Redux state
+  console.log('Redux categories:', categories);
+  console.log('Redux products:', products);
 
   // Backend integration state
   const [formDataLoaded, setFormDataLoaded] = useState<boolean>(false);
@@ -505,16 +511,18 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
 
   const loadDefaultData = async () => {
     try {
-      const [partiesResponse, categoriesResponse, productsResponse] =
-        await Promise.all([
-          getAllParties(),
-          categoryService.getAllCategories(),
-          productService.getAllProducts(),
-        ]);
+      const partiesResponse = await dispatch(getAllParties()).unwrap();
       setCompanies(partiesResponse?.data || []);
-      setCategories(categoriesResponse?.data || []);
-      setProducts(productsResponse?.data || []);
+      
+      // Dispatch Redux actions for categories and products
+      console.log('Dispatching fetchCategories and fetchProducts...');
+      const categoriesResult = await dispatch(fetchCategories()).unwrap();
+      const productsResult = await dispatch(fetchProducts()).unwrap();
+      
+      console.log('Categories loaded:', categoriesResult);
+      console.log('Products loaded:', productsResult);
     } catch (err) {
+      console.error('Error loading default data:', err);
       setError('Failed to fetch data');
     } finally {
       setLoading(false);
@@ -527,7 +535,8 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
       setLoading(true);
       try {
         // Fetch from API
-        getPiInvoiceById(parseInt(id!))
+        dispatch(getPiInvoiceById(parseInt(id!)))
+          .unwrap()
           .then((response) => {
             const pi = response.data;
             if (pi) {
@@ -1178,17 +1187,21 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
 
       if (!product) {
         console.error('Product still not found after type conversion attempts');
+        // Create a fallback product from form data
+        const fallbackName = `Product ${currentProduct.productId}`;
         product = {
           id: currentProduct.productId || 'unknown',
-          name: 'Product ' + (currentProduct.productId || 'Unknown'),
-          hsCode: '0000.00',
-          description: 'Product description',
+          name: fallbackName,
+          productName: fallbackName,
+          hsCode: 'N/A',
+          description: 'Custom product entry',
           weightPerUnitKg: 1,
           packingBoxWeightKg: 0.5,
           units: [currentProduct.unit],
           categoryId: currentProduct.categoryId || selectedCategory,
           subcategoryId: currentProduct.subcategoryId || selectedSubcategory,
         };
+        console.log('Created fallback product:', product);
       }
     }
 
@@ -1212,34 +1225,34 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
       currentProduct.unit
     );
 
-    // Create the product data with explicit name from the product object
-    const productName = product ? product.name : 'Unknown Product';
+    // Create the product data with explicit name from the product object or form input
+    const productName = product?.name || product?.productName || currentProduct.productId || 'Unknown Product';
     console.log('Using product name:', productName);
 
     const productData: ProductData = {
-      productId: product.id,
+      productId: product?.id || currentProduct.productId,
       name: productName, // Use the explicit product name
-      hsCode: product.hsCode || '',
-      description: product.description || '',
+      productName: productName, // Also set productName field for API
+      hsCode: product?.hsCode || product?.category?.hsnCode || 'N/A',
+      description: product?.description || 'No description available',
       quantity,
       rate,
       unit: currentProduct.unit || 'pcs',
       total: quantity * rate,
       totalWeight,
       categoryId:
-        currentProduct.categoryId || selectedCategory || product.categoryId,
+        currentProduct.categoryId || selectedCategory || product?.categoryId,
       subcategoryId:
         currentProduct.subcategoryId ||
         selectedSubcategory ||
-        product.subcategoryId,
+        product?.subcategoryId,
     };
-
-    // Ensure the product name is correctly set for API submission
-    productData.productName = productName;
 
     // Log the product data being added
     console.log('Adding product with data:', productData);
     console.log('Category:', category?.name || 'N/A');
+    console.log('Product from Redux:', product);
+    console.log('Current product form data:', currentProduct);
     console.log(
       'Weight calculation - Unit:',
       currentProduct.unit,
@@ -1248,6 +1261,23 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
       'Total Weight:',
       totalWeight
     );
+    
+    // Debug: Check if product has all required fields
+    console.log('Product validation:', {
+      hasId: !!product?.id,
+      hasName: !!(product?.name || product?.productName),
+      hasHsCode: !!(product?.hsCode || product?.category?.hsnCode),
+      hasDescription: !!product?.description,
+      productKeys: product ? Object.keys(product) : [],
+      finalProductData: {
+        productId: productData.productId,
+        name: productData.name,
+        hsCode: productData.hsCode,
+        unit: productData.unit,
+        quantity: productData.quantity,
+        rate: productData.rate
+      }
+    });
 
     // Show container info if multiple containers needed
     const validation = validateContainerCapacity(
@@ -1515,12 +1545,12 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
 
       if (isEditMode) {
         // Update existing PI as draft
-        const result = await updatePiInvoice(parseInt(id!), apiData);
+        const result = await dispatch(updatePiInvoice({ id: parseInt(id!), piData: apiData })).unwrap();
         toast.success(result.message);
         navigate(`/proforma-invoices/${result.data.id}/edit`);
       } else {
         // Create new PI as draft
-        const result = await createPiInvoice(apiData);
+        const result = await dispatch(createPiInvoice(apiData)).unwrap();
         toast.success(result.message);
         navigate(`/proforma-invoices/${result.data.id}/edit`);
       }
@@ -1589,11 +1619,11 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
 
       if (isEditMode) {
         // Update existing PI
-        const result = await updatePiInvoice(parseInt(id!), apiData);
+        const result = await dispatch(updatePiInvoice({ id: parseInt(id!), piData: apiData })).unwrap();
         toast.success(result.message);
       } else {
         // Create new PI
-        const result = await createPiInvoice(apiData);
+        const result = await dispatch(createPiInvoice(apiData)).unwrap();
         toast.success(result.message);
       }
 
@@ -1720,6 +1750,11 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
 
       return categoryMatch && subcategoryMatch;
     });
+
+    console.log('Filtered products count:', filteredProducts.length);
+    console.log('All products count:', products.length);
+    console.log('Current category ID:', currentCategoryId);
+    console.log('Current subcategory ID:', currentSubcategoryId);
 
     const handleQuantityByWeightChange = useCallback(
       (weight: string) => {
@@ -1858,11 +1893,20 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
               required
             >
               <option value="">Choose product</option>
-              {filteredProducts.map((prod) => (
-                <option key={prod.id} value={prod.id}>
-                  {prod.name}
+              {filteredProducts.map((prod) => {
+                const displayName = prod.name || prod.productName || prod.title || `Product ${prod.id}`;
+                return (
+                  <option key={prod.id} value={prod.id}>
+                    {displayName}
+                  </option>
+                );
+              })}
+              {/* If no products found, show option to add custom product */}
+              {filteredProducts.length === 0 && (
+                <option value="custom" disabled>
+                  No products found for this category
                 </option>
-              ))}
+              )}
             </select>
           </div>
         </div>
@@ -1871,6 +1915,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         {prod && (
           <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900 rounded">
             <div className="text-sm text-gray-700 dark:text-gray-300">
+              <strong>Product:</strong> {prod.name || prod.productName || 'N/A'} |{' '}
               <strong>HS Code:</strong>{' '}
               {prod.category?.hsnCode || prod.hsCode || 'N/A'} |{' '}
               <strong>Description:</strong> {prod.description || 'N/A'}
@@ -2996,13 +3041,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                         Choose Company
                       </option>
                       {companies
-                        ?.filter(
-                          (comp) =>
-                            (comp.role === 'customer' ||
-                              comp.type === 'customer' ||
-                              comp.partyType === 'customer') &&
-                            comp.status === true
-                        )
+                        ?.filter((comp) => comp.role === 'Customer')
                         .map((comp) => (
                           <option key={comp.id} value={comp.id}>
                             {comp?.companyName || comp?.name}
@@ -3623,7 +3662,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                                 }
                               >
                                 <td className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100">
-                                  {category?.name || 'N/A'}
+                                  {category?.name || category?.categoryName || 'sugarcane bagasse'}
                                 </td>
                                 <td className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100">
                                   {(() => {
@@ -3633,18 +3672,21 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                                         p.id.toString() ===
                                         product.productId.toString()
                                     );
-                                    return (
-                                      foundProduct?.name ||
-                                      product.name ||
-                                      'Unknown Product'
-                                    );
+                                    
+                                    // Try multiple name fields and fallback to productId if needed
+                                    return foundProduct?.name || 
+                                           foundProduct?.productName || 
+                                           product.name ||
+                                           product.productName ||
+                                           `Product ${product.productId}` ||
+                                           'Unknown Product';
                                   })()}
                                 </td>
                                 <td className="px-3 py-2 text-sm text-right text-gray-900 dark:text-gray-100">
                                   {product.quantity}
                                 </td>
                                 <td className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100">
-                                  {product.unit}
+                                  {product.unit || 'N/A'}
                                 </td>
                                 <td className="px-3 py-2 text-sm text-right text-gray-900 dark:text-gray-100">
                                   {(() => {
@@ -3655,7 +3697,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                                         product.quantity.toString(),
                                         product.unit
                                       );
-                                    return weight.toFixed(2);
+                                    return weight > 0 ? weight.toFixed(2) : 'N/A';
                                   })()}
                                 </td>
                                 <td className="px-3 py-2 text-sm text-right text-gray-900 dark:text-gray-100">

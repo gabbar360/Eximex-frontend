@@ -7,6 +7,9 @@ export const getCurrentUser = async () => {
 };
 
 export const userService = {
+  // Get current user
+  getCurrentUser,
+
   // Get user by ID
   getUser: async (id) => {
     const response = await axiosInstance.get(`/users/${id}`);
@@ -145,10 +148,10 @@ export const userService = {
     return response.data.data;
   },
 
-  resetUserPassword: async (userId, passwordData) => {
+  resetUserPassword: async (userId, newPassword) => {
     const response = await axiosInstance.patch(
       `/super-admin/users/${userId}/reset-password`,
-      passwordData
+      { newPassword }
     );
     return { message: response.data.message };
   },
@@ -180,3 +183,5 @@ export const userService = {
     return response.data.data;
   },
 };
+
+export default userService;

@@ -1,5 +1,6 @@
+import { useDispatch, useSelector } from 'react-redux';
 import React, { useState, useEffect } from 'react';
-import { userService } from '../../service/userService';
+import { getAllUsersForSuperAdmin, toggleUserBlock } from '../../features/userSlice';
 import { toast } from 'react-toastify';
 
 interface User {
@@ -18,6 +19,7 @@ interface User {
 }
 
 const UserManagement: React.FC = () => {
+  const dispatch = useDispatch();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
@@ -39,7 +41,7 @@ const UserManagement: React.FC = () => {
         limit: pagination.limit,
       };
 
-      const response = await userService.getAllUsersForSuperAdmin(params);
+      const response = await dispatch(getAllUsersForSuperAdmin(params)).unwrap();
       setUsers(response.data || []);
       setPagination((prev) => ({
         ...prev,
@@ -56,7 +58,7 @@ const UserManagement: React.FC = () => {
 
   const handleToggleBlock = async (userId: number) => {
     try {
-      const response = await userService.toggleUserBlock(userId);
+      const response = await dispatch(toggleUserBlock(userId)).unwrap();
       toast.success(response.message);
       fetchUsers();
     } catch (error: any) {

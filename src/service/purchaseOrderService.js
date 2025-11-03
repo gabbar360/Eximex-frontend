@@ -87,7 +87,7 @@ class PurchaseOrderService {
   }
 
   // Get all purchase orders
-  async getPurchaseOrders(params = {}) {
+  async getAllPurchaseOrders(params = {}) {
     try {
       const response = await axiosInstance.get('/purchase-order', { params });
       return response.data;

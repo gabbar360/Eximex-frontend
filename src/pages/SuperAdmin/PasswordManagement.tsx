@@ -1,5 +1,6 @@
+import { useDispatch, useSelector } from 'react-redux';
 import React, { useState, useEffect } from 'react';
-import { userService } from '../../service/userService';
+import { getAllUsersForSuperAdmin, resetUserPassword } from '../../features/userSlice';
 import { toast } from 'react-toastify';
 
 interface User {
@@ -14,6 +15,7 @@ interface User {
 }
 
 const PasswordManagement: React.FC = () => {
+  const dispatch = useDispatch();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -42,7 +44,7 @@ const PasswordManagement: React.FC = () => {
         limit: pagination.limit,
       };
 
-      const response = await userService.getAllUsersForSuperAdmin(params);
+      const response = await dispatch(getAllUsersForSuperAdmin(params)).unwrap();
       // Filter out SUPER_ADMIN users for password reset
       const filteredUsers = (response.data || []).filter(
         (user) => user.role !== 'SUPER_ADMIN'
@@ -76,7 +78,7 @@ const PasswordManagement: React.FC = () => {
 
     try {
       setResetting(true);
-      await userService.resetUserPassword(selectedUser.id, { newPassword });
+      await dispatch(resetUserPassword({ userId: selectedUser.id, newPassword })).unwrap();
       toast.success(`Password reset successfully for ${selectedUser.name}`);
       setShowModal(false);
       setNewPassword('');

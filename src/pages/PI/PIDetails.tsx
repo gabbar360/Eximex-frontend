@@ -11,17 +11,20 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import Confetti from 'react-confetti';
-import {
+import { useDispatch } from 'react-redux';
+import { 
   getPiInvoiceById,
   updatePiStatus,
   updatePiInvoice,
-  downloadPiInvoicePdf,
-} from '../../service/piService';
+  updatePiAmount,
+  downloadPiInvoicePdf
+} from '../../features/piSlice';
 import EmailInvoiceModal from '../../components/EmailInvoiceModal';
 
 const PIDetails: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [piData, setPiData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showPayment, setShowPayment] = useState(false);
@@ -36,9 +39,8 @@ const PIDetails: React.FC = () => {
     const fetchPIDetails = async () => {
       try {
         setLoading(true);
-        const response = await getPiInvoiceById(id);
-        // console.log("API Response:", response); // Debug log
-        setPiData(response.data);
+        const response = await dispatch(getPiInvoiceById(id)).unwrap();
+        setPiData(response.data || response);
       } catch (error) {
         console.error('Error fetching PI details:', error);
         toast.error('Failed to load PI details');
@@ -74,45 +76,34 @@ const PIDetails: React.FC = () => {
         setPiData(updatedData);
         console.log('After update - piData:', updatedData);
 
-        // Force update totalAmount and advanceAmount in backend
+        // Update totalAmount and advanceAmount in backend using Redux
         try {
           console.log(
-            'Force updating totalAmount and advanceAmount in backend:',
+            'Updating totalAmount and advanceAmount in backend:',
             {
               totalAmount: updatedTotalAmount,
               advanceAmount: payment,
             }
           );
-          // Use a direct API call to update totalAmount and advanceAmount
-          const response = await fetch(
-            `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:8000'}/api/v1/${id}/update-amount`,
-            {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-              },
-              body: JSON.stringify({
-                totalAmount: updatedTotalAmount,
-                advanceAmount: payment,
-              }),
+          await dispatch(updatePiAmount({
+            id,
+            amountData: {
+              totalAmount: updatedTotalAmount,
+              advanceAmount: payment,
             }
-          );
-
-          if (!response.ok) {
-            throw new Error('Failed to update amount');
-          }
-
-          const backendResponse = await response.json();
-          console.log('Backend amount update response:', backendResponse);
+          })).unwrap();
+          console.log('Backend amount update successful');
         } catch (backendError) {
           console.error('Backend amount update failed:', backendError);
           // Fallback to regular update
           try {
-            await updatePiInvoice(id, {
-              totalAmount: updatedTotalAmount,
-              advanceAmount: payment,
-            });
+            await dispatch(updatePiInvoice({
+              id,
+              piData: {
+                totalAmount: updatedTotalAmount,
+                advanceAmount: payment,
+              }
+            })).unwrap();
           } catch (fallbackError) {
             console.error('Fallback update also failed:', fallbackError);
             toast.error('Failed to update amount in backend');
@@ -124,8 +115,8 @@ const PIDetails: React.FC = () => {
         toast.success('Order confirmed successfully');
       }
 
-      // Update PI status to "confirmed" via API
-      await updatePiStatus(id, 'confirmed');
+      // Update PI status to "confirmed" via Redux
+      await dispatch(updatePiStatus({ id, status: 'confirmed' })).unwrap();
 
       // Update local state to reflect confirmed status
       setPiData((prev) => ({ ...prev, status: 'confirmed' }));
@@ -221,7 +212,7 @@ const PIDetails: React.FC = () => {
         </div>
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <button
-            onClick={() => downloadPiInvoicePdf(id)}
+            onClick={() => dispatch(downloadPiInvoicePdf(id))}
             className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm sm:text-base"
           >
             <FontAwesomeIcon icon={faDownload} />

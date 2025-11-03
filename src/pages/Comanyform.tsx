@@ -2,7 +2,7 @@ import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { createCompany } from '../service/company';
+import { createCompany } from '../features/companySlice';
 
 interface OnboardingModalProps {
   onClose?: () => void;
@@ -32,9 +32,10 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({
   onClose,
   onSuccess,
 }) => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, error } = useSelector(
-    (state: any) => state.onboarding || {}
+    (state: any) => state.company || {}
   );
 
   const [form, setForm] = useState<CompanyFormData>({
@@ -111,13 +112,13 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({
         formData.append('logo', form.logo);
       }
 
-      const resultAction = await createCompany(formData);
+      const resultAction = await dispatch(createCompany(formData)).unwrap();
       console.log('API Response:', resultAction);
 
       toast.success(resultAction.message || 'Company created successfully!');
 
-      // Force immediate navigation
-      window.location.replace('/cprospect');
+      // Force immediate navigation to dashboard
+      window.location.replace('/dashboard');
     } catch (error: any) {
       console.error('Error submitting form:', error);
 

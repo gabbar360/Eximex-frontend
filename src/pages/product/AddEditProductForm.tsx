@@ -1,12 +1,15 @@
+import { useDispatch, useSelector } from 'react-redux';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import { toast } from 'react-toastify';
+import { getAllCategories, getCategoryById } from '../../features/categorySlice';
+import { getProductById, updateProduct, addProduct } from '../../features/productSlice';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import PageMeta from '../../components/common/PageMeta';
-import productService from '../../service/productService';
-import categoryService from '../../service/categoryService';
+
+
 import BasicProductInfo from '../../components/product/BasicProductInfo';
 import PackagingDetails from '../../components/product/PackagingDetails';
 import PackagingPreview from '../../components/product/PackagingPreview';
@@ -100,6 +103,7 @@ const AddEditProductForm = () => {
   const location = useLocation();
   const { id } = useParams();
   const isEdit = Boolean(id);
+  const dispatch = useDispatch();
 
   // Check if we should render this component
   const [forceHide, setForceHide] = useState(false);
@@ -153,7 +157,7 @@ const AddEditProductForm = () => {
   const fetchCategories = async () => {
     try {
       setCategoriesLoading(true);
-      const response = await categoryService.getAllCategories();
+      const response = await dispatch(getAllCategories()).unwrap();
       setCategories(response.data || []);
     } catch (error) {
       console.error('Failed to fetch categories:', error);
@@ -188,7 +192,7 @@ const AddEditProductForm = () => {
   const fetchProduct = async () => {
     try {
       setLoading(true);
-      const response = await productService.getProductById(id);
+      const response = await dispatch(getProductById(id)).unwrap();
       setProduct(response.data);
       if (response.data.categoryId) {
         setSelectedCategoryId(response.data.categoryId.toString());
@@ -231,7 +235,7 @@ const AddEditProductForm = () => {
 
     try {
       setLoadingCategory(true);
-      const categoryData = await categoryService.getCategoryById(categoryId);
+      const categoryData = await dispatch(getCategoryById(categoryId)).unwrap();
 
       if (categoryData && categoryData.packagingHierarchy) {
         setPackagingHierarchy(categoryData.packagingHierarchy);
@@ -290,10 +294,10 @@ const AddEditProductForm = () => {
     const baseSchema = {
       name: Yup.string().required('Product name is required'),
       sku: Yup.string().optional(),
-      description: Yup.string().optional(),
+      description: Yup.string().required('Description is required'),
       price: Yup.number().min(0).optional(),
       currency: Yup.string().optional(),
-      categoryId: Yup.number().optional(),
+      categoryId: Yup.number().required('Category is required'),
       subCategoryId: Yup.number().optional(),
       totalBoxes: Yup.number().integer().min(1).optional(),
       grossWeightPerBox: Yup.number().min(0).optional(),
@@ -492,13 +496,19 @@ const AddEditProductForm = () => {
       setLoading(true);
       setSubmitting(true);
 
+      // Validate required fields before submission
+      if (!values.name || !values.categoryId) {
+        toast.error('Please fill all required fields (Name and Category)');
+        return;
+      }
+
       const productData = {
-        name: values.name,
-        sku: values.sku || null,
-        description: values.description,
+        name: values.name.trim(),
+        sku: values.sku?.trim() || null,
+        description: values.description?.trim() || '',
         price: values.price ? parseFloat(values.price) : null,
         currency: values.currency || 'USD',
-        categoryId: values.categoryId ? parseInt(values.categoryId) : null,
+        categoryId: parseInt(values.categoryId),
         subCategoryId: values.subCategoryId
           ? parseInt(values.subCategoryId)
           : null,
@@ -662,13 +672,13 @@ const AddEditProductForm = () => {
       console.log('Submitting product data:', productData);
 
       if (isEdit) {
-        const result = await productService.updateProduct(
-          product.id,
-          productData
-        );
+        const result = await dispatch(updateProduct({
+          id: product.id,
+          product: productData
+        })).unwrap();
         toast.success(result.message);
       } else {
-        const result = await productService.createProduct(productData);
+        const result = await dispatch(addProduct(productData)).unwrap();
         toast.success(result.message);
       }
 

@@ -36,6 +36,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import PublicRoute from './components/auth/PublicRoute';
 import { useEffect, useState } from 'react';
 import { setUser } from './features/userSlice';
+import { getCurrentUser } from './features/authSlice';
 import authService from './service/authService';
 import Cprospect from '../src/pages/party/Cprospect';
 import AddEditPartyForm from './pages/party/AddEditPartyForm';
@@ -59,11 +60,14 @@ import ActivityLogComponent from './components/ActivityLog';
 import RoleBasedDashboard from './components/RoleBasedDashboard';
 import UserManagement from './pages/SuperAdmin/UserManagement';
 import SuperAdminDashboard from './pages/SuperAdmin/SuperAdminDashboard';
+import EnhancedSuperAdminDashboard from './pages/SuperAdmin/EnhancedSuperAdminDashboard';
+import SuperAdminManagement from './components/SuperAdminManagement';
 import PasswordManagement from './pages/SuperAdmin/PasswordManagement';
 import CompanyManagement from './pages/SuperAdmin/CompanyManagement';
 import PurchaseOrders from './pages/PO/PurchaseOrders';
 import AddEditPurchaseOrderForm from './pages/PO/AddEditPurchaseOrderForm';
 import PaymentTracking from './pages/PaymentTracking';
+import CompanySetup from './pages/Comanyform';
 
 function AppContent() {
   const location = useLocation();
@@ -101,6 +105,7 @@ function AppContent() {
       <Route element={<ProtectedRoute />}>
         {/* <Route path="/" element={<Navigate to="/admin/dashboard" replace />} /> */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/company-setup" element={<CompanySetup />} />
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<RoleBasedDashboard />} />
           {/* <Route path="/admin/dashboard" element={<Home />} /> */}
@@ -144,19 +149,43 @@ function AppContent() {
 
           <Route path="/staff-management" element={<StaffManagement />} />
           <Route path="/activity-logs" element={<ActivityLogComponent />} />
+          {/* Super Admin Routes */}
+          <Route path="/super-admin/dashboard" element={<EnhancedSuperAdminDashboard />} />
+          <Route path="/super-admin/management" element={<SuperAdminManagement />} />
           <Route path="/super-admin/users" element={<UserManagement />} />
-          <Route
-            path="/super-admin/dashboard"
-            element={<SuperAdminDashboard />}
-          />
-          <Route
-            path="/super-admin/passwords"
-            element={<PasswordManagement />}
-          />
-          <Route
-            path="/super-admin/companies"
-            element={<CompanyManagement />}
-          />
+          <Route path="/super-admin/passwords" element={<PasswordManagement />} />
+          <Route path="/super-admin/companies" element={<CompanyManagement />} />
+          
+          {/* Super Admin Database Management */}
+          <Route path="/super-admin/database/tables" element={<SuperAdminDashboard />} />
+          <Route path="/super-admin/database/export" element={<SuperAdminDashboard />} />
+          <Route path="/super-admin/database/import" element={<SuperAdminDashboard />} />
+          <Route path="/super-admin/database/health" element={<SuperAdminDashboard />} />
+          
+          {/* Super Admin User Management */}
+          <Route path="/super-admin/users/roles" element={<UserManagement />} />
+          <Route path="/super-admin/users/activity" element={<UserManagement />} />
+          
+          {/* Super Admin Company Management */}
+          <Route path="/super-admin/companies/settings" element={<CompanyManagement />} />
+          <Route path="/super-admin/companies/subscriptions" element={<CompanyManagement />} />
+          
+          {/* Super Admin Security & Access */}
+          <Route path="/super-admin/security/logs" element={<SuperAdminDashboard />} />
+          <Route path="/super-admin/security/api-keys" element={<SuperAdminDashboard />} />
+          <Route path="/super-admin/security/access" element={<SuperAdminDashboard />} />
+          <Route path="/super-admin/security/threats" element={<SuperAdminDashboard />} />
+          
+          {/* Super Admin Analytics & Reports */}
+          <Route path="/super-admin/analytics/system" element={<SuperAdminDashboard />} />
+          <Route path="/super-admin/analytics/usage" element={<SuperAdminDashboard />} />
+          <Route path="/super-admin/analytics/financial" element={<SuperAdminDashboard />} />
+          
+          {/* Super Admin System Settings */}
+          <Route path="/super-admin/settings/global" element={<SuperAdminDashboard />} />
+          <Route path="/super-admin/settings/email" element={<SuperAdminDashboard />} />
+          <Route path="/super-admin/settings/maintenance" element={<SuperAdminDashboard />} />
+          <Route path="/super-admin/settings/backup" element={<SuperAdminDashboard />} />
           <Route path="/payments" element={<PaymentTracking />} />
 
           <Route path="/calendar" element={<Calendar />} />
@@ -210,9 +239,16 @@ export default function App() {
           // Only fetch user if not already set from Google callback
           if (!googleCallback.userData) {
             // Try to get current user, which will trigger token refresh if needed
-            const res = await authService.getCurrentUser();
+            const res = await dispatch(getCurrentUser()).unwrap();
             if (res?.data) {
               dispatch(setUser(res.data));
+              
+              // Check if user needs company setup (skip for SUPER_ADMIN)
+              const userData = res.data;
+              if (userData && userData.role !== 'SUPER_ADMIN' && (!userData.company && !userData.companyId) && window.location.pathname !== '/company-setup') {
+                window.location.replace('/company-setup');
+                return;
+              }
             }
           }
         }

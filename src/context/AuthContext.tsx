@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { setUser, clearUser } from '../features/userSlice';
-import authService from '../service/authService';
+import { loginUser } from '../features/authSlice';
+import { clearUser } from '../features/userSlice';
 
 interface User {
   id: number;
@@ -57,10 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const login = async (credentials: { email: string; password: string }) => {
     try {
-      const response = await authService.login(credentials);
-      if (response?.data) {
-        dispatch(setUser(response.data.user));
-      }
+      const response = await dispatch(loginUser(credentials)).unwrap();
     } catch (error) {
       throw error;
     }

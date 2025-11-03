@@ -1,5 +1,6 @@
+import { useDispatch, useSelector } from 'react-redux';
 import React, { useState, useEffect } from 'react';
-import { userService } from '../service/userService';
+import { getCompanyStaff, getAssignableData, assignData } from '../features/userSlice';
 import { toast } from 'react-toastify';
 
 interface AssignableData {
@@ -21,6 +22,7 @@ const DataAssignment: React.FC<{
   isOpen: boolean;
   onClose: () => void;
 }> = ({ isOpen, onClose }) => {
+  const dispatch = useDispatch();
   const [staff, setStaff] = useState<Staff[]>([]);
   const [selectedFromUser, setSelectedFromUser] = useState<number | null>(null);
   const [selectedToUser, setSelectedToUser] = useState<number | null>(null);
@@ -51,7 +53,7 @@ const DataAssignment: React.FC<{
 
   const fetchStaff = async () => {
     try {
-      const data = await userService.getCompanyStaff();
+      const data = await dispatch(getCompanyStaff()).unwrap();
       setStaff(data.data || []);
     } catch (error) {
       toast.error(error.message);
@@ -62,10 +64,10 @@ const DataAssignment: React.FC<{
     if (!selectedFromUser) return;
 
     try {
-      const data = await userService.getAssignableData(
-        selectedFromUser,
+      const data = await dispatch(getAssignableData({
+        userId: selectedFromUser,
         entityType
-      );
+      })).unwrap();
       setAssignableData(data.data || []);
       setSelectedItems([]);
     } catch (error) {
@@ -81,12 +83,12 @@ const DataAssignment: React.FC<{
 
     setLoading(true);
     try {
-      const result = await userService.assignData(
+      const result = await dispatch(assignData({
         entityType,
-        selectedItems,
-        selectedFromUser,
-        selectedToUser
-      );
+        itemIds: selectedItems,
+        fromUserId: selectedFromUser,
+        toUserId: selectedToUser
+      })).unwrap();
 
       toast.success(result.message);
       fetchAssignableData();

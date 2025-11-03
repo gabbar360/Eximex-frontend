@@ -1,5 +1,6 @@
+import { useDispatch, useSelector } from 'react-redux';
 import React, { useState, useEffect } from 'react';
-import { userService } from '../../service/userService';
+import { getAllCompanies, getCompanyDetails } from '../../features/companySlice';
 import { toast } from 'react-toastify';
 
 interface Company {
@@ -31,6 +32,7 @@ interface CompanyDetails extends Company {
 }
 
 const CompanyManagement: React.FC = () => {
+  const dispatch = useDispatch();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<CompanyDetails | null>(
     null
@@ -57,7 +59,7 @@ const CompanyManagement: React.FC = () => {
         limit: pagination.limit,
       };
 
-      const response = await userService.getAllCompanies(params);
+      const response = await dispatch(getAllCompanies(params)).unwrap();
       setCompanies(response.data || []);
       setPagination((prev) => ({
         ...prev,
@@ -75,7 +77,7 @@ const CompanyManagement: React.FC = () => {
   const fetchCompanyDetails = async (companyId: number) => {
     try {
       setDetailsLoading(true);
-      const response = await userService.getCompanyDetails(companyId);
+      const response = await dispatch(getCompanyDetails(companyId)).unwrap();
       setSelectedCompany(response);
       setShowModal(true);
     } catch (error) {

@@ -1,6 +1,7 @@
+import { useDispatch, useSelector } from 'react-redux';
 import React, { useState, useEffect } from 'react';
 import { PermissionGuard } from '../context/AuthContext';
-import { userService } from '../service/userService';
+import { fetchActivityLogs, fetchActivityStats } from '../features/userSlice';
 import { toast } from 'react-toastify';
 
 interface ActivityLog {
@@ -37,9 +38,11 @@ const ActivityLogComponent: React.FC = () => {
     limit: 50,
   });
 
-  const fetchActivityLogs = async () => {
+  const dispatch = useDispatch();
+
+  const loadActivityLogs = async () => {
     try {
-      const data = await userService.getActivityLogs(filters);
+      const data = await dispatch(fetchActivityLogs(filters)).unwrap();
       setLogs(data.data || []);
     } catch (error) {
       console.error('Failed to fetch activity logs:', error);
@@ -49,9 +52,9 @@ const ActivityLogComponent: React.FC = () => {
     }
   };
 
-  const fetchActivityStats = async () => {
+  const loadActivityStats = async () => {
     try {
-      const data = await userService.getActivityStats();
+      const data = await dispatch(fetchActivityStats()).unwrap();
       setStats(data);
     } catch (error) {
       console.error('Failed to fetch activity stats:', error);
@@ -60,9 +63,9 @@ const ActivityLogComponent: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchActivityLogs();
-    fetchActivityStats();
-  }, [filters]);
+    loadActivityLogs();
+    loadActivityStats();
+  }, [filters, dispatch]);
 
   const getActionColor = (action: string) => {
     switch (action) {

@@ -6,9 +6,9 @@ import Input from '../form/input/InputField';
 import Checkbox from '../form/input/Checkbox';
 import Button from '../ui/button/Button';
 import { FcGoogle } from 'react-icons/fc';
-import authService from '../../service/authService.js';
 import { useDispatch } from 'react-redux';
-import { setUser } from '../../features/userSlice.js';
+import { loginUser, googleLogin } from '../../features/authSlice';
+import { setUser } from '../../features/userSlice';
 import { toast } from 'react-toastify';
 
 export default function SignInForm() {
@@ -23,10 +23,23 @@ export default function SignInForm() {
   const handleLogin = async () => {
     setIsSubmitting(true);
     try {
-      const data = await authService.login(email, password);
-      dispatch(setUser(data.data.user));
+      const data = await dispatch(loginUser({ email, password })).unwrap();
       toast.success(data.message);
-      navigate('/admin/dashboard');
+      
+      // Set user data in Redux store
+      if (data.data?.user) {
+        dispatch(setUser(data.data.user));
+      }
+      
+      // Check if user has company details
+      const user = data.data?.user;
+      if (user && (!user.company || !user.companyId)) {
+        // No company details, redirect to company form
+        navigate('/company-setup');
+      } else {
+        // Has company details, redirect to dashboard
+        navigate('/dashboard');
+      }
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -46,7 +59,7 @@ export default function SignInForm() {
           {/* Google Sign-In Button */}
           <button
             type="button"
-            onClick={() => authService.googleLogin()}
+            onClick={() => dispatch(googleLogin())}
             className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-colors dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
           >
             <FcGoogle className="w-5 h-5" />

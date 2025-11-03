@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchOrders, deleteOrder } from '../../features/orderSlice';
+import { getPackingListById, deletePackingList } from '../../features/packingListSlice';
+import { deleteVgm } from '../../features/vgmSlice';
+import { updatePiStatus } from '../../features/piSlice';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faPlus,
@@ -10,10 +16,6 @@ import {
   faEye,
 } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
-import orderService from '../../service/orderService';
-import packingListService from '../../service/packingListService';
-import piService from '../../service/piService';
-import vgmService from '../../service/vgmService';
 import PageBreadCrumb from '../../components/common/PageBreadCrumb';
 import PageMeta from '../../components/common/PageMeta';
 import {
@@ -28,8 +30,9 @@ import FilterBar from '../../components/order/FilterBar';
 
 const Orders = () => {
   const navigate = useNavigate();
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+  const { orders, loading, pagination: reduxPagination } = useSelector((state: any) => state.order);
+  const [localOrders, setLocalOrders] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
@@ -45,248 +48,55 @@ const Orders = () => {
     total: 0,
     pages: 0,
   });
-  // Helper function to fetch packing list data for an order
-  const fetchPackingListForOrder = async (order) => {
-    // Only proceed if order has a valid packingListId or piInvoiceId
+  // Helper function to fetch packing list data using Redux
+  const fetchPackingListForOrder = async (order, dispatch) => {
     if (!order.packingListId && !order.piInvoiceId) {
-      console.log(
-        `Order ${order.id} has no packingListId or piInvoiceId, skipping packing list fetch`
-      );
       return order;
     }
 
-    // Use packingListId if available, otherwise use piInvoiceId
     const packingId = order.packingListId || order.piInvoiceId;
 
-    console.log(
-      `Checking order ${order.id} for packing list with ID: ${packingId}`
-    );
-
     try {
-      console.log(
-        `Fetching packing list for order ${order.id}, PackingList ID: ${packingId}`
-      );
+      const response = await dispatch(getPackingListById(packingId)).unwrap();
+      const packingData = response?.data || response;
 
-      // Try to fetch detailed packaging steps first
-      let packingData = null;
-      let containers = [];
+      if (packingData && packingData.containers && Array.isArray(packingData.containers)) {
+        const containers = packingData.containers.map((container) => ({
+          containerNumber: container.containerNumber || '',
+          descriptionOfGoods:
+            container.products?.map((p) => p.productName).join(', ') ||
+            container.descriptionOfGoods ||
+            'Mixed goods',
+          noOfBoxes: parseInt(container.totalNoOfBoxes || container.noOfBoxes) || 0,
+          netWeight: parseFloat(container.totalNetWeight || container.netWeight) || 0,
+          grossWeight: parseFloat(container.totalGrossWeight || container.grossWeight) || 0,
+          volume: parseFloat(container.totalMeasurement || container.volume) || 0,
+          sealNumber: container.sealNumber || '',
+          products: container.products || [],
+        }));
 
-      try {
-        const packagingResponse =
-          await packingListService.getPackingListById(packingId);
-        console.log(
-          `Packaging steps response for order ${order.id}:`,
-          packagingResponse
-        );
+        const packingList = {
+          totalContainers: containers.length,
+          totalBoxes: containers.reduce((sum, c) => sum + (c.noOfBoxes || 0), 0),
+          totalNetWeight: containers.reduce((sum, c) => sum + (c.netWeight || 0), 0),
+          totalGrossWeight: containers.reduce((sum, c) => sum + (c.grossWeight || 0), 0),
+          totalVolume: containers.reduce((sum, c) => sum + (c.volume || 0), 0),
+          containers: containers,
+        };
 
-        if (packagingResponse && packagingResponse.data) {
-          // Use the single packing list data object
-          const packingData = packagingResponse.data;
-
-          // Extract container data directly from the packing list
-          if (packingData.containers && Array.isArray(packingData.containers)) {
-            containers = packingData.containers.map((container) => ({
-              containerNumber: container.containerNumber || '',
-              descriptionOfGoods:
-                container.products?.map((p) => p.productName).join(', ') ||
-                'Mixed goods',
-              noOfBoxes: parseInt(container.totalNoOfBoxes) || 0,
-              netWeight: parseFloat(container.totalNetWeight) || 0,
-              grossWeight: parseFloat(container.totalGrossWeight) || 0,
-              volume: parseFloat(container.totalMeasurement) || 0,
-              dimensions: null,
-              sealNumber: container.sealNumber || '',
-              products: container.products || [],
-            }));
-          }
-
-          // packingData is already set above
-        }
-      } catch (packagingError) {
-        console.log(
-          `Could not fetch packaging steps for order ${order.id}:`,
-          packagingError.message
-        );
-      }
-
-      // Fallback to packing list API
-      const packingResponse =
-        await packingListService.getPackingListById(packingId);
-      console.log(`Packing response for order ${order.id}:`, packingResponse);
-
-      if (packingResponse && packingResponse.data) {
-        packingData = packingResponse.data;
-        console.log(`Raw packing data for order ${order.id}:`, packingData);
-
-        // Extract container data from packagingSteps.notes (where actual data is stored)
-        if (
-          containers.length === 0 &&
-          packingData.pi &&
-          packingData.pi.packagingSteps &&
-          packingData.pi.packagingSteps.length > 0
-        ) {
-          const packagingStep = packingData.pi.packagingSteps[0];
-          if (packagingStep.notes) {
-            try {
-              // Handle both string and object cases
-              let detailedPackingData = packagingStep.notes;
-              if (typeof detailedPackingData === 'string') {
-                detailedPackingData = JSON.parse(detailedPackingData);
-              }
-              console.log(
-                `📦 Parsed packaging data from notes for order ${order.id}:`,
-                detailedPackingData
-              );
-
-              if (
-                detailedPackingData.containers &&
-                Array.isArray(detailedPackingData.containers)
-              ) {
-                containers = detailedPackingData.containers.map(
-                  (container) => ({
-                    containerNumber: container.containerNumber || '',
-                    descriptionOfGoods:
-                      container.products
-                        ?.map((p) => p.productName)
-                        .join(', ') || 'Mixed goods',
-                    noOfBoxes: parseInt(container.totalNoOfBoxes) || 0,
-                    netWeight: parseFloat(container.totalNetWeight) || 0,
-                    grossWeight: parseFloat(container.totalGrossWeight) || 0,
-                    volume: parseFloat(container.totalMeasurement) || 0,
-                    dimensions: null,
-                    sealNumber: container.sealNumber || '',
-                    products: container.products || [],
-                  })
-                );
-                console.log(
-                  `✅ Extracted ${containers.length} containers from notes for order ${order.id}`
-                );
-              }
-            } catch (e) {
-              console.error(
-                `Failed to parse packaging notes for order ${order.id}:`,
-                e
-              );
-            }
-          }
-        }
-
-        // If no containers from packaging steps, try to create from available data
-        if (containers.length === 0) {
-          // Check if containers field exists and parse it
-          if (packingData.containers) {
-            let containerData = packingData.containers;
-            if (typeof containerData === 'string') {
-              try {
-                containerData = JSON.parse(containerData);
-              } catch (e) {
-                containerData = [];
-              }
-            }
-
-            if (Array.isArray(containerData) && containerData.length > 0) {
-              containers = containerData.map((container) => ({
-                containerNumber: container.containerNumber || '',
-                descriptionOfGoods:
-                  container.products?.map((p) => p.productName).join(', ') ||
-                  container.descriptionOfGoods ||
-                  'Mixed goods',
-                noOfBoxes:
-                  parseInt(container.totalNoOfBoxes) ||
-                  container.noOfBoxes ||
-                  container.products?.reduce(
-                    (sum, p) => sum + (parseInt(p.noOfBoxes) || 0),
-                    0
-                  ) ||
-                  0,
-                netWeight:
-                  parseFloat(container.totalNetWeight) ||
-                  container.netWeight ||
-                  container.products?.reduce(
-                    (sum, p) => sum + (parseFloat(p.netWeight) || 0),
-                    0
-                  ) ||
-                  0,
-                grossWeight:
-                  parseFloat(container.totalGrossWeight) ||
-                  container.grossWeight ||
-                  container.products?.reduce(
-                    (sum, p) => sum + (parseFloat(p.grossWeight) || 0),
-                    0
-                  ) ||
-                  0,
-                volume:
-                  parseFloat(container.totalMeasurement) ||
-                  container.volume ||
-                  container.products?.reduce(
-                    (sum, p) => sum + (parseFloat(p.measurement) || 0),
-                    0
-                  ) ||
-                  0,
-                dimensions: container.dimensions || null,
-                sealNumber: container.sealNumber || '',
-                products: container.products || [],
-              }));
-            }
-          }
-        }
-
-        // Create packing list if we have container data OR basic totals
-        if (containers.length > 0 || packingData.totalBoxes > 0) {
-          const finalPackingList = {
-            totalContainers:
-              containers.length > 0
-                ? containers.length
-                : packingData.totalContainers || 1,
-            totalBoxes:
-              containers.length > 0
-                ? containers.reduce((sum, c) => sum + (c.noOfBoxes || 0), 0)
-                : packingData.totalBoxes || 0,
-            totalNetWeight:
-              containers.length > 0
-                ? containers.reduce((sum, c) => sum + (c.netWeight || 0), 0)
-                : packingData.totalNetWeight || 0,
-            totalGrossWeight:
-              containers.length > 0
-                ? containers.reduce((sum, c) => sum + (c.grossWeight || 0), 0)
-                : packingData.totalGrossWeight || 0,
-            totalVolume:
-              containers.length > 0
-                ? containers.reduce((sum, c) => sum + (c.volume || 0), 0)
-                : packingData.totalVolume || 0,
-            containers: containers,
-            lastUpdated: packingData.updatedAt || packingData.createdAt,
-            exportInvoiceNo: packingData.exportInvoiceNo,
-            buyerReference: packingData.buyerReference,
-            status: packingData.status,
-          };
-
-          console.log(
-            `✅ Final packing list created for order ${order.id}:`,
-            finalPackingList
-          );
-
-          return {
-            ...order,
-            packingList: finalPackingList,
-          };
-        }
-      } else {
-        console.log(`❌ No packing list data found for order ${order.id}`);
+        return {
+          ...order,
+          packingList: packingList,
+        };
       }
     } catch (error) {
-      console.error(
-        `❌ Could not fetch packing list for order ${order.id}:`,
-        error.message
-      );
-      console.error(`Error details:`, error);
+      console.log(`Could not fetch packing list for order ${order.id}:`, error.message);
     }
 
-    console.log(`⚠️ Returning order ${order.id} without packing list`);
     return order;
   };
 
-  const fetchOrders = async (
+  const fetchOrdersData = async (
     page = 1,
     search = '',
     status = '',
@@ -294,76 +104,70 @@ const Orders = () => {
     dateEnd = '',
     customer = ''
   ) => {
-    try {
-      setLoading(true);
-      const params = {
-        page,
-        limit: pagination.limit,
-        ...(search && { search }),
-        ...(status && { status }),
-        ...(dateStart && { dateStart }),
-        ...(dateEnd && { dateEnd }),
-        ...(customer && { customer }),
-      };
-      const response = await orderService.getAllOrders(params);
-      const orders = response.orders || [];
+    const params = {
+      page,
+      limit: pagination.limit,
+      ...(search && { search }),
+      ...(status && { status }),
+      ...(dateStart && { dateStart }),
+      ...(dateEnd && { dateEnd }),
+      ...(customer && { customer }),
+    };
+    
+    dispatch(fetchOrders(params));
+  };
 
-      // Fetch packing list data only for orders that might have packing lists
-      const ordersWithPackingList = await Promise.all(
-        orders.map((order) => {
-          // Only fetch packing list if order has packingListId or has meaningful indicators
-          if (
-            order.packingListId ||
-            (order.piInvoiceId && order.orderStatus !== 'pending')
-          ) {
-            return fetchPackingListForOrder(order);
-          }
-          return Promise.resolve(order);
-        })
-      );
-
-      setOrders(ordersWithPackingList);
-      setPagination(
-        response.pagination || {
-          page: 1,
-          limit: 10,
-          total: 0,
-          pages: 0,
-        }
-      );
-
-      // Don't auto-select first order if we already have a selection
-      if (ordersWithPackingList.length > 0 && !selectedOrderId) {
-        const savedOrderId = localStorage.getItem('selectedOrderId');
-        if (savedOrderId) {
-          const orderExists = ordersWithPackingList.find(
-            (order) => order.id === parseInt(savedOrderId)
-          );
-          if (orderExists) {
-            setSelectedOrderId(parseInt(savedOrderId));
+  // Update local orders when Redux orders change
+  useEffect(() => {
+    const processOrders = async () => {
+      if (orders && Array.isArray(orders)) {
+        // Fetch packing list data for orders that have packing lists
+        const ordersWithPackingList = await Promise.all(
+          orders.map((order) => {
+            if (order.packingListId || order.piInvoiceId) {
+              return fetchPackingListForOrder(order, dispatch);
+            }
+            return Promise.resolve(order);
+          })
+        );
+        
+        setLocalOrders(ordersWithPackingList);
+        
+        // Auto-select first order if none selected
+        if (ordersWithPackingList.length > 0 && !selectedOrderId) {
+          const savedOrderId = localStorage.getItem('selectedOrderId');
+          if (savedOrderId) {
+            const orderExists = ordersWithPackingList.find(
+              (order) => order.id === parseInt(savedOrderId)
+            );
+            if (orderExists) {
+              setSelectedOrderId(parseInt(savedOrderId));
+            } else {
+              setSelectedOrderId(ordersWithPackingList[0].id);
+            }
           } else {
             setSelectedOrderId(ordersWithPackingList[0].id);
           }
-        } else {
-          setSelectedOrderId(ordersWithPackingList[0].id);
         }
       }
-    } catch (error) {
-      console.error('Error fetching orders:', error);
-      toast.error('Failed to fetch orders');
-      setOrders([]); // Ensure orders is always an array
-    } finally {
-      setLoading(false);
+    };
+    
+    processOrders();
+  }, [orders, selectedOrderId, dispatch]);
+
+  // Update pagination from Redux
+  useEffect(() => {
+    if (reduxPagination) {
+      setPagination(reduxPagination);
     }
-  };
+  }, [reduxPagination]);
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    fetchOrdersData();
+  }, [dispatch]);
 
   const handleSearch = () => {
-    // Don't reset selection when searching - preserve current selection
-    fetchOrders(
+    fetchOrdersData(
       1,
       searchTerm,
       statusFilter,
@@ -375,8 +179,7 @@ const Orders = () => {
 
   const handleStatusChange = (status: string) => {
     setStatusFilter(status);
-    // Don't reset selection when filtering - preserve current selection
-    fetchOrders(
+    fetchOrdersData(
       1,
       searchTerm,
       status,
@@ -387,7 +190,7 @@ const Orders = () => {
   };
 
   const handlePageChange = (page: number) => {
-    fetchOrders(
+    fetchOrdersData(
       page,
       searchTerm,
       statusFilter,
@@ -437,7 +240,11 @@ const Orders = () => {
         orderToDelete.piInvoice.vgmDocuments.length > 0
       ) {
         for (const vgm of orderToDelete.piInvoice.vgmDocuments) {
-          await vgmService.deleteVgm(vgm.id);
+          try {
+            await dispatch(deleteVgm(vgm.id)).unwrap();
+          } catch (error) {
+            console.log('VGM document not found or already deleted');
+          }
         }
       }
 
@@ -445,18 +252,22 @@ const Orders = () => {
       const packingId = orderToDelete?.packingListId || piId;
       if (packingId) {
         try {
-          await packingListService.deletePackingList(packingId);
+          await dispatch(deletePackingList(packingId)).unwrap();
         } catch (error) {
           console.log('Packing list not found or already deleted');
         }
       }
 
       // Delete the order
-      const result = await orderService.deleteOrder(confirmDelete);
+      const result = await dispatch(deleteOrder(confirmDelete)).unwrap();
 
       // Update PI status to pending if PI ID exists
       if (piId) {
-        await piService.updatePiStatus(piId, 'pending');
+        try {
+          await dispatch(updatePiStatus({ id: piId, status: 'pending' })).unwrap();
+        } catch (error) {
+          console.log('Failed to update PI status');
+        }
       }
 
       toast.success(result.message);
@@ -490,7 +301,7 @@ const Orders = () => {
     if (!confirmDeletePacking) return;
 
     try {
-      await packingListService.deletePackingList(confirmDeletePacking);
+const result = await dispatch(deletePackingList(confirmDeletePacking)).unwrap();
       toast.success('Packing list deleted successfully!');
       setConfirmDeletePacking(null);
       // Store current selection before refresh
@@ -517,7 +328,7 @@ const Orders = () => {
   const handleDownloadInvoice = async (orderId) => {
     try {
       setDownloadingOrder(orderId);
-      await orderService.downloadOrderInvoicePdf(orderId);
+// Note: Download is handled directly by the service, not through Redux
       toast.success('Invoice PDF downloaded successfully!');
     } catch (error) {
       console.error('Download error:', error);
@@ -586,7 +397,7 @@ const Orders = () => {
             className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm overflow-hidden"
           >
             <option value="">Choose an order...</option>
-            {orders.map((order) => {
+            {localOrders.map((order) => {
               const orderNumber = order.orderNumber || `#${order.id}`;
               const companyName = order.piInvoice?.party?.companyName || 'N/A';
               const amount = `$${order.totalAmount?.toLocaleString() || '0'}`;
@@ -613,7 +424,7 @@ const Orders = () => {
         <div className="flex justify-center items-center h-48 sm:h-64 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
           <div className="animate-spin rounded-full h-8 w-8 sm:h-12 sm:w-12 border-b-2 border-blue-600"></div>
         </div>
-      ) : orders.length === 0 ? (
+      ) : localOrders.length === 0 ? (
         <div className="flex flex-col justify-center items-center h-48 sm:h-64 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
           <p className="text-gray-500 dark:text-gray-400 text-center text-sm sm:text-base">
             No orders found.
@@ -626,7 +437,7 @@ const Orders = () => {
         <div className="space-y-3 sm:space-y-4">
           {selectedOrderId ? (
             (() => {
-              const selectedOrder = orders.find(
+              const selectedOrder = localOrders.find(
                 (order) => order.id === selectedOrderId
               );
               return selectedOrder ? (
@@ -707,7 +518,7 @@ const Orders = () => {
                 </TableRow>
               </TableHeader>
               <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                {orders.map((order) => (
+                {localOrders.map((order) => (
                   <TableRow key={order.id}>
                     <TableCell className="px-3 sm:px-4 py-3 text-start min-w-[120px]">
                       <div className="flex flex-col gap-1">

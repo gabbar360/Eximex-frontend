@@ -12,6 +12,17 @@ export const fetchParties = createAsyncThunk(
   }
 );
 
+export const fetchPartyById = createAsyncThunk(
+  'party/fetchPartyById',
+  async (id, { rejectWithValue }) => {
+    try {
+      return await partyService.getPartyById(id);
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
 export const addParty = createAsyncThunk(
   'party/addParty',
   async (party, { rejectWithValue }) => {
@@ -42,6 +53,39 @@ export const deleteParty = createAsyncThunk(
     try {
       const response = await partyService.deleteParty(id);
       return { id, message: response.message };
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
+export const getAllParties = createAsyncThunk(
+  'party/getAllParties',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await partyService.getAllParties();
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
+export const getPartyById = createAsyncThunk(
+  'party/getPartyById',
+  async (id, { rejectWithValue }) => {
+    try {
+      return await partyService.getPartyById(id);
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
+export const createParty = createAsyncThunk(
+  'party/createParty',
+  async (partyData, { rejectWithValue }) => {
+    try {
+      return await partyService.createParty(partyData);
     } catch (err) {
       return rejectWithValue(err.message);
     }
@@ -121,6 +165,43 @@ const partySlice = createSlice({
         state.successMessage = payload.message;
       })
       .addCase(deleteParty.rejected, (state, { payload }) => {
+        state.loading = false;
+        state.error = payload;
+      })
+      .addCase(getAllParties.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getAllParties.fulfilled, (state, { payload }) => {
+        state.loading = false;
+        state.parties = payload?.data || payload || [];
+      })
+      .addCase(getAllParties.rejected, (state, { payload }) => {
+        state.loading = false;
+        state.error = payload;
+      })
+      .addCase(getPartyById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getPartyById.fulfilled, (state, { payload }) => {
+        state.loading = false;
+        state.selectedParty = payload?.data || payload;
+      })
+      .addCase(getPartyById.rejected, (state, { payload }) => {
+        state.loading = false;
+        state.error = payload;
+      })
+      .addCase(createParty.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createParty.fulfilled, (state, { payload }) => {
+        state.loading = false;
+        state.parties.unshift(payload?.data || payload);
+        state.successMessage = payload.message;
+      })
+      .addCase(createParty.rejected, (state, { payload }) => {
         state.loading = false;
         state.error = payload;
       });

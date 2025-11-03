@@ -1,9 +1,13 @@
+import { useDispatch, useSelector } from 'react-redux';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import packingListService from '../../service/packingListService';
-import vgmService from '../../service/vgmService';
+import { deletePackingList, downloadPackingListPdf } from '../../features/packingListSlice';
+import { deleteVgm, downloadVgmPdf } from '../../features/vgmSlice';
+import { downloadOrderInvoice } from '../../features/orderSlice';
+
+
 import {
   faCalendarAlt,
   faBuilding,
@@ -52,6 +56,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
   downloadingOrder,
   onOrderSelect,
 }) => {
+  const dispatch = useDispatch();
   const [editableField, setEditableField] = useState<string | null>(null);
   const [tempValue, setTempValue] = useState<string>('');
   const [isDownloading, setIsDownloading] = useState(false);
@@ -206,7 +211,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
       console.log(`Updating order ${order.id}:`, updateData);
 
       // Example API call (uncomment and modify as needed):
-      // await orderService.updateOrder(order.id, updateData);
+      // await dispatch(updateOrder({ id: order.id, data: updateData })).unwrap();
 
       // For now, just update locally
       order[editableField] = tempValue.trim();
@@ -241,42 +246,30 @@ const OrderCard: React.FC<OrderCardProps> = ({
   const hasVgmDocuments =
     order.piInvoice?.vgmDocuments && order.piInvoice.vgmDocuments.length > 0;
 
-  // Check if packing list exists - very strict check
-  const hasPackingList =
-    order.packingList &&
-    order.packingList.containers &&
-    order.packingList.containers.length > 0 &&
-    order.packingList.containers.some(
-      (container) =>
-        (container.containerNumber &&
-          container.containerNumber.trim() &&
-          container.containerNumber !== 'Container 1') ||
-        (container.descriptionOfGoods &&
-          container.descriptionOfGoods.trim() &&
-          container.descriptionOfGoods !== 'Mixed goods') ||
-        (container.noOfBoxes && container.noOfBoxes > 0) ||
-        (container.products && container.products.length > 0) ||
-        (container.netWeight && container.netWeight > 0) ||
-        (container.grossWeight && container.grossWeight > 0)
-    ) &&
-    // Also check if we have meaningful totals
-    (order.packingList.totalBoxes > 0 ||
-      order.packingList.totalNetWeight > 0 ||
-      order.packingList.totalGrossWeight > 0 ||
-      order.packingList.totalVolume > 0);
+  // Check if packing list exists - check both possible locations
+  const hasPackingList = 
+    (order.packingList && Object.keys(order.packingList).length > 0 && order.packingList.containers && order.packingList.containers.length > 0) ||
+    (order.piInvoice?.packagingSteps && order.piInvoice.packagingSteps.length > 0 && order.piInvoice.packagingSteps[0]?.notes?.containers && order.piInvoice.packagingSteps[0].notes.containers.length > 0);
+
+  // Extract containers from the correct location
+  const containers = order.packingList?.containers?.length > 0 
+    ? order.packingList.containers 
+    : order.piInvoice?.packagingSteps?.[0]?.notes?.containers || [];
 
   // Debug: Log packing list data to console
   React.useEffect(() => {
+    const containers = order.packingList?.containers || order.piInvoice?.packagingSteps?.[0]?.notes?.containers || [];
     console.log(`🔍 OrderCard Debug - Order ${order.id}:`, {
       hasPackingList,
       packingListExists: !!order.packingList,
       packingList: order.packingList,
-      containers: order.packingList?.containers,
-      containerCount: order.packingList?.containers?.length,
-      totalBoxes: order.packingList?.totalBoxes,
-      totalContainers: order.packingList?.totalContainers,
+      packagingStepsExists: !!order.piInvoice?.packagingSteps,
+      packagingSteps: order.piInvoice?.packagingSteps,
+      packagingStepsCount: order.piInvoice?.packagingSteps?.length,
+      extractedContainers: containers,
+      containersLength: containers?.length,
     });
-  }, [order.packingList, hasPackingList]);
+  }, [order.packingList, order.piInvoice?.packagingSteps, hasPackingList]);
 
   const handlePackingListPDF = async () => {
     setIsDownloading(true);
@@ -290,7 +283,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
         return;
       }
 
-      const response = await packingListService.downloadPDF(packingId);
+      const response = await dispatch(downloadPackingListPdf(packingId)).unwrap();
 
       const blob = new Blob([response.data], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
@@ -328,7 +321,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
         return;
       }
 
-      await packingListService.deletePackingList(packingId);
+      await dispatch(deletePackingList(packingId)).unwrap();
       toast.success('Packing list deleted successfully!');
       setConfirmDeletePacking(false);
       window.location.reload();
@@ -343,7 +336,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
     toast.info('Preparing VGM PDF download...', { autoClose: 2000 });
 
     try {
-      const response = await vgmService.downloadVgmPdf(vgmId);
+      const response = await dispatch(downloadVgmPdf(vgmId)).unwrap();
 
       // Try to get filename from response headers first
       const disposition =
@@ -395,7 +388,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
 
   const handleConfirmVgmDelete = async () => {
     try {
-      await vgmService.deleteVgm(confirmDeleteVgm.vgmId);
+      await dispatch(deleteVgm(confirmDeleteVgm.vgmId)).unwrap();
       toast.success('VGM document deleted successfully!');
 
       // Update local list without reloading the page
@@ -824,7 +817,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
 
               {/* Mobile Card View */}
               <div className="block sm:hidden space-y-3">
-                {order.packingList?.containers?.map((container, index) => (
+                {containers?.map((container, index) => (
                   <div
                     key={index}
                     className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-600"
@@ -992,7 +985,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
                       </tr>
                     </thead>
                     <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
-                      {order.packingList?.containers?.map(
+                      {containers?.map(
                         (container, index) => (
                           <tr
                             key={index}
@@ -1523,20 +1516,27 @@ const OrderCard: React.FC<OrderCardProps> = ({
               <FontAwesomeIcon icon={faEye} className="text-sm" />
             </button>
           )}
-          {onDownloadInvoice && (
-            <button
-              onClick={() => onDownloadInvoice(order.id)}
-              disabled={downloadingOrder === order.id}
-              className="text-purple-500 hover:text-purple-700 p-2 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors disabled:opacity-50"
-              title="Download Invoice PDF"
-            >
-              {downloadingOrder === order.id ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-500"></div>
-              ) : (
-                <FontAwesomeIcon icon={faDownload} className="text-sm" />
-              )}
-            </button>
-          )}
+          <button
+            onClick={async () => {
+              try {
+                toast.info('Preparing commercial invoice PDF download...', { autoClose: 2000 });
+                const result = await dispatch(downloadOrderInvoice(order.id)).unwrap();
+                toast.success(`Commercial invoice PDF downloaded successfully!`);
+              } catch (error) {
+                console.error('Error downloading commercial invoice PDF:', error);
+                toast.error('Failed to download commercial invoice PDF');
+              }
+            }}
+            disabled={downloadingOrder === order.id}
+            className="text-purple-500 hover:text-purple-700 p-2 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors disabled:opacity-50"
+            title="Download Commercial Invoice PDF"
+          >
+            {downloadingOrder === order.id ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-500"></div>
+            ) : (
+              <FontAwesomeIcon icon={faDownload} className="text-sm" />
+            )}
+          </button>
           <button
             onClick={() => onDelete(order.id)}
             className="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"

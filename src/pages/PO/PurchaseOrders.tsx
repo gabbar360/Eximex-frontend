@@ -1,7 +1,9 @@
+import { useDispatch, useSelector } from 'react-redux';
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { fetchPurchaseOrders, deletePurchaseOrder, downloadPurchaseOrderPDF } from '../../features/purchaseOrderSlice';
 import { toast } from 'react-toastify';
-import purchaseOrderService from '../../service/purchaseOrderService';
+
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import PageMeta from '../../components/common/PageMeta';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -21,18 +23,35 @@ import {
 
 const PurchaseOrders: React.FC = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [purchaseOrders, setPurchaseOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [downloadingPdf, setDownloadingPdf] = useState<string | null>(null);
 
-  const fetchPurchaseOrders = async () => {
+  const loadPurchaseOrders = async () => {
     setLoading(true);
     try {
-      const response = await purchaseOrderService.getPurchaseOrders();
-      setPurchaseOrders(response.data?.purchaseOrders || []);
+      const response = await dispatch(fetchPurchaseOrders()).unwrap();
+      console.log('Purchase Orders API Response:', response);
+      
+      // Handle different response structures
+      let purchaseOrdersData = [];
+      if (response?.data?.purchaseOrders) {
+        purchaseOrdersData = response.data.purchaseOrders;
+      } else if (response?.purchaseOrders) {
+        purchaseOrdersData = response.purchaseOrders;
+      } else if (Array.isArray(response?.data)) {
+        purchaseOrdersData = response.data;
+      } else if (Array.isArray(response)) {
+        purchaseOrdersData = response;
+      }
+      
+      console.log('Processed Purchase Orders Data:', purchaseOrdersData);
+      setPurchaseOrders(purchaseOrdersData);
     } catch (error: any) {
+      console.error('Error fetching purchase orders:', error);
       toast.error(error.message || 'Failed to fetch purchase orders');
       setPurchaseOrders([]);
     } finally {
@@ -41,7 +60,7 @@ const PurchaseOrders: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchPurchaseOrders();
+    loadPurchaseOrders();
   }, []);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,10 +76,10 @@ const PurchaseOrders: React.FC = () => {
 
     try {
       const result =
-        await purchaseOrderService.deletePurchaseOrder(confirmDelete);
+        await dispatch(deletePurchaseOrder(confirmDelete)).unwrap();
       toast.success(result.message || 'Purchase order deleted successfully');
       setConfirmDelete(null);
-      fetchPurchaseOrders();
+      loadPurchaseOrders();
     } catch (error: any) {
       toast.error(error.message || 'Failed to delete purchase order');
     }
@@ -69,7 +88,7 @@ const PurchaseOrders: React.FC = () => {
   const handleDownload = async (id: string, poNumber: string) => {
     setDownloadingPdf(id);
     try {
-      const pdfBlob = await purchaseOrderService.downloadPurchaseOrderPDF(id);
+      const pdfBlob = await dispatch(downloadPurchaseOrderPDF(id)).unwrap();
 
       // Create download link
       const url = window.URL.createObjectURL(pdfBlob);

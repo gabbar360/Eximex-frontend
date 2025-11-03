@@ -1,3 +1,4 @@
+import { useDispatch, useSelector } from 'react-redux';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -13,7 +14,8 @@ import {
   faFileInvoice,
 } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
-import orderService from '../../service/orderService';
+import { fetchOrderById, downloadOrderInvoicePdf } from '../../features/orderSlice';
+
 import PageMeta from '../../components/common/PageMeta';
 
 const ViewInvoice: React.FC = () => {
@@ -23,12 +25,14 @@ const ViewInvoice: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
 
+  const dispatch = useDispatch();
+
   useEffect(() => {
     const fetchOrder = async () => {
       try {
         setLoading(true);
-        const response = await orderService.getOrderById(id);
-        setOrder(response);
+        const response = await dispatch(fetchOrderById(id)).unwrap();
+        setOrder(response.data || response);
       } catch (error) {
         console.error('Error fetching order:', error);
         toast.error('Failed to load invoice data');
@@ -39,16 +43,18 @@ const ViewInvoice: React.FC = () => {
     };
 
     if (id) fetchOrder();
-  }, [id, navigate]);
+  }, [id, navigate, dispatch]);
 
   const handleDownloadPdf = async () => {
     try {
       setDownloading(true);
-      const result = await orderService.downloadOrderInvoicePdf(id);
+      toast.info('Preparing PDF download...', { autoClose: 2000 });
+      
+      const result = await dispatch(downloadOrderInvoicePdf(id)).unwrap();
       toast.success(`Invoice PDF downloaded: ${result.filename}`);
     } catch (error) {
       console.error('Error downloading PDF:', error);
-      toast.error('Failed to download PDF');
+      toast.error('Failed to download invoice PDF');
     } finally {
       setDownloading(false);
     }

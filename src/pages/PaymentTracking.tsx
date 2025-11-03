@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import PageBreadCrumb from '../components/common/PageBreadCrumb';
-import paymentService from '../service/paymentService';
 
 interface Payment {
   id: number;
@@ -31,7 +30,7 @@ const PaymentTracking: React.FC = () => {
   const loadPayments = async () => {
     setLoading(true);
     try {
-      const response = await paymentService.getPayments();
+// TODO: Convert to Redux action - getPayments();
       setPayments(response.data.data || []);
     } catch (error) {
       console.error('Payment error:', error);
@@ -44,7 +43,7 @@ const PaymentTracking: React.FC = () => {
 
   const loadDuePayments = async () => {
     try {
-      const response = await paymentService.getDuePayments();
+// TODO: Convert to Redux action - getDuePayments();
       setDuePayments(response.data.data || []);
     } catch (error) {
       console.error('Failed to load due payments');
@@ -54,7 +53,7 @@ const PaymentTracking: React.FC = () => {
 
   const updatePaymentStatus = async (id: number, status: string) => {
     try {
-      await paymentService.updatePaymentStatus(id, status);
+// TODO: Convert to Redux action - updatePaymentStatus(id, status);
       toast.success('Payment status updated');
       loadPayments();
       loadDuePayments();

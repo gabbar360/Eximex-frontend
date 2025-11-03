@@ -5,8 +5,9 @@ import { faArrowLeft, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-// Import service
-import { getPiInvoiceHistory } from '../../service/piService';
+// Import Redux actions
+import { fetchPiInvoiceHistory } from '../../features/piSlice';
+import { useDispatch } from 'react-redux';
 
 // Import components
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
@@ -35,6 +36,7 @@ interface HistoryItem {
 const PIHistory: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState<boolean>(true);
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
@@ -42,7 +44,7 @@ const PIHistory: React.FC = () => {
     const fetchHistory = async () => {
       try {
         setLoading(true);
-        const response = await getPiInvoiceHistory(id);
+        const response = await dispatch(fetchPiInvoiceHistory(id)).unwrap();
         console.log('History response:', response);
 
         if (response && Array.isArray(response)) {

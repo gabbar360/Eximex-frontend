@@ -1,3 +1,6 @@
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchPiInvoices, updatePiAmount } from '../../features/piSlice';
+import { fetchOrders, createOrder } from '../../features/orderSlice';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -10,11 +13,12 @@ import {
 import { toast } from 'react-toastify';
 import PageBreadCrumb from '../../components/common/PageBreadCrumb';
 import PageMeta from '../../components/common/PageMeta';
-import orderService from '../../service/orderService';
-import piService from '../../service/piService';
+
+
 import DatePicker from '../../components/form/DatePicker';
 
 const AddOrder = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [piLoading, setPiLoading] = useState(true);
@@ -40,16 +44,18 @@ const AddOrder = () => {
       try {
         setPiLoading(true);
         const [piResponse, ordersResponse] = await Promise.all([
-          piService.getAllPiInvoices(true),
-          orderService.getAllOrders(),
+          dispatch(fetchPiInvoices({ available: true })).unwrap(),
+          dispatch(fetchOrders()).unwrap(),
         ]);
 
         const allPIs = piResponse?.piInvoices || [];
         const existingOrders = ordersResponse?.orders || [];
 
-        // Filter out PIs that already have orders
+        // Filter out PIs that already have orders and exclude confirmed PIs
         const availablePIs = allPIs.filter(
-          (pi) => !existingOrders.some((order) => order.piInvoiceId === pi.id)
+          (pi) => 
+            !existingOrders.some((order) => order.piInvoiceId === pi.id) &&
+            pi.status !== 'confirmed'
         );
 
         setPiList(availablePIs);
@@ -62,7 +68,7 @@ const AddOrder = () => {
       }
     };
     fetchPIList();
-  }, []);
+  }, [dispatch]);
 
   const handlePISelect = (pi) => {
     setSelectedPI(pi);
@@ -102,7 +108,7 @@ const AddOrder = () => {
     setLoading(true);
     try {
       // Check if order already exists before proceeding
-      const existingOrders = await orderService.getAllOrders();
+      const existingOrders = await dispatch(fetchOrders()).unwrap();
       const orderExists = existingOrders?.orders?.some(
         (order) => order.piInvoiceId === selectedPI.id
       );
@@ -124,27 +130,15 @@ const AddOrder = () => {
           updated: updatedTotalAmount,
         });
 
-        // Update PI total amount in backend
+        // Update PI total amount in backend using Redux
         try {
-          const response = await fetch(
-            `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:8000'}/api/v1/${selectedPI.id}/update-amount`,
-            {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-              },
-              body: JSON.stringify({
-                totalAmount: updatedTotalAmount,
-                advanceAmount: advancePayment,
-              }),
+          await dispatch(updatePiAmount({
+            id: selectedPI.id,
+            amountData: {
+              totalAmount: updatedTotalAmount,
+              advanceAmount: advancePayment,
             }
-          );
-
-          if (!response.ok) {
-            throw new Error('Failed to update PI amount');
-          }
-
+          })).unwrap();
           console.log('PI amount updated successfully');
         } catch (error) {
           console.error('Failed to update PI amount:', error);
@@ -195,7 +189,7 @@ const AddOrder = () => {
       console.log('Order payload:', orderPayload);
 
       // Create the order with all details
-      const result = await orderService.createOrder(orderPayload);
+      const result = await dispatch(createOrder(orderPayload)).unwrap();
       console.log('Order created successfully:', result);
 
       toast.success(result.message);
