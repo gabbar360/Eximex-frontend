@@ -18,7 +18,7 @@ export default function AuthLayout({
       <div className="absolute bottom-20 right-10 w-24 h-24 bg-blue-400/10 rounded-full blur-lg animate-pulse delay-1000"></div>
       <div className="absolute top-1/2 right-1/4 w-16 h-16 bg-indigo-400/10 rounded-full blur-md animate-pulse delay-500"></div>
       
-      <div className="relative h-full flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+      <div className="relative h-full flex items-center justify-center p-2 sm:p-4">
         {children}
         
         {/* Theme Toggle */}

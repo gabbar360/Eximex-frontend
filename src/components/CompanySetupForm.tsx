@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { createCompany } from '../features/companySlice';
+import { getCurrentUser } from '../features/authSlice';
+import { setUser } from '../features/userSlice';
 import { FaCheck, FaChevronRight, FaChevronLeft, FaBuilding, FaAddressCard, FaUniversity } from 'react-icons/fa';
 
 interface CompanyFormData {
@@ -137,8 +139,19 @@ export default function CompanySetupForm() {
       });
 
       const resultAction = await dispatch(createCompany(formData)).unwrap();
+      
+      // Refresh user data to include the new company
+      try {
+        const userResponse = await dispatch(getCurrentUser()).unwrap();
+        if (userResponse?.data) {
+          dispatch(setUser(userResponse.data));
+        }
+      } catch (userError) {
+        console.warn('Failed to refresh user data:', userError);
+      }
+      
       toast.success('Company created successfully!');
-      window.location.replace('/dashboard');
+      navigate('/dashboard');
     } catch (error: any) {
       console.error('API Error:', error);
       

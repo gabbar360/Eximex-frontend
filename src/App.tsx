@@ -250,13 +250,6 @@ export default function App() {
             const res = await dispatch(getCurrentUser()).unwrap();
             if (res?.data) {
               dispatch(setUser(res.data));
-              
-              // Check if user needs company setup (skip for SUPER_ADMIN)
-              const userData = res.data;
-              if (userData && userData.role !== 'SUPER_ADMIN' && (!userData.company && !userData.companyId) && window.location.pathname !== '/company-setup') {
-                window.location.replace('/company-setup');
-                return;
-              }
             }
           }
         }
