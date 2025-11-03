@@ -7,6 +7,7 @@ import { useDispatch } from 'react-redux';
 import { registerUser } from '../../features/authSlice';
 import { EyeCloseIcon, EyeIcon } from '../../icons';
 import { HiEye, HiEyeOff } from 'react-icons/hi';
+import AuthSlider from './AuthSlider';
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -49,61 +50,10 @@ const handleSubmit = async (
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-      <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-16 xl:gap-32 items-center min-h-screen py-4 sm:py-8 lg:py-0">
-        {/* Left Side - Branding */}
-        <div className="hidden lg:flex flex-col items-center justify-center text-white text-center">
-          <div className="mb-4">
-            <img 
-              src="/sidelogo3.png" 
-              alt="Eximex" 
-              className="h-40 mb-2 mx-auto"
-            />
-            <h1 className="text-3xl font-bold mb-2 leading-tight">
-              Join Global
-              <span className="block text-blue-300">Trade Network</span>
-            </h1>
-            <p className="text-base text-blue-100 mb-4 leading-relaxed">
-              Create your business account and connect with verified suppliers.
-            </p>
-          </div>
-          
-          {/* Benefits */}
-          <div className="space-y-2 mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-              <span className="text-sm text-blue-100">Free Account Setup</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-              <span className="text-sm text-blue-100">Instant Supplier Matching</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-              <span className="text-sm text-blue-100">Secure Trade Protection</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-              <span className="text-sm text-blue-100">24/7 Support Team</span>
-            </div>
-          </div>
-          
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-300 mb-1">50K+</div>
-              <div className="text-xs text-blue-100">Active Traders</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-300 mb-1">180+</div>
-              <div className="text-xs text-blue-100">Countries</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-300 mb-1">$2B+</div>
-              <div className="text-xs text-blue-100">Trade Volume</div>
-            </div>
-          </div>
-        </div>
+    <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-full">
+      <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-16 xl:gap-32 items-center h-full py-4 sm:py-8 lg:py-0">
+        {/* Left Side - Slider */}
+        <AuthSlider />
 
         {/* Right Side - Form */}
         <div className="w-full max-w-xs xs:max-w-sm sm:max-w-md mx-auto lg:mx-0 order-first lg:order-last">
