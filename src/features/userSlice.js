@@ -192,9 +192,31 @@ export const getAllDatabaseData = createAsyncThunk(
 
 export const resetUserPassword = createAsyncThunk(
   'user/resetUserPassword',
-  async ({ userId, passwordData }, { rejectWithValue }) => {
+  async ({ userId, newPassword }, { rejectWithValue }) => {
     try {
-      return await userService.resetUserPassword(userId, passwordData);
+      return await userService.resetUserPassword(userId, newPassword);
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
+export const getAllCompanies = createAsyncThunk(
+  'user/getAllCompanies',
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      return await userService.getAllCompanies(params);
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
+export const getCompanyDetails = createAsyncThunk(
+  'user/getCompanyDetails',
+  async (companyId, { rejectWithValue }) => {
+    try {
+      return await userService.getCompanyDetails(companyId);
     } catch (err) {
       return rejectWithValue(err.message);
     }

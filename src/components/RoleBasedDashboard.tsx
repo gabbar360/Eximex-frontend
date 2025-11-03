@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth, RoleGuard, PermissionGuard } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { getUserDataSummary, getSuperAdminDashboardStats, getCompanyDashboardStats, getUserStats, getActivityLogs } from '../features/userSlice';
+import SuperAdminOverview from './SuperAdminOverview';
 
 import {
   FiUsers,
@@ -114,6 +115,11 @@ const RoleBasedDashboard: React.FC = () => {
         Loading dashboard...
       </div>
     );
+  }
+
+  // Show SuperAdmin overview for SUPER_ADMIN role
+  if (user?.role === 'SUPER_ADMIN') {
+    return <SuperAdminOverview />;
   }
 
   return (
