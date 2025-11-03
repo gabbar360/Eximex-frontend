@@ -5,15 +5,11 @@ import * as Yup from 'yup';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
 import { registerUser } from '../../features/authSlice';
-
-import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from '../../icons';
-import Label from '../form/Label';
-import Input from '../form/input/InputField';
-import Checkbox from '../form/input/Checkbox';
+import { EyeCloseIcon, EyeIcon } from '../../icons';
+import { HiEye, HiEyeOff } from 'react-icons/hi';
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const [isChecked, setIsChecked] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -35,7 +31,7 @@ export default function SignUpForm() {
       .required('Password is required'),
   });
 
-  const handleSubmit = async (
+const handleSubmit = async (
     values,
     { setSubmitting, setFieldError, setStatus }
   ) => {
@@ -46,146 +42,220 @@ export default function SignUpForm() {
       navigate('/signin');
     } catch (err) {
       console.error('Registration error:', err);
-
-      // Handle field-specific errors
-      if (err.response?.data?.errors) {
-        const errors = err.response.data.errors;
-        Object.keys(errors).forEach((field) => {
-          setFieldError(field, errors[field]);
-        });
-      } else {
-        // Handle general errors
-        setStatus(err.message || 'Registration failed');
-        toast.error(err.message || 'Registration failed');
-      }
+      toast.error(err);
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="flex flex-col flex-1 w-full overflow-y-auto lg:w-1/2 no-scrollbar">
-      <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
-        <div>
-          <div className="mb-5 sm:mb-8">
-            <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
-              Sign Up
+    <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-16 xl:gap-32 items-center min-h-screen py-4 sm:py-8 lg:py-0">
+        {/* Left Side - Branding */}
+        <div className="hidden lg:flex flex-col items-center justify-center text-white text-center">
+          <div className="mb-4">
+            <img 
+              src="/sidelogo3.png" 
+              alt="Eximex" 
+              className="h-40 mb-2 mx-auto"
+            />
+            <h1 className="text-3xl font-bold mb-2 leading-tight">
+              Join Global
+              <span className="block text-blue-300">Trade Network</span>
             </h1>
+            <p className="text-base text-blue-100 mb-4 leading-relaxed">
+              Create your business account and connect with verified suppliers.
+            </p>
           </div>
-          <Formik
-            initialValues={initialValues}
-            validationSchema={validationSchema}
-            onSubmit={handleSubmit}
-          >
-            {({ isSubmitting, status }) => (
-              <Form className="space-y-5">
-                {/* {status && (
-                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                    {status}
-                  </div>
-                )} */}
-                <div>
-                  <Label>
-                    Name <span className="text-error-500">*</span>
-                  </Label>
-                  <Field
-                    name="name"
-                    type="text"
-                    as={Input}
-                    placeholder="Enter your name"
-                  />
-                  <ErrorMessage
-                    name="name"
-                    component="div"
-                    className="text-sm text-red-500"
-                  />
-                </div>
+          
+          {/* Benefits */}
+          <div className="space-y-2 mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+              <span className="text-sm text-blue-100">Free Account Setup</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+              <span className="text-sm text-blue-100">Instant Supplier Matching</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+              <span className="text-sm text-blue-100">Secure Trade Protection</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+              <span className="text-sm text-blue-100">24/7 Support Team</span>
+            </div>
+          </div>
+          
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-blue-300 mb-1">50K+</div>
+              <div className="text-xs text-blue-100">Active Traders</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-blue-300 mb-1">180+</div>
+              <div className="text-xs text-blue-100">Countries</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-blue-300 mb-1">$2B+</div>
+              <div className="text-xs text-blue-100">Trade Volume</div>
+            </div>
+          </div>
+        </div>
 
-                <div>
-                  <Label>
-                    Mobile Number <span className="text-error-500">*</span>
-                  </Label>
-                  <Field
-                    name="mobileNum"
-                    type="text"
-                    as={Input}
-                    placeholder="Enter 10-digit mobile number"
-                  />
-                  <ErrorMessage
-                    name="mobileNum"
-                    component="div"
-                    className="text-sm text-red-500"
-                  />
-                </div>
+        {/* Right Side - Form */}
+        <div className="w-full max-w-xs xs:max-w-sm sm:max-w-md mx-auto lg:mx-0 order-first lg:order-last">
+          {/* Mobile Header */}
+          <div className="lg:hidden text-center mb-6 sm:mb-8">
+            <img 
+              src="/logo.png" 
+              alt="Eximex" 
+              className="h-12 mx-auto mb-4"
+            />
+            <h2 className="text-2xl font-bold text-white mb-2">Create Account</h2>
+            <p className="text-blue-200">Join the global trade network</p>
+          </div>
 
-                <div>
-                  <Label>
-                    Email <span className="text-error-500">*</span>
-                  </Label>
-                  <Field
-                    name="email"
-                    type="email"
-                    as={Input}
-                    placeholder="Enter your email"
-                  />
-                  <ErrorMessage
-                    name="email"
-                    component="div"
-                    className="text-sm text-red-500"
-                  />
-                </div>
+          {/* Form Card */}
+          <div className="bg-white/95 backdrop-blur-xl rounded-lg sm:rounded-xl lg:rounded-2xl shadow-2xl p-3 xs:p-4 sm:p-6 border border-white/20 dark:bg-gray-900/95 dark:border-gray-700/30">
+            <div className="hidden lg:block text-center mb-4 sm:mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Create Business Account</h2>
+              <p className="text-gray-600 dark:text-gray-300">Start trading globally today</p>
+            </div>
 
-                <div>
-                  <Label>
-                    Password <span className="text-error-500">*</span>
-                  </Label>
-                  <div className="relative">
+            <Formik
+              initialValues={initialValues}
+              validationSchema={validationSchema}
+              onSubmit={handleSubmit}
+            >
+              {({ isSubmitting, status }) => (
+                <Form className="space-y-2 sm:space-y-3">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Full Name
+                    </label>
                     <Field
-                      name="password"
-                      type={showPassword ? 'text' : 'password'}
-                      as={Input}
-                      placeholder="Enter your password"
+                      name="name"
+                      type="text"
+                      placeholder="Enter your full name"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 transition-all duration-200 text-sm sm:text-base"
                     />
-                    <span
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
-                    >
-                      {showPassword ? (
-                        <EyeIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
-                      ) : (
-                        <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
-                      )}
-                    </span>
+                    <ErrorMessage
+                      name="name"
+                      component="div"
+                      className="text-sm text-red-500 mt-1"
+                    />
                   </div>
-                  <ErrorMessage
-                    name="password"
-                    component="div"
-                    className="text-sm text-red-500"
-                  />
-                </div>
-                <div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Business Email
+                    </label>
+                    <Field
+                      name="email"
+                      type="email"
+                      placeholder="Enter your business email"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 transition-all duration-200 text-sm sm:text-base"
+                    />
+                    <ErrorMessage
+                      name="email"
+                      component="div"
+                      className="text-sm text-red-500 mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Mobile Number
+                    </label>
+                    <Field
+                      name="mobileNum"
+                      type="text"
+                      placeholder="Enter 10-digit mobile number"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 transition-all duration-200 text-sm sm:text-base"
+                    />
+                    <ErrorMessage
+                      name="mobileNum"
+                      component="div"
+                      className="text-sm text-red-500 mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Password
+                    </label>
+                    <div className="relative">
+                      <Field
+                        name="password"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="Create a strong password"
+                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-10 sm:pr-12 border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 transition-all duration-200 text-sm sm:text-base"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors z-10 p-1"
+                      >
+                        {showPassword ? <HiEye className="w-5 h-5" /> : <HiEyeOff className="w-5 h-5" />}
+                      </button>
+                    </div>
+                    <ErrorMessage
+                      name="password"
+                      component="div"
+                      className="text-sm text-red-500 mt-1"
+                    />
+                  </div>
+
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600"
+                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-2.5 sm:py-3 rounded-lg sm:rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all duration-200 disabled:cursor-not-allowed transform hover:scale-[1.01] active:scale-[0.99] mb-2 sm:mb-3 text-sm sm:text-base"
                   >
-                    {isSubmitting ? 'Submitting...' : 'Sign Up'}
+                    {isSubmitting ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Creating Account...
+                      </div>
+                    ) : (
+                      'Create Business Account'
+                    )}
                   </button>
-                </div>
-              </Form>
-            )}
-          </Formik>
 
-          <div className="mt-5">
-            <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
-              Already have an account?{' '}
-              <Link
-                to="/signin"
-                className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
-              >
-                Sign In
-              </Link>
-            </p>
+                  <div className="text-center">
+                    <p className="text-gray-600 dark:text-gray-300">
+                      Already have an account?{' '}
+                      <Link
+                        to="/signin"
+                        className="font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+                      >
+                        Sign In
+                      </Link>
+                    </p>
+                  </div>
+                </Form>
+              )}
+            </Formik>
+          </div>
+
+          {/* Trust Indicators */}
+          <div className="mt-6 text-center">
+            <div className="flex items-center justify-center gap-4 text-xs text-white/70">
+              <span className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                Free Registration
+              </span>
+              <span className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                Instant Verification
+              </span>
+              <span className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                No Hidden Fees
+              </span>
+            </div>
           </div>
         </div>
       </div>
