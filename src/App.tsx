@@ -64,6 +64,10 @@ import EnhancedSuperAdminDashboard from './pages/SuperAdmin/EnhancedSuperAdminDa
 import SuperAdminManagement from './components/SuperAdminManagement';
 import PasswordManagement from './pages/SuperAdmin/PasswordManagement';
 import CompanyManagement from './pages/SuperAdmin/CompanyManagement';
+import DatabaseManagement from './pages/SuperAdmin/DatabaseManagement';
+import SubscriptionManagement from './pages/SuperAdmin/SubscriptionManagement';
+import SecurityManagement from './pages/SuperAdmin/SecurityManagement';
+import AuditReports from './pages/SuperAdmin/AuditReports';
 import PurchaseOrders from './pages/PO/PurchaseOrders';
 import AddEditPurchaseOrderForm from './pages/PO/AddEditPurchaseOrderForm';
 import PaymentTracking from './pages/PaymentTracking';
@@ -155,6 +159,10 @@ function AppContent() {
           <Route path="/super-admin/users" element={<UserManagement />} />
           <Route path="/super-admin/passwords" element={<PasswordManagement />} />
           <Route path="/super-admin/companies" element={<CompanyManagement />} />
+          <Route path="/super-admin/database" element={<DatabaseManagement />} />
+          <Route path="/super-admin/subscriptions" element={<SubscriptionManagement />} />
+          <Route path="/super-admin/security" element={<SecurityManagement />} />
+          <Route path="/super-admin/reports" element={<AuditReports />} />
           
           {/* Super Admin Database Management */}
           <Route path="/super-admin/database/tables" element={<SuperAdminDashboard />} />
@@ -242,13 +250,6 @@ export default function App() {
             const res = await dispatch(getCurrentUser()).unwrap();
             if (res?.data) {
               dispatch(setUser(res.data));
-              
-              // Check if user needs company setup (skip for SUPER_ADMIN)
-              const userData = res.data;
-              if (userData && userData.role !== 'SUPER_ADMIN' && (!userData.company && !userData.companyId) && window.location.pathname !== '/company-setup') {
-                window.location.replace('/company-setup');
-                return;
-              }
             }
           }
         }

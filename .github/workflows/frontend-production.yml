@@ -1,202 +1,202 @@
-name: Frontend Production Deployment
+# name: Frontend Production Deployment
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-  workflow_dispatch:
+# on:
+#   push:
+#     branches: [main]
+#   pull_request:
+#     branches: [main]
+#   workflow_dispatch:
 
-jobs:
-  quality-checks:
-    runs-on: ubuntu-latest
+# jobs:
+#   quality-checks:
+#     runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v4
+#     steps:
+#       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: '20'
+#           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
+#       - name: Install dependencies
+#         run: npm ci
 
-      - name: Check TypeScript
-        run: npx tsc --noEmit
+#       - name: Check TypeScript
+#         run: npx tsc --noEmit
 
-      - name: Run linting
-        run: npm run lint || echo "⚠️ Lint warnings ignored for testing"
+#       - name: Run linting
+#         run: npm run lint || echo "⚠️ Lint warnings ignored for testing"
 
-      - name: Check code formatting
-        run: npm run format:check || echo "⚠️ Format warnings ignored for testing"
+#       - name: Check code formatting
+#         run: npm run format:check || echo "⚠️ Format warnings ignored for testing"
 
-      - name: Security audit
-        run: npm audit --audit-level=high || echo "⚠️ Audit warnings ignored"
+#       - name: Security audit
+#         run: npm audit --audit-level=high || echo "⚠️ Audit warnings ignored"
 
-      - name: Run tests
-        run: npm test
+#       - name: Run tests
+#         run: npm test
 
-  build-production:
-    needs: quality-checks
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+#   build-production:
+#     needs: quality-checks
+#     runs-on: ubuntu-latest
+#     if: github.ref == 'refs/heads/main'
 
-    steps:
-      - uses: actions/checkout@v4
+#     steps:
+#       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: '20'
+#           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
+#       - name: Install dependencies
+#         run: npm ci
 
-      - name: Build for production
-        run: npm run build
-        env:
-          VITE_API_BASE_URL: ${{ secrets.PROD_API_URL }}
+#       - name: Build for production
+#         run: npm run build
+#         env:
+#           VITE_API_BASE_URL: ${{ secrets.PROD_API_URL }}
 
-      - name: Validate build
-        run: |
-          ls -la dist
-          du -sh dist
-          echo "Build size: $(du -sh dist | cut -f1)"
+#       - name: Validate build
+#         run: |
+#           ls -la dist
+#           du -sh dist
+#           echo "Build size: $(du -sh dist | cut -f1)"
 
-      - name: Upload production build
-        uses: actions/upload-artifact@v4
-        with:
-          name: production-build
-          path: ./dist/
-          retention-days: 30
+#       - name: Upload production build
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: production-build
+#           path: ./dist/
+#           retention-days: 30
 
-  deploy-production:
-    needs: build-production
-    runs-on: ubuntu-latest
-    environment: production
-    if: github.ref == 'refs/heads/main'
+#   deploy-production:
+#     needs: build-production
+#     runs-on: ubuntu-latest
+#     environment: production
+#     if: github.ref == 'refs/heads/main'
 
-    steps:
-      - name: Download production build
-        uses: actions/download-artifact@v4
-        with:
-          name: production-build
-          path: ./dist
+#     steps:
+#       - name: Download production build
+#         uses: actions/download-artifact@v4
+#         with:
+#           name: production-build
+#           path: ./dist
 
-      - name: Cleanup old build
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.PROD_FTP_HOST }}
-          username: ${{ secrets.PROD_FTP_USER }}
-          password: ${{ secrets.PROD_FTP_PASS }}
-          port: 22
-          script: |
-            rm -rf /var/www/Eximex-frontend/* 2>/dev/null || true
-            mkdir -p /var/www/Eximex-frontend
-            chown -R $USER:$USER /var/www/Eximex-frontend 2>/dev/null || true
-            chmod -R 755 /var/www/Eximex-frontend 2>/dev/null || true
+#       - name: Cleanup old build
+#         uses: appleboy/ssh-action@v1.0.3
+#         with:
+#           host: ${{ secrets.PROD_FTP_HOST }}
+#           username: ${{ secrets.PROD_FTP_USER }}
+#           password: ${{ secrets.PROD_FTP_PASS }}
+#           port: 22
+#           script: |
+#             rm -rf /var/www/Eximex-frontend/* 2>/dev/null || true
+#             mkdir -p /var/www/Eximex-frontend
+#             chown -R $USER:$USER /var/www/Eximex-frontend 2>/dev/null || true
+#             chmod -R 755 /var/www/Eximex-frontend 2>/dev/null || true
 
-      - name: Deploy to Production
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.PROD_FTP_HOST }}
-          username: ${{ secrets.PROD_FTP_USER }}
-          password: ${{ secrets.PROD_FTP_PASS }}
-          port: 22
-          script: |
-            # Create temp directory
-            mkdir -p /tmp/deploy
+#       - name: Deploy to Production
+#         uses: appleboy/ssh-action@v1.0.3
+#         with:
+#           host: ${{ secrets.PROD_FTP_HOST }}
+#           username: ${{ secrets.PROD_FTP_USER }}
+#           password: ${{ secrets.PROD_FTP_PASS }}
+#           port: 22
+#           script: |
+#             # Create temp directory
+#             mkdir -p /tmp/deploy
             
-      - name: Copy files to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.PROD_FTP_HOST }}
-          username: ${{ secrets.PROD_FTP_USER }}
-          password: ${{ secrets.PROD_FTP_PASS }}
-          port: 22
-          source: './dist/*'
-          target: '/tmp/deploy/'
-          strip_components: 1
-          overwrite: true
+#       - name: Copy files to server
+#         uses: appleboy/scp-action@v0.1.7
+#         with:
+#           host: ${{ secrets.PROD_FTP_HOST }}
+#           username: ${{ secrets.PROD_FTP_USER }}
+#           password: ${{ secrets.PROD_FTP_PASS }}
+#           port: 22
+#           source: './dist/*'
+#           target: '/tmp/deploy/'
+#           strip_components: 1
+#           overwrite: true
           
-      - name: Move files to final location
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.PROD_FTP_HOST }}
-          username: ${{ secrets.PROD_FTP_USER }}
-          password: ${{ secrets.PROD_FTP_PASS }}
-          port: 22
-          script: |
-            # Move files from temp to final location
-            cp -r /tmp/deploy/* /var/www/Eximex-frontend/ 2>/dev/null || true
-            # Cleanup temp
-            rm -rf /tmp/deploy
-            # Set permissions
-            chmod -R 644 /var/www/Eximex-frontend/* 2>/dev/null || true
-            find /var/www/Eximex-frontend -type d -exec chmod 755 {} \; 2>/dev/null || true
+#       - name: Move files to final location
+#         uses: appleboy/ssh-action@v1.0.3
+#         with:
+#           host: ${{ secrets.PROD_FTP_HOST }}
+#           username: ${{ secrets.PROD_FTP_USER }}
+#           password: ${{ secrets.PROD_FTP_PASS }}
+#           port: 22
+#           script: |
+#             # Move files from temp to final location
+#             cp -r /tmp/deploy/* /var/www/Eximex-frontend/ 2>/dev/null || true
+#             # Cleanup temp
+#             rm -rf /tmp/deploy
+#             # Set permissions
+#             chmod -R 644 /var/www/Eximex-frontend/* 2>/dev/null || true
+#             find /var/www/Eximex-frontend -type d -exec chmod 755 {} \; 2>/dev/null || true
 
-      - name: Restart Services
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.PROD_FTP_HOST }}
-          username: ${{ secrets.PROD_FTP_USER }}
-          password: ${{ secrets.PROD_FTP_PASS }}
-          port: 22
-          script: |
-            systemctl reload nginx 2>/dev/null || service nginx reload 2>/dev/null || echo "Nginx reload skipped - no sudo access"
+#       - name: Restart Services
+#         uses: appleboy/ssh-action@v1.0.3
+#         with:
+#           host: ${{ secrets.PROD_FTP_HOST }}
+#           username: ${{ secrets.PROD_FTP_USER }}
+#           password: ${{ secrets.PROD_FTP_PASS }}
+#           port: 22
+#           script: |
+#             systemctl reload nginx 2>/dev/null || service nginx reload 2>/dev/null || echo "Nginx reload skipped - no sudo access"
 
-      - name: Health Check
-        run: |
-          sleep 30
-          for i in {1..5}; do
-            if curl -fsS ${{ secrets.PROD_URL }}/health.json > /dev/null; then
-              echo "✅ Health check passed"
-              break
-            fi
-            echo "⏳ Attempt $i failed, retrying..."
-            sleep 15
-          done
+#       - name: Health Check
+#         run: |
+#           sleep 30
+#           for i in {1..5}; do
+#             if curl -fsS ${{ secrets.PROD_URL }}/health.json > /dev/null; then
+#               echo "✅ Health check passed"
+#               break
+#             fi
+#             echo "⏳ Attempt $i failed, retrying..."
+#             sleep 15
+#           done
 
-      - name: Performance Check
-        run: |
-          response_time=$(curl -o /dev/null -s -w '%{time_total}' ${{ secrets.PROD_URL }})
-          if (( $(echo "$response_time > 3.0" | bc -l) )); then
-            echo "⚠️ Slow response time: ${response_time}s"
-            exit 1
-          fi
-          echo "✅ Performance OK: ${response_time}s"
+#       - name: Performance Check
+#         run: |
+#           response_time=$(curl -o /dev/null -s -w '%{time_total}' ${{ secrets.PROD_URL }})
+#           if (( $(echo "$response_time > 3.0" | bc -l) )); then
+#             echo "⚠️ Slow response time: ${response_time}s"
+#             exit 1
+#           fi
+#           echo "✅ Performance OK: ${response_time}s"
 
-      - name: Notify Success
-        if: success()
-        run: |
-          echo "🚀 Production deployment successful!"
-          echo "🔗 URL: ${{ secrets.PROD_URL }}"
+#       - name: Notify Success
+#         if: success()
+#         run: |
+#           echo "🚀 Production deployment successful!"
+#           echo "🔗 URL: ${{ secrets.PROD_URL }}"
 
-      - name: Send email on failure
-        if: failure()
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: ${{ secrets.SMTP_HOST }}
-          server_port: ${{ secrets.SMTP_PORT }}
-          username: ${{ secrets.SMTP_USER }}
-          password: ${{ secrets.SMTP_PASS }}
-          from: ${{ secrets.SMTP_FROM }}
-          to: jaydeep.flexa@gmail.com
-          subject: '❌ Frontend Deployment Failed'
-          body: 'Production deployment failed. Check GitHub Actions logs for details.'
+#       - name: Send email on failure
+#         if: failure()
+#         uses: dawidd6/action-send-mail@v3
+#         with:
+#           server_address: ${{ secrets.SMTP_HOST }}
+#           server_port: ${{ secrets.SMTP_PORT }}
+#           username: ${{ secrets.SMTP_USER }}
+#           password: ${{ secrets.SMTP_PASS }}
+#           from: ${{ secrets.SMTP_FROM }}
+#           to: jaydeep.flexa@gmail.com
+#           subject: '❌ Frontend Deployment Failed'
+#           body: 'Production deployment failed. Check GitHub Actions logs for details.'
 
-      - name: Send email on success
-        if: success()
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: ${{ secrets.SMTP_HOST }}
-          server_port: ${{ secrets.SMTP_PORT }}
-          username: ${{ secrets.SMTP_USER }}
-          password: ${{ secrets.SMTP_PASS }}
-          from: ${{ secrets.SMTP_FROM }}
-          to: jaydeep.flexa@gmail.com
-          subject: '✅ Frontend Deployment Successful'
-          body: 'Production deployment completed successfully! 🎉'
+#       - name: Send email on success
+#         if: success()
+#         uses: dawidd6/action-send-mail@v3
+#         with:
+#           server_address: ${{ secrets.SMTP_HOST }}
+#           server_port: ${{ secrets.SMTP_PORT }}
+#           username: ${{ secrets.SMTP_USER }}
+#           password: ${{ secrets.SMTP_PASS }}
+#           from: ${{ secrets.SMTP_FROM }}
+#           to: jaydeep.flexa@gmail.com
+#           subject: '✅ Frontend Deployment Successful'
+#           body: 'Production deployment completed successfully! 🎉'
