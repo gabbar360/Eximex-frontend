@@ -50,30 +50,32 @@ const handleSubmit = async (
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-full">
-      <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-16 xl:gap-32 items-center h-full py-4 sm:py-8 lg:py-0">
-        {/* Left Side - Slider */}
-        <AuthSlider />
+    <div className="auth-form-container w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 min-h-screen mobile-form-container">
+      <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-16 xl:gap-32 items-center lg:items-center justify-center min-h-screen py-6 sm:py-8 lg:py-12">
+        {/* Left Side - Slider - Only on laptop screens */}
+        <div className="hidden lg:block w-full">
+          <AuthSlider />
+        </div>
 
         {/* Right Side - Form */}
-        <div className="w-full max-w-xs xs:max-w-sm sm:max-w-md mx-auto lg:mx-0 order-first lg:order-last">
-          {/* Mobile Header */}
-          <div className="lg:hidden text-center mb-6 sm:mb-8">
-            <img 
-              src="/logo.png" 
-              alt="Eximex" 
-              className="h-12 mx-auto mb-4"
-            />
-            <h2 className="text-2xl font-bold text-white mb-2">Create Account</h2>
-            <p className="text-blue-200">Join the global trade network</p>
-          </div>
-
+        <div className="w-full max-w-sm sm:max-w-md lg:max-w-lg mx-auto lg:mx-0 order-first lg:order-last">
           {/* Form Card */}
-          <div className="bg-white/95 backdrop-blur-xl rounded-lg sm:rounded-xl lg:rounded-2xl shadow-2xl p-3 xs:p-4 sm:p-6 border border-white/20 dark:bg-gray-900/95 dark:border-gray-700/30">
-            <div className="hidden lg:block text-center mb-4 sm:mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Create Business Account</h2>
-              <p className="text-gray-600 dark:text-gray-300">Start trading globally today</p>
+          <div className="auth-form-card bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl border border-white/20 overflow-hidden w-full">
+            {/* Header */}
+            <div className="bg-white p-4 sm:p-6 border-b-2" style={{borderColor: '#86a0b2'}}>
+              <div className="text-center">
+                <img 
+                  src="/logo1.png" 
+                  alt="Eximex" 
+                  className="h-12 sm:h-16 lg:h-20 mx-auto mb-3 sm:mb-4"
+                />
+                <h2 className="text-lg sm:text-xl font-bold mb-1" style={{color: '#86a0b2'}}>Create Business Account</h2>
+                <p className="text-gray-600 text-xs sm:text-sm">Join the global trade network</p>
+              </div>
             </div>
+
+            {/* Form Content */}
+            <div className="p-4 sm:p-6">
 
             <Formik
               initialValues={initialValues}
@@ -81,60 +83,60 @@ const handleSubmit = async (
               onSubmit={handleSubmit}
             >
               {({ isSubmitting, status }) => (
-                <Form className="space-y-2 sm:space-y-3">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                <Form className="auth-form-fields space-y-4">
+                  <div className="auth-form-field form-field-spacing">
+                    <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                       Full Name
                     </label>
                     <Field
                       name="name"
                       type="text"
                       placeholder="Enter your full name"
-                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 transition-all duration-200 text-sm sm:text-base"
+                      className="auth-form-input w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 text-sm"
                     />
                     <ErrorMessage
                       name="name"
                       component="div"
-                      className="text-sm text-red-500 mt-1"
+                      className="auth-error-message text-xs text-red-500 mt-1 min-h-[16px] error-spacing"
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <div className="auth-form-field form-field-spacing">
+                    <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                       Business Email
                     </label>
                     <Field
                       name="email"
                       type="email"
                       placeholder="Enter your business email"
-                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 transition-all duration-200 text-sm sm:text-base"
+                      className="auth-form-input w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 text-sm"
                     />
                     <ErrorMessage
                       name="email"
                       component="div"
-                      className="text-sm text-red-500 mt-1"
+                      className="auth-error-message text-xs text-red-500 mt-1 min-h-[16px] error-spacing"
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <div className="auth-form-field form-field-spacing">
+                    <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                       Mobile Number
                     </label>
                     <Field
                       name="mobileNum"
                       type="text"
                       placeholder="Enter 10-digit mobile number"
-                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 transition-all duration-200 text-sm sm:text-base"
+                      className="auth-form-input w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 text-sm"
                     />
                     <ErrorMessage
                       name="mobileNum"
                       component="div"
-                      className="text-sm text-red-500 mt-1"
+                      className="auth-error-message text-xs text-red-500 mt-1 min-h-[16px] error-spacing"
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <div className="auth-form-field form-field-spacing">
+                    <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                       Password
                     </label>
                     <div className="relative">
@@ -142,31 +144,31 @@ const handleSubmit = async (
                         name="password"
                         type={showPassword ? 'text' : 'password'}
                         placeholder="Create a strong password"
-                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-10 sm:pr-12 border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 transition-all duration-200 text-sm sm:text-base"
+                        className="auth-form-input w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-10 sm:pr-12 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 text-sm"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors z-10 p-1"
+                        className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10 p-1"
                       >
-                        {showPassword ? <HiEye className="w-5 h-5" /> : <HiEyeOff className="w-5 h-5" />}
+                        {showPassword ? <HiEye className="w-4 h-4 sm:w-5 sm:h-5" /> : <HiEyeOff className="w-4 h-4 sm:w-5 sm:h-5" />}
                       </button>
                     </div>
                     <ErrorMessage
                       name="password"
                       component="div"
-                      className="text-sm text-red-500 mt-1"
+                      className="auth-error-message text-xs text-red-500 mt-1 min-h-[16px] error-spacing"
                     />
                   </div>
 
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-2.5 sm:py-3 rounded-lg sm:rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all duration-200 disabled:cursor-not-allowed transform hover:scale-[1.01] active:scale-[0.99] mb-2 sm:mb-3 text-sm sm:text-base"
+                    className="auth-form-button w-full bg-gray-300 text-gray-900 font-bold py-2.5 sm:py-3 rounded-lg hover:bg-gray-500 disabled:opacity-50 transition-all duration-200 disabled:cursor-not-allowed mb-4 text-sm mt-2"
                   >
                     {isSubmitting ? (
                       <div className="flex items-center justify-center gap-2">
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                         Creating Account...
                       </div>
                     ) : (
@@ -175,11 +177,11 @@ const handleSubmit = async (
                   </button>
 
                   <div className="text-center">
-                    <p className="text-gray-600 dark:text-gray-300">
+                    <p className="text-gray-600 text-xs sm:text-sm">
                       Already have an account?{' '}
                       <Link
                         to="/signin"
-                        className="font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+                        className="font-semibold" style={{color: '#86a0b2'}}
                       >
                         Sign In
                       </Link>
@@ -188,23 +190,6 @@ const handleSubmit = async (
                 </Form>
               )}
             </Formik>
-          </div>
-
-          {/* Trust Indicators */}
-          <div className="mt-6 text-center">
-            <div className="flex items-center justify-center gap-4 text-xs text-white/70">
-              <span className="flex items-center gap-1">
-                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                Free Registration
-              </span>
-              <span className="flex items-center gap-1">
-                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                Instant Verification
-              </span>
-              <span className="flex items-center gap-1">
-                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                No Hidden Fees
-              </span>
             </div>
           </div>
         </div>
