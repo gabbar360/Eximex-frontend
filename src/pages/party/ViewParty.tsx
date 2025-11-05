@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getPartyById } from '../../features/partySlice';
 import { useDispatch } from 'react-redux';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faEdit } from '@fortawesome/free-solid-svg-icons';
+import { HiArrowLeft, HiPencil, HiBuildingOffice2, HiUser, HiEnvelope, HiPhone, HiMapPin, HiGlobeAlt, HiTag, HiDocumentText, HiCheckBadge, HiXCircle } from 'react-icons/hi2';
 import { Link } from 'react-router-dom';
 
 const ViewParty = () => {
@@ -26,170 +25,254 @@ const ViewParty = () => {
       }
     };
     fetchParty();
-  }, [id]);
+  }, [id, dispatch]);
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-8 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-blue-500 mx-auto mb-4"></div>
+          <p className="text-slate-600 font-medium">Loading party details...</p>
+        </div>
       </div>
     );
   }
 
   if (error || !party) {
     return (
-      <div className="text-center py-12">
-        <div className="text-red-500 text-lg">{error || 'Party not found'}</div>
-        <button
-          onClick={() => navigate('/cprospect')}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-        >
-          Back to Prospects
-        </button>
+      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-12 text-center max-w-md">
+          <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-r from-red-500 to-pink-600 flex items-center justify-center shadow-lg">
+            <HiBuildingOffice2 className="text-white text-xl" />
+          </div>
+          <h3 className="text-xl font-semibold text-slate-800 mb-2">Party Not Found</h3>
+          <p className="text-slate-600 mb-6">{error || 'The requested party could not be found'}</p>
+          <button
+            onClick={() => navigate('/cprospect')}
+            className="px-6 py-3 rounded-2xl font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 hover:scale-105 transform shadow-lg"
+          >
+            Back to Prospects
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-4xl p-4 md:p-6">
-      {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => navigate('/cprospect')}
-            className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"
-          >
-            <FontAwesomeIcon icon={faArrowLeft} />
-          </button>
-          <h2 className="text-2xl font-bold text-black dark:text-white">
-            View Customer Prospect
-          </h2>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      <div className="p-3 sm:p-4 lg:p-6 pt-6 sm:pt-8 lg:pt-12 pb-6 sm:pb-8 lg:pb-12">
+        {/* Header */}
+        <div className="mb-4 sm:mb-6">
+          <div className="bg-white/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl border border-white/30 p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <button
+                  onClick={() => navigate('/cprospect')}
+                  className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 hover:shadow-lg hover:scale-105 transform"
+                >
+                  <HiArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                </button>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg">
+                    <HiBuildingOffice2 className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  </div>
+                  <div className="min-w-0">
+                    <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-800 truncate">
+                      {party.companyName}
+                    </h1>
+                    <p className="text-slate-600 text-sm sm:text-base hidden sm:block">Party Details & Information</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+                <span className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-semibold shadow-lg inline-flex items-center ${
+                  party.status 
+                    ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white' 
+                    : 'bg-gradient-to-r from-red-500 to-pink-500 text-white'
+                }`}>
+                  {party.status ? (
+                    <><HiCheckBadge className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />Active</>
+                  ) : (
+                    <><HiXCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />Inactive</>
+                  )}
+                </span>
+                <Link
+                  to={`/edit-party/${party.id}`}
+                  className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 rounded-xl sm:rounded-2xl font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 hover:shadow-xl hover:scale-105 transform shadow-lg text-center text-sm sm:text-base"
+                >
+                  <HiPencil className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 inline" />
+                  Edit Party
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
-        <Link
-          to={`/edit-party/${party.id}`}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-        >
-          <FontAwesomeIcon icon={faEdit} />
-          Edit
-        </Link>
-      </div>
 
-      {/* Party Details Card */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-              Company Name
-            </label>
-            <p className="text-lg font-semibold text-gray-900 dark:text-white">
-              {party.companyName}
-            </p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-              Status
-            </label>
-            <span
-              className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${
-                party.status
-                  ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                  : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-              }`}
-            >
-              {party.status ? 'Active' : 'Inactive'}
-            </span>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-              Role
-            </label>
-            <p className="text-gray-900 dark:text-white">{party.role}</p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-              Contact Person
-            </label>
-            <p className="text-gray-900 dark:text-white">
-              {party.contactPerson}
-            </p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-              Email
-            </label>
-            <p className="text-gray-900 dark:text-white">{party.email}</p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-              Phone
-            </label>
-            <p className="text-gray-900 dark:text-white">{party.phone}</p>
-          </div>
-
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-              Address
-            </label>
-            <p className="text-gray-900 dark:text-white">{party.address}</p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-              City
-            </label>
-            <p className="text-gray-900 dark:text-white">{party.city}</p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-              State
-            </label>
-            <p className="text-gray-900 dark:text-white">{party.state}</p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-              Country
-            </label>
-            <p className="text-gray-900 dark:text-white">{party.country}</p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-              Pincode
-            </label>
-            <p className="text-gray-900 dark:text-white">{party.pincode}</p>
-          </div>
-
-          {party.gstNumber && (
-            <div>
-              <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                GST Number
-              </label>
-              <p className="text-gray-900 dark:text-white">{party.gstNumber}</p>
+        {/* Party Details */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          {/* Basic Information */}
+          <div className="bg-white/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl border border-white/30 p-4 sm:p-6 lg:p-8">
+            <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+              <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg">
+                <HiBuildingOffice2 className="text-white w-4 h-4 sm:w-5 sm:h-5" />
+              </div>
+              <h2 className="text-lg sm:text-xl font-bold text-slate-800">Basic Information</h2>
             </div>
-          )}
-
-          {party.currency && (
-            <div>
-              <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                Currency
-              </label>
-              <p className="text-gray-900 dark:text-white">{party.currency}</p>
+            
+            <div className="space-y-4 sm:space-y-6">
+              <div>
+                <label className="flex items-center text-xs sm:text-sm font-semibold text-slate-600 mb-2">
+                  <HiBuildingOffice2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-blue-600" />
+                  Company Name
+                </label>
+                <p className="text-base sm:text-lg font-semibold text-slate-800 bg-white/50 rounded-xl p-2 sm:p-3 break-words">{party.companyName}</p>
+              </div>
+              
+              <div>
+                <label className="flex items-center text-xs sm:text-sm font-semibold text-slate-600 mb-2">
+                  <HiTag className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-blue-600" />
+                  Role
+                </label>
+                <span className="inline-flex px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg">
+                  {party.role}
+                </span>
+              </div>
+              
+              <div>
+                <label className="flex items-center text-xs sm:text-sm font-semibold text-slate-600 mb-2">
+                  <HiUser className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-blue-600" />
+                  Contact Person
+                </label>
+                <p className="text-sm sm:text-base text-slate-800 font-medium bg-white/50 rounded-xl p-2 sm:p-3 break-words">{party.contactPerson}</p>
+              </div>
+              
+              {party.currency && (
+                <div>
+                  <label className="flex items-center text-xs sm:text-sm font-semibold text-slate-600 mb-2">
+                    <HiGlobeAlt className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-blue-600" />
+                    Currency
+                  </label>
+                  <p className="text-sm sm:text-base text-slate-800 font-medium bg-white/50 rounded-xl p-2 sm:p-3">{party.currency}</p>
+                </div>
+              )}
             </div>
-          )}
+          </div>
 
-          {party.notes && (
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                Notes
-              </label>
-              <p className="text-gray-900 dark:text-white">{party.notes}</p>
+          {/* Contact Information */}
+          <div className="bg-white/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl border border-white/30 p-4 sm:p-6 lg:p-8">
+            <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+              <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-r from-emerald-500 to-green-500 shadow-lg">
+                <HiPhone className="text-white w-4 h-4 sm:w-5 sm:h-5" />
+              </div>
+              <h2 className="text-lg sm:text-xl font-bold text-slate-800">Contact Information</h2>
+            </div>
+            
+            <div className="space-y-4 sm:space-y-6">
+              <div>
+                <label className="flex items-center text-xs sm:text-sm font-semibold text-slate-600 mb-2">
+                  <HiEnvelope className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-emerald-600" />
+                  Email Address
+                </label>
+                <p className="text-sm sm:text-base text-slate-800 font-medium break-all bg-white/50 rounded-xl p-2 sm:p-3">{party.email}</p>
+              </div>
+              
+              <div>
+                <label className="flex items-center text-xs sm:text-sm font-semibold text-slate-600 mb-2">
+                  <HiPhone className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-emerald-600" />
+                  Phone Number
+                </label>
+                <p className="text-sm sm:text-base text-slate-800 font-medium bg-white/50 rounded-xl p-2 sm:p-3">{party.phone}</p>
+              </div>
+              
+              <div>
+                <label className="flex items-center text-xs sm:text-sm font-semibold text-slate-600 mb-2">
+                  <HiMapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-emerald-600" />
+                  Address
+                </label>
+                <p className="text-sm sm:text-base text-slate-800 font-medium bg-white/50 rounded-xl p-2 sm:p-3 break-words">{party.address}</p>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div>
+                  <label className="flex items-center text-xs sm:text-sm font-semibold text-slate-600 mb-2">
+                    <HiMapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-emerald-600" />
+                    City
+                  </label>
+                  <p className="text-sm sm:text-base text-slate-800 font-medium bg-white/50 rounded-xl p-2 sm:p-3">{party.city}</p>
+                </div>
+                <div>
+                  <label className="flex items-center text-xs sm:text-sm font-semibold text-slate-600 mb-2">
+                    <HiMapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-emerald-600" />
+                    Pincode
+                  </label>
+                  <p className="text-sm sm:text-base text-slate-800 font-medium bg-white/50 rounded-xl p-2 sm:p-3">{party.pincode}</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div>
+                  <label className="flex items-center text-xs sm:text-sm font-semibold text-slate-600 mb-2">
+                    <HiMapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-emerald-600" />
+                    State
+                  </label>
+                  <p className="text-sm sm:text-base text-slate-800 font-medium bg-white/50 rounded-xl p-2 sm:p-3">{party.state}</p>
+                </div>
+                <div>
+                  <label className="flex items-center text-xs sm:text-sm font-semibold text-slate-600 mb-2">
+                    <HiGlobeAlt className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-emerald-600" />
+                    Country
+                  </label>
+                  <p className="text-sm sm:text-base text-slate-800 font-medium bg-white/50 rounded-xl p-2 sm:p-3">{party.country}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Additional Information */}
+          {(party.tags || party.notes) && (
+            <div className="lg:col-span-2">
+              <div className="bg-white/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl border border-white/30 p-4 sm:p-6 lg:p-8">
+                <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                  <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 shadow-lg">
+                    <HiDocumentText className="text-white w-4 h-4 sm:w-5 sm:h-5" />
+                  </div>
+                  <h2 className="text-lg sm:text-xl font-bold text-slate-800">Additional Information</h2>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                  {party.tags && (
+                    <div>
+                      <label className="flex items-center text-xs sm:text-sm font-semibold text-slate-600 mb-2 sm:mb-3">
+                        <HiTag className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-purple-600" />
+                        Tags
+                      </label>
+                      <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                        {party.tags.split(',').map((tag, index) => (
+                          <span
+                            key={index}
+                            className="px-2 sm:px-3 py-1 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-medium bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
+                          >
+                            {tag.trim()}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {party.notes && (
+                    <div className={party.tags ? '' : 'md:col-span-2'}>
+                      <label className="flex items-center text-xs sm:text-sm font-semibold text-slate-600 mb-2 sm:mb-3">
+                        <HiDocumentText className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-purple-600" />
+                        Notes
+                      </label>
+                      <div className="bg-white/60 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-white/50">
+                        <p className="text-sm sm:text-base text-slate-800 leading-relaxed break-words">{party.notes}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           )}
         </div>

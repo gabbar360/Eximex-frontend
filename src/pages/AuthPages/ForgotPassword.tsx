@@ -43,7 +43,7 @@ const ForgotPassword: React.FC = () => {
           description="Password reset link sent to your email"
         />
         <AuthLayout>
-          <div className="auth-form-container w-full max-w-sm sm:max-w-md mx-auto px-4 mobile-form-container min-h-screen flex items-center justify-center">
+          <div className="w-full max-w-sm sm:max-w-md mx-auto px-4">
             <div className="auth-form-card bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl shadow-2xl p-6 sm:p-8 border border-white/20 dark:bg-gray-900/95 dark:border-gray-700/30 text-center w-full">
               <div className="mx-auto h-12 w-12 sm:h-16 sm:w-16 bg-green-100 rounded-full flex items-center justify-center mb-4 sm:mb-6">
                 <svg
@@ -94,8 +94,8 @@ const ForgotPassword: React.FC = () => {
         description="Reset your Eximex account password securely"
       />
       <AuthLayout>
-        <div className="auth-form-container w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 min-h-screen mobile-form-container">
-          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-16 xl:gap-32 items-center lg:items-center justify-center min-h-screen py-6 sm:py-8 lg:py-12">
+        <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-16 xl:gap-32 items-center">
             {/* Left Side - Slider - Only on laptop screens */}
             <div className="hidden lg:block w-full">
               <AuthSlider />

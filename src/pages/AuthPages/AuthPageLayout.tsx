@@ -6,10 +6,8 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen overflow-x-hidden overflow-y-auto relative" style={{backgroundColor: '#86a0b2'}}>
-      <div className="relative min-h-screen">
-        {children}
-      </div>
+    <div className="h-screen overflow-x-hidden overflow-y-auto relative flex items-center justify-center" style={{backgroundColor: '#86a0b2'}}>
+      {children}
     </div>
   );
 }

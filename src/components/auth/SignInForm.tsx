@@ -45,8 +45,8 @@ export default function SignInForm() {
   };
 
   return (
-    <div className="auth-form-container w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 min-h-screen mobile-form-container">
-      <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-16 xl:gap-32 items-center lg:items-center justify-center min-h-screen py-6 sm:py-8 lg:py-12">
+    <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-16 xl:gap-32 items-center">
         {/* Left Side - Slider - Only on laptop screens */}
         <div className="hidden lg:block w-full">
           <AuthSlider />
