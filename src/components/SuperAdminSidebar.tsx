@@ -53,48 +53,8 @@ const getSuperAdminNavItems = (): SuperAdminNavItem[] => [
   },
   {
     icon: <FontAwesomeIcon icon={faUserShield} />,
-    name: 'Management Center',
-    path: '/super-admin/management',
-  },
-  {
-    icon: <FontAwesomeIcon icon={faDatabase} />,
-    name: 'Database Management',
-    path: '/super-admin/database',
-  },
-  {
-    icon: <FontAwesomeIcon icon={faUsers} />,
-    name: 'User Management',
-    path: '/super-admin/users',
-  },
-  {
-    icon: <FontAwesomeIcon icon={faBuilding} />,
-    name: 'Company Management',
-    path: '/super-admin/companies',
-  },
-  {
-    icon: <FontAwesomeIcon icon={faShield} />,
-    name: 'Security & Access',
-    path: '/super-admin/security',
-  },
-  {
-    icon: <FontAwesomeIcon icon={faFileAlt} />,
-    name: 'Audit & Reports',
-    path: '/super-admin/reports',
-  },
-  {
-    icon: <FontAwesomeIcon icon={faChartLine} />,
-    name: 'Analytics & Reports',
-    path: '/super-admin/analytics',
-  },
-  {
-    icon: <FontAwesomeIcon icon={faCog} />,
-    name: 'System Settings',
-    path: '/super-admin/settings',
-  },
-  {
-    icon: <FontAwesomeIcon icon={faCreditCard} />,
-    name: 'Subscription & Billing',
-    path: '/super-admin/subscriptions',
+    name: 'Role Management',
+    path: '/super-admin/roles',
   }
 ];
 

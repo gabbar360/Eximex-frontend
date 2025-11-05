@@ -47,7 +47,7 @@ const RoleBasedDashboard: React.FC = () => {
       console.log('Fetching dashboard stats...');
 
       // For staff, show only their own data
-      if (user?.role === 'STAFF') {
+      if (user?.role?.name === 'STAFF') {
         try {
           const summary = await dispatch(getUserDataSummary(user.id)).unwrap();
           console.log('Staff data summary:', summary);
@@ -58,7 +58,7 @@ const RoleBasedDashboard: React.FC = () => {
         } catch (error) {
           console.error('Failed to fetch user data summary:', error);
         }
-      } else if (user?.role === 'SUPER_ADMIN') {
+      } else if (user?.role?.name === 'SUPER_ADMIN') {
         // For super admin, get global stats across all companies
         try {
           const superAdminStats =
@@ -118,7 +118,7 @@ const RoleBasedDashboard: React.FC = () => {
   }
 
   // Show SuperAdmin overview for SUPER_ADMIN role
-  if (user?.role === 'SUPER_ADMIN') {
+  if (user?.role?.name === 'SUPER_ADMIN') {
     return <SuperAdminOverview />;
   }
 
@@ -130,7 +130,7 @@ const RoleBasedDashboard: React.FC = () => {
           Welcome back, {user?.name}!
         </h1>
         <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-2">
-          {user?.role === 'ADMIN'
+          {user?.role?.name === 'ADMIN'
             ? 'Manage your company operations and staff'
             : 'Manage your export operations'}
         </p>
