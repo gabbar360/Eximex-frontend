@@ -15,6 +15,7 @@ import paymentReducer from '../features/paymentSlice';
 import productVariantReducer from '../features/productVariantSlice';
 import userManagementReducer from '../features/userManagementSlice';
 import vgmReducer from '../features/vgmSlice';
+import roleReducer from '../features/roleSlice';
 
 const store = configureStore({
   reducer: {
@@ -33,6 +34,7 @@ const store = configureStore({
     productVariant: productVariantReducer,
     userManagement: userManagementReducer,
     vgm: vgmReducer,
+    role: roleReducer,
   },
 });
 

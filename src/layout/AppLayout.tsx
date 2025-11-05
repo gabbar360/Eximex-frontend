@@ -11,12 +11,18 @@ import { useSelector } from 'react-redux';
 const LayoutContent: React.FC = () => {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
   const user = useSelector((state: any) => state.user.user);
-  const isProfileComplete = user?.companyId || user?.role === 'SUPER_ADMIN';
-  const isSuperAdmin = user?.role === 'SUPER_ADMIN';
+  const isProfileComplete = user?.companyId || user?.role?.name === 'SUPER_ADMIN';
+  const isSuperAdmin = user?.role?.name === 'SUPER_ADMIN';
+  
+  console.log('AppLayout Debug:', { 
+    userRole: user?.role?.name, 
+    isSuperAdmin, 
+    user: user 
+  });
 
   return (
     <div className="min-h-screen xl:flex">
-      {!isProfileComplete && user?.role !== 'SUPER_ADMIN' && <OnboardingModal onClose={() => {}} />}
+      {!isProfileComplete && user?.role?.name !== 'SUPER_ADMIN' && <OnboardingModal onClose={() => {}} />}
       <div>
         {isSuperAdmin ? <SuperAdminSidebar /> : <AppSidebar />}
         <Backdrop />
