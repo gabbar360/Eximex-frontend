@@ -7,7 +7,6 @@ import { useDispatch } from 'react-redux';
 import { loginUser, googleLogin } from '../../features/authSlice';
 import { setUser } from '../../features/userSlice';
 import { toast } from 'react-toastify';
-import AuthSlider from './AuthSlider';
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -45,37 +44,64 @@ export default function SignInForm() {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-      <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-16 xl:gap-32 items-center">
-        {/* Left Side - Slider - Only on laptop screens */}
-        <div className="hidden lg:block w-full">
-          <AuthSlider />
+    <div className="h-screen w-screen flex overflow-hidden">
+      {/* Left Side - Image */}
+      <div className="hidden lg:flex lg:w-[60%] relative overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-800"
+          style={{
+            backgroundImage: 'url("https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/80 to-purple-900/80"></div>
         </div>
-
-        {/* Right Side - Form */}
-        <div className="w-full max-w-sm sm:max-w-md lg:max-w-lg mx-auto lg:mx-0 order-first lg:order-last">
+        <div className="relative z-10 flex flex-col justify-center p-12 text-white">
+          <h1 className="text-4xl font-bold mb-6">Welcome to Eximex</h1>
+          <p className="text-xl mb-8 opacity-90">Your global trading platform for seamless import-export operations</p>
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-2 h-2 bg-white rounded-full"></div>
+              <span>Real-time market insights</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="w-2 h-2 bg-white rounded-full"></div>
+              <span>Secure transactions</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="w-2 h-2 bg-white rounded-full"></div>
+              <span>Global network access</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Right Side - Form */}
+      <div className="w-full lg:w-[40%] flex items-center justify-center p-2 sm:p-4 overflow-hidden">
+        <div className="w-full max-w-sm">
           {/* Form Card */}
           <div className="auth-form-card bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl border border-white/20 overflow-hidden w-full">
             {/* Header */}
-            <div className="bg-white p-4 sm:p-6 border-b-2" style={{borderColor: '#86a0b2'}}>
+            <div className="bg-white p-2 sm:p-3 lg:p-4 border-b-2" style={{borderColor: '#86a0b2'}}>
               <div className="text-center">
                 <img 
                   src="/logo1.png" 
                   alt="Eximex" 
-                  className="h-10 sm:h-12 mx-auto mb-3 sm:mb-4"
+                  className="h-12 sm:h-16 lg:h-20 mx-auto mb-2 sm:mb-3"
                 />
-                <h2 className="text-lg sm:text-xl font-bold mb-1" style={{color: '#86a0b2'}}>Welcome Back</h2>
-                <p className="text-gray-600 text-xs sm:text-sm">Sign in to your trading account</p>
+                <h2 className="text-sm sm:text-lg lg:text-xl font-bold mb-1" style={{color: '#86a0b2'}}>Welcome Back</h2>
+                {/* <p className="text-gray-600 text-xs sm:text-sm">Sign in to your trading account</p> */}
               </div>
             </div>
 
             {/* Form Content */}
-            <div className="p-4 sm:p-6">
+            <div className="p-2 sm:p-3 lg:p-4">
 
               {/* Google Sign-In */}
               <button
                 onClick={() => dispatch(googleLogin())}
-                className="w-full flex items-center justify-center gap-3 px-4 py-3 border-2 border-gray-200 rounded-lg text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all duration-200 mb-4 group"
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 sm:py-3 border-2 border-gray-200 rounded-lg text-xs sm:text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all duration-200 mb-3 group"
               >
                 <FcGoogle className="w-5 h-5 group-hover:scale-110 transition-transform" />
                 Continue with Google
@@ -94,7 +120,7 @@ export default function SignInForm() {
               </div>
 
               {/* Form Fields */}
-              <div className="auth-form-fields space-y-4">
+              <div className="auth-form-fields space-y-2 sm:space-y-3">
                 <div className="auth-form-field form-field-spacing">
                   <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                     Business Email
@@ -105,7 +131,7 @@ export default function SignInForm() {
                     onChange={(e) => setEmail(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
                     placeholder="Enter your business email"
-                    className="auth-form-input w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 text-sm"
+                    className="auth-form-input w-full px-3 py-2 sm:py-2.5 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 text-xs sm:text-sm"
                   />
                 </div>
 
@@ -120,7 +146,7 @@ export default function SignInForm() {
                       onChange={(e) => setPassword(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
                       placeholder="Enter your password"
-                      className="auth-form-input w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-10 sm:pr-12 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 text-sm"
+                      className="auth-form-input w-full px-3 py-2 sm:py-2.5 pr-10 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 text-xs sm:text-sm"
                     />
                     <button
                       type="button"
@@ -134,7 +160,7 @@ export default function SignInForm() {
               </div>
 
               {/* Forgot Password */}
-              <div className="flex justify-end mt-4 mb-6">
+              <div className="flex justify-end mt-2 mb-3 sm:mt-3 sm:mb-4">
                 <Link
                   to="/forgot-password"
                   className="text-xs sm:text-sm font-semibold" style={{color: '#86a0b2'}}
@@ -147,7 +173,7 @@ export default function SignInForm() {
               <button
                 onClick={handleLogin}
                 disabled={isSubmitting || !email || !password}
-                className="auth-form-button w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold py-2.5 sm:py-3 rounded-lg hover:shadow-lg disabled:opacity-50 transition-all duration-200 disabled:cursor-not-allowed mb-6 text-sm"
+                className="auth-form-button w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold py-2 sm:py-2.5 rounded-lg hover:shadow-lg disabled:opacity-50 transition-all duration-200 disabled:cursor-not-allowed mb-3 sm:mb-4 text-xs sm:text-sm"
               >
                 {isSubmitting ? (
                   <div className="flex items-center justify-center gap-2">
