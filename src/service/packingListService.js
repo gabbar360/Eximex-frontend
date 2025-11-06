@@ -112,6 +112,18 @@ const packingListService = {
       throw error;
     }
   },
+
+  // Download BL draft PDF
+  downloadBLDraftPDF: async (id) => {
+    try {
+      const response = await axiosInstance.get(`/orders/${id}/bl-draft-pdf`, {
+        responseType: 'blob',
+      });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 
 export default packingListService;

@@ -248,7 +248,12 @@ const AddEditPackingList = () => {
                   containerNumber: container.containerNumber || '',
                   sealType: container.sealType || '',
                   sealNumber: container.sealNumber || '',
-                  products: container.products || [],
+                  products: (container.products || []).map(product => ({
+                    ...product,
+                    packedQuantity: product.packedQuantity || product.quantity || '',
+                    unit: product.unit || 'Box',
+                    productData: product.productData || null
+                  })),
                   totalNoOfBoxes: (container.totalNoOfBoxes || '').toString(),
                   totalNetWeight: (container.totalNetWeight || '').toString(),
                   totalGrossWeight: (
@@ -373,6 +378,13 @@ const AddEditPackingList = () => {
 
   const addProductToContainer = (containerIndex) => {
     const updatedContainers = [...packagingList.containers];
+    
+    // Ensure products array exists
+    if (!updatedContainers[containerIndex].products) {
+      updatedContainers[containerIndex].products = [];
+    }
+    
+    // Add new empty product
     updatedContainers[containerIndex].products.push({
       productName: '',
       hsnCode: '',
@@ -382,6 +394,9 @@ const AddEditPackingList = () => {
       netWeight: '',
       grossWeight: '',
       measurement: '',
+      packedQuantity: '',
+      unit: 'Box',
+      productData: null
     });
 
     const calculatedData = calculateTotals({
@@ -409,6 +424,22 @@ const AddEditPackingList = () => {
     value
   ) => {
     const updatedContainers = [...packagingList.containers];
+    
+    // Ensure container and product exist
+    if (!updatedContainers[containerIndex]) {
+      console.error('Container not found at index:', containerIndex);
+      return;
+    }
+    
+    if (!updatedContainers[containerIndex].products) {
+      updatedContainers[containerIndex].products = [];
+    }
+    
+    if (!updatedContainers[containerIndex].products[productIndex]) {
+      console.error('Product not found at index:', productIndex);
+      return;
+    }
+    
     updatedContainers[containerIndex].products[productIndex][field] = value;
 
     const calculatedData = calculateTotals({
@@ -1277,7 +1308,10 @@ const AddEditPackingList = () => {
                             {product.hsnCode || '-'}
                           </td>
                           <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right">
-                            {product.unit || 'Box'}
+                            {product.unit &&
+                            product.unit.toLowerCase() === 'box'
+                              ? product.unit
+                              : 'Box'}
                           </td>
                           <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right">
                             {product.unit &&

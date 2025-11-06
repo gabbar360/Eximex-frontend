@@ -7,7 +7,6 @@ import { useDispatch } from 'react-redux';
 import { registerUser } from '../../features/authSlice';
 import { EyeCloseIcon, EyeIcon } from '../../icons';
 import { HiEye, HiEyeOff } from 'react-icons/hi';
-import AuthSlider from './AuthSlider';
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -50,27 +49,54 @@ const handleSubmit = async (
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-      <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-16 xl:gap-32 items-center">
-        {/* Left Side - Slider - Only on laptop screens */}
-        <div className="hidden lg:block w-full">
-          <AuthSlider />
+    <div className="h-screen w-screen flex overflow-hidden">
+      {/* Left Side - Image */}
+      <div className="hidden lg:flex lg:w-[60%] relative overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-800"
+          style={{
+            backgroundImage: 'url("https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/80 to-teal-900/80"></div>
         </div>
-
-        {/* Right Side - Form */}
-        <div className="w-full max-w-sm sm:max-w-md lg:max-w-lg mx-auto lg:mx-0 order-first lg:order-last">
+        <div className="relative z-10 flex flex-col justify-center p-12 text-white">
+          <h1 className="text-4xl font-bold mb-6">Join Eximex Today</h1>
+          <p className="text-xl mb-8 opacity-90">Start your journey in global trade with our comprehensive platform</p>
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-2 h-2 bg-white rounded-full"></div>
+              <span>Free account setup</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="w-2 h-2 bg-white rounded-full"></div>
+              <span>Instant market access</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="w-2 h-2 bg-white rounded-full"></div>
+              <span>24/7 support</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Right Side - Form */}
+      <div className="w-full lg:w-[40%] flex items-center justify-center p-2 sm:p-4 overflow-hidden">
+        <div className="w-full max-w-sm">
           {/* Form Card */}
           <div className="auth-form-card bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl border border-white/20 overflow-hidden w-full">
             {/* Header */}
-            <div className="bg-white p-3 sm:p-4 border-b-2" style={{borderColor: '#86a0b2'}}>
+            <div className="bg-white p-2 sm:p-3 border-b-2" style={{borderColor: '#86a0b2'}}>
               <div className="text-center">
                 <img 
                   src="/logo1.png" 
                   alt="Eximex" 
-                  className="h-8 sm:h-10 lg:h-12 mx-auto mb-2 sm:mb-3"
+                  className="h-10 sm:h-14 lg:h-16 mx-auto mb-1 sm:mb-2"
                 />
-                <h2 className="text-base sm:text-lg font-bold mb-1" style={{color: '#86a0b2'}}>Create Business Account</h2>
-                <p className="text-gray-600 text-xs">Join the global trade network</p>
+                <h2 className="text-xs sm:text-base lg:text-lg font-bold mb-1" style={{color: '#86a0b2'}}>Create Business Account</h2>
+                {/* <p className="text-gray-600 text-xs">Join the global trade network</p> */}
               </div>
             </div>
 
