@@ -1,8 +1,16 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
+import { Navigate } from 'react-router-dom';
 import CompanySetupForm from '../components/CompanySetupForm';
 import CompanySetupSlider from '../components/CompanySetupSlider';
 
 const OnboardingModal: React.FC = () => {
+  const user = useSelector((state: any) => state.user.user);
+
+  // Redirect SUPER_ADMIN to dashboard
+  if (user?.role?.name === 'SUPER_ADMIN') {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <div className="h-screen overflow-hidden" style={{backgroundColor: '#86a0b2'}}>

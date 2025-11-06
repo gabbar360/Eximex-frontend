@@ -291,6 +291,24 @@ layer(base);
   overflow-x: hidden;
   box-sizing: border-box;
 }
+
+@utility mobile-form-container {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  min-height: 100vh;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+@utility form-field-spacing {
+  margin-bottom: 1rem;
+}
+
+@utility error-spacing {
+  min-height: 1rem;
+  margin-top: 0.25rem;
+}
 @utility custom-scrollbar {
   &::-webkit-scrollbar {
     @apply size-1.5;
@@ -874,4 +892,51 @@ span.flatpickr-weekday,
 
 .simplebar-scrollbar.simplebar-visible:before {
   @apply opacity-100;
+}
+
+/* Mobile Form Responsiveness */
+@media (max-width: 640px) {
+  .auth-form-container {
+    padding: 0.75rem !important;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .auth-form-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+  
+  .auth-form-fields {
+    gap: 1rem !important;
+  }
+  
+  .auth-form-field {
+    margin-bottom: 1rem !important;
+  }
+  
+  .auth-error-message {
+    min-height: 1rem;
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 375px) {
+  .auth-form-container {
+    padding: 0.5rem !important;
+  }
+  
+  .auth-form-input {
+    padding: 0.625rem !important;
+    font-size: 0.875rem !important;
+  }
+  
+  .auth-form-button {
+    padding: 0.625rem !important;
+    font-size: 0.875rem !important;
+  }
 }

@@ -61,13 +61,7 @@ import RoleBasedDashboard from './components/RoleBasedDashboard';
 import UserManagement from './pages/SuperAdmin/UserManagement';
 import SuperAdminDashboard from './pages/SuperAdmin/SuperAdminDashboard';
 import EnhancedSuperAdminDashboard from './pages/SuperAdmin/EnhancedSuperAdminDashboard';
-import SuperAdminManagement from './components/SuperAdminManagement';
-import PasswordManagement from './pages/SuperAdmin/PasswordManagement';
-import CompanyManagement from './pages/SuperAdmin/CompanyManagement';
-import DatabaseManagement from './pages/SuperAdmin/DatabaseManagement';
-import SubscriptionManagement from './pages/SuperAdmin/SubscriptionManagement';
-import SecurityManagement from './pages/SuperAdmin/SecurityManagement';
-import AuditReports from './pages/SuperAdmin/AuditReports';
+import RoleManagement from './pages/SuperAdmin/RoleManagement';
 import PurchaseOrders from './pages/PO/PurchaseOrders';
 import AddEditPurchaseOrderForm from './pages/PO/AddEditPurchaseOrderForm';
 import PaymentTracking from './pages/PaymentTracking';
@@ -155,45 +149,8 @@ function AppContent() {
           <Route path="/activity-logs" element={<ActivityLogComponent />} />
           {/* Super Admin Routes */}
           <Route path="/super-admin/dashboard" element={<EnhancedSuperAdminDashboard />} />
-          <Route path="/super-admin/management" element={<SuperAdminManagement />} />
-          <Route path="/super-admin/users" element={<UserManagement />} />
-          <Route path="/super-admin/passwords" element={<PasswordManagement />} />
-          <Route path="/super-admin/companies" element={<CompanyManagement />} />
-          <Route path="/super-admin/database" element={<DatabaseManagement />} />
-          <Route path="/super-admin/subscriptions" element={<SubscriptionManagement />} />
-          <Route path="/super-admin/security" element={<SecurityManagement />} />
-          <Route path="/super-admin/reports" element={<AuditReports />} />
-          
-          {/* Super Admin Database Management */}
-          <Route path="/super-admin/database/tables" element={<SuperAdminDashboard />} />
-          <Route path="/super-admin/database/export" element={<SuperAdminDashboard />} />
-          <Route path="/super-admin/database/import" element={<SuperAdminDashboard />} />
-          <Route path="/super-admin/database/health" element={<SuperAdminDashboard />} />
-          
-          {/* Super Admin User Management */}
-          <Route path="/super-admin/users/roles" element={<UserManagement />} />
-          <Route path="/super-admin/users/activity" element={<UserManagement />} />
-          
-          {/* Super Admin Company Management */}
-          <Route path="/super-admin/companies/settings" element={<CompanyManagement />} />
-          <Route path="/super-admin/companies/subscriptions" element={<CompanyManagement />} />
-          
-          {/* Super Admin Security & Access */}
-          <Route path="/super-admin/security/logs" element={<SuperAdminDashboard />} />
-          <Route path="/super-admin/security/api-keys" element={<SuperAdminDashboard />} />
-          <Route path="/super-admin/security/access" element={<SuperAdminDashboard />} />
-          <Route path="/super-admin/security/threats" element={<SuperAdminDashboard />} />
-          
-          {/* Super Admin Analytics & Reports */}
-          <Route path="/super-admin/analytics/system" element={<SuperAdminDashboard />} />
-          <Route path="/super-admin/analytics/usage" element={<SuperAdminDashboard />} />
-          <Route path="/super-admin/analytics/financial" element={<SuperAdminDashboard />} />
-          
-          {/* Super Admin System Settings */}
-          <Route path="/super-admin/settings/global" element={<SuperAdminDashboard />} />
-          <Route path="/super-admin/settings/email" element={<SuperAdminDashboard />} />
-          <Route path="/super-admin/settings/maintenance" element={<SuperAdminDashboard />} />
-          <Route path="/super-admin/settings/backup" element={<SuperAdminDashboard />} />
+          <Route path="/super-admin/roles" element={<RoleManagement />} />
+
           <Route path="/payments" element={<PaymentTracking />} />
 
           <Route path="/calendar" element={<Calendar />} />
