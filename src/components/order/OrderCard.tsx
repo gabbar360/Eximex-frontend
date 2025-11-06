@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { deletePackingList, downloadPackingListPdf } from '../../features/packingListSlice';
+import { deletePackingList, downloadPackingListPdf, downloadBLDraftPdf } from '../../features/packingListSlice';
 import { deleteVgm, downloadVgmPdf } from '../../features/vgmSlice';
 import { downloadOrderInvoice } from '../../features/orderSlice';
 
@@ -60,6 +60,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
   const [editableField, setEditableField] = useState<string | null>(null);
   const [tempValue, setTempValue] = useState<string>('');
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isDownloadingBL, setIsDownloadingBL] = useState(false);
   const [confirmDeletePacking, setConfirmDeletePacking] = useState(false);
   const [isDownloadingVgm, setIsDownloadingVgm] = useState(false);
   const [confirmDeleteVgm, setConfirmDeleteVgm] = useState<{
@@ -301,6 +302,39 @@ const OrderCard: React.FC<OrderCardProps> = ({
       toast.error('Failed to download packing list PDF');
     } finally {
       setIsDownloading(false);
+    }
+  };
+
+  const handleBLDraftPDF = async () => {
+    setIsDownloadingBL(true);
+    toast.info('Preparing BL draft PDF download...', { autoClose: 2000 });
+
+    try {
+      const orderId = order.id;
+      if (!orderId) {
+        toast.error('No order ID found');
+        setIsDownloadingBL(false);
+        return;
+      }
+
+      const response = await dispatch(downloadBLDraftPdf(orderId)).unwrap();
+
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `bl-draft-${order.orderNumber || orderId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast.success('BL draft PDF downloaded successfully!');
+    } catch (error) {
+      console.error('Error downloading BL draft PDF:', error);
+      toast.error('Failed to download BL draft PDF');
+    } finally {
+      setIsDownloadingBL(false);
     }
   };
 
@@ -911,8 +945,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
                       </div>
                     )}
 
-                    {index === 0 && (
-                      <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                         <Link
                           to={`/packing-list/${order.id}`}
                           onClick={handleNavigation}
@@ -930,7 +963,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
                               : 'text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20'
                           }`}
                           title={
-                            isDownloading ? 'Downloading...' : 'Download PDF'
+                            isDownloading ? 'Downloading...' : 'Download Packing List PDF'
                           }
                         >
                           {isDownloading ? (
@@ -950,7 +983,6 @@ const OrderCard: React.FC<OrderCardProps> = ({
                           <FontAwesomeIcon icon={faTrash} className="text-sm" />
                         </button>
                       </div>
-                    )}
                   </div>
                 ))}
               </div>
@@ -1088,8 +1120,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
                               </div>
                             </td>
                             <td className="px-3 py-3 whitespace-nowrap">
-                              {index === 0 && (
-                                <div className="flex items-center space-x-2">
+                              <div className="flex items-center space-x-2">
                                   <Link
                                     to={`/packing-list/${order.id}`}
                                     onClick={handleNavigation}
@@ -1112,7 +1143,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
                                     title={
                                       isDownloading
                                         ? 'Downloading...'
-                                        : 'Download PDF'
+                                        : 'Download Packing List PDF'
                                     }
                                   >
                                     {isDownloading ? (
@@ -1135,7 +1166,6 @@ const OrderCard: React.FC<OrderCardProps> = ({
                                     />
                                   </button>
                                 </div>
-                              )}
                             </td>
                           </tr>
                         )
@@ -1535,6 +1565,22 @@ const OrderCard: React.FC<OrderCardProps> = ({
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-500"></div>
             ) : (
               <FontAwesomeIcon icon={faDownload} className="text-sm" />
+            )}
+          </button>
+          <button
+            onClick={handleBLDraftPDF}
+            disabled={isDownloadingBL}
+            className={`p-2 rounded-lg transition-colors ${
+              isDownloadingBL
+                ? 'text-gray-400 cursor-not-allowed'
+                : 'text-orange-500 hover:text-orange-700 hover:bg-orange-50 dark:hover:bg-orange-900/20'
+            }`}
+            title={isDownloadingBL ? 'Downloading...' : 'Download BL Draft PDF'}
+          >
+            {isDownloadingBL ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-500"></div>
+            ) : (
+              <FontAwesomeIcon icon={faFileAlt} className="text-sm" />
             )}
           </button>
           <button

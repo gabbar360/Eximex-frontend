@@ -26,6 +26,7 @@ const EditOrder = () => {
     bookingDate: '',
     wayBillNumber: '',
     truckNumber: '',
+    blNumber: '',
   });
 
   useEffect(() => {
@@ -36,7 +37,9 @@ const EditOrder = () => {
     try {
       setLoading(true);
       const response = await dispatch(getOrderById(id)).unwrap();
-      const order = response;
+      const order = response.data; // Extract data from nested structure
+      
+      console.log('Fetched order data:', order); // Debug log
 
       setOrderData({
         orderStatus: order.orderStatus || 'pending',
@@ -48,6 +51,7 @@ const EditOrder = () => {
           : '',
         wayBillNumber: order.wayBillNumber || '',
         truckNumber: order.truckNumber || '',
+        blNumber: order.blNumber || '',
       });
     } catch (error) {
       toast.error('Failed to fetch order details');
@@ -80,6 +84,7 @@ const EditOrder = () => {
           : null,
         wayBillNumber: orderData.wayBillNumber || null,
         truckNumber: orderData.truckNumber || null,
+        blNumber: orderData.blNumber || null,
       };
 
       const result = await dispatch(updateOrder({ id, orderData: updateData })).unwrap();
@@ -142,7 +147,7 @@ const EditOrder = () => {
                       { value: 'delivered', label: 'Delivered' },
                       { value: 'cancelled', label: 'Cancelled' },
                     ]}
-                    defaultValue={orderData.orderStatus}
+                    value={orderData.orderStatus}
                     onChange={(value) =>
                       setOrderData((prev) => ({ ...prev, orderStatus: value }))
                     }
@@ -160,7 +165,7 @@ const EditOrder = () => {
                       { value: 'paid', label: 'Paid' },
                       { value: 'overdue', label: 'Overdue' },
                     ]}
-                    defaultValue={orderData.paymentStatus}
+                    value={orderData.paymentStatus}
                     onChange={(value) =>
                       setOrderData((prev) => ({
                         ...prev,
@@ -180,7 +185,7 @@ const EditOrder = () => {
                       { value: 'cif', label: 'CIF' },
                       { value: 'ddp', label: 'DDP' },
                     ]}
-                    defaultValue={orderData.deliveryTerms}
+                    value={orderData.deliveryTerms}
                     onChange={(value) =>
                       setOrderData((prev) => ({
                         ...prev,
@@ -237,6 +242,30 @@ const EditOrder = () => {
                     value={orderData.truckNumber}
                     onChange={handleInputChange}
                     placeholder="Enter truck number"
+                  />
+                </div>
+
+                {/* BL Number */}
+                <div>
+                  <Label>BL Number</Label>
+                  <InputField
+                    type="text"
+                    name="blNumber"
+                    value={orderData.blNumber}
+                    onChange={handleInputChange}
+                    placeholder="Enter BL number"
+                  />
+                </div>
+
+                {/* Vessel/Voyage Info */}
+                <div>
+                  <Label>Vessel/Voyage Info</Label>
+                  <InputField
+                    type="text"
+                    name="vesselVoyageInfo"
+                    value={orderData.vesselVoyageInfo}
+                    onChange={handleInputChange}
+                    placeholder="e.g., MSC FLORA/123456"
                   />
                 </div>
               </div>
