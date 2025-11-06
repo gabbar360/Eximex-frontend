@@ -5,7 +5,6 @@ import { toast } from 'react-toastify';
 import { forgotPassword } from '../../features/authSlice';
 import AuthLayout from './AuthPageLayout';
 import PageMeta from '../../components/common/PageMeta';
-import AuthSlider from '../../components/auth/AuthSlider';
 
 const ForgotPassword: React.FC = () => {
   const dispatch = useDispatch();
@@ -94,24 +93,51 @@ const ForgotPassword: React.FC = () => {
         description="Reset your Eximex account password securely"
       />
       <AuthLayout>
-        <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-16 xl:gap-32 items-center">
-            {/* Left Side - Slider - Only on laptop screens */}
-            <div className="hidden lg:block w-full">
-              <AuthSlider />
+        <div className="h-screen w-screen flex overflow-hidden">
+          {/* Left Side - Image */}
+          <div className="hidden lg:flex lg:w-[60%] relative overflow-hidden">
+            <div 
+              className="absolute inset-0 bg-gradient-to-br from-orange-600 via-red-600 to-pink-800"
+              style={{
+                backgroundImage: 'url("https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2126&q=80")',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+              }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-900/80 to-red-900/80"></div>
             </div>
-
-            {/* Right Side - Form */}
-            <div className="w-full max-w-sm sm:max-w-md lg:max-w-lg mx-auto lg:mx-0 order-first lg:order-last">
+            <div className="relative z-10 flex flex-col justify-center p-12 text-white">
+              <h1 className="text-4xl font-bold mb-6">Reset Password</h1>
+              <p className="text-xl mb-8 opacity-90">Secure your account with a new password and get back to trading</p>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                  <span>Secure reset process</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                  <span>Email verification</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                  <span>Quick recovery</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Right Side - Form */}
+          <div className="w-full lg:w-[40%] flex items-center justify-center p-2 sm:p-4 overflow-hidden">
+            <div className="w-full max-w-sm">
               {/* Form Card */}
               <div className="auth-form-card bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl border border-white/20 overflow-hidden w-full">
                 {/* Header */}
-                <div className="bg-white p-4 sm:p-6 border-b-2" style={{borderColor: '#86a0b2'}}>
+                <div className="bg-white p-2 sm:p-3 lg:p-4 border-b-2" style={{borderColor: '#86a0b2'}}>
                   <div className="text-center">
                     <img 
                       src="/logo1.png" 
                       alt="Eximex" 
-                      className="h-10 sm:h-12 mx-auto mb-3 sm:mb-4"
+                      className="h-12 sm:h-16 lg:h-20 mx-auto mb-2 sm:mb-3"
                     />
                     <div className="mx-auto h-12 w-12 sm:h-16 sm:w-16 rounded-full flex items-center justify-center mb-3 sm:mb-4" style={{backgroundColor: '#86a0b2'}}>
                       <svg
@@ -128,7 +154,7 @@ const ForgotPassword: React.FC = () => {
                         />
                       </svg>
                     </div>
-                    <h2 className="text-lg sm:text-xl font-bold mb-1" style={{color: '#86a0b2'}}>Forgot Password?</h2>
+                    <h2 className="text-sm sm:text-lg lg:text-xl font-bold mb-1" style={{color: '#86a0b2'}}>Forgot Password?</h2>
                     <p className="text-gray-600 text-xs sm:text-sm">
                       Enter your email address and we'll send you a secure reset link
                     </p>
@@ -136,7 +162,7 @@ const ForgotPassword: React.FC = () => {
                 </div>
 
                 {/* Form Content */}
-                <div className="p-4 sm:p-6">
+                <div className="p-2 sm:p-3 lg:p-4">
 
                   <form onSubmit={handleSubmit} className="auth-form-fields space-y-4">
                     <div className="auth-form-field form-field-spacing">
