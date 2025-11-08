@@ -501,11 +501,11 @@ const AddEditPackingList = () => {
       // If unit is Pcs, calculate boxes needed
       const product = productData.product || productData;
       const packagingData = product.packagingHierarchyData?.dynamicFields || {};
-      const piecesPerPackage = packagingData.PiecesPerPackage || 50;
-      const packagePerBox = packagingData.PackagePerBox || 40;
+      const piecesPerPack = packagingData.PiecesPerPack || packagingData.PiecesPerPackage || 50;
+      const packPerBox = packagingData.PackPerBox || packagingData.PackagePerBox || 40;
       const unitWeight = product.unitWeight || 8; // Weight per piece in grams
 
-      const piecesPerBox = piecesPerPackage * packagePerBox;
+      const piecesPerBox = piecesPerPack * packPerBox;
       boxesNeeded = Math.ceil(qty / piecesPerBox);
 
       // Calculate net weight (product weight only)
@@ -513,10 +513,14 @@ const AddEditPackingList = () => {
       netWeightKg = netWeightGrams / 1000;
 
       // Calculate gross weight (net weight + packaging)
-      const packagingWeightPerBox = 700; // grams
-      const packagingWeightTotal = boxesNeeded * packagingWeightPerBox;
-      const grossWeightGrams = netWeightGrams + packagingWeightTotal;
-      grossWeightKg = grossWeightGrams / 1000;
+      const packagingMaterialWeight = product.packagingMaterialWeight || 700; // grams
+      const packagingUnit = product.packagingMaterialWeightUnit || 'g';
+      const packagingWeightPerBoxKg = packagingUnit === 'kg' 
+        ? packagingMaterialWeight 
+        : packagingMaterialWeight / 1000;
+      
+      const packagingWeightTotal = boxesNeeded * packagingWeightPerBoxKg;
+      grossWeightKg = netWeightKg + packagingWeightTotal;
     }
 
     // Calculate volume if available
