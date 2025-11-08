@@ -4,7 +4,7 @@ import { Link } from 'react-router';
 import { useSidebar } from '../context/SidebarContext';
 import { ThemeToggleButton } from '../components/common/ThemeToggleButton';
 import UserDropdown from '../components/header/UserDropdown';
-import NotificationBell from '../components/Notifications/NotificationBell.jsx';
+
 import { useTheme } from '../context/ThemeContext';
 
 const AppHeader: React.FC = () => {
@@ -182,9 +182,7 @@ const AppHeader: React.FC = () => {
             <ThemeToggleButton />
             {/* <!-- Dark Mode Toggler --> */}
             
-            {/* <!-- Real-time Notification Bell --> */}
-            <NotificationBell />
-            {/* <!-- Notification Menu Area --> */}
+
           </div>
           {/* <!-- User Area --> */}
           <UserDropdown />
