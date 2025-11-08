@@ -67,6 +67,17 @@ export const downloadPackingListPdf = createAsyncThunk(
   }
 );
 
+export const downloadBLDraftPdf = createAsyncThunk(
+  'packingList/downloadBLDraftPdf',
+  async (id, { rejectWithValue }) => {
+    try {
+      return await packingListService.downloadBLDraftPDF(id);
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
 export const getPackingListById = fetchPackingListById;
 
 const packingListSlice = createSlice({
