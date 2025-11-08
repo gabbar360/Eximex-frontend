@@ -711,39 +711,61 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
     return totalUnits.toFixed(2);
   };
 
-  // Gross weight calculation using actual product data
+  // Gross weight calculation - net weight + packaging material weight
   const calculateGrossWeight = (productList: ProductData[]) => {
     return productList.reduce((sum, product) => {
       if (!product.productId) return sum;
-
-      const prod = products.find(
-        (p) => p?.id?.toString() === product.productId?.toString()
+      
+      // Get net weight
+      const netWeight = product.totalWeight || calculateTotalWeight(
+        product.productId,
+        product.quantity.toString(),
+        product.unit
       );
-      let boxes = 0;
-
-      // Calculate boxes based on unit
-      if (product.unit === 'Box' || product.unit === 'box') {
-        boxes = product.quantity;
-      } else if (product.unit === 'pcs') {
-        boxes = product.quantity / 2000; // 50 pcs/pack × 40 pack/box
-      } else if (product.unit === 'package') {
-        boxes = product.quantity / 40; // 40 packages per box
-      } else {
-        boxes = product.quantity; // fallback assume it's boxes
+      
+      // Get product data for packaging weight
+      const prod = products.find(
+        (p) => p.id.toString() === product.productId.toString()
+      );
+      
+      if (!prod) return sum + netWeight;
+      
+      // Calculate packaging weight based on quantity and unit
+      let packagingWeight = 0;
+      const packagingMaterialWeight = prod.packagingMaterialWeight || 0;
+      const packagingUnit = prod.packagingMaterialWeightUnit || 'g';
+      
+      if (packagingMaterialWeight > 0) {
+        // Convert packaging weight to KG if needed
+        const packagingWeightKg = packagingUnit === 'kg' 
+          ? packagingMaterialWeight 
+          : packagingMaterialWeight / 1000;
+        
+        // Calculate how many boxes based on unit and quantity
+        let boxes = 0;
+        const packagingData = prod.packagingHierarchyData?.dynamicFields;
+        
+        if (product.unit.toLowerCase() === 'box') {
+          boxes = product.quantity;
+        } else if (product.unit.toLowerCase() === 'pcs' || product.unit.toLowerCase() === 'pieces') {
+          const piecesPerPack = packagingData?.PiecesPerPack || 1;
+          const packPerBox = packagingData?.PackPerBox || 1;
+          boxes = Math.ceil(product.quantity / (piecesPerPack * packPerBox));
+        } else if (product.unit.toLowerCase() === 'pack' || product.unit.toLowerCase() === 'package') {
+          const packPerBox = packagingData?.PackPerBox || 1;
+          boxes = Math.ceil(product.quantity / packPerBox);
+        } else if (product.unit.toLowerCase() === 'pallet') {
+          const boxPerPallet = packagingData?.BoxPerPallet || packagingData?.boxesPerPallet || 1;
+          boxes = product.quantity * boxPerPallet;
+        } else {
+          // Fallback: assume 1 box per unit
+          boxes = product.quantity;
+        }
+        
+        packagingWeight = boxes * packagingWeightKg;
       }
-
-      // Get gross weight per box from product data
-      let grossWeightPerBox =
-        prod?.packagingHierarchyData?.dynamicFields?.grossWeightPerBox ||
-        prod?.grossWeightPerBox ||
-        10.06;
-
-      // Convert to KG if in grams
-      if (grossWeightPerBox > 100) {
-        grossWeightPerBox = grossWeightPerBox / 1000; // Convert grams to KG
-      }
-
-      return sum + boxes * grossWeightPerBox;
+      
+      return sum + netWeight + packagingWeight;
     }, 0);
   };
 

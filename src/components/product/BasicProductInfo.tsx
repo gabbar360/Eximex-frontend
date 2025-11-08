@@ -1,6 +1,7 @@
 import React from 'react';
 import { Field } from 'formik';
 import { toast } from 'react-toastify';
+import { HiCube, HiTag, HiDocumentText, HiCurrencyDollar } from 'react-icons/hi2';
 
 interface BasicProductInfoProps {
   values: any;
@@ -36,14 +37,20 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
   setTrackVolume,
 }) => {
   return (
-    <div className="space-y-4">
-      <h4 className="font-medium text-gray-900 dark:text-white">
-        Product Information
-      </h4>
+    <div className="space-y-6">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 shadow-md">
+          <HiCube className="w-5 h-5 text-white" />
+        </div>
+        <h4 className="text-lg font-semibold text-slate-800">
+          Product Information
+        </h4>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
+            <HiTag className="w-4 h-4 mr-2 text-blue-600" />
             Select Category *
           </label>
           <select
@@ -74,7 +81,7 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
                 setTrackVolume(false);
               }
             }}
-            className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+            className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
             disabled={
               categoriesLoading || !categories || categories.length === 0
             }
@@ -90,17 +97,21 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
                 </option>
               ))}
           </select>
+          {touched.categoryId && errors.categoryId && (
+            <div className="text-sm text-red-500 mt-1">{errors.categoryId}</div>
+          )}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
+            <HiTag className="w-4 h-4 mr-2 text-blue-600" />
             Subcategory (Optional)
           </label>
           <select
             name="subCategoryId"
             value={values.subCategoryId}
             onChange={(e) => setFieldValue('subCategoryId', e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+            className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
             disabled={!values.categoryId}
           >
             <option value="">Select Subcategory</option>
@@ -113,50 +124,57 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
+            <HiCube className="w-4 h-4 mr-2 text-blue-600" />
             Product Name *
           </label>
           <Field
             type="text"
             name="name"
             placeholder="Enter product name"
-            className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+            className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
           />
           {touched.name && errors.name && (
-            <div className="mt-1 text-sm text-red-600">{errors.name}</div>
+            <div className="text-sm text-red-500 mt-1">{errors.name}</div>
           )}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
+            <HiTag className="w-4 h-4 mr-2 text-blue-600" />
             SKU
           </label>
           <Field
             type="text"
             name="sku"
             placeholder="Enter SKU"
-            className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+            className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
+            <HiDocumentText className="w-4 h-4 mr-2 text-blue-600" />
             Description
           </label>
           <Field
             type="text"
             name="description"
             placeholder="Enter description"
-            className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+            className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
           />
+          {touched.description && errors.description && (
+            <div className="text-sm text-red-500 mt-1">{errors.description}</div>
+          )}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
+            <HiCurrencyDollar className="w-4 h-4 mr-2 text-blue-600" />
             Price
           </label>
           <div className="flex">
@@ -166,12 +184,12 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
               step="any"
               min="0"
               placeholder="Enter price"
-              className="w-full rounded-l-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+              className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-l-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
             />
             <Field
               as="select"
               name="currency"
-              className="rounded-r-lg border border-l-0 border-gray-300 px-3 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+              className="px-3 py-3 border border-l-0 border-white/50 bg-white/60 backdrop-blur-sm rounded-r-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
             >
               <option value="USD">USD</option>
               <option value="EUR">EUR</option>
