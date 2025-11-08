@@ -3,17 +3,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router';
 import { toast } from 'react-toastify';
 import { fetchCategories, deleteCategory } from '../../features/categorySlice';
-import PageBreadcrumb from '../../components/common/PageBreadCrumb';
-import PageMeta from '../../components/common/PageMeta';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faTrash, faPlus } from '@fortawesome/free-solid-svg-icons';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from '../../components/ui/table';
+import { HiEye, HiPencil, HiTrash, HiPlus, HiMagnifyingGlass, HiSparkles } from 'react-icons/hi2';
+import { MdCategory, MdInventory, MdViewList, MdDescription } from 'react-icons/md';
+import { FaLayerGroup, FaBoxes, FaIndustry, FaBarcode, FaCubes } from 'react-icons/fa';
+import { BiCategory, BiPackage } from 'react-icons/bi';
 
 const CategoryRow: React.FC<{
   category: any;
@@ -57,71 +50,73 @@ const CategoryRow: React.FC<{
 
   return (
     <React.Fragment>
-      <TableRow className={bgColor}>
-        <TableCell className="px-5 py-3 text-start">
-          <span
-            className={`text-gray-800 dark:text-white/90`}
-            style={{ paddingLeft: `${indent * 4}px` }}
-          >
-            {level > 0 && '↳ '}
-            {category.name}
-          </span>
-        </TableCell>
-        <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-          {category.useParentHsnCode ? (
-            <span className="italic">(Using parent's HSN code)</span>
-          ) : (
-            category.hsn_code
-          )}
-        </TableCell>
-        <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-          {category.description || '-'}
-        </TableCell>
-        <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-          {category.primary_unit || '-'}
-        </TableCell>
-        <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-          {category.secondary_unit || '-'}
-        </TableCell>
-
-        <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-          {filteredSubcategories.length > 0 ? (
-            <button
-              onClick={() => toggleExpand(category.id)}
-              className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-            >
-              {filteredSubcategories.length} subcategories{' '}
-              {expandedCategories.includes(category.id) ? '▼' : '►'}
-            </button>
-          ) : level === 0 ? (
-            'None'
-          ) : (
-            '-'
-          )}
-        </TableCell>
-        <TableCell className="px-4 py-3 text-gray-500 text-end text-theme-sm dark:text-gray-400">
-          <div className="flex items-center justify-end gap-2">
+      <div className={`p-4 border-b border-white/20 ${bgColor}`}>
+        <div className="grid grid-cols-7 gap-3 items-center">
+          {/* Name Column */}
+          <div className="flex items-center gap-2" style={{ paddingLeft: `${indent * 16}px` }}>
+            <BiCategory className="w-4 h-4 text-blue-600 flex-shrink-0" />
+            <span className="text-slate-800 font-medium truncate" title={category.name}>
+              {level > 0 && '↳ '}
+              {category.name}
+            </span>
+          </div>
+          
+          {/* HSN Code Column */}
+          <div className="text-slate-700 text-sm">
+            {category.useParentHsnCode ? (
+              <span className="italic text-slate-500">(Parent's HSN)</span>
+            ) : (
+              category.hsn_code || category.hsnCode || '-'
+            )}
+          </div>
+          
+          {/* Description Column */}
+          <div className="text-slate-700 text-sm truncate" title={category.description || category.desc}>
+            {category.description || category.desc || '-'}
+          </div>
+          
+          {/* Primary Unit Column */}
+          <div className="text-slate-700 text-sm">
+            {category.primary_unit || category.primaryUnit || '-'}
+          </div>
+          
+          {/* Secondary Unit Column */}
+          <div className="text-slate-700 text-sm">
+            {category.secondary_unit || category.secondaryUnit || '-'}
+          </div>
+          
+          {/* Subcategories Column */}
+          <div className="text-slate-700 text-sm">
+            {filteredSubcategories.length > 0 ? (
+              <button
+                onClick={() => toggleExpand(category.id)}
+                className="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
+              >
+                <span>{filteredSubcategories.length}</span>
+                <span>{expandedCategories.includes(category.id) ? '▼' : '►'}</span>
+              </button>
+            ) : (
+              <span>{level === 0 ? 'None' : '-'}</span>
+            )}
+          </div>
+          
+          {/* Actions Column */}
+          <div className="flex items-center justify-end space-x-2">
             <Link
               to={`/edit-category/${category.id}`}
-              className="hover:text-primary"
+              className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-gradient-to-r hover:from-emerald-500 hover:to-emerald-600 transition-all duration-300 hover:scale-110 transform"
             >
-              <FontAwesomeIcon
-                icon={faEdit}
-                className="text-blue-500 hover:text-blue-700"
-              />
+              <HiPencil className="w-4 h-4" />
             </Link>
             <button
               onClick={() => handleDeleteClick(category.id)}
-              className="hover:text-primary"
+              className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-gradient-to-r hover:from-red-500 hover:to-red-600 transition-all duration-300 hover:scale-110 transform"
             >
-              <FontAwesomeIcon
-                icon={faTrash}
-                className="text-red-500 hover:text-red-700"
-              />
+              <HiTrash className="w-4 h-4" />
             </button>
           </div>
-        </TableCell>
-      </TableRow>
+        </div>
+      </div>
       {expandedCategories.includes(category.id) &&
         filteredSubcategories.map((subcategory: any) => (
           <CategoryRow
@@ -235,149 +230,257 @@ const Category: React.FC = () => {
       .filter(Boolean) || [];
 
   return (
-    <>
-      <PageMeta
-        title="Categories | EximEx Dashboard"
-        description="Manage your categories in EximEx Dashboard"
-      />
-      <PageBreadcrumb pageTitle="Categories" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      <div className="p-4 lg:p-6 pt-6 sm:pt-8 lg:pt-12 pb-6 sm:pb-8 lg:pb-12">
+        {/* Header */}
+        <div className="mb-6">
+          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-6 lg:p-8">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg">
+                  <MdViewList className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
+                    Categories
+                  </h1>
+                  <p className="text-slate-600 text-sm lg:text-base">Manage your product categories</p>
+                </div>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1 sm:flex-none">
+                  <HiMagnifyingGlass className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <input
+                    type="text"
+                    placeholder="Search categories..."
+                    className="pl-12 pr-4 py-3 w-full sm:w-72 rounded-2xl border border-white/50 bg-white/60 backdrop-blur-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-200 transition-all duration-300 text-sm placeholder-slate-500 shadow-sm"
+                    value={searchTerm}
+                    onChange={handleSearch}
+                  />
+                </div>
+                
+                <Link
+                  to="/add-category"
+                  className="inline-flex items-center justify-center px-4 sm:px-6 py-3 rounded-2xl font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg text-sm sm:text-base whitespace-nowrap"
+                >
+                  <HiPlus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                  <span className="hidden xs:inline">Add Category</span>
+                  <span className="xs:hidden">Add</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
 
-      <div className="rounded-sm bg-white shadow-default dark:border-strokedark dark:bg-gray-900">
-        <div className="py-6 px-4 md:px-6 xl:px-7.5">
-          <div className="flex items-center justify-between">
-            <h4 className="text-xl font-semibold text-black dark:text-white">
-              Categories
-            </h4>
+        {/* Categories List */}
+        {loading ? (
+          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-12 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-blue-500 mx-auto mb-4"></div>
+            <p className="text-slate-600 font-medium">Loading categories...</p>
+          </div>
+        ) : filteredCategories.length === 0 ? (
+          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-12 text-center">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg">
+              <HiMagnifyingGlass className="w-8 h-8 text-white" />
+            </div>
+            <h3 className="text-xl font-semibold text-slate-800 mb-2">No categories found</h3>
+            <p className="text-slate-600 mb-6">
+              {searchTerm ? 'Try a different search term.' : 'Add your first category to get started'}
+            </p>
             <Link
               to="/add-category"
-              className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-black hover:bg-opacity-90 dark:text-white"
+              className="inline-flex items-center px-6 py-3 rounded-2xl font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg"
             >
-              <svg className="mr-2" width="16" height="16" viewBox="0 0 16 16">
-                <path
-                  d="M8 3.33331V12.6666M3.33337 7.99998H12.6667"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              Add Category
+              <HiPlus className="w-5 h-5 mr-2" />
+              Add First Category
             </Link>
           </div>
-
-          <div className="mt-4">
-            <input
-              type="text"
-              placeholder="Search categories..."
-              value={searchTerm}
-              onChange={handleSearch}
-              className="w-full md:w-1/3 rounded-lg border dark:text-gray-400 border-gray-300 bg-transparent py-2 px-4 outline-none focus:border-primary focus:shadow-sm dark:border-gray-700 dark:bg-gray-800"
-            />
-          </div>
-        </div>
-
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03] mx-4 md:mx-6 xl:mx-7.5">
-          <div className="max-w-full overflow-x-auto">
-            {loading ? (
-              <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        ) : (
+          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 overflow-hidden">
+            {/* Desktop Table View */}
+            <div className="hidden lg:block">
+              {/* Table Header */}
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-white/30 p-4">
+                <div className="grid grid-cols-7 gap-3 text-sm font-semibold text-slate-700">
+                  <div className="flex items-center gap-2">
+                    <MdCategory className="w-4 h-4 text-blue-600" />
+                    <span>Name</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaBarcode className="w-4 h-4 text-blue-600" />
+                    <span>HSN Code</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <MdDescription className="w-4 h-4 text-blue-600" />
+                    <span>Description</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaCubes className="w-4 h-4 text-blue-600" />
+                    <span>Primary Unit</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <BiPackage className="w-4 h-4 text-blue-600" />
+                    <span>Secondary Unit</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaLayerGroup className="w-4 h-4 text-blue-600" />
+                    <span>Subcategories</span>
+                  </div>
+                  <div className="flex items-center justify-end gap-2">
+                    <HiSparkles className="w-4 h-4 text-blue-600" />
+                    <span>Actions</span>
+                  </div>
+                </div>
               </div>
-            ) : filteredCategories.length === 0 ? (
-              <div className="flex justify-center items-center h-64">
-                <p className="text-gray-500 dark:text-gray-400">
-                  No categories found.{' '}
-                  {searchTerm && 'Try a different search term.'}
-                </p>
+              <div className="divide-y divide-white/20">
+                {filteredCategories.map((category: any) => (
+                  <CategoryRow
+                    key={category.id}
+                    category={category}
+                    level={0}
+                    expandedCategories={expandedCategories}
+                    toggleExpand={toggleExpand}
+                    handleDeleteClick={handleDeleteClick}
+                    searchTerm={searchTerm}
+                  />
+                ))}
               </div>
-            ) : (
-              <Table>
-                <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
-                  <TableRow>
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                    >
-                      Name
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                    >
-                      HSN Code
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                    >
-                      Description
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                    >
-                      Primary Unit
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                    >
-                      Secondary Unit
-                    </TableCell>
-
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                    >
-                      Subcategories
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-end text-theme-xs dark:text-gray-400"
-                    >
-                      Actions
-                    </TableCell>
-                  </TableRow>
-                </TableHeader>
-                <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                  {filteredCategories.map((category: any) => (
-                    <CategoryRow
-                      key={category.id}
-                      category={category}
-                      level={0}
-                      expandedCategories={expandedCategories}
-                      toggleExpand={toggleExpand}
-                      handleDeleteClick={handleDeleteClick}
-                      searchTerm={searchTerm}
-                    />
+            </div>
+            
+            {/* Mobile Card View */}
+            <div className="lg:hidden divide-y divide-white/20">
+              {filteredCategories.map((category: any) => (
+                <div key={category.id} className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <BiCategory className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                      <h3 className="font-semibold text-slate-800">{category.name}</h3>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Link
+                        to={`/edit-category/${category.id}`}
+                        className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-gradient-to-r hover:from-emerald-500 hover:to-emerald-600 transition-all duration-300"
+                      >
+                        <HiPencil className="w-4 h-4" />
+                      </Link>
+                      <button
+                        onClick={() => handleDeleteClick(category.id)}
+                        className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-gradient-to-r hover:from-red-500 hover:to-red-600 transition-all duration-300"
+                      >
+                        <HiTrash className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <span className="font-medium text-slate-500 text-xs">HSN Code:</span>
+                      <div className="text-slate-700">
+                        {category.useParentHsnCode ? (
+                          <span className="italic text-slate-500">(Parent's HSN)</span>
+                        ) : (
+                          category.hsn_code || category.hsnCode || '-'
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <span className="font-medium text-slate-500 text-xs">Primary Unit:</span>
+                      <div className="text-slate-700">{category.primary_unit || category.primaryUnit || '-'}</div>
+                    </div>
+                    <div>
+                      <span className="font-medium text-slate-500 text-xs">Secondary Unit:</span>
+                      <div className="text-slate-700">{category.secondary_unit || category.secondaryUnit || '-'}</div>
+                    </div>
+                    <div>
+                      <span className="font-medium text-slate-500 text-xs">Subcategories:</span>
+                      <div className="text-slate-700">
+                        {category.subcategories?.length > 0 ? (
+                          <button
+                            onClick={() => toggleExpand(category.id)}
+                            className="text-blue-600 hover:text-blue-800 font-medium"
+                          >
+                            {category.subcategories.length} {expandedCategories.includes(category.id) ? '▼' : '►'}
+                          </button>
+                        ) : (
+                          'None'
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {(category.description || category.desc) && (
+                    <div className="mt-3 pt-3 border-t border-white/20">
+                      <span className="font-medium text-slate-500 text-xs">Description:</span>
+                      <div className="text-slate-700 text-sm mt-1">{category.description || category.desc}</div>
+                    </div>
+                  )}
+                  
+                  {/* Mobile Subcategories */}
+                  {expandedCategories.includes(category.id) && category.subcategories?.map((subcategory: any) => (
+                    <div key={subcategory.id} className="mt-3 ml-6 p-3 bg-white/50 rounded-lg border border-white/30">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <BiCategory className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                          <span className="font-medium text-slate-700">↳ {subcategory.name}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Link
+                            to={`/edit-category/${subcategory.id}`}
+                            className="p-1.5 rounded text-slate-500 hover:text-emerald-600"
+                          >
+                            <HiPencil className="w-3 h-3" />
+                          </Link>
+                          <button
+                            onClick={() => handleDeleteClick(subcategory.id)}
+                            className="p-1.5 rounded text-slate-500 hover:text-red-600"
+                          >
+                            <HiTrash className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                          <span className="text-slate-500">HSN:</span>
+                          <span className="ml-1 text-slate-700">
+                            {subcategory.useParentHsnCode ? '(Parent)' : (subcategory.hsn_code || subcategory.hsnCode || '-')}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-slate-500">Desc:</span>
+                          <span className="ml-1 text-slate-700">{subcategory.description || subcategory.desc || '-'}</span>
+                        </div>
+                      </div>
+                    </div>
                   ))}
-                </TableBody>
-              </Table>
-            )}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Delete Confirmation Modal */}
       {confirmDelete && (
-        <div className="fixed inset-0 z-999999 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 dark:bg-gray-800">
-            <h3 className="mb-4 text-lg font-semibold text-black dark:text-white">
-              Confirm Delete
-            </h3>
-            <p className="mb-6 text-gray-600 dark:text-gray-400">
-              Are you sure you want to delete this category? This action cannot
-              be undone.
-            </p>
-            <div className="flex justify-end gap-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl max-w-md w-full p-8 border border-white/30">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-r from-red-500 to-pink-600 flex items-center justify-center shadow-lg">
+                <HiTrash className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 mb-2">Delete Category</h3>
+              <p className="text-slate-600">Are you sure you want to delete this category? This action cannot be undone.</p>
+            </div>
+            <div className="flex items-center justify-center space-x-3">
               <button
                 onClick={() => setConfirmDelete(null)}
-                className="rounded-md bg-gray-200 py-2 px-4 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                className="px-6 py-3 rounded-2xl border border-white/50 text-slate-600 hover:bg-slate-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmDelete}
-                className="rounded-md bg-red-500 py-2 px-4 text-white hover:bg-red-600"
+                className="px-6 py-3 rounded-2xl bg-gradient-to-r from-red-500 to-pink-600 text-white hover:from-red-600 hover:to-pink-700 shadow-lg"
               >
                 Delete
               </button>
@@ -385,7 +488,7 @@ const Category: React.FC = () => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

@@ -6,8 +6,7 @@ import * as Yup from 'yup';
 import { toast } from 'react-toastify';
 import { getAllCategories, getCategoryById } from '../../features/categorySlice';
 import { getProductById, updateProduct, addProduct } from '../../features/productSlice';
-import PageBreadcrumb from '../../components/common/PageBreadCrumb';
-import PageMeta from '../../components/common/PageMeta';
+import { HiArrowLeft, HiCheckCircle, HiCube } from 'react-icons/hi2';
 
 
 import BasicProductInfo from '../../components/product/BasicProductInfo';
@@ -714,24 +713,42 @@ const AddEditProductForm = () => {
 
   if (!initialValues || loading || categoriesLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        Loading...
+      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-8 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-blue-500 mx-auto mb-4"></div>
+          <p className="text-slate-600 font-medium">Loading...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <>
-      <PageMeta title={`${isEdit ? 'Edit' : 'Add'} Product | EximEx`} />
-      <PageBreadcrumb
-        pageTitle={`${isEdit ? 'Edit' : 'Add'} Product`}
-        breadcrumbItems={[{ label: 'Products', href: '/products' }]}
-      />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      <div className="p-4 lg:p-6">
+        {/* Header */}
+        <div className="mb-6">
+          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-6">
+            <div className="flex items-center gap-4 mb-4">
+              <button
+                onClick={() => navigate('/products')}
+                className="p-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 hover:shadow-lg hover:scale-105 transform"
+              >
+                <HiArrowLeft className="w-5 h-5" />
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold text-slate-800">
+                  {isEdit ? 'Edit Product' : 'Add New Product'}
+                </h1>
+                <p className="text-slate-600">
+                  {isEdit ? 'Update product information' : 'Create a new product'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
 
-      <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90 mb-6">
-          {isEdit ? 'Edit Product' : 'Add Product'}
-        </h3>
+        {/* Form */}
+        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-6 lg:p-8">
 
         <Formik
           key={`formik-${isEdit ? product?.id || 'edit' : 'add'}`}
@@ -783,55 +800,38 @@ const AddEditProductForm = () => {
               />
 
               {/* Submit Buttons */}
-              <div className="flex gap-3 pt-6 border-t border-gray-200 dark:border-gray-800">
+              <div className="flex items-center justify-end space-x-4 pt-6 border-t border-white/50">
+                <button
+                  type="button"
+                  onClick={() => navigate('/products')}
+                  className="px-6 py-3 rounded-2xl border border-white/50 text-slate-600 hover:bg-slate-50 transition-all duration-300 hover:scale-105 transform"
+                >
+                  Cancel
+                </button>
                 <button
                   type="submit"
                   disabled={loading || isSubmitting}
-                  className="rounded-lg bg-brand-500 px-6 py-2.5 text-sm font-medium text-white hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-3 rounded-2xl font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 hover:shadow-xl hover:scale-105 transform disabled:opacity-50 shadow-lg"
                 >
                   {loading || isSubmitting ? (
-                    <span className="flex items-center">
-                      <svg
-                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                       {isEdit ? 'Updating...' : 'Creating...'}
-                    </span>
-                  ) : isEdit ? (
-                    'Update Product'
+                    </div>
                   ) : (
-                    'Create Product'
+                    <>
+                      <HiCheckCircle className="w-5 h-5 mr-2 inline" />
+                      {isEdit ? 'Update Product' : 'Create Product'}
+                    </>
                   )}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => window.history.back()}
-                  className="rounded-lg border border-gray-300 px-6 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
-                >
-                  Cancel
                 </button>
               </div>
             </Form>
           )}
         </Formik>
+        </div>
       </div>
-    </>
+    </div>
   );
 };
 

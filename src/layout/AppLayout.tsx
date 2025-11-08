@@ -35,7 +35,7 @@ const LayoutContent: React.FC = () => {
         } ${isMobileOpen ? 'ml-0' : ''} relative`}
       >
         <AppHeader />
-        <main className="p-2 mx-auto max-w-(--breakpoint-2xl) md:p-3">
+        <main className="mt-20 pt-4 p-2 mx-auto max-w-(--breakpoint-2xl) md:p-3">
           <Outlet />
         </main>
       </div>

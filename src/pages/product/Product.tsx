@@ -1,19 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { fetchProducts, deleteProduct } from '../../features/productSlice';
-import PageBreadcrumb from '../../components/common/PageBreadCrumb';
-import PageMeta from '../../components/common/PageMeta';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faTrash, faPlus } from '@fortawesome/free-solid-svg-icons';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from '../../components/ui/table';
+import { getAllCategories } from '../../features/categorySlice';
+import { HiEye, HiPencil, HiTrash, HiPlus, HiMagnifyingGlass, HiCube, HiTag, HiFunnel } from 'react-icons/hi2';
 
 const Product: React.FC = () => {
   const dispatch = useDispatch();
@@ -21,10 +12,18 @@ const Product: React.FC = () => {
     (state: any) => state.product
   );
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedSubCategory, setSelectedSubCategory] = useState('');
+  const itemsPerPage = 12;
+
+  const { categories } = useSelector((state: any) => state.category);
 
   useEffect(() => {
     dispatch(fetchProducts() as any);
+    dispatch(getAllCategories() as any);
   }, [dispatch]);
 
   useEffect(() => {
@@ -55,11 +54,39 @@ const Product: React.FC = () => {
     }
   };
 
-  const filteredProducts = Array.isArray(products)
-    ? products.filter((product: any) =>
-        product?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : [];
+  const filteredProducts = useMemo(() => {
+    const term = searchTerm.toLowerCase();
+    return Array.isArray(products)
+      ? products.filter((product: any) => {
+          const matchesSearch = product?.name?.toLowerCase().includes(term) ||
+            product?.sku?.toLowerCase().includes(term) ||
+            product?.category?.name?.toLowerCase().includes(term);
+          
+          const matchesCategory = !selectedCategory || product?.categoryId?.toString() === selectedCategory;
+          const matchesSubCategory = !selectedSubCategory || product?.subCategoryId?.toString() === selectedSubCategory;
+          
+          return matchesSearch && matchesCategory && matchesSubCategory;
+        })
+      : [];
+  }, [searchTerm, products, selectedCategory, selectedSubCategory]);
+
+  const availableSubCategories = useMemo(() => {
+    if (!selectedCategory || !categories) return [];
+    const category = categories.find((cat: any) => cat.id.toString() === selectedCategory);
+    return category?.subcategories || [];
+  }, [selectedCategory, categories]);
+
+  const handleCategoryChange = (categoryId: string) => {
+    setSelectedCategory(categoryId);
+    setSelectedSubCategory('');
+    setCurrentPage(1);
+  };
+
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const currentProducts = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredProducts.slice(start, start + itemsPerPage);
+  }, [filteredProducts, currentPage]);
   const getProductTypeLabel = (type: string) => {
     const types: Record<string, string> = {
       tiles: 'Tiles',
@@ -81,200 +108,386 @@ const Product: React.FC = () => {
     return units[unit] || unit;
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-8 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-blue-500 mx-auto mb-4"></div>
+          <p className="text-slate-600 font-medium">Loading products...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <>
-      <PageMeta
-        title="Products | EximEx Dashboard"
-        description="Manage your products in EximEx Dashboard"
-      />
-      <PageBreadcrumb pageTitle="Products" />
-
-      <div className="rounded-sm bg-white shadow-default dark:border-strokedark dark:bg-gray-900">
-        <div className="py-6 px-4 md:px-6 xl:px-7.5">
-          <div className="flex items-center justify-between">
-            <h4 className="text-xl font-semibold text-black dark:text-white">
-              Products
-            </h4>
-            <Link
-              to="/add-product"
-              onClick={() => console.log('Add Product clicked')}
-              className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-black hover:bg-opacity-90 dark:text-white"
-            >
-              <svg className="mr-2" width="16" height="16" viewBox="0 0 16 16">
-                <path
-                  d="M8 3.33331V12.6666M3.33337 7.99998H12.6667"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              Add Product
-            </Link>
-          </div>
-
-          <div className="mt-4">
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={searchTerm}
-              onChange={handleSearch}
-              className="w-full md:w-1/3 rounded-lg border border-gray-300 dark:text-gray-400 bg-transparent py-2 px-4 outline-none focus:border-primary focus:shadow-sm dark:border-gray-700 dark:bg-gray-800"
-            />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      <div className="p-4 lg:p-6 pt-6 sm:pt-8 lg:pt-12 pb-6 sm:pb-8 lg:pb-12">
+        {/* Header */}
+        <div className="mb-6">
+          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-6 lg:p-8">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-2xl bg-blue-600 shadow-lg">
+                  <HiCube className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
+                    Products
+                  </h1>
+                  {/* <p className="text-slate-600 text-sm lg:text-base">Manage your product inventory</p> */}
+                </div>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="relative">
+                    <HiMagnifyingGlass className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                    <input
+                      type="text"
+                      placeholder="Search products..."
+                      className="pl-12 pr-4 py-3 w-full sm:w-64 rounded-2xl border border-white/50 bg-white/60 backdrop-blur-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-200 transition-all duration-300 text-sm placeholder-slate-500 shadow-sm"
+                      value={searchTerm}
+                      onChange={(e) => {
+                        setSearchTerm(e.target.value);
+                        setCurrentPage(1);
+                      }}
+                    />
+                  </div>
+                  
+                  <div className="relative">
+                    <HiFunnel className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => handleCategoryChange(e.target.value)}
+                      className="pl-11 pr-4 py-3 w-full sm:w-48 rounded-2xl border border-white/50 bg-white/60 backdrop-blur-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-200 transition-all duration-300 text-sm shadow-sm appearance-none"
+                    >
+                      <option value="">All Categories</option>
+                      {categories?.map((category: any) => (
+                        <option key={category.id} value={category.id}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  {selectedCategory && availableSubCategories.length > 0 && (
+                    <div className="relative">
+                      <HiFunnel className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                      <select
+                        value={selectedSubCategory}
+                        onChange={(e) => {
+                          setSelectedSubCategory(e.target.value);
+                          setCurrentPage(1);
+                        }}
+                        className="pl-11 pr-4 py-3 w-full sm:w-48 rounded-2xl border border-white/50 bg-white/60 backdrop-blur-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-200 transition-all duration-300 text-sm shadow-sm appearance-none"
+                      >
+                        <option value="">All Subcategories</option>
+                        {availableSubCategories.map((subCategory: any) => (
+                          <option key={subCategory.id} value={subCategory.id}>
+                            {subCategory.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+                
+                <Link
+                  to="/add-product"
+                  className="inline-flex items-center justify-center px-6 py-3 rounded-2xl font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-lg flex-shrink-0"
+                >
+                  <HiPlus className="w-5 h-5 mr-2" />
+                  Add Product
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03] mx-4 md:mx-6 xl:mx-7.5">
-          <div className="max-w-full overflow-x-auto">
-            {loading ? (
-              <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        {/* Products Display */}
+        {filteredProducts.length === 0 ? (
+          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-12 text-center">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg">
+              <HiMagnifyingGlass className="w-8 h-8 text-white" />
+            </div>
+            <h3 className="text-xl font-semibold text-slate-800 mb-2">No products found</h3>
+            <p className="text-slate-600 mb-6">Add your first product to get started</p>
+            <Link
+              to="/add-product"
+              className="inline-flex items-center px-6 py-3 rounded-2xl font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-lg"
+            >
+              <HiPlus className="w-5 h-5 mr-2" />
+              Add First Product
+            </Link>
+          </div>
+        ) : (
+          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 overflow-hidden">
+            {/* Desktop Table View */}
+            <div className="hidden lg:block">
+              {/* Table Header */}
+              <div className="bg-blue-50 border-b border-white/30 p-4">
+                <div className="grid grid-cols-7 gap-3 text-sm font-semibold text-slate-700">
+                  <div className="flex items-center gap-2">
+                    <HiCube className="w-4 h-4 text-blue-600" />
+                    <span>Product Name</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <HiTag className="w-4 h-4 text-blue-600" />
+                    <span>SKU</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <HiTag className="w-4 h-4 text-blue-600" />
+                    <span>Category</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <HiCube className="w-4 h-4 text-blue-600" />
+                    <span>Unit Weight</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <HiCube className="w-4 h-4 text-blue-600" />
+                    <span>Total Weight</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <HiCube className="w-4 h-4 text-blue-600" />
+                    <span>Price</span>
+                  </div>
+                  <div className="flex items-center justify-end gap-2">
+                    <HiCube className="w-4 h-4 text-blue-600" />
+                    <span>Actions</span>
+                  </div>
+                </div>
               </div>
-            ) : filteredProducts.length === 0 ? (
-              <div className="flex justify-center items-center h-64">
-                <p className="text-gray-500 dark:text-gray-400">
-                  No products found.{' '}
-                  {searchTerm && 'Try a different search term.'}
-                </p>
-              </div>
-            ) : (
-              <Table>
-                <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
-                  <TableRow>
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                    >
-                      Product Name
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                    >
-                      SKU
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                    >
-                      Category
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                    >
-                      Unit Weight
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                    >
-                      Total Weight
-                    </TableCell>
-                    {/* <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                    >
-                      Boxes/Pieces
-                    </TableCell> */}
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-end text-theme-xs dark:text-gray-400"
-                    >
-                      Actions
-                    </TableCell>
-                  </TableRow>
-                </TableHeader>
-                <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                  {filteredProducts.map((product: any) => (
-                    <TableRow key={product.id}>
-                      <TableCell className="px-5 py-4 text-start">
-                        <div className="flex flex-col gap-1">
-                          <span className="font-medium text-gray-800 dark:text-white/90">
-                            {product.name}
-                          </span>
-                          {/* <span className="text-sm text-gray-500">
-                            ID: {product.id}
-                          </span> */}
-                        </div>
-                      </TableCell>
-                      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                        {product.sku || 'N/A'}
-                      </TableCell>
-                      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                        {product.category?.name || 'N/A'}
-                      </TableCell>
-                      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+              <div className="divide-y divide-white/20">
+                {currentProducts.map((product: any) => (
+                  <div key={product.id} className="p-4 hover:bg-white/50 transition-all duration-300">
+                    <div className="grid grid-cols-7 gap-3 items-center">
+                      {/* Product Name */}
+                      <div className="flex items-center gap-2">
+                        <HiCube className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                        <span className="text-slate-800 font-medium truncate" title={product.name}>
+                          {product.name}
+                        </span>
+                      </div>
+                      
+                      {/* SKU */}
+                      <div className="text-slate-700 text-sm">
+                        {product.sku || '-'}
+                      </div>
+                      
+                      {/* Category */}
+                      <div className="text-slate-700 text-sm">
+                        {product.category?.name || '-'}
+                      </div>
+                      
+                      {/* Unit Weight */}
+                      <div className="text-slate-700 text-sm">
                         {product.unitWeight && product.weightUnitType
                           ? `${product.unitWeight} ${product.unitWeightUnit} per ${product.weightUnitType}`
                           : product.weight
                             ? `${product.weight} ${product.weightUnit}`
-                            : 'N/A'}
-                      </TableCell>
-                      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                            : '-'}
+                      </div>
+                      
+                      {/* Total Weight */}
+                      <div className="text-slate-700 text-sm">
                         {product.totalGrossWeight
                           ? `${product.totalGrossWeight} ${product.totalGrossWeightUnit}`
-                          : 'N/A'}
-                      </TableCell>
-                      {/* <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                        <div className="flex flex-col text-xs">
-                          {product.totalBoxes && <span>Boxes: {product.totalBoxes}</span>}
-                          {product.totalPieces && <span>Pieces: {product.totalPieces}</span>}
-                          {!product.totalBoxes && !product.totalPieces && "N/A"}
+                          : '-'}
+                      </div>
+                      
+                      {/* Price */}
+                      <div className="text-slate-700 text-sm">
+                        {product.price ? `${product.currency} ${product.price}` : '-'}
+                      </div>
+                      
+                      {/* Actions */}
+                      <div className="flex items-center justify-end space-x-2">
+                        <Link
+                          to={`/edit-product/${product.id}`}
+                          className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-500 transition-all duration-300 hover:scale-110 transform"
+                        >
+                          <HiPencil className="w-4 h-4" />
+                        </Link>
+                        <button
+                          onClick={() => handleDeleteClick(product.id)}
+                          className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-500 transition-all duration-300 hover:scale-110 transform"
+                        >
+                          <HiTrash className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Tablet/Mobile Table View with Horizontal Scroll */}
+            <div className="lg:hidden">
+              <div className="overflow-x-auto">
+                <div className="min-w-[800px]">
+                  {/* Table Header */}
+                  <div className="bg-blue-50 border-b border-white/30 p-4">
+                    <div className="grid grid-cols-7 gap-3 text-sm font-semibold text-slate-700">
+                      <div className="flex items-center gap-2">
+                        <HiCube className="w-4 h-4 text-blue-600" />
+                        <span>Product Name</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <HiTag className="w-4 h-4 text-blue-600" />
+                        <span>SKU</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <HiTag className="w-4 h-4 text-blue-600" />
+                        <span>Category</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <HiCube className="w-4 h-4 text-blue-600" />
+                        <span>Unit Weight</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <HiCube className="w-4 h-4 text-blue-600" />
+                        <span>Total Weight</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <HiCube className="w-4 h-4 text-blue-600" />
+                        <span>Price</span>
+                      </div>
+                      <div className="flex items-center justify-end gap-2">
+                        <HiCube className="w-4 h-4 text-blue-600" />
+                        <span>Actions</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="divide-y divide-white/20">
+                    {currentProducts.map((product: any) => (
+                      <div key={product.id} className="p-4 hover:bg-white/50 transition-all duration-300">
+                        <div className="grid grid-cols-7 gap-3 items-center">
+                          {/* Product Name */}
+                          <div className="flex items-center gap-2">
+                            <HiCube className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                            <span className="text-slate-800 font-medium truncate" title={product.name}>
+                              {product.name}
+                            </span>
+                          </div>
+                          
+                          {/* SKU */}
+                          <div className="text-slate-700 text-sm">
+                            {product.sku || '-'}
+                          </div>
+                          
+                          {/* Category */}
+                          <div className="text-slate-700 text-sm">
+                            {product.category?.name || '-'}
+                          </div>
+                          
+                          {/* Unit Weight */}
+                          <div className="text-slate-700 text-sm">
+                            {product.unitWeight && product.weightUnitType
+                              ? `${product.unitWeight} ${product.unitWeightUnit} per ${product.weightUnitType}`
+                              : product.weight
+                                ? `${product.weight} ${product.weightUnit}`
+                                : '-'}
+                          </div>
+                          
+                          {/* Total Weight */}
+                          <div className="text-slate-700 text-sm">
+                            {product.totalGrossWeight
+                              ? `${product.totalGrossWeight} ${product.totalGrossWeightUnit}`
+                              : '-'}
+                          </div>
+                          
+                          {/* Price */}
+                          <div className="text-slate-700 text-sm">
+                            {product.price ? `${product.currency} ${product.price}` : '-'}
+                          </div>
+                          
+                          {/* Actions */}
+                          <div className="flex items-center justify-end space-x-2">
+                            <Link
+                              to={`/edit-product/${product.id}`}
+                              className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-500 transition-all duration-300 hover:scale-110 transform"
+                            >
+                              <HiPencil className="w-4 h-4" />
+                            </Link>
+                            <button
+                              onClick={() => handleDeleteClick(product.id)}
+                              className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-500 transition-all duration-300 hover:scale-110 transform"
+                            >
+                              <HiTrash className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
-                      </TableCell> */}
-                      <TableCell className="px-4 py-3 text-gray-500 text-end text-theme-sm dark:text-gray-400">
-                        <div className="flex items-center justify-end gap-2">
-                          <Link
-                            to={`/edit-product/${product.id}`}
-                            className="hover:text-primary"
-                          >
-                            <FontAwesomeIcon
-                              icon={faEdit}
-                              className="text-blue-500 hover:text-blue-700"
-                            />
-                          </Link>
-                          <button
-                            onClick={() => handleDeleteClick(product.id)}
-                            className="hover:text-primary"
-                          >
-                            <FontAwesomeIcon
-                              icon={faTrash}
-                              className="text-red-500 hover:text-red-700"
-                            />
-                          </button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-6 mt-6">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-slate-600">
+                Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredProducts.length)} of {filteredProducts.length} products
+              </p>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 rounded-xl border border-white/50 text-slate-600 hover:bg-blue-500 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:shadow-lg"
+                >
+                  Previous
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-4 py-2 rounded-xl transition-all duration-300 ${
+                      currentPage === page
+                        ? 'bg-blue-600 text-white font-semibold shadow-lg'
+                        : 'text-slate-600 hover:bg-blue-500 hover:text-white hover:shadow-lg'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 rounded-xl border border-white/50 text-slate-600 hover:bg-blue-500 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:shadow-lg"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Delete Confirmation Modal */}
       {confirmDelete && (
-        <div className="fixed inset-0 z-999999 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 dark:bg-gray-800">
-            <h3 className="mb-4 text-lg font-semibold text-black dark:text-white">
-              Confirm Delete
-            </h3>
-            <p className="mb-6 text-gray-600 dark:text-gray-400">
-              Are you sure you want to delete this product? This action cannot
-              be undone.
-            </p>
-            <div className="flex justify-end gap-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl max-w-md w-full p-8 border border-white/30">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-red-500 flex items-center justify-center shadow-lg">
+                <HiTrash className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 mb-2">Delete Product</h3>
+              <p className="text-slate-600">Are you sure you want to delete this product? This action cannot be undone.</p>
+            </div>
+            <div className="flex items-center justify-center space-x-3">
               <button
                 onClick={() => setConfirmDelete(null)}
-                className="rounded-md bg-gray-200 py-2 px-4 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                className="px-6 py-3 rounded-2xl border border-white/50 text-slate-600 hover:bg-slate-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmDelete}
-                className="rounded-md bg-red-500 py-2 px-4 text-white hover:bg-red-600"
+                className="px-6 py-3 rounded-2xl bg-red-500 text-white hover:bg-red-600 shadow-lg"
               >
                 Delete
               </button>
@@ -282,7 +495,7 @@ const Product: React.FC = () => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 
