@@ -1,13 +1,18 @@
 import React, { createContext, useContext, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { loginUser } from '../features/authSlice';
+import { loginUser, logoutUser } from '../features/authSlice';
 import { clearUser } from '../features/userSlice';
 
 interface User {
   id: number;
   name: string;
   email: string;
-  role: 'SUPER_ADMIN' | 'ADMIN' | 'STAFF';
+  role: {
+    id: number;
+    name: 'SUPER_ADMIN' | 'ADMIN' | 'STAFF';
+    displayName: string;
+    permissions: any;
+  };
   companyId: number;
   profilePicture?: string;
   googleId?: string;
@@ -19,12 +24,15 @@ interface User {
   };
 }
 
-const getPermissions = (role: string) => ({
-  canManageStaff: ['ADMIN', 'SUPER_ADMIN'].includes(role),
-  canViewAllData: ['ADMIN', 'SUPER_ADMIN'].includes(role),
-  canReassignData: ['ADMIN', 'SUPER_ADMIN'].includes(role),
-  canViewActivityLogs: ['ADMIN', 'SUPER_ADMIN'].includes(role),
-});
+const getPermissions = (role: any) => {
+  const roleName = role?.name || role;
+  return {
+    canManageStaff: ['ADMIN', 'SUPER_ADMIN'].includes(roleName),
+    canViewAllData: ['ADMIN', 'SUPER_ADMIN'].includes(roleName),
+    canReassignData: ['ADMIN', 'SUPER_ADMIN'].includes(roleName),
+    canViewActivityLogs: ['ADMIN', 'SUPER_ADMIN'].includes(roleName),
+  };
+};
 
 const AuthContext = createContext<{
   user: User | null;
@@ -63,10 +71,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    dispatch(clearUser());
+  const logout = async () => {
+    try {
+      // Call backend logout API
+      await dispatch(logoutUser()).unwrap();
+    } catch (error) {
+      console.warn('Logout API failed:', error);
+    } finally {
+      // Always clear local state and storage
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      dispatch(clearUser());
+    }
   };
 
   return (
@@ -94,7 +110,8 @@ export const RoleGuard: React.FC<{
 }> = ({ children, allowedRoles, fallback = null }) => {
   const { user } = useAuth();
 
-  if (!user || !allowedRoles.includes(user.role)) {
+  const userRole = user?.role?.name || user?.role;
+  if (!user || !allowedRoles.includes(userRole)) {
     return <>{fallback}</>;
   }
 

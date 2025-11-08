@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -20,8 +20,10 @@ import {
   faCog,
   faUserShield,
   faLock,
-  faUnlock
+  faUnlock,
+  faBell
 } from '@fortawesome/free-solid-svg-icons';
+import socketService from '../../service/socketService';
 import { getSuperAdminDashboardStats, getAllDatabaseData, getAllUsersForSuperAdmin, getAllCompanies } from '../../features/userSlice';
 
 interface DashboardStats {
@@ -59,6 +61,23 @@ const EnhancedSuperAdminDashboard: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
 
   const dispatch = useDispatch();
+  const { notifications, unreadCount } = useSelector(state => state.notifications);
+  
+  console.log('Dashboard notifications:', notifications);
+  console.log('Dashboard unread count:', unreadCount);
+  
+  // Force refresh notifications every 3 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (socketService.isConnected) {
+        console.log('Force refreshing notifications...');
+        socketService.getNotifications({ page: 1, limit: 20 });
+      }
+    }, 3000);
+    
+    return () => clearInterval(interval);
+  }, []);
+  console.log('Notifications array length:', notifications?.length || 0);
 
   const fetchDashboardStats = async () => {
     try {
@@ -94,6 +113,16 @@ const EnhancedSuperAdminDashboard: React.FC = () => {
       setLoading(false);
     };
     loadData();
+  }, []);
+
+  useEffect(() => {
+    // Fetch notifications when component mounts or socket connects
+    const timer = setTimeout(() => {
+      console.log('Fetching notifications for dashboard...');
+      socketService.getNotifications({ page: 1, limit: 10 });
+    }, 1000);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   const StatCard = ({ title, value, icon, color, trend }: {
@@ -326,6 +355,34 @@ const EnhancedSuperAdminDashboard: React.FC = () => {
           </div>
         </div>
 
+        {/* Navigation Tabs */}
+        <div className="mb-6">
+          <div className="border-b border-gray-200 dark:border-gray-700">
+            <nav className="-mb-px flex space-x-8">
+              <button
+                onClick={() => setActiveTab('overview')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'overview'
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                }`}
+              >
+                Overview
+              </button>
+              <button
+                onClick={() => setActiveTab('database')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'database'
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                }`}
+              >
+                Database
+              </button>
+            </nav>
+          </div>
+        </div>
+
 
 
         {/* Overview Tab */}
@@ -364,7 +421,7 @@ const EnhancedSuperAdminDashboard: React.FC = () => {
             </div>
 
             {/* Secondary Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
               <StatCard
                 title="PI Invoices"
                 value={stats.piInvoices}
@@ -383,6 +440,64 @@ const EnhancedSuperAdminDashboard: React.FC = () => {
                 icon={faFileInvoice}
                 color="border-l-red-500"
               />
+              <StatCard
+                title="Notifications"
+                value={unreadCount}
+                icon={faBell}
+                color="border-l-yellow-500"
+              />
+            </div>
+
+            {/* Recent Notifications */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+                  Recent Activity Notifications
+                </h3>
+                <button
+                  onClick={() => {
+                    console.log('Refreshing notifications...');
+                    socketService.getNotifications({ page: 1, limit: 10 });
+                  }}
+                  className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                >
+                  Refresh
+                </button>
+              </div>
+              <div className="space-y-3">
+                {notifications.slice(0, 5).map((notification) => (
+                  <div key={notification.id} className="flex items-start p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div className="flex-shrink-0 mr-3">
+                      <div className={`w-2 h-2 rounded-full mt-2 ${
+                        notification.priority === 'HIGH' ? 'bg-red-500' :
+                        notification.priority === 'MEDIUM' ? 'bg-yellow-500' : 'bg-green-500'
+                      }`}></div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                        {notification.title}
+                      </p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        {notification.message}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                        {new Date(notification.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                    {!notification.isRead && (
+                      <div className="flex-shrink-0">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {notifications.length === 0 && (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <FontAwesomeIcon icon={faBell} className="text-3xl mb-2 opacity-50" />
+                    <p>No notifications yet</p>
+                  </div>
+                )}
+              </div>
             </div>
 
 
