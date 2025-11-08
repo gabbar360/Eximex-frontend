@@ -4,6 +4,7 @@ import { ThemeToggleButton } from '../common/ThemeToggleButton';
 import NotificationDropdown from './NotificationDropdown';
 import UserDropdown from './UserDropdown';
 import { Link } from 'react-router';
+import NotificationBell from '../Notifications/NotificationBell';
 
 // Define the interface for the props
 interface HeaderProps {
@@ -155,7 +156,9 @@ const Header: React.FC<HeaderProps> = ({ onClick, onToggle }) => {
             {/* <!-- Dark Mode Toggler --> */}
             <ThemeToggleButton />
             {/* <!-- Dark Mode Toggler --> */}
-            {/* <NotificationDropdown /> */}
+            
+            {/* <!-- Real-time Notification Bell --> */}
+            <NotificationBell />
             {/* <!-- Notification Menu Area --> */}
           </div>
           {/* <!-- User Area --> */}

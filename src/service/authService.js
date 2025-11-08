@@ -41,10 +41,14 @@ const logout = async () => {
     return response.data;
   } catch (error) {
     console.warn('Logout request failed:', error);
-    throw handleAxiosError(error, 'auth', 'logout');
+    // Don't throw error, just log it
   } finally {
+    // Always clear localStorage regardless of API success/failure
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+    localStorage.removeItem('selectedOrderId');
+    localStorage.removeItem('theme');
+    return { message: 'Logged out successfully' };
   }
 };
 

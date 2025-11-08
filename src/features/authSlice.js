@@ -203,6 +203,9 @@ const authSlice = createSlice({
         state.refreshToken = null;
         state.isAuthenticated = false;
         state.successMessage = payload.message;
+        // Clear localStorage
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
       })
       .addCase(logoutUser.rejected, (state, { payload }) => {
         state.loading = false;
@@ -211,6 +214,9 @@ const authSlice = createSlice({
         state.token = null;
         state.refreshToken = null;
         state.isAuthenticated = false;
+        // Clear localStorage even on error
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
       })
       .addCase(changePassword.pending, (state) => {
         state.loading = true;

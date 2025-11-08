@@ -38,6 +38,8 @@ import { useEffect, useState } from 'react';
 import { setUser } from './features/userSlice';
 import { getCurrentUser } from './features/authSlice';
 import authService from './service/authService';
+import socketService from './service/socketService';
+import { resetNotifications } from './features/notificationSlice';
 import Cprospect from '../src/pages/party/Cprospect';
 import AddEditPartyForm from './pages/party/AddEditPartyForm';
 import ViewParty from './pages/party/ViewParty';
@@ -221,6 +223,30 @@ export default function App() {
     };
     loadBasicDetails();
   }, [dispatch]);
+
+  // Socket connection management
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken');
+    
+    if (user && token) {
+      // Connect to socket when user is authenticated
+      socketService.connect(token);
+      
+      // Request notification permission
+      socketService.constructor.requestNotificationPermission();
+    } else {
+      // Disconnect socket when user logs out
+      socketService.disconnect();
+      dispatch(resetNotifications());
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (!user) {
+        socketService.disconnect();
+      }
+    };
+  }, [user, dispatch]);
 
   if (loading) {
     return <div className="text-center py-10">Loading...</div>;
