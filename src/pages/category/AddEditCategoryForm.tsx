@@ -12,18 +12,43 @@ import {
   fetchPackagingHierarchy,
 } from '../../features/packagingSlice';
 import { useDispatch } from 'react-redux';
-import PageBreadcrumb from '../../components/common/PageBreadCrumb';
-import PageMeta from '../../components/common/PageMeta';
-import Form from '../../components/form/Form';
-import Input from '../../components/form/input/InputField';
-import Label from '../../components/form/Label';
-import TextArea from '../../components/form/input/TextArea';
-import Select from '../../components/form/Select';
 import PackagingDetailsSection from '../../components/form/PackagingDetailsSection';
-// import PricingConfigSection from "../../components/form/PricingConfigSection";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import { 
+  HiArrowLeft, 
+  HiCheckCircle, 
+  HiPlus, 
+  HiTrash,
+  HiSparkles,
+  HiClipboardDocumentList,
+  HiCubeTransparent,
+  HiRectangleStack,
+  HiDocumentDuplicate,
+  HiBeaker,
+  HiCog6Tooth,
+  HiShieldCheck,
+  HiAcademicCap,
+  HiChartBarSquare
+} from 'react-icons/hi2';
+import { 
+  MdCategory, 
+  MdInventory, 
+  MdDescription, 
+  MdQrCode2,
+  MdPrecisionManufacturing
+} from 'react-icons/md';
+import { 
+  FaBoxes, 
+  FaCubes, 
+  FaLayerGroup, 
+  FaIndustry,
+  FaBarcode
+} from 'react-icons/fa';
+import { 
+  BiCategory, 
+  BiPackage 
+} from 'react-icons/bi';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
 
@@ -147,14 +172,14 @@ const UnitDropdown: React.FC<{
       <button
         type="button"
         id={id}
-        className="h-11 w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2.5 pr-11 text-sm shadow-theme-xs text-left focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
+        className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm text-left"
         onClick={() => setIsOpen(!isOpen)}
       >
         <span
           className={
             selectedUnit
-              ? 'text-gray-900 dark:text-white/90'
-              : 'text-gray-400 dark:text-white/30'
+              ? 'text-slate-800'
+              : 'text-slate-400'
           }
         >
           {selectedUnit ? selectedUnit.label : placeholder}
@@ -175,14 +200,14 @@ const UnitDropdown: React.FC<{
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-60 overflow-hidden">
-          <div className="p-2 border-b border-gray-200 dark:border-gray-700">
+        <div className="absolute top-full left-0 right-0 mt-1 bg-white/90 backdrop-blur-xl border border-white/30 rounded-2xl shadow-xl z-50 max-h-60 overflow-hidden">
+          <div className="p-3 border-b border-white/20">
             <input
               type="text"
               placeholder="Search units..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500 dark:bg-gray-800 dark:text-white"
+              className="w-full px-3 py-2 text-sm border border-white/50 bg-white/60 backdrop-blur-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-200"
               autoFocus
             />
           </div>
@@ -192,10 +217,10 @@ const UnitDropdown: React.FC<{
                 <button
                   key={unit.value}
                   type="button"
-                  className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-800 ${
+                  className={`w-full px-4 py-2 text-left text-sm hover:bg-blue-50 transition-colors ${
                     value === unit.value
-                      ? 'bg-brand-50 text-brand-600 dark:bg-brand-900/20 dark:text-brand-400'
-                      : 'text-gray-900 dark:text-white/90'
+                      ? 'bg-blue-50 text-blue-600'
+                      : 'text-slate-700'
                   }`}
                   onClick={() => handleSelect(unit.value)}
                 >
@@ -203,7 +228,7 @@ const UnitDropdown: React.FC<{
                 </button>
               ))
             ) : (
-              <div className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
+              <div className="px-4 py-2 text-sm text-slate-500">
                 No units found
               </div>
             )}
@@ -444,37 +469,56 @@ const AddEditCategoryForm: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-8 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-blue-500 mx-auto mb-4"></div>
+          <p className="text-slate-600 font-medium">Loading...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">
-        <strong>Error:</strong> {error}
+      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-8 text-center max-w-md">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-r from-red-500 to-pink-600 flex items-center justify-center shadow-lg">
+            <HiDocumentText className="w-8 h-8 text-white" />
+          </div>
+          <h3 className="text-xl font-bold text-slate-800 mb-2">Error</h3>
+          <p className="text-slate-600">{error}</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-screen-2xl p-2 sm:p-4 md:p-6 2xl:p-10">
-      <PageMeta
-        title={`${isEditMode ? 'Edit' : 'Add'} Category | EximEx Dashboard`}
-        description={`${
-          isEditMode ? 'Edit' : 'Add'
-        } a category in your EximEx Dashboard`}
-      />
-      <PageBreadcrumb pageTitle={`${isEditMode ? 'Edit' : 'Add'} Category`} />
-
-      <div className="rounded-sm bg-white shadow-default dark:border-strokedark dark:bg-gray-900 p-3 sm:p-6 md:p-8">
-        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-3 sm:p-6">
-          <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-3 sm:pb-4 mb-4 sm:mb-8">
-            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 dark:text-gray-100">
-              {isEditMode ? 'Edit Category' : 'Add New Category'}
-            </h2>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      <div className="p-4 lg:p-6">
+        {/* Header */}
+        <div className="mb-6">
+          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-6">
+            <div className="flex items-center gap-4 mb-4">
+              <button
+                onClick={() => navigate('/categories')}
+                className="p-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 hover:shadow-lg hover:scale-105 transform"
+              >
+                <HiArrowLeft className="w-5 h-5" />
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold text-slate-800">
+                  {isEditMode ? 'Edit Category' : 'Add New Category'}
+                </h1>
+                <p className="text-slate-600">
+                  {isEditMode ? 'Update category information' : 'Create a new product category'}
+                </p>
+              </div>
+            </div>
           </div>
+        </div>
+
+        {/* Form */}
+        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-6 lg:p-8">
 
           <Formik
             enableReinitialize
@@ -512,51 +556,54 @@ const AddEditCategoryForm: React.FC = () => {
               errors,
               setFieldValue,
             }) => (
-              <Form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Category Name */}
-                  <div className="col-span-1">
-                    <Label htmlFor="name">Category Name</Label>
-                    <Input
-                      id="name"
+                  <div>
+                    <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
+                      <MdCategory className="w-4 h-4 mr-2 text-blue-600" />
+                      Category Name
+                    </label>
+                    <input
                       name="name"
                       type="text"
                       placeholder="Enter category name"
                       value={values.name}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      required
+                      className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
                     />
                     {touched.name && errors.name && (
-                      <div className="text-sm text-red-500 mt-1">
-                        {errors.name}
-                      </div>
+                      <div className="text-sm text-red-500 mt-1">{errors.name}</div>
                     )}
                   </div>
 
                   {/* HSN Code */}
-                  <div className="col-span-1">
-                    <Label htmlFor="hsn_code">HSN Code</Label>
-                    <Input
-                      id="hsn_code"
+                  <div>
+                    <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
+                      <FaBarcode className="w-4 h-4 mr-2 text-blue-600" />
+                      HSN Code
+                    </label>
+                    <input
                       name="hsn_code"
                       type="text"
                       placeholder="Enter HSN code"
                       value={values.hsn_code}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      required
+                      className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
                     />
                     {touched.hsn_code && errors.hsn_code && (
-                      <div className="text-sm text-red-500 mt-1">
-                        {errors.hsn_code}
-                      </div>
+                      <div className="text-sm text-red-500 mt-1">{errors.hsn_code}</div>
                     )}
                   </div>
 
                   {/* Primary Unit */}
-                  <div className="col-span-1">
-                    <Label htmlFor="primary_unit">Primary Unit</Label>
+                  <div>
+                    <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
+                      <FaCubes className="w-4 h-4 mr-2 text-blue-600" />
+                      Primary Unit
+                    </label>
                     <UnitDropdown
                       id="primary_unit"
                       name="primary_unit"
@@ -565,123 +612,83 @@ const AddEditCategoryForm: React.FC = () => {
                       placeholder="Select Primary Unit"
                     />
                     {touched.primary_unit && errors.primary_unit && (
-                      <div className="text-sm text-red-500 mt-1">
-                        {errors.primary_unit}
-                      </div>
+                      <div className="text-sm text-red-500 mt-1">{errors.primary_unit}</div>
                     )}
                   </div>
 
                   {/* Secondary Unit */}
-                  <div className="col-span-1">
-                    <Label htmlFor="secondary_unit">Secondary Unit</Label>
+                  <div>
+                    <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
+                      <BiPackage className="w-4 h-4 mr-2 text-blue-600" />
+                      Secondary Unit
+                    </label>
                     <UnitDropdown
                       id="secondary_unit"
                       name="secondary_unit"
                       value={values.secondary_unit || ''}
-                      onChange={(value) =>
-                        setFieldValue('secondary_unit', value)
-                      }
+                      onChange={(value) => setFieldValue('secondary_unit', value)}
                       placeholder="Select Secondary Unit"
                     />
                     {touched.secondary_unit && errors.secondary_unit && (
-                      <div className="text-sm text-red-500 mt-1">
-                        {errors.secondary_unit}
-                      </div>
+                      <div className="text-sm text-red-500 mt-1">{errors.secondary_unit}</div>
                     )}
                   </div>
-                  <div className="col-span-1 lg:col-span-2">
-                    <Label htmlFor="desc">Description</Label>
-                    <TextArea
+
+                  {/* Description */}
+                  <div className="md:col-span-2">
+                    <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
+                      <MdDescription className="w-4 h-4 mr-2 text-blue-600" />
+                      Description
+                    </label>
+                    <textarea
+                      name="desc"
                       rows={3}
                       placeholder="Category description..."
                       value={values.desc}
-                      onChange={(value) => setFieldValue('desc', value)}
-                      required
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
                     />
                     {touched.desc && errors.desc && (
-                      <div className="text-sm text-red-500 mt-1">
-                        {errors.desc}
-                      </div>
+                      <div className="text-sm text-red-500 mt-1">{errors.desc}</div>
                     )}
                   </div>
                 </div>
 
-                {/* Subcategories Section - Show in both Add and Edit modes */}
-                <div className="mt-6 sm:mt-8">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-white/90">
+                {/* Subcategories Section */}
+                <div className="mt-8">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+                    <h3 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                      <FaLayerGroup className="w-5 h-5 text-blue-600" />
                       Subcategories
                     </h3>
                     <button
                       type="button"
                       onClick={addSubcategoryField}
-                      className="w-full sm:w-auto px-3 py-1.5 bg-brand-500 text-white rounded-md text-sm hover:bg-brand-600"
+                      className="inline-flex items-center justify-center px-3 sm:px-4 py-2 sm:py-2 rounded-2xl font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg transition-all duration-300 hover:scale-105 transform text-sm sm:text-base whitespace-nowrap"
                     >
-                      Add Subcategory
+                      <HiPlus className="w-4 h-4 mr-2" />
+                      <span className="hidden xs:inline">Add Subcategory</span>
+                      <span className="xs:hidden">Add Sub</span>
                     </button>
                   </div>
 
-                  {subcategories.map((subcategory, index) => (
-                    <div
-                      key={index}
-                      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-10 gap-3 sm:gap-4 mb-4 p-3 sm:p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
-                    >
-                      <div className="sm:col-span-1 lg:col-span-3">
-                        <Label htmlFor={`subcategory-name-${index}`}>
-                          Name
-                        </Label>
-                        <Input
-                          id={`subcategory-name-${index}`}
-                          name="name"
-                          type="text"
-                          placeholder="Subcategory name"
-                          value={subcategory.name}
-                          onChange={(e) => {
-                            const { name, value } = e.target;
-                            const updatedSubcategories = [...subcategories];
-                            updatedSubcategories[index] = {
-                              ...updatedSubcategories[index],
-                              [name]: value,
-                            };
-                            setSubcategories(updatedSubcategories);
-                          }}
-                        />
-                      </div>
-                      <div className="sm:col-span-1 lg:col-span-3">
-                        <Label htmlFor={`subcategory-hsn_code-${index}`}>
-                          HSN Code
-                        </Label>
-                        <div className="space-y-2">
-                          <div className="flex items-center">
-                            <input
-                              id={`use-parent-hsn-${index}`}
-                              name="useParentHsnCode"
-                              type="checkbox"
-                              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                              checked={subcategory.useParentHsnCode || false}
-                              onChange={(e) => {
-                                const updatedSubcategories = [...subcategories];
-                                updatedSubcategories[index] = {
-                                  ...updatedSubcategories[index],
-                                  useParentHsnCode: e.target.checked,
-                                };
-                                setSubcategories(updatedSubcategories);
-                              }}
-                            />
-                            <label
-                              htmlFor={`use-parent-hsn-${index}`}
-                              className="ml-2 text-sm text-gray-700 dark:text-gray-300"
-                            >
-                              Use parent's HSN code
+                  <div className="space-y-4">
+                    {subcategories.map((subcategory, index) => (
+                      <div
+                        key={index}
+                        className="bg-white/50 backdrop-blur-sm rounded-2xl border border-white/30 p-6 shadow-sm"
+                      >
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-2">
+                              Name
                             </label>
-                          </div>
-                          {!subcategory.useParentHsnCode && (
-                            <Input
-                              id={`subcategory-hsn_code-${index}`}
-                              name="hsn_code"
+                            <input
+                              name="name"
                               type="text"
-                              placeholder="HSN code"
-                              value={subcategory.hsn_code}
+                              placeholder="Subcategory name"
+                              value={subcategory.name}
                               onChange={(e) => {
                                 const { name, value } = e.target;
                                 const updatedSubcategories = [...subcategories];
@@ -691,49 +698,88 @@ const AddEditCategoryForm: React.FC = () => {
                                 };
                                 setSubcategories(updatedSubcategories);
                               }}
+                              className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
                             />
-                          )}
-                          {subcategory.useParentHsnCode && (
-                            <div className="text-sm text-gray-500 italic">
-                              Will use parent category's HSN code
+                          </div>
+                          
+                          <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-2">
+                              HSN Code
+                            </label>
+                            <div className="space-y-2">
+                              <label className="flex items-center space-x-2">
+                                <input
+                                  type="checkbox"
+                                  checked={subcategory.useParentHsnCode || false}
+                                  onChange={(e) => {
+                                    const updatedSubcategories = [...subcategories];
+                                    updatedSubcategories[index] = {
+                                      ...updatedSubcategories[index],
+                                      useParentHsnCode: e.target.checked,
+                                    };
+                                    setSubcategories(updatedSubcategories);
+                                  }}
+                                  className="w-4 h-4 rounded border-2 border-white/50 text-blue-600 focus:ring-blue-200"
+                                />
+                                <span className="text-sm text-slate-600">Use parent's HSN</span>
+                              </label>
+                              {!subcategory.useParentHsnCode && (
+                                <input
+                                  name="hsn_code"
+                                  type="text"
+                                  placeholder="HSN code"
+                                  value={subcategory.hsn_code}
+                                  onChange={(e) => {
+                                    const { name, value } = e.target;
+                                    const updatedSubcategories = [...subcategories];
+                                    updatedSubcategories[index] = {
+                                      ...updatedSubcategories[index],
+                                      [name]: value,
+                                    };
+                                    setSubcategories(updatedSubcategories);
+                                  }}
+                                  className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
+                                />
+                              )}
                             </div>
-                          )}
+                          </div>
+                          
+                          <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-2">
+                              Description
+                            </label>
+                            <div className="flex gap-2">
+                              <input
+                                name="desc"
+                                type="text"
+                                placeholder="Brief description"
+                                value={subcategory.desc}
+                                onChange={(e) => {
+                                  const { name, value } = e.target;
+                                  const updatedSubcategories = [...subcategories];
+                                  updatedSubcategories[index] = {
+                                    ...updatedSubcategories[index],
+                                    [name]: value,
+                                  };
+                                  setSubcategories(updatedSubcategories);
+                                }}
+                                className="flex-1 px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
+                              />
+                              {subcategories.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeSubcategoryField(index)}
+                                  className="p-3 rounded-2xl text-white bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 transition-all duration-300 hover:scale-105 transform shadow-lg"
+                                >
+                                  <HiTrash className="w-4 h-4" />
+                                </button>
+                              )}
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      <div className="sm:col-span-2 lg:col-span-3">
-                        <Label htmlFor={`subcategory-desc-${index}`}>
-                          Description
-                        </Label>
-                        <Input
-                          id={`subcategory-desc-${index}`}
-                          name="desc"
-                          type="text"
-                          placeholder="Brief description"
-                          value={subcategory.desc}
-                          onChange={(e) => {
-                            const { name, value } = e.target;
-                            const updatedSubcategories = [...subcategories];
-                            updatedSubcategories[index] = {
-                              ...updatedSubcategories[index],
-                              [name]: value,
-                            };
-                            setSubcategories(updatedSubcategories);
-                          }}
-                        />
-                      </div>
-                      <div className="sm:col-span-2 lg:col-span-1 flex items-end justify-center">
-                        {subcategories.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeSubcategoryField(index)}
-                            className="px-3 py-2 bg-red-500 text-white rounded-md text-sm hover:bg-red-600 w-full"
-                          >
-                            Remove
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
 
                 {/* Packaging Details Section - Only show for parent categories */}
@@ -746,29 +792,33 @@ const AddEditCategoryForm: React.FC = () => {
                 )}
 
                 {/* Buttons */}
-                <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row justify-end gap-3 sm:gap-0 sm:space-x-4">
+                <div className="flex items-center justify-end space-x-4 pt-6 border-t border-white/50">
                   <button
                     type="button"
                     onClick={() => navigate('/categories')}
-                    className="w-full sm:w-auto rounded-lg border border-gray-300 bg-white px-4 py-2.5 sm:py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                    className="px-6 py-3 rounded-2xl border border-white/50 text-slate-600 hover:bg-slate-50 transition-all duration-300 hover:scale-105 transform"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="w-full sm:w-auto rounded-lg bg-blue-600 px-4 py-2.5 sm:py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-6 py-3 rounded-2xl font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 hover:shadow-xl hover:scale-105 transform disabled:opacity-50 shadow-lg"
                   >
-                    {submitting
-                      ? isEditMode
-                        ? 'Updating...'
-                        : 'Creating...'
-                      : isEditMode
-                        ? 'Update Category'
-                        : 'Create Category'}
+                    {submitting ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        {isEditMode ? 'Updating...' : 'Creating...'}
+                      </div>
+                    ) : (
+                      <>
+                        <HiCheckCircle className="w-5 h-5 mr-2 inline" />
+                        {isEditMode ? 'Update Category' : 'Create Category'}
+                      </>
+                    )}
                   </button>
                 </div>
-              </Form>
+              </form>
             )}
           </Formik>
         </div>

@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Field } from 'formik';
+import { HiCube, HiScale, HiRectangleGroup } from 'react-icons/hi2';
 
 interface PackagingDetailsProps {
   values: any;
@@ -37,22 +38,31 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
   if (packagingHierarchy.length === 0) return null;
 
   return (
-    <div className="space-y-4">
-      <h4 className="font-medium text-gray-900 dark:text-white">
-        Packaging Details
-      </h4>
+    <div className="space-y-6">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 shadow-md">
+          <HiCube className="w-5 h-5 text-white" />
+        </div>
+        <h4 className="text-lg font-semibold text-slate-800">
+          Packaging Details
+        </h4>
+      </div>
 
       {loadingCategory ? (
-        <div className="text-center py-4">Loading packaging details...</div>
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-slate-200 border-t-blue-500 mx-auto mb-2"></div>
+          <p className="text-slate-600">Loading packaging details...</p>
+        </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-6">
           {/* Line 1: Packaging hierarchy fields (2 inputs) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {packagingHierarchy.slice(0, 2).map((level, index) => {
               const quantityField = `${level.from}Per${level.to}`;
               return (
                 <div key={index}>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
+                    <HiRectangleGroup className="w-4 h-4 mr-2 text-blue-600" />
                     {level.from} per {level.to}
                   </label>
                   <Field
@@ -60,7 +70,7 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
                     name={quantityField}
                     min="1"
                     placeholder={`Enter ${level.from} per ${level.to}`}
-                    className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                    className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
                     onChange={(e) =>
                       setFieldValue(quantityField, e.target.value)
                     }
@@ -73,9 +83,10 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
           </div>
 
           {/* Line 2: Weight input and Unit Type (2 inputs) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
+                <HiScale className="w-4 h-4 mr-2 text-blue-600" />
                 Weight per Unit
               </label>
               <div className="flex">
@@ -85,12 +96,12 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
                   step="any"
                   min="0"
                   placeholder="Enter weight"
-                  className="w-full rounded-l-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                  className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-l-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
                 />
                 <Field
                   as="select"
                   name="unitWeightUnit"
-                  className="rounded-r-lg border border-l-0 border-gray-300 px-3 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                  className="px-3 py-3 border border-l-0 border-white/50 bg-white/60 backdrop-blur-sm rounded-r-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
                 >
                   <option value="kg">kg</option>
                   <option value="g">g</option>
@@ -100,13 +111,14 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
+                <HiRectangleGroup className="w-4 h-4 mr-2 text-blue-600" />
                 Unit Type
               </label>
               <Field
                 as="select"
                 name="weightUnitType"
-                className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
               >
                 <option value="">Select unit</option>
                 {packagingHierarchy.map((level, idx) => (
@@ -126,9 +138,10 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
           </div>
 
           {/* Line 3: Packaging material weight and additional field (2 inputs) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
+                <HiScale className="w-4 h-4 mr-2 text-blue-600" />
                 {packagingHierarchy.length > 0
                   ? packagingHierarchy[packagingHierarchy.length - 1].to
                   : 'Box'}{' '}
@@ -145,7 +158,7 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
                       ? packagingHierarchy[packagingHierarchy.length - 1].to
                       : 'box'
                   } weight`}
-                  className="w-full rounded-l-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                  className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-l-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
                   onChange={(e) =>
                     setFieldValue('packagingMaterialWeight', e.target.value)
                   }
@@ -153,7 +166,7 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
                 <Field
                   as="select"
                   name="packagingMaterialWeightUnit"
-                  className="rounded-r-lg border border-l-0 border-gray-300 px-3 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                  className="px-3 py-3 border border-l-0 border-white/50 bg-white/60 backdrop-blur-sm rounded-r-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
                 >
                   <option value="kg">kg</option>
                   <option value="g">g</option>
@@ -163,7 +176,8 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
+                <HiCube className="w-4 h-4 mr-2 text-blue-600" />
                 {packagingHierarchy.length > 0
                   ? packagingHierarchy[packagingHierarchy.length - 1].to
                   : 'Box'}{' '}
@@ -176,7 +190,7 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
                   step="any"
                   min="0"
                   placeholder="Length (m)"
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                  className="w-full px-3 py-2 border border-white/50 bg-white/60 backdrop-blur-sm rounded-xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm text-sm"
                   onChange={(e) =>
                     setFieldValue('packagingLength', e.target.value)
                   }
@@ -187,7 +201,7 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
                   step="any"
                   min="0"
                   placeholder="Width (m)"
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                  className="w-full px-3 py-2 border border-white/50 bg-white/60 backdrop-blur-sm rounded-xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm text-sm"
                   onChange={(e) =>
                     setFieldValue('packagingWidth', e.target.value)
                   }
@@ -198,20 +212,20 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
                   step="any"
                   min="0"
                   placeholder="Height (m)"
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                  className="w-full px-3 py-2 border border-white/50 bg-white/60 backdrop-blur-sm rounded-xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm text-sm"
                   onChange={(e) =>
                     setFieldValue('packagingHeight', e.target.value)
                   }
                 />
               </div>
-              <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                Volume:{' '}
-                {(
-                  (values.packagingLength || 0) *
-                  (values.packagingWidth || 0) *
-                  (values.packagingHeight || 0)
-                ).toFixed(3)}{' '}
-                m³
+              <div className="mt-3 p-3 bg-blue-50 rounded-xl border border-blue-200">
+                <div className="text-sm font-medium text-blue-800">
+                  Volume: {(
+                    (values.packagingLength || 0) *
+                    (values.packagingWidth || 0) *
+                    (values.packagingHeight || 0)
+                  ).toFixed(3)} m³
+                </div>
               </div>
               <Field
                 type="hidden"
@@ -244,50 +258,51 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
           {/* Volume fields - Separate section if needed */}
           {trackVolume && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
+                <HiCube className="w-4 h-4 mr-2 text-blue-600" />
                 {packagingHierarchy.length > 0
                   ? packagingHierarchy[packagingHierarchy.length - 1].to
                   : 'Box'}{' '}
                 Dimensions (L × W × H in cm)
               </label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-3">
                 <div className="flex items-center">
-                  <span className="mr-2">L</span>
+                  <span className="mr-2 text-sm font-medium text-slate-600">L</span>
                   <Field
                     type="number"
                     name="volumeLength"
                     step="any"
                     min="0"
                     placeholder="Length"
-                    className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                    className="w-full px-3 py-2 border border-white/50 bg-white/60 backdrop-blur-sm rounded-xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm text-sm"
                     onChange={(e) =>
                       setFieldValue('volumeLength', e.target.value)
                     }
                   />
                 </div>
                 <div className="flex items-center">
-                  <span className="mr-2">W</span>
+                  <span className="mr-2 text-sm font-medium text-slate-600">W</span>
                   <Field
                     type="number"
                     name="volumeWidth"
                     step="any"
                     min="0"
                     placeholder="Width"
-                    className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                    className="w-full px-3 py-2 border border-white/50 bg-white/60 backdrop-blur-sm rounded-xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm text-sm"
                     onChange={(e) =>
                       setFieldValue('volumeWidth', e.target.value)
                     }
                   />
                 </div>
                 <div className="flex items-center">
-                  <span className="mr-2">H</span>
+                  <span className="mr-2 text-sm font-medium text-slate-600">H</span>
                   <Field
                     type="number"
                     name="volumeHeight"
                     step="any"
                     min="0"
                     placeholder="Height"
-                    className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                    className="w-full px-3 py-2 border border-white/50 bg-white/60 backdrop-blur-sm rounded-xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm text-sm"
                     onChange={(e) =>
                       setFieldValue('volumeHeight', e.target.value)
                     }

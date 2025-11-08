@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { HiEye, HiScale, HiCube } from 'react-icons/hi2';
 
 interface PackagingPreviewProps {
   values: any;
@@ -80,163 +81,198 @@ const PackagingPreview: React.FC<PackagingPreviewProps> = ({
   if (packagingHierarchy.length === 0) return null;
 
   return (
-    <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-      <h5 className="font-medium text-gray-900 dark:text-white mb-3">
-        Packaging Preview
-      </h5>
-
-      {/* Visual representation */}
-      <div className="flex items-center mb-4 overflow-x-auto pb-2">
-        {packagingHierarchy.map((level, index) => (
-          <React.Fragment key={index}>
-            <div className="flex-shrink-0 px-3 py-1 bg-blue-100 dark:bg-blue-900 rounded-md text-blue-800 dark:text-blue-200 text-sm font-medium">
-              {level.from}
-            </div>
-            {index < packagingHierarchy.length - 1 && (
-              <div className="flex-shrink-0 mx-2 text-gray-500 dark:text-gray-400">
-                →
-              </div>
-            )}
-          </React.Fragment>
-        ))}
-        <div className="flex-shrink-0 mx-2 text-gray-500 dark:text-gray-400">
-          →
+    <div className="space-y-6">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 shadow-md">
+          <HiEye className="w-5 h-5 text-white" />
         </div>
-        <div className="flex-shrink-0 px-3 py-1 bg-green-100 dark:bg-green-900 rounded-md text-green-800 dark:text-green-200 text-sm font-medium">
-          {packagingHierarchy.length > 0
-            ? packagingHierarchy[packagingHierarchy.length - 1].to
-            : 'box'}
-        </div>
+        <h4 className="text-lg font-semibold text-slate-800">
+          Packaging Preview
+        </h4>
       </div>
+      
+      <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-200">
 
-      <div className="space-y-3 mb-4">
-        {/* Packaging calculations */}
-        {packagingHierarchy.map((level, index) => {
-          const quantityField = `${level.from}Per${level.to}`;
-          const quantity = values[quantityField] || 0;
+        {/* Visual representation */}
+        <div className="flex items-center mb-6 overflow-x-auto pb-2">
+          {packagingHierarchy.map((level, index) => (
+            <React.Fragment key={index}>
+              <div className="flex-shrink-0 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl text-white text-sm font-semibold shadow-md">
+                {level.from}
+              </div>
+              {index < packagingHierarchy.length - 1 && (
+                <div className="flex-shrink-0 mx-3 text-blue-600 font-bold text-lg">
+                  →
+                </div>
+              )}
+            </React.Fragment>
+          ))}
+          <div className="flex-shrink-0 mx-3 text-blue-600 font-bold text-lg">
+            →
+          </div>
+          <div className="flex-shrink-0 px-4 py-2 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl text-white text-sm font-semibold shadow-md">
+            {packagingHierarchy.length > 0
+              ? packagingHierarchy[packagingHierarchy.length - 1].to
+              : 'box'}
+          </div>
+        </div>
 
-          return (
-            <div
-              key={index}
-              className="flex justify-between items-center py-1 border-b border-gray-200 dark:border-gray-700"
-            >
-              <span className="text-sm text-gray-700 dark:text-gray-300">
-                1 {level.to} = {quantity} {level.from}
-              </span>
-            </div>
-          );
-        })}
+        <div className="space-y-4">
+          {/* Packaging calculations */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {packagingHierarchy.map((level, index) => {
+              const quantityField = `${level.from}Per${level.to}`;
+              const quantity = values[quantityField] || 0;
 
-        {/* Dynamic weight calculations */}
-        {values.unitWeight && values.weightUnitType && (
-          <>
-            {/* Weight per selected unit type */}
-            <div className="flex justify-between items-center py-1 border-b border-gray-200 dark:border-gray-700">
-              <span className="text-sm text-gray-700 dark:text-gray-300">
-                Weight per {values.weightUnitType}
-              </span>
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                {values.unitWeight} {values.unitWeightUnit}
-              </span>
-            </div>
-
-            {/* Dynamic weight display for all levels */}
-            {packagingHierarchy.length > 0 && (
-              <>
-                {/* Base unit weight */}
-                {values[`weightPer${packagingHierarchy[0].from}`] && (
-                  <div className="flex justify-between items-center py-1 border-b border-gray-200 dark:border-gray-700">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      Weight per {packagingHierarchy[0].from}
-                    </span>
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
-                      {values[`weightPer${packagingHierarchy[0].from}`]}{' '}
-                      {values.unitWeightUnit}
+              return (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-3 bg-white/70 backdrop-blur-sm rounded-xl border border-white/50 shadow-sm"
+                >
+                  <div className="flex items-center gap-2">
+                    <HiCube className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm font-medium text-slate-700">
+                      1 {level.to} = {quantity} {level.from}
                     </span>
                   </div>
-                )}
+                </div>
+              );
+            })}
+          </div>
 
-                {/* All packaging level weights */}
-                {packagingHierarchy.map((level, index) => {
-                  const weightFieldName = `weightPer${level.to}`;
-                  const weightValue = values[weightFieldName];
-
-                  if (!weightValue) return null;
-
-                  return (
-                    <div
-                      key={`weight-${level.to}`}
-                      className="flex justify-between items-center py-1 border-b border-gray-200 dark:border-gray-700"
-                    >
-                      <span className="text-sm text-gray-600 dark:text-gray-400">
-                        Weight per {level.to}
-                      </span>
-                      <span className="text-sm text-gray-700 dark:text-gray-300">
-                        {weightValue} {values.unitWeightUnit}
-                      </span>
-                    </div>
-                  );
-                })}
-              </>
-            )}
-
-            {/* Gross weight per box */}
-            <div className="flex flex-col py-1 border-b border-gray-200 dark:border-gray-700">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Gross weight per{' '}
-                  {packagingHierarchy[packagingHierarchy.length - 1]?.to ||
-                    'Box'}
+          {/* Dynamic weight calculations */}
+          {values.unitWeight && values.weightUnitType && (
+            <div className="space-y-3">
+              <h6 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                <HiScale className="w-4 h-4 text-blue-600" />
+                Weight Calculations
+              </h6>
+              
+              {/* Weight per selected unit type */}
+              <div className="flex items-center justify-between p-3 bg-white/70 backdrop-blur-sm rounded-xl border border-white/50 shadow-sm">
+                <span className="text-sm font-medium text-slate-700">
+                  Weight per {values.weightUnitType}
                 </span>
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {(() => {
-                    const lastLevel =
-                      packagingHierarchy[packagingHierarchy.length - 1];
-                    const netWeightFieldName = `weightPer${lastLevel?.to || 'Box'}`;
-                    const netWeight =
-                      parseFloat(values[netWeightFieldName]) || 0;
-                    const packWeight =
-                      parseFloat(values.packagingMaterialWeight) || 0;
-                    const packWeightInKg = convertToKg(
-                      packWeight,
-                      values.packagingMaterialWeightUnit || 'g'
-                    );
-                    const packWeightInDisplayUnit = convertFromKg(
-                      packWeightInKg,
-                      values.unitWeightUnit
-                    );
-                    const grossWeight = netWeight + packWeightInDisplayUnit;
-
-                    return `${grossWeight.toFixed(2)} ${values.unitWeightUnit}`;
-                  })()}
-                  {parseFloat(values.packagingMaterialWeight) > 0 && (
-                    <span className="text-xs text-gray-500 ml-2">
-                      (Net + {values.packagingMaterialWeight}{' '}
-                      {values.packagingMaterialWeightUnit} box weight)
-                    </span>
-                  )}
+                <span className="text-sm font-semibold text-blue-600">
+                  {values.unitWeight} {values.unitWeightUnit}
                 </span>
               </div>
+
+              {/* Dynamic weight display for all levels */}
+              {packagingHierarchy.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {/* Base unit weight */}
+                  {values[`weightPer${packagingHierarchy[0].from}`] && (
+                    <div className="flex items-center justify-between p-3 bg-white/70 backdrop-blur-sm rounded-xl border border-white/50 shadow-sm">
+                      <span className="text-sm text-slate-600">
+                        Weight per {packagingHierarchy[0].from}
+                      </span>
+                      <span className="text-sm font-medium text-slate-700">
+                        {values[`weightPer${packagingHierarchy[0].from}`]}{' '}
+                        {values.unitWeightUnit}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* All packaging level weights */}
+                  {packagingHierarchy.map((level, index) => {
+                    const weightFieldName = `weightPer${level.to}`;
+                    const weightValue = values[weightFieldName];
+
+                    if (!weightValue) return null;
+
+                    return (
+                      <div
+                        key={`weight-${level.to}`}
+                        className="flex items-center justify-between p-3 bg-white/70 backdrop-blur-sm rounded-xl border border-white/50 shadow-sm"
+                      >
+                        <span className="text-sm text-slate-600">
+                          Weight per {level.to}
+                        </span>
+                        <span className="text-sm font-medium text-slate-700">
+                          {weightValue} {values.unitWeightUnit}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Gross weight per box */}
+              <div className="p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-200">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-emerald-800">
+                    Gross weight per{' '}
+                    {packagingHierarchy[packagingHierarchy.length - 1]?.to ||
+                      'Box'}
+                  </span>
+                  <div className="text-right">
+                    <div className="text-sm font-bold text-emerald-700">
+                      {(() => {
+                        const lastLevel =
+                          packagingHierarchy[packagingHierarchy.length - 1];
+                        const netWeightFieldName = `weightPer${lastLevel?.to || 'Box'}`;
+                        const netWeight =
+                          parseFloat(values[netWeightFieldName]) || 0;
+                        const packWeight =
+                          parseFloat(values.packagingMaterialWeight) || 0;
+                        const packWeightInKg = convertToKg(
+                          packWeight,
+                          values.packagingMaterialWeightUnit || 'g'
+                        );
+                        const packWeightInDisplayUnit = convertFromKg(
+                          packWeightInKg,
+                          values.unitWeightUnit
+                        );
+                        const grossWeight = netWeight + packWeightInDisplayUnit;
+
+                        return `${grossWeight.toFixed(2)} ${values.unitWeightUnit}`;
+                      })()}
+                    </div>
+                    {parseFloat(values.packagingMaterialWeight) > 0 && (
+                      <div className="text-xs text-emerald-600 mt-1">
+                        (Net + {values.packagingMaterialWeight}{' '}
+                        {values.packagingMaterialWeightUnit} box weight)
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
-          </>
-        )}
+          )}
 
-        {/* Total boxes */}
-        <div className="flex justify-between items-center py-1 border-b border-gray-200 dark:border-gray-700">
-          <span className="text-sm text-gray-700 dark:text-gray-300">
-            Total {packagingHierarchy[packagingHierarchy.length - 1].to} count:{' '}
-            {values.totalBoxes || 0}
-          </span>
-        </div>
+          {/* Summary section */}
+          <div className="space-y-3">
+            <h6 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+              <HiCube className="w-4 h-4 text-blue-600" />
+              Summary
+            </h6>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {/* Total boxes */}
+              <div className="flex items-center justify-between p-3 bg-white/70 backdrop-blur-sm rounded-xl border border-white/50 shadow-sm">
+                <span className="text-sm font-medium text-slate-700">
+                  Total {packagingHierarchy[packagingHierarchy.length - 1].to} count
+                </span>
+                <span className="text-sm font-bold text-blue-600">
+                  {values.totalBoxes || 0}
+                </span>
+              </div>
 
-        {/* Total pieces */}
-        {packagingHierarchy[0].from === 'pcs' && (
-          <div className="flex justify-between items-center py-1 border-b border-gray-200 dark:border-gray-700">
-            <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
-              Total pieces: {values.totalPieces || 0}
-            </span>
+              {/* Total pieces */}
+              {packagingHierarchy[0].from === 'pcs' && (
+                <div className="flex items-center justify-between p-3 bg-white/70 backdrop-blur-sm rounded-xl border border-white/50 shadow-sm">
+                  <span className="text-sm font-medium text-slate-700">
+                    Total pieces
+                  </span>
+                  <span className="text-sm font-bold text-blue-600">
+                    {values.totalPieces || 0}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
