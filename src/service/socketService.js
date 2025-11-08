@@ -14,7 +14,8 @@ class SocketService {
       return;
     }
 
-    const serverUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const serverUrl = import.meta.env.VITE_API_URL;
+    console.log('🔌 Connecting to socket server', serverUrl);
     
     this.socket = io(serverUrl, {
       auth: {
