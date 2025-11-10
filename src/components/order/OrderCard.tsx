@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { deletePackingList, downloadPackingListPdf, downloadBLDraftPdf } from '../../features/packingListSlice';
 import { deleteVgm, downloadVgmPdf } from '../../features/vgmSlice';
 import { downloadOrderInvoice } from '../../features/orderSlice';
+import { deleteShipment } from '../../features/shipmentSlice';
 
 
 import {
@@ -68,6 +69,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
     vgmId: string;
     vgmNumber: string;
   }>({ show: false, vgmId: '', vgmNumber: '' });
+  const [confirmDeleteShipment, setConfirmDeleteShipment] = useState(false);
 
   // Local VGM documents state to avoid full page reloads on delete
   const [vgmDocuments, setVgmDocuments] = useState<any[]>(
@@ -234,14 +236,14 @@ const OrderCard: React.FC<OrderCardProps> = ({
   };
 
   // Check if shipment details exist
-  const hasShipmentDetails =
-    order.bookingNumber ||
-    order.bookingDate ||
-    order.vesselVoyageInfo ||
-    order.containerNumber ||
-    order.sealNumber ||
-    order.wayBillNumber ||
-    order.truckNumber;
+  const hasShipmentDetails = order.shipment && (
+    order.shipment.bookingNumber ||
+    order.shipment.bookingDate ||
+    order.shipment.vesselVoyageInfo ||
+    order.shipment.wayBillNumber ||
+    order.shipment.truckNumber ||
+    order.shipment.blNumber
+  );
 
   // Check if VGM documents exist
   const hasVgmDocuments =
@@ -603,20 +605,29 @@ const OrderCard: React.FC<OrderCardProps> = ({
             Shipment & Logistics Details
           </h4>
           {hasShipmentDetails && (
-            <Link
-              to={`/edit-order/${order.id}`}
-              onClick={handleNavigation}
-              className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm flex items-center gap-1"
-            >
-              <FontAwesomeIcon icon={faEdit} className="text-xs" />
-              Edit
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link
+                to={`/shipment/${order.id}`}
+                onClick={handleNavigation}
+                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm flex items-center gap-1"
+              >
+                <FontAwesomeIcon icon={faEdit} className="text-xs" />
+                Edit Shipment
+              </Link>
+              <button
+                onClick={() => setConfirmDeleteShipment(true)}
+                className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm flex items-center gap-1"
+              >
+                <FontAwesomeIcon icon={faTrash} className="text-xs" />
+                Delete
+              </button>
+            </div>
           )}
         </div>
 
         {hasShipmentDetails ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-            {order.bookingNumber && (
+            {order.shipment.bookingNumber && (
               <div className="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg flex items-center gap-2 text-xs sm:text-sm border border-gray-200 dark:border-gray-600">
                 <FontAwesomeIcon
                   icon={faBarcode}
@@ -626,11 +637,11 @@ const OrderCard: React.FC<OrderCardProps> = ({
                   Booking:
                 </span>
                 <span className="font-medium text-gray-900 dark:text-white truncate">
-                  {order.bookingNumber}
+                  {order.shipment.bookingNumber}
                 </span>
               </div>
             )}
-            {order.bookingDate && (
+            {order.shipment.bookingDate && (
               <div className="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg flex items-center gap-2 text-xs sm:text-sm border border-gray-200 dark:border-gray-600">
                 <FontAwesomeIcon
                   icon={faCalendarAlt}
@@ -640,11 +651,11 @@ const OrderCard: React.FC<OrderCardProps> = ({
                   Date:
                 </span>
                 <span className="font-medium text-gray-900 dark:text-white">
-                  {formatDate(order.bookingDate)}
+                  {formatDate(order.shipment.bookingDate)}
                 </span>
               </div>
             )}
-            {order.vesselVoyageInfo && (
+            {order.shipment.vesselVoyageInfo && (
               <div className="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg flex items-center gap-2 text-xs sm:text-sm border border-gray-200 dark:border-gray-600">
                 <FontAwesomeIcon
                   icon={faShip}
@@ -654,39 +665,12 @@ const OrderCard: React.FC<OrderCardProps> = ({
                   Vessel:
                 </span>
                 <span className="font-medium text-gray-900 dark:text-white truncate">
-                  {order.vesselVoyageInfo}
+                  {order.shipment.vesselVoyageInfo}
                 </span>
               </div>
             )}
-            {order.containerNumber && (
-              <div className="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg flex items-center gap-2 text-xs sm:text-sm border border-gray-200 dark:border-gray-600">
-                <FontAwesomeIcon
-                  icon={faBox}
-                  className="text-orange-600 dark:text-orange-400 flex-shrink-0"
-                />
-                <span className="text-gray-700 dark:text-gray-300 hidden sm:inline">
-                  Container:
-                </span>
-                <span className="font-medium text-gray-900 dark:text-white truncate">
-                  {order.containerNumber}
-                </span>
-              </div>
-            )}
-            {order.sealNumber && (
-              <div className="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg flex items-center gap-2 text-xs sm:text-sm border border-gray-200 dark:border-gray-600">
-                <FontAwesomeIcon
-                  icon={faShieldAlt}
-                  className="text-green-600 dark:text-green-400 flex-shrink-0"
-                />
-                <span className="text-gray-700 dark:text-gray-300 hidden sm:inline">
-                  Seal:
-                </span>
-                <span className="font-medium text-gray-900 dark:text-white truncate">
-                  {order.sealNumber}
-                </span>
-              </div>
-            )}
-            {order.wayBillNumber && (
+
+            {order.shipment.wayBillNumber && (
               <div className="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg flex items-center gap-2 text-xs sm:text-sm border border-gray-200 dark:border-gray-600">
                 <FontAwesomeIcon
                   icon={faFileAlt}
@@ -696,11 +680,11 @@ const OrderCard: React.FC<OrderCardProps> = ({
                   Way Bill:
                 </span>
                 <span className="font-medium text-gray-900 dark:text-white truncate">
-                  {order.wayBillNumber}
+                  {order.shipment.wayBillNumber}
                 </span>
               </div>
             )}
-            {order.truckNumber && (
+            {order.shipment.truckNumber && (
               <div className="bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg flex items-center gap-2 text-xs sm:text-sm border border-gray-200 dark:border-gray-600">
                 <FontAwesomeIcon
                   icon={faTruck}
@@ -710,10 +694,11 @@ const OrderCard: React.FC<OrderCardProps> = ({
                   Truck:
                 </span>
                 <span className="font-medium text-gray-900 dark:text-white truncate">
-                  {order.truckNumber}
+                  {order.shipment.truckNumber}
                 </span>
               </div>
             )}
+
           </div>
         ) : (
           <div className="border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-lg p-6 text-center">
@@ -725,7 +710,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
               No shipment details added yet
             </p>
             <Link
-              to={`/edit-order/${order.id}`}
+              to={`/shipment/${order.id}`}
               onClick={handleNavigation}
               className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
             >
@@ -1120,7 +1105,8 @@ const OrderCard: React.FC<OrderCardProps> = ({
                               </div>
                             </td>
                             <td className="px-3 py-3 whitespace-nowrap">
-                              <div className="flex items-center space-x-2">
+                              {index === 0 ? (
+                                <div className="flex items-center space-x-2">
                                   <Link
                                     to={`/packing-list/${order.id}`}
                                     onClick={handleNavigation}
@@ -1166,6 +1152,9 @@ const OrderCard: React.FC<OrderCardProps> = ({
                                     />
                                   </button>
                                 </div>
+                              ) : (
+                                <div className="text-gray-400 text-sm">-</div>
+                              )}
                             </td>
                           </tr>
                         )
@@ -1529,14 +1518,6 @@ const OrderCard: React.FC<OrderCardProps> = ({
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Link
-            to={`/edit-order/${order.id}`}
-            onClick={handleNavigation}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-lg flex items-center gap-2 text-xs sm:text-sm font-medium transition-colors flex-1 sm:flex-none justify-center"
-          >
-            <FontAwesomeIcon icon={faEdit} className="text-xs" />
-            <span>Edit Order</span>
-          </Link>
           {onViewInvoice && (
             <button
               onClick={() => onViewInvoice(order.id)}
@@ -1619,6 +1600,49 @@ const OrderCard: React.FC<OrderCardProps> = ({
                 className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
               >
                 Delete Packing List
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Shipment Confirmation Modal */}
+      {confirmDeleteShipment && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl dark:bg-gray-800 transform transition-all">
+            <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-100 rounded-full">
+              <FontAwesomeIcon icon={faTrash} className="text-red-600" />
+            </div>
+            <h3 className="mb-2 text-lg sm:text-xl font-semibold text-center text-gray-800 dark:text-white">
+              Delete Shipment
+            </h3>
+            <p className="mb-6 text-sm sm:text-base text-center text-gray-600 dark:text-gray-400">
+              Are you sure you want to delete this shipment? This will remove all shipment details and cannot be undone.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => setConfirmDeleteShipment(false)}
+                className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    await dispatch(deleteShipment(order.shipment.id)).unwrap();
+                    toast.success('Shipment deleted successfully!');
+                    setConfirmDeleteShipment(false);
+                    // Update local order state to remove shipment data
+                    order.shipment = null;
+                  } catch (error) {
+                    console.error('Error deleting shipment:', error);
+                    toast.error('Failed to delete shipment');
+                    setConfirmDeleteShipment(false);
+                  }
+                }}
+                className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Delete Shipment
               </button>
             </div>
           </div>
