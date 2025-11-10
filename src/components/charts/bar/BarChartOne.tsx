@@ -1,96 +1,54 @@
-import Chart from 'react-apexcharts';
-import { ApexOptions } from 'apexcharts';
+import React from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+const data = [
+  { month: 'Jan', sales: 168 },
+  { month: 'Feb', sales: 385 },
+  { month: 'Mar', sales: 201 },
+  { month: 'Apr', sales: 298 },
+  { month: 'May', sales: 187 },
+  { month: 'Jun', sales: 195 },
+  { month: 'Jul', sales: 291 },
+  { month: 'Aug', sales: 110 },
+  { month: 'Sep', sales: 215 },
+  { month: 'Oct', sales: 390 },
+  { month: 'Nov', sales: 280 },
+  { month: 'Dec', sales: 112 },
+];
 
 export default function BarChartOne() {
-  const options: ApexOptions = {
-    colors: ['#465fff'],
-    chart: {
-      fontFamily: 'Outfit, sans-serif',
-      type: 'bar',
-      height: 180,
-      toolbar: {
-        show: false,
-      },
-    },
-    plotOptions: {
-      bar: {
-        horizontal: false,
-        columnWidth: '39%',
-        borderRadius: 5,
-        borderRadiusApplication: 'end',
-      },
-    },
-    dataLabels: {
-      enabled: false,
-    },
-    stroke: {
-      show: true,
-      width: 4,
-      colors: ['transparent'],
-    },
-    xaxis: {
-      categories: [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'May',
-        'Jun',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Dec',
-      ],
-      axisBorder: {
-        show: false,
-      },
-      axisTicks: {
-        show: false,
-      },
-    },
-    legend: {
-      show: true,
-      position: 'top',
-      horizontalAlign: 'left',
-      fontFamily: 'Outfit',
-    },
-    yaxis: {
-      title: {
-        text: undefined,
-      },
-    },
-    grid: {
-      yaxis: {
-        lines: {
-          show: true,
-        },
-      },
-    },
-    fill: {
-      opacity: 1,
-    },
-
-    tooltip: {
-      x: {
-        show: false,
-      },
-      y: {
-        formatter: (val: number) => `${val}`,
-      },
-    },
-  };
-  const series = [
-    {
-      name: 'Sales',
-      data: [168, 385, 201, 298, 187, 195, 291, 110, 215, 390, 280, 112],
-    },
-  ];
   return (
-    <div className="max-w-full overflow-x-auto custom-scrollbar">
-      <div id="chartOne" className="min-w-[1000px]">
-        <Chart options={options} series={series} type="bar" height={180} />
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6 w-full">
+      <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4">
+        Monthly Sales
+      </h3>
+      <div className="w-full" style={{ height: '180px' }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data}>
+            <defs>
+              <linearGradient id="colorBar" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#465fff" stopOpacity={0.8}/>
+                <stop offset="95%" stopColor="#465fff" stopOpacity={0.3}/>
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <XAxis dataKey="month" stroke="#666" fontSize={12} />
+            <YAxis stroke="#666" fontSize={12} />
+            <Tooltip 
+              contentStyle={{ 
+                backgroundColor: '#fff', 
+                border: '1px solid #e0e0e0',
+                borderRadius: '8px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+              }} 
+            />
+            <Bar 
+              dataKey="sales" 
+              fill="url(#colorBar)" 
+              radius={[5, 5, 0, 0]}
+            />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );
