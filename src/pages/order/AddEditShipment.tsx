@@ -4,30 +4,32 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faSave } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
-import { getOrderById, updateOrder } from '../../features/orderSlice';
+import { getOrderById } from '../../features/orderSlice';
+import { createShipment, updateShipment, getShipmentByOrderId } from '../../features/shipmentSlice';
 
 import PageBreadCrumb from '../../components/common/PageBreadCrumb';
 import InputField from '../../components/form/input/InputField';
-import Select from '../../components/form/Select';
+
 import Label from '../../components/form/Label';
 import DatePicker from '../../components/form/DatePicker';
 
-const EditOrder = () => {
+const AddEditShipment = () => {
   const dispatch = useDispatch();
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [orderData, setOrderData] = useState({
-    orderStatus: 'pending',
-    paymentStatus: 'pending',
-    deliveryTerms: '',
+  const [orderData, setOrderData] = useState(null);
+  const [shipmentData, setShipmentData] = useState({
     bookingNumber: '',
     bookingDate: '',
+    vesselVoyageInfo: '',
     wayBillNumber: '',
     truckNumber: '',
-    blNumber: '',
+    blNumber: ''
   });
+  const [isEdit, setIsEdit] = useState(false);
+  const [shipmentId, setShipmentId] = useState(null);
 
   useEffect(() => {
     fetchOrderDetails();
@@ -36,23 +38,33 @@ const EditOrder = () => {
   const fetchOrderDetails = async () => {
     try {
       setLoading(true);
-      const response = await dispatch(getOrderById(id)).unwrap();
-      const order = response.data; // Extract data from nested structure
+      const orderResponse = await dispatch(getOrderById(id)).unwrap();
+      const order = orderResponse.data;
       
-      console.log('Fetched order data:', order); // Debug log
-
-      setOrderData({
-        orderStatus: order.orderStatus || 'pending',
-        paymentStatus: order.paymentStatus || 'pending',
-        deliveryTerms: order.deliveryTerms || '',
-        bookingNumber: order.bookingNumber || '',
-        bookingDate: order.bookingDate
-          ? new Date(order.bookingDate).toISOString().split('T')[0]
-          : '',
-        wayBillNumber: order.wayBillNumber || '',
-        truckNumber: order.truckNumber || '',
-        blNumber: order.blNumber || '',
-      });
+      setOrderData(order);
+      
+      // Try to fetch existing shipment
+      try {
+        const shipmentResponse = await dispatch(getShipmentByOrderId(id)).unwrap();
+        if (shipmentResponse.data) {
+          const shipment = shipmentResponse.data;
+          setIsEdit(true);
+          setShipmentId(shipment.id);
+          setShipmentData({
+            bookingNumber: shipment.bookingNumber || '',
+            bookingDate: shipment.bookingDate
+              ? new Date(shipment.bookingDate).toISOString().split('T')[0]
+              : '',
+            vesselVoyageInfo: shipment.vesselVoyageInfo || '',
+            wayBillNumber: shipment.wayBillNumber || '',
+            truckNumber: shipment.truckNumber || '',
+            blNumber: shipment.blNumber || ''
+          });
+        }
+      } catch (shipmentError) {
+        // No existing shipment found, that's okay
+        console.log('No existing shipment found');
+      }
     } catch (error) {
       toast.error('Failed to fetch order details');
       navigate('/orders');
@@ -63,7 +75,7 @@ const EditOrder = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setOrderData((prev) => ({
+    setShipmentData((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -74,21 +86,18 @@ const EditOrder = () => {
     try {
       setSaving(true);
 
-      const updateData = {
-        orderStatus: orderData.orderStatus,
-        paymentStatus: orderData.paymentStatus,
-        deliveryTerms: orderData.deliveryTerms,
-        bookingNumber: orderData.bookingNumber || null,
-        bookingDate: orderData.bookingDate
-          ? new Date(orderData.bookingDate)
-          : null,
-        wayBillNumber: orderData.wayBillNumber || null,
-        truckNumber: orderData.truckNumber || null,
-        blNumber: orderData.blNumber || null,
+      const submitData = {
+        ...shipmentData,
+        bookingDate: shipmentData.bookingDate ? new Date(shipmentData.bookingDate) : null
       };
 
-      const result = await dispatch(updateOrder({ id, orderData: updateData })).unwrap();
-      console.log('Update response:', result);
+      let result;
+      if (isEdit) {
+        result = await dispatch(updateShipment({ shipmentId, shipmentData: submitData })).unwrap();
+      } else {
+        result = await dispatch(createShipment({ ...submitData, orderId: parseInt(id) })).unwrap();
+      }
+      
       toast.success(result.message);
 
       // Delay navigation to show toast
@@ -96,8 +105,8 @@ const EditOrder = () => {
         navigate('/orders');
       }, 1500);
     } catch (error) {
-      console.error('Update error:', error);
-      toast.error(error.message);
+      console.error('Submit error:', error);
+      toast.error(error.message || 'Failed to save shipment');
     } finally {
       setSaving(false);
     }
@@ -113,7 +122,7 @@ const EditOrder = () => {
 
   return (
     <div className="p-3 sm:p-6">
-      <PageBreadCrumb pageTitle="Edit Order" />
+      <PageBreadCrumb pageTitle={isEdit ? "Edit Shipment" : "Add Shipment"} />
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md">
         <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
@@ -125,8 +134,13 @@ const EditOrder = () => {
               <FontAwesomeIcon icon={faArrowLeft} />
             </button>
             <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
-              Edit Order
+              {isEdit ? "Edit Shipment" : "Add Shipment"}
             </h2>
+            {orderData && (
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Order: {orderData.orderNumber} | PI: {orderData.piNumber}
+              </div>
+            )}
           </div>
         </div>
 
@@ -135,74 +149,13 @@ const EditOrder = () => {
           <div>
             <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                {/* Order Status */}
-                <div>
-                  <Label>Order Status</Label>
-                  <Select
-                    options={[
-                      { value: 'pending', label: 'Pending' },
-                      { value: 'confirmed', label: 'Confirmed' },
-                      { value: 'processing', label: 'Processing' },
-                      { value: 'shipped', label: 'Shipped' },
-                      { value: 'delivered', label: 'Delivered' },
-                      { value: 'cancelled', label: 'Cancelled' },
-                    ]}
-                    value={orderData.orderStatus}
-                    onChange={(value) =>
-                      setOrderData((prev) => ({ ...prev, orderStatus: value }))
-                    }
-                    placeholder="Select Order Status"
-                  />
-                </div>
-
-                {/* Payment Status */}
-                <div>
-                  <Label>Payment Status</Label>
-                  <Select
-                    options={[
-                      { value: 'pending', label: 'Pending' },
-                      { value: 'partial', label: 'Partial' },
-                      { value: 'paid', label: 'Paid' },
-                      { value: 'overdue', label: 'Overdue' },
-                    ]}
-                    value={orderData.paymentStatus}
-                    onChange={(value) =>
-                      setOrderData((prev) => ({
-                        ...prev,
-                        paymentStatus: value,
-                      }))
-                    }
-                    placeholder="Select Payment Status"
-                  />
-                </div>
-
-                {/* Delivery Terms */}
-                <div>
-                  <Label>Delivery Terms</Label>
-                  <Select
-                    options={[
-                      { value: 'fob', label: 'FOB' },
-                      { value: 'cif', label: 'CIF' },
-                      { value: 'ddp', label: 'DDP' },
-                    ]}
-                    value={orderData.deliveryTerms}
-                    onChange={(value) =>
-                      setOrderData((prev) => ({
-                        ...prev,
-                        deliveryTerms: value,
-                      }))
-                    }
-                    placeholder="Select Delivery Terms"
-                  />
-                </div>
-
                 {/* Booking Number */}
                 <div>
                   <Label>Booking Number</Label>
                   <InputField
                     type="text"
                     name="bookingNumber"
-                    value={orderData.bookingNumber}
+                    value={shipmentData.bookingNumber}
                     onChange={handleInputChange}
                     placeholder="Enter booking number"
                   />
@@ -212,9 +165,9 @@ const EditOrder = () => {
                 <div>
                   <Label>Booking Date</Label>
                   <DatePicker
-                    value={orderData.bookingDate}
+                    value={shipmentData.bookingDate}
                     onChange={(value) =>
-                      setOrderData((prev) => ({ ...prev, bookingDate: value }))
+                      setShipmentData((prev) => ({ ...prev, bookingDate: value }))
                     }
                     placeholder="Select booking date"
                     className="px-4 py-2.5 text-sm shadow-sm"
@@ -227,7 +180,7 @@ const EditOrder = () => {
                   <InputField
                     type="text"
                     name="wayBillNumber"
-                    value={orderData.wayBillNumber}
+                    value={shipmentData.wayBillNumber}
                     onChange={handleInputChange}
                     placeholder="Enter way bill number"
                   />
@@ -239,7 +192,7 @@ const EditOrder = () => {
                   <InputField
                     type="text"
                     name="truckNumber"
-                    value={orderData.truckNumber}
+                    value={shipmentData.truckNumber}
                     onChange={handleInputChange}
                     placeholder="Enter truck number"
                   />
@@ -251,7 +204,7 @@ const EditOrder = () => {
                   <InputField
                     type="text"
                     name="blNumber"
-                    value={orderData.blNumber}
+                    value={shipmentData.blNumber}
                     onChange={handleInputChange}
                     placeholder="Enter BL number"
                   />
@@ -263,11 +216,12 @@ const EditOrder = () => {
                   <InputField
                     type="text"
                     name="vesselVoyageInfo"
-                    value={orderData.vesselVoyageInfo}
+                    value={shipmentData.vesselVoyageInfo}
                     onChange={handleInputChange}
                     placeholder="e.g., MSC FLORA/123456"
                   />
                 </div>
+
               </div>
 
               {/* Submit Button */}
@@ -285,7 +239,7 @@ const EditOrder = () => {
                   className="flex items-center justify-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed order-1 sm:order-2"
                 >
                   <FontAwesomeIcon icon={faSave} />
-                  {saving ? 'Saving...' : 'Save Changes'}
+                  {saving ? 'Saving...' : (isEdit ? 'Update Shipment' : 'Create Shipment')}
                 </button>
               </div>
             </form>
@@ -296,4 +250,4 @@ const EditOrder = () => {
   );
 };
 
-export default EditOrder;
+export default AddEditShipment;
