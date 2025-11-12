@@ -427,7 +427,7 @@ const Product: React.FC = () => {
         )}
 
         {/* Pagination */}
-        {totalPages > 1 && (
+        {filteredProducts.length > 0 && (
           <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-6 mt-6">
             <div className="flex items-center justify-between">
               <p className="text-sm text-slate-600">

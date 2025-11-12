@@ -12,7 +12,17 @@ interface UserData {
   name: string;
   email: string;
   mobileNum?: string;
-  role: string;
+  role: {
+    id: number;
+    name: string;
+    displayName: string;
+    description?: string;
+    permissions?: any;
+    isActive: boolean;
+    isSystem: boolean;
+    createdAt: string;
+    updatedAt: string;
+  } | string;
   status: string;
   companyId?: number;
   profilePicture?: string;
@@ -100,7 +110,7 @@ export default function UserMetaCard({
               </h4>
               <div className="flex flex-col items-center gap-1 text-center xl:flex-row xl:gap-3 xl:text-left">
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {userData?.role || 'N/A'}
+                  {typeof userData?.role === 'object' ? userData.role.displayName : userData?.role || 'N/A'}
                 </p>
                 <div className="hidden h-3.5 w-px bg-gray-300 dark:bg-gray-700 xl:block"></div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
