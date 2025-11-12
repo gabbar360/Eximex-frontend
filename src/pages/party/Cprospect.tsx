@@ -98,7 +98,6 @@ const Cprospect = () => {
                   <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
                     Customer Prospects
                   </h1>
-                  <p className="text-slate-600 text-sm lg:text-base">Manage your business relationships</p>
                 </div>
               </div>
               

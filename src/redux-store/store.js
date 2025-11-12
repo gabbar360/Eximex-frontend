@@ -16,7 +16,8 @@ import productVariantReducer from '../features/productVariantSlice';
 import userManagementReducer from '../features/userManagementSlice';
 import vgmReducer from '../features/vgmSlice';
 import roleReducer from '../features/roleSlice';
-
+// import notificationReducer from '../features/notificationSlice';
+import shipmentReducer from '../features/shipmentSlice';
 
 const store = configureStore({
   reducer: {
@@ -36,7 +37,8 @@ const store = configureStore({
     userManagement: userManagementReducer,
     vgm: vgmReducer,
     role: roleReducer,
-
+    // notifications: notificationReducer,
+    shipment: shipmentReducer,
   },
 });
 

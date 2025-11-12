@@ -28,15 +28,7 @@ const AddOrder = () => {
   const [orderData, setOrderData] = useState({
     piInvoiceId: '',
     advanceAmount: '',
-    bookingNumber: '',
-    bookingDate: '',
     balanceAmount: '',
-    balanceDueDate: '',
-    paymentMethod: 'bank_transfer',
-    deliveryTerms: '',
-    notes: '',
-    wayBillNumber: '',
-    truckNumber: '',
   });
 
   useEffect(() => {
@@ -76,7 +68,6 @@ const AddOrder = () => {
       ...prev,
       piInvoiceId: pi.id,
       balanceAmount: (pi.totalAmount || 0).toString(),
-      deliveryTerms: pi.deliveryTerm || '',
     }));
   };
 
@@ -156,26 +147,9 @@ const AddOrder = () => {
       // Step 2: Create order with all form data
       const orderPayload = {
         piInvoiceId: selectedPI.id,
-        deliveryTerms: orderData.deliveryTerms || selectedPI.deliveryTerm || '',
         paymentAmount:
           orderData.advanceAmount && orderData.advanceAmount !== ''
             ? parseFloat(orderData.advanceAmount)
-            : null,
-        bookingNumber:
-          orderData.bookingNumber && orderData.bookingNumber !== ''
-            ? orderData.bookingNumber
-            : null,
-        bookingDate:
-          orderData.bookingDate && orderData.bookingDate !== ''
-            ? orderData.bookingDate
-            : null,
-        wayBillNumber:
-          orderData.wayBillNumber && orderData.wayBillNumber !== ''
-            ? orderData.wayBillNumber
-            : null,
-        truckNumber:
-          orderData.truckNumber && orderData.truckNumber !== ''
-            ? orderData.truckNumber
             : null,
       };
 
@@ -322,7 +296,7 @@ const AddOrder = () => {
               {/* Advance Amount */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Advance Amount (Optional)
+                  Advance Amount 
                 </label>
                 <input
                   type="number"
@@ -345,34 +319,7 @@ const AddOrder = () => {
                   )}
               </div>
 
-              {/* Booking Number */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Booking Number (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={orderData.bookingNumber}
-                  onChange={(e) =>
-                    handleInputChange('bookingNumber', e.target.value)
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder="Enter booking number"
-                />
-              </div>
 
-              {/* Booking Date */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Booking Date (Optional)
-                </label>
-                <DatePicker
-                  value={orderData.bookingDate}
-                  onChange={(value) => handleInputChange('bookingDate', value)}
-                  placeholder="Select booking date"
-                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
 
               {/* Balance Amount */}
               <div>
@@ -396,101 +343,7 @@ const AddOrder = () => {
                   )}
               </div>
 
-              {/* Balance Due Date */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Balance Due Date
-                </label>
-                <DatePicker
-                  value={orderData.balanceDueDate}
-                  onChange={(value) =>
-                    handleInputChange('balanceDueDate', value)
-                  }
-                  placeholder="Select balance due date"
-                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
 
-              {/* Payment Method */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Payment Method
-                </label>
-                <select
-                  value={orderData.paymentMethod}
-                  onChange={(e) =>
-                    handleInputChange('paymentMethod', e.target.value)
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  <option value="bank_transfer">Bank Transfer</option>
-                  <option value="letter_of_credit">Letter of Credit</option>
-                  <option value="cash">Cash</option>
-                  <option value="cheque">Cheque</option>
-                </select>
-              </div>
-
-              {/* Delivery Terms */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Delivery Terms
-                </label>
-                <input
-                  type="text"
-                  value={orderData.deliveryTerms}
-                  onChange={(e) =>
-                    handleInputChange('deliveryTerms', e.target.value)
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder="Enter delivery terms"
-                />
-              </div>
-
-              {/* Way Bill Number */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Way Bill Number
-                </label>
-                <input
-                  type="text"
-                  value={orderData.wayBillNumber}
-                  onChange={(e) =>
-                    handleInputChange('wayBillNumber', e.target.value)
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder="Enter way bill number"
-                />
-              </div>
-
-              {/* Truck Number */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Truck Number
-                </label>
-                <input
-                  type="text"
-                  value={orderData.truckNumber}
-                  onChange={(e) =>
-                    handleInputChange('truckNumber', e.target.value)
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder="Enter truck number"
-                />
-              </div>
-
-              {/* Notes */}
-              <div className="lg:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Notes
-                </label>
-                <textarea
-                  value={orderData.notes}
-                  onChange={(e) => handleInputChange('notes', e.target.value)}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder="Additional notes or comments..."
-                />
-              </div>
             </div>
           </div>
 

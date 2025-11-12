@@ -54,7 +54,8 @@ import ConfirmOrder from './pages/PI/ConfirmOrder';
 import OrderConfirmed from './pages/PI/OrderConfirmed';
 import EmailInvoice from './pages/PI/EmailInvoice';
 import Orders from './pages/order/Orders';
-import EditOrder from './pages/order/EditOrder';
+import EditOrder from './pages/order/AddEditShipment';
+import AddEditShipment from './pages/order/AddEditShipment';
 import AddOrder from './pages/order/AddOrder';
 import AddEditPackingList from './pages/order/AddEditPackingList';
 import ViewInvoice from './pages/order/ViewInvoice';
@@ -137,6 +138,7 @@ function AppContent() {
           <Route path="/orders" element={<Orders />} />
           <Route path="/add-order" element={<AddOrder />} />
           <Route path="/edit-order/:id" element={<EditOrder />} />
+          <Route path="/shipment/:id" element={<AddEditShipment />} />
           <Route path="/view-invoice/:id" element={<ViewInvoice />} />
           <Route path="/packing-list/:id" element={<AddEditPackingList />} />
           <Route path="/vgm/create" element={<AddEditVgm />} />

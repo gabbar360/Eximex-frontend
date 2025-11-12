@@ -95,11 +95,11 @@ const getNavItems = (userRole: string): NavItem[] => [
           name: 'Purchase Orders',
           path: '/purchase-orders',
         },
-        {
-          icon: <FontAwesomeIcon icon={faCreditCard} />,
-          name: 'Payment Tracking',
-          path: '/payments',
-        },
+        // {
+        //   icon: <FontAwesomeIcon icon={faCreditCard} />,
+        //   name: 'Payment Tracking',
+        //   path: '/payments',
+        // },
       ]
     : []),
   ...(['ADMIN', 'SUPER_ADMIN'].includes(userRole)
