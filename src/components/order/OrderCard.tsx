@@ -252,27 +252,27 @@ const OrderCard: React.FC<OrderCardProps> = ({
   // Check if packing list exists - check both possible locations
   const hasPackingList = 
     (order.packingList && Object.keys(order.packingList).length > 0 && order.packingList.containers && order.packingList.containers.length > 0) ||
-    (order.piInvoice?.packagingSteps && order.piInvoice.packagingSteps.length > 0 && order.piInvoice.packagingSteps[0]?.notes?.containers && order.piInvoice.packagingSteps[0].notes.containers.length > 0);
+    (order.piInvoice?.packingLists && order.piInvoice.packingLists.length > 0 && order.piInvoice.packingLists[0]?.notes?.containers && order.piInvoice.packingLists[0].notes.containers.length > 0);
 
   // Extract containers from the correct location
   const containers = order.packingList?.containers?.length > 0 
     ? order.packingList.containers 
-    : order.piInvoice?.packagingSteps?.[0]?.notes?.containers || [];
+    : order.piInvoice?.packingLists?.[0]?.notes?.containers || [];
 
   // Debug: Log packing list data to console
   React.useEffect(() => {
-    const containers = order.packingList?.containers || order.piInvoice?.packagingSteps?.[0]?.notes?.containers || [];
+    const containers = order.packingList?.containers || order.piInvoice?.packingLists?.[0]?.notes?.containers || [];
     console.log(`🔍 OrderCard Debug - Order ${order.id}:`, {
       hasPackingList,
       packingListExists: !!order.packingList,
       packingList: order.packingList,
-      packagingStepsExists: !!order.piInvoice?.packagingSteps,
-      packagingSteps: order.piInvoice?.packagingSteps,
-      packagingStepsCount: order.piInvoice?.packagingSteps?.length,
+      packingListsExists: !!order.piInvoice?.packingLists,
+      packingLists: order.piInvoice?.packingLists,
+      packingListsCount: order.piInvoice?.packingLists?.length,
       extractedContainers: containers,
       containersLength: containers?.length,
     });
-  }, [order.packingList, order.piInvoice?.packagingSteps, hasPackingList]);
+  }, [order.packingList, order.piInvoice?.packingLists, hasPackingList]);
 
   const handlePackingListPDF = async () => {
     setIsDownloading(true);
