@@ -105,7 +105,7 @@ export default function UserInfoCard({
                 Role
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                {typeof userData?.role === 'object' ? userData.role.displayName : userData?.role || 'N/A'}
+                {typeof userData?.role === 'object' && userData.role ? userData.role.displayName : userData?.role || 'N/A'}
               </p>
             </div>
 
