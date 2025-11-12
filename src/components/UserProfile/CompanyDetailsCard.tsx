@@ -55,6 +55,7 @@ export default function CompanyDetailsCard({
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [logoError, setLogoError] = useState(false);
 
   useEffect(() => {
     if (companyData) {
@@ -73,6 +74,7 @@ export default function CompanyDetailsCard({
         swiftCode: companyData.swiftCode || '',
       });
       setLogoPreview(companyData.logo || null);
+      setLogoError(false); // Reset error state when data changes
     }
   }, [companyData]);
 
@@ -109,26 +111,37 @@ export default function CompanyDetailsCard({
         <div>
           <div className="flex items-center gap-4 mb-6">
             <div className="flex-shrink-0">
-              <Image
-                src={
-                  companyData?.logo
-                    ? `${import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || window.location.origin}${companyData.logo}`
-                    : '/images/default-company-logo.png'
-                }
-                alt="Company Logo"
-                width={96}
-                height={96}
-                className="rounded-lg object-cover border border-gray-200 dark:border-gray-700"
-                preview={{
-                  mask: (
-                    <EyeOutlined style={{ fontSize: '20px', color: 'white' }} />
-                  ),
-                }}
-                onError={(e) => {
-                  e.currentTarget.src = '/images/default-company-logo.png';
-                  e.currentTarget.onerror = null; // Prevent infinite loop
-                }}
-              />
+              {!logoError && companyData?.logo ? (
+                <Image
+                  src={`${import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || window.location.origin}${companyData.logo}`}
+                  alt="Company Logo"
+                  width={96}
+                  height={96}
+                  className="rounded-lg object-cover border border-gray-200 dark:border-gray-700"
+                  preview={{
+                    mask: (
+                      <EyeOutlined style={{ fontSize: '20px', color: 'white' }} />
+                    ),
+                  }}
+                  onError={() => setLogoError(true)}
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center border border-gray-200 dark:border-gray-700">
+                  <svg
+                    className="w-8 h-8 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                    />
+                  </svg>
+                </div>
+              )}
             </div>
             <div>
               <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90">
