@@ -353,6 +353,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<number>(1);
+  const [originalPiStatus, setOriginalPiStatus] = useState<string>('');
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [validationErrors, setValidationErrors] = useState<{
     [key: string]: boolean;
@@ -575,6 +576,9 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
 
               // Set currency
               setCurrency(pi.currency || 'USD');
+
+              // Store original PI status
+              setOriginalPiStatus(pi.status || '');
 
               // Set max shipment weight
               setMaxShipmentWeight(pi.maxShipmentWeight?.toString() || '');
@@ -1621,7 +1625,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         portOfDischarge,
         finalDestination,
         totalGrossWeight: calculateGrossWeight(formData.productsData),
-        status: isFormComplete() ? 'pending' : 'draft',
+        status: isEditMode && originalPiStatus === 'confirmed' ? 'confirmed' : (isFormComplete() ? 'pending' : 'draft'),
         products: formData.productsData.map((product) => ({
           productId: parseInt(product.productId),
           productName: product.productName || product.name,
