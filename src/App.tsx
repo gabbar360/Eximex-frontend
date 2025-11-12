@@ -50,6 +50,9 @@ import PerformaInvoice from '../src/pages/PI/PerformaInvoice';
 import AddEditPerformaInvoiceForm from '../src/pages/PI/AddEditPerformaInvoiceForm';
 import PIHistory from './pages/PI/PIHistory';
 import PIDetails from './pages/PI/PIDetails';
+import ConfirmOrder from './pages/PI/ConfirmOrder';
+import OrderConfirmed from './pages/PI/OrderConfirmed';
+import EmailInvoice from './pages/PI/EmailInvoice';
 import Orders from './pages/order/Orders';
 import EditOrder from './pages/order/AddEditShipment';
 import AddEditShipment from './pages/order/AddEditShipment';
@@ -128,6 +131,9 @@ function AppContent() {
           />
           <Route path="/edit-pi/:id" element={<AddEditPerformaInvoiceForm />} />
           <Route path="/pi-details/:id" element={<PIDetails />} />
+          <Route path="/proforma-invoices/:id/email" element={<EmailInvoice />} />
+          <Route path="/proforma-invoices/:id/confirm" element={<ConfirmOrder />} />
+          <Route path="/proforma-invoices/:id/confirmed" element={<OrderConfirmed />} />
 
           <Route path="/orders" element={<Orders />} />
           <Route path="/add-order" element={<AddOrder />} />

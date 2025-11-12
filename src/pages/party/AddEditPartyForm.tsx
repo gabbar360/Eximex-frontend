@@ -166,7 +166,7 @@ const AddEditPartyForm = () => {
               companyName: Yup.string().required('Company name is required'),
               role: Yup.string().required('Role is required'),
               email: Yup.string().email('Invalid email').required('Email is required'),
-              phone: Yup.string().required('Phone number is required').matches(/^(?:\d{10}|\d{12})$/, 'Phone number must be exactly 10 or 12 digits'),
+              phone: Yup.string().required('Phone number is required'),
               address: Yup.string().required('Address is required'),
               city: Yup.string().required('City is required'),
               state: Yup.string().required('State is required'),
@@ -245,12 +245,9 @@ const AddEditPartyForm = () => {
                     <input
                       name="phone"
                       type="text"
-                      placeholder="Enter phone number"
+                      placeholder="Enter phone number (e.g., +91 9876543210)"
                       value={values.phone}
-                      onChange={(e) => {
-                        const numericValue = e.target.value.replace(/\D/g, '');
-                        setFieldValue('phone', numericValue);
-                      }}
+                      onChange={handleChange}
                       onBlur={handleBlur}
                       className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
                     />

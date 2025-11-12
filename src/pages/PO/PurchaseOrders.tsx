@@ -52,7 +52,7 @@ const PurchaseOrders: React.FC = () => {
       setPurchaseOrders(purchaseOrdersData);
     } catch (error: any) {
       console.error('Error fetching purchase orders:', error);
-      toast.error(error.message || 'Failed to fetch purchase orders');
+      toast.error(error.message);
       setPurchaseOrders([]);
     } finally {
       setLoading(false);

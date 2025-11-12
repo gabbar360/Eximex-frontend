@@ -174,10 +174,10 @@ const AddEditPackingList = () => {
 
       if (
         rawPackingData.pi &&
-        rawPackingData.pi.packagingSteps &&
-        rawPackingData.pi.packagingSteps.length > 0
+        rawPackingData.pi.packingLists &&
+        rawPackingData.pi.packingLists.length > 0
       ) {
-        const packagingStep = rawPackingData.pi.packagingSteps[0];
+        const packagingStep = rawPackingData.pi.packingLists[0];
         if (packagingStep.notes) {
           try {
             // Handle both string and object cases

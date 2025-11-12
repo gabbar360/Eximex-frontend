@@ -353,6 +353,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<number>(1);
+  const [originalPiStatus, setOriginalPiStatus] = useState<string>('');
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [validationErrors, setValidationErrors] = useState<{
     [key: string]: boolean;
@@ -575,6 +576,9 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
 
               // Set currency
               setCurrency(pi.currency || 'USD');
+
+              // Store original PI status
+              setOriginalPiStatus(pi.status || '');
 
               // Set max shipment weight
               setMaxShipmentWeight(pi.maxShipmentWeight?.toString() || '');
@@ -1569,12 +1573,12 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         // Update existing PI as draft
         const result = await dispatch(updatePiInvoice({ id: parseInt(id!), piData: apiData })).unwrap();
         toast.success(result.message);
-        navigate(`/proforma-invoices/${result.data.id}/edit`);
+        navigate('/proforma-invoices');
       } else {
         // Create new PI as draft
         const result = await dispatch(createPiInvoice(apiData)).unwrap();
         toast.success(result.message);
-        navigate(`/proforma-invoices/${result.data.id}/edit`);
+        navigate('/proforma-invoices');
       }
     } catch (err: any) {
       console.error('Error saving draft:', err);
@@ -1621,7 +1625,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         portOfDischarge,
         finalDestination,
         totalGrossWeight: calculateGrossWeight(formData.productsData),
-        status: isFormComplete() ? 'pending' : 'draft',
+        status: isEditMode && originalPiStatus === 'confirmed' ? 'confirmed' : (isFormComplete() ? 'pending' : 'draft'),
         products: formData.productsData.map((product) => ({
           productId: parseInt(product.productId),
           productName: product.productName || product.name,
@@ -2545,368 +2549,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
     );
   }
 
-  // --- Review Modal ---
-  const ReviewModal: React.FC<{
-    open: boolean;
-    data: PIData | null;
-    onClose: () => void;
-    onEdit: () => void;
-    onConfirm: () => void;
-  }> = ({ open, data, onClose, onEdit, onConfirm }) => {
-    // Prevent body scroll when modal is open
-    useEffect(() => {
-      if (open) {
-        document.body.style.overflow = 'hidden';
-      } else {
-        document.body.style.overflow = 'unset';
-      }
 
-      // Cleanup on unmount
-      return () => {
-        document.body.style.overflow = 'unset';
-      };
-    }, [open]);
-
-    if (!open || !data) return null;
-
-    const { company, paymentTerm, deliveryTerm, productsData, charges } = data;
-    let subtotal = 0;
-    let chargesTotal = 0;
-
-    // Calculate subtotal
-    productsData.forEach((prod) => {
-      subtotal += prod.total;
-    });
-
-    // Calculate charges
-    if (deliveryTerm === 'fob' && charges.noOtherCharges) {
-      // No other charges
-    } else if (charges) {
-      Object.entries(charges).forEach(([key, val]) => {
-        if (key === 'noOtherCharges') return;
-        if (key === 'otherCharges' && Array.isArray(val)) {
-          val.forEach((oc: any) => {
-            chargesTotal += parseFloat(oc.amount) || 0;
-          });
-        } else if (typeof val === 'number' || !isNaN(parseFloat(val))) {
-          let amount = parseFloat(val) || 0;
-          if (key === 'dutyPercent' || key === 'vatPercent')
-            amount = (amount / 100) * subtotal;
-          chargesTotal += amount;
-        }
-      });
-    }
-
-    const totalAmount = subtotal + chargesTotal;
-
-    const modalContent = (
-      <div
-        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
-        aria-modal="true"
-        role="dialog"
-        style={{ zIndex: 9999 }}
-        onClick={(e) => {
-          // Close modal when clicking on backdrop
-          if (e.target === e.currentTarget) {
-            onClose();
-          }
-        }}
-      >
-        <div
-          className="bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 relative"
-          style={{ zIndex: 10000 }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-2xl font-semibold text-gray-900 dark:text-white">
-              Proforma Invoice Review
-            </h3>
-          </div>
-
-          {/* Company & Contact Details */}
-          <section className="mb-6">
-            <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">
-              Company & Contact Details
-            </h4>
-            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-gray-700 dark:text-gray-300">
-              {[
-                { label: 'Company', value: company?.name },
-                { label: 'Contact Person', value: company?.contactPerson },
-                { label: 'Address', value: company?.address },
-                { label: 'Country', value: company?.country },
-                { label: 'Email', value: company?.email },
-                { label: 'Phone', value: company?.phone },
-              ].map((item, index) => (
-                <div key={index}>
-                  <dt className="font-medium">{item.label}</dt>
-                  <dd className="whitespace-pre-line">{item.value}</dd>
-                </div>
-              ))}
-            </dl>
-          </section>
-
-          {/* Container & Terms Information */}
-          <section className="mb-6">
-            <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">
-              Container & Terms Information
-            </h4>
-            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-gray-700 dark:text-gray-300">
-              {containerType && (
-                <>
-                  <div>
-                    <dt className="font-medium">Container Type</dt>
-                    <dd>{containerType}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-medium">Capacity Basis</dt>
-                    <dd>
-                      {capacityBasis === 'weight'
-                        ? 'By Weight (KG)'
-                        : 'By Volume (CBM)'}
-                    </dd>
-                  </div>
-                  {capacityBasis === 'weight' && data.maxWeight && (
-                    <div>
-                      <dt className="font-medium">Max Container Weight</dt>
-                      <dd>{data.maxWeight} KG</dd>
-                    </div>
-                  )}
-                </>
-              )}
-              <div>
-                <dt className="font-medium">Payment Term</dt>
-                <dd>{paymentTermNames[paymentTerm]}</dd>
-              </div>
-              <div>
-                <dt className="font-medium">Delivery Term</dt>
-                <dd>{deliveryTermNames[deliveryTerm]}</dd>
-              </div>
-            </dl>
-          </section>
-
-          {/* Products Table */}
-          <section className="mb-6">
-            <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">
-              Products
-            </h4>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-gray-700 dark:text-gray-300">
-                <thead className="bg-gray-100 dark:bg-gray-800">
-                  <tr>
-                    <th className="px-3 py-2 text-left text-sm font-semibold">
-                      Category
-                    </th>
-                    <th className="px-3 py-2 text-left text-sm font-semibold">
-                      Product Name
-                    </th>
-                    <th className="px-3 py-2 text-left text-sm font-semibold">
-                      HS Code
-                    </th>
-                    <th className="px-3 py-2 text-right text-sm font-semibold">
-                      Quantity
-                    </th>
-                    <th className="px-3 py-2 text-left text-sm font-semibold">
-                      Unit
-                    </th>
-                    <th className="px-3 py-2 text-right text-sm font-semibold">
-                      Weight (KG)
-                    </th>
-                    <th className="px-3 py-2 text-right text-sm font-semibold">
-                      Rate
-                    </th>
-                    <th className="px-3 py-2 text-right text-sm font-semibold">
-                      Total
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {productsData.map((prod, i) => {
-                    const category = categories.find(
-                      (c) => c.id.toString() === prod.categoryId?.toString()
-                    );
-                    const productInfo = products.find(
-                      (p) => p.id.toString() === prod.productId.toString()
-                    );
-                    const weight =
-                      prod.totalWeight ||
-                      calculateTotalWeight(
-                        prod.productId,
-                        prod.quantity.toString(),
-                        prod.unit
-                      );
-                    const productName =
-                      productInfo?.name || prod.name || 'Unknown Product';
-                    return (
-                      <tr key={i} className="bg-white dark:bg-gray-900">
-                        <td className="px-3 py-2 text-sm">
-                          {category?.name || 'N/A'}
-                        </td>
-                        <td className="px-3 py-2 text-sm">{productName}</td>
-                        <td className="px-3 py-2 text-sm">
-                          {prod.hsCode || productInfo?.hsCode}
-                        </td>
-                        <td className="px-3 py-2 text-sm text-right">
-                          {prod.quantity}
-                        </td>
-                        <td className="px-3 py-2 text-sm">{prod.unit}</td>
-                        <td className="px-3 py-2 text-sm text-right">
-                          {weight.toFixed(2)}
-                        </td>
-                        <td className="px-3 py-2 text-sm text-right">
-                          {formatCurrency(prod.rate, currency, 2, 3)}
-                        </td>
-                        <td className="px-3 py-2 text-sm text-right font-semibold">
-                          {formatCurrency(prod.total)}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-                <tfoot>
-                  <tr className="bg-gray-50 dark:bg-gray-800 font-semibold text-gray-900 dark:text-gray-200">
-                    <td colSpan={5} className="text-right px-3 py-2">
-                      Net Weight:
-                    </td>
-                    <td className="text-right px-3 py-2">
-                      {productsData
-                        .reduce((sum, prod) => {
-                          const weight =
-                            prod.totalWeight ||
-                            calculateTotalWeight(
-                              prod.productId,
-                              prod.quantity.toString(),
-                              prod.unit
-                            );
-                          return sum + weight;
-                        }, 0)
-                        .toFixed(2)}{' '}
-                      KG
-                    </td>
-                    <td className="text-right px-3 py-2">Subtotal:</td>
-                    <td className="text-right px-3 py-2">
-                      {formatCurrency(subtotal)}
-                    </td>
-                  </tr>
-                  <tr className="bg-blue-50 dark:bg-blue-800 font-semibold text-blue-900 dark:text-blue-200">
-                    <td colSpan={5} className="text-right px-3 py-2">
-                      Gross Weight:
-                    </td>
-                    <td className="text-right px-3 py-2">
-                      {calculateGrossWeight(productsData).toFixed(2)} KG
-                    </td>
-                    <td colSpan={2} className="text-center px-3 py-2 text-sm">
-                      (Net + Packaging)
-                    </td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-          </section>
-
-          {/* Charges Section */}
-          <section className="mb-6">
-            <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">
-              Additional Charges Breakdown
-            </h4>
-            <dl className="text-gray-700 dark:text-gray-300 space-y-1">
-              {deliveryTerm === 'fob' && charges.noOtherCharges ? (
-                <p>No other charges applicable.</p>
-              ) : (
-                Object.entries(charges).map(([key, val]) => {
-                  if (key === 'noOtherCharges') return null;
-                  if (key === 'otherCharges' && Array.isArray(val)) {
-                    return val.map((oc, i) => (
-                      <p key={i}>
-                        {oc.name}: {formatCurrency(oc.amount)}
-                      </p>
-                    ));
-                  } else if (
-                    (typeof val === 'number' || !isNaN(parseFloat(val))) &&
-                    parseFloat(val) > 0
-                  ) {
-                    let label = '';
-                    switch (key) {
-                      case 'freightCharge':
-                        label = 'Freight Charge';
-                        break;
-                      case 'insurance':
-                        label = 'Insurance';
-                        break;
-                      case 'destinationPortHandlingCharge':
-                        label = 'Destination Port Handling Charge';
-                        break;
-                      case 'dutyPercent':
-                        label = 'Duty (%)';
-                        break;
-                      case 'vatPercent':
-                        label = 'VAT (%)';
-                        break;
-                      case 'transportationCharge':
-                        label = 'Transportation Charge';
-                        break;
-                      default:
-                        label = key;
-                    }
-                    let amount = parseFloat(val);
-                    if (key === 'dutyPercent' || key === 'vatPercent')
-                      amount = (amount / 100) * subtotal;
-                    return (
-                      <p key={key}>
-                        {label}: {formatCurrency(amount)}
-                      </p>
-                    );
-                  }
-                  return null;
-                })
-              )}
-            </dl>
-          </section>
-
-          {/* Total Amount */}
-          <section className="mb-6 text-right font-bold text-xl text-gray-900 dark:text-white">
-            Total Amount: <span>{formatCurrency(totalAmount)}</span>
-          </section>
-
-          {/* Footer Buttons */}
-          <div className="flex justify-end space-x-4">
-            <button
-              type="button"
-              className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
-              onClick={onEdit}
-            >
-              <FontAwesomeIcon icon={faTimes} className="mr-2" /> Edit
-            </button>
-            <button
-              type="button"
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-              onClick={onConfirm}
-              disabled={submitting}
-            >
-              <FontAwesomeIcon icon={faCheck} className="mr-2" />
-              {submitting
-                ? 'Processing...'
-                : isEditMode
-                  ? 'Update'
-                  : 'Confirm & Save'}
-            </button>
-          </div>
-
-          {/* Close Icon */}
-          <button
-            type="button"
-            aria-label="Close modal"
-            className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-400 focus:outline-none"
-            onClick={onClose}
-          >
-            <FontAwesomeIcon icon={faTimes} size="lg" />
-          </button>
-        </div>
-      </div>
-    );
-
-    // Use portal to render modal outside of the normal layout flow
-    return createPortal(modalContent, document.body);
-  };
 
   if (loading) {
     return (
@@ -2925,126 +2568,125 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-2 sm:p-4 lg:p-6">
-      <PageMeta
-        title={`${
-          isEditMode ? 'Edit' : 'New'
-        } Proforma Invoice | EximEx Dashboard`}
-        description={`${
-          isEditMode ? 'Edit' : 'Create'
-        } a proforma invoice in your EximEx Dashboard`}
-      />
-      <PageBreadcrumb
-        pageTitle={`${isEditMode ? 'Edit' : 'New'} Proforma Invoice`}
-      />
+    <div className="min-h-screen bg-gray-50">
+      <div className="p-4 lg:p-6 pt-6 sm:pt-8 lg:pt-12 pb-6 sm:pb-8 lg:pb-12">
+        <PageMeta
+          title={`${
+            isEditMode ? 'Edit' : 'New'
+          } Proforma Invoice | EximEx Dashboard`}
+          description={`${
+            isEditMode ? 'Edit' : 'Create'
+          } a proforma invoice in your EximEx Dashboard`}
+        />
+        <PageBreadcrumb
+          pageTitle={`${isEditMode ? 'Edit' : 'New'} Proforma Invoice`}
+        />
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-3">
-        <h2 className="text-lg sm:text-xl lg:text-2xl font-bold dark:text-gray-100">
-          {isEditMode ? 'Edit Proforma Invoice' : 'New Proforma Invoice'}
-        </h2>
-        <button
-          onClick={() => navigate('/proforma-invoices')}
-          className="w-full sm:w-auto bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-        >
-          Cancel
-        </button>
-      </div>
-
-      {/* Step Progress Indicator - Same design as Packing List */}
-      <div className="mb-6 sm:mb-8">
-        <div className="flex items-center justify-between overflow-x-auto pb-2">
-          {[1, 2, 3, 4, 5].map((step) => (
-            <div key={step} className="flex items-center flex-shrink-0">
-              <button
-                type="button"
-                onClick={() => setCurrentStep(step)}
-                className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold ${
-                  step === currentStep
-                    ? 'bg-primary text-white'
-                    : step < currentStep || completedSteps.has(step)
-                      ? 'bg-green-500 text-white'
-                      : 'bg-gray-300 text-gray-600 dark:bg-gray-600 dark:text-gray-300'
-                }`}
+        {/* Header */}
+        <div className="mb-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-6 lg:p-8">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-lg bg-blue-600">
+                  <FontAwesomeIcon icon={faPlus} className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-1">
+                    {isEditMode ? 'Edit Proforma Invoice' : 'New Proforma Invoice'}
+                  </h1>
+                  {/* <p className="text-gray-600 text-sm lg:text-base">
+                    {isEditMode ? 'Update your proforma invoice details' : 'Create a new proforma invoice for your client'}
+                  </p> */}
+                </div>
+              </div>
+              
+              {/* <button
+                onClick={() => navigate('/proforma-invoices')}
+                className="inline-flex items-center px-4 sm:px-6 py-3 rounded-lg font-semibold text-gray-600 bg-white border border-gray-300 text-sm sm:text-base"
               >
-                {step < currentStep || completedSteps.has(step) ? '✓' : step}
-              </button>
-              {step < 5 && (
-                <div
-                  className={`w-8 sm:w-16 h-1 mx-1 sm:mx-2 ${
-                    step < currentStep || completedSteps.has(step)
-                      ? 'bg-green-500'
-                      : 'bg-gray-300 dark:bg-gray-600'
-                  }`}
-                />
-              )}
+                <FontAwesomeIcon icon={faTimes} className="w-4 h-4 mr-2" />
+                Cancel
+              </button> */}
             </div>
-          ))}
-        </div>
-        <div className="flex justify-between mt-2 text-xs sm:text-sm overflow-x-auto">
-          <span
-            className={
-              currentStep === 1
-                ? 'text-primary font-semibold flex-shrink-0'
-                : 'text-gray-600 dark:text-gray-400 flex-shrink-0'
-            }
-          >
-            Company
-          </span>
-          <span
-            className={
-              currentStep === 2
-                ? 'text-primary font-semibold flex-shrink-0'
-                : 'text-gray-600 dark:text-gray-400 flex-shrink-0'
-            }
-          >
-            Container
-          </span>
-          <span
-            className={
-              currentStep === 3
-                ? 'text-primary font-semibold flex-shrink-0'
-                : 'text-gray-600 dark:text-gray-400 flex-shrink-0'
-            }
-          >
-            Terms
-          </span>
-          <span
-            className={
-              currentStep === 4
-                ? 'text-primary font-semibold flex-shrink-0'
-                : 'text-gray-600 dark:text-gray-400 flex-shrink-0'
-            }
-          >
-            Products
-          </span>
-          <span
-            className={
-              currentStep === 5
-                ? 'text-primary font-semibold flex-shrink-0'
-                : 'text-gray-600 dark:text-gray-400 flex-shrink-0'
-            }
-          >
-            Review
-          </span>
-        </div>
-      </div>
-
-      {/* Form Card - Same design as Packing List */}
-      <div className="rounded-sm bg-white shadow-default dark:border-strokedark dark:bg-gray-900">
-        <div className="border-b border-stroke py-3 sm:py-4 px-3 sm:px-6.5 dark:border-strokedark">
-          <h3 className="font-medium text-black dark:text-white text-sm sm:text-base">
-            {isEditMode ? 'Edit' : 'Create'} Proforma Invoice
-          </h3>
+          </div>
         </div>
 
-        <div className="p-3 sm:p-6.5">
+        {/* Step Progress Indicator */}
+        <div className="mb-8">
+          <div className="bg-white rounded-lg border border-gray-200 p-8">
+            <div className="flex items-center justify-between overflow-x-auto pb-4">
+              {[1, 2, 3, 4, 5].map((step) => (
+                <div key={step} className="flex items-center flex-shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setCurrentStep(step)}
+                    className={`w-12 h-12 rounded-lg flex items-center justify-center text-sm font-bold ${
+                      step === currentStep
+                        ? 'bg-blue-600 text-white'
+                        : step < currentStep || completedSteps.has(step)
+                          ? 'bg-green-500 text-white'
+                          : 'bg-white text-gray-600 border-2 border-gray-300'
+                    }`}
+                  >
+                    {step < currentStep || completedSteps.has(step) ? '✓' : step}
+                  </button>
+                  {step < 5 && (
+                    <div className="mx-4">
+                      <div
+                        className={`w-20 h-2 rounded-full ${
+                          step < currentStep || completedSteps.has(step)
+                            ? 'bg-green-500'
+                            : 'bg-gray-200 border border-gray-300'
+                        }`}
+                      />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-between mt-6 text-sm font-medium overflow-x-auto">
+              <span className={currentStep === 1 ? 'text-blue-600 font-bold flex-shrink-0' : 'text-gray-500 flex-shrink-0'}>
+                Company
+              </span>
+              <span className={currentStep === 2 ? 'text-blue-600 font-bold flex-shrink-0' : 'text-gray-500 flex-shrink-0'}>
+                Container
+              </span>
+              <span className={currentStep === 3 ? 'text-blue-600 font-bold flex-shrink-0' : 'text-gray-500 flex-shrink-0'}>
+                Terms
+              </span>
+              <span className={currentStep === 4 ? 'text-blue-600 font-bold flex-shrink-0' : 'text-gray-500 flex-shrink-0'}>
+                Products
+              </span>
+              <span className={currentStep === 5 ? 'text-blue-600 font-bold flex-shrink-0' : 'text-gray-500 flex-shrink-0'}>
+                Review
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Form Card */}
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="bg-gray-50 border-b border-gray-200 p-6">
+            <h3 className="text-lg font-semibold text-gray-900">
+              {isEditMode ? 'Edit' : 'Create'} Proforma Invoice
+            </h3>
+          </div>
+
+          <div className="p-6">
           <Form onSubmit={handleReview} className="space-y-6 sm:space-y-10">
             {currentStep === 1 && (
               <div className="step-content">
-                <h4 className="text-lg sm:text-xl font-semibold text-black dark:text-white mb-4 sm:mb-6 border-b pb-2 sm:pb-3">
-                  Step 1: Company Selection
-                </h4>
+                <div className="mb-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 rounded-lg bg-blue-600">
+                      <FontAwesomeIcon icon={faPlus} className="w-5 h-5 text-white" />
+                    </div>
+                    <h4 className="text-xl font-semibold text-gray-900">
+                      Step 1: Company Selection
+                    </h4>
+                  </div>
+                  <div className="h-1 bg-blue-600 rounded w-20"></div>
+                </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                   <div>
                     <Label htmlFor="company">Select Company</Label>
@@ -3192,9 +2834,17 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
 
             {currentStep === 2 && (
               <div className="step-content">
-                <h4 className="text-lg sm:text-xl font-semibold text-black dark:text-white mb-4 sm:mb-6 border-b pb-2 sm:pb-3">
-                  Step 2: Container Management
-                </h4>
+                <div className="mb-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 shadow-md">
+                      <FontAwesomeIcon icon={faPlus} className="w-5 h-5 text-white" />
+                    </div>
+                    <h4 className="text-xl font-semibold text-slate-800">
+                      Step 2: Container Management
+                    </h4>
+                  </div>
+                  <div className="h-1 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full w-20"></div>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
                   <div>
                     <Label htmlFor="numberOfContainers">
@@ -3447,9 +3097,17 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
 
             {currentStep === 3 && (
               <div className="step-content">
-                <h4 className="text-lg sm:text-xl font-semibold text-black dark:text-white mb-4 sm:mb-6 border-b pb-2 sm:pb-3">
-                  Step 3: Terms Configuration
-                </h4>
+                <div className="mb-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 shadow-md">
+                      <FontAwesomeIcon icon={faPlus} className="w-5 h-5 text-white" />
+                    </div>
+                    <h4 className="text-xl font-semibold text-slate-800">
+                      Step 3: Terms Configuration
+                    </h4>
+                  </div>
+                  <div className="h-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full w-20"></div>
+                </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                   <div>
                     <Label htmlFor="paymentTerm">Select Payment Term *</Label>
@@ -3511,9 +3169,17 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
 
             {currentStep === 4 && (
               <div className="step-content">
-                <h4 className="text-lg sm:text-xl font-semibold text-black dark:text-white mb-4 sm:mb-6 border-b pb-2 sm:pb-3">
-                  Step 4: Add Products
-                </h4>
+                <div className="mb-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 shadow-md">
+                      <FontAwesomeIcon icon={faPlus} className="w-5 h-5 text-white" />
+                    </div>
+                    <h4 className="text-xl font-semibold text-slate-800">
+                      Step 4: Add Products
+                    </h4>
+                  </div>
+                  <div className="h-1 bg-gradient-to-r from-orange-500 to-red-500 rounded-full w-20"></div>
+                </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
                   <div>
                     <Label htmlFor="maxShipmentWeight">
@@ -3983,53 +3649,367 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
 
             {currentStep === 5 && (
               <div className="step-content">
-                <h4 className="text-lg sm:text-xl font-semibold text-black dark:text-white mb-4 sm:mb-6 border-b pb-2 sm:pb-3">
-                  Step 5: Review & Confirmation
-                </h4>
+                <div className="mb-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 shadow-md">
+                      <FontAwesomeIcon icon={faEye} className="w-5 h-5 text-white" />
+                    </div>
+                    <h4 className="text-xl font-semibold text-slate-800">
+                      Step 5: Review & Confirmation
+                    </h4>
+                  </div>
+                  <div className="h-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full w-20"></div>
+                </div>
 
-                <div className="text-center py-8">
-                  <p className="text-gray-600 dark:text-gray-400 mb-6">
-                    Please review all the information you've entered before
-                    creating the Proforma Invoice.
-                  </p>
+                {/* Review Details Section */}
+                <div className="space-y-8">
+                  {/* Company & Contact Details */}
+                  <section className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                    <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
+                      Company & Contact Details
+                    </h4>
+                    <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-gray-700 dark:text-gray-300">
+                      <div>
+                        <dt className="font-medium text-gray-500 dark:text-gray-400">Company</dt>
+                        <dd className="mt-1 font-semibold">{company?.name || 'N/A'}</dd>
+                      </div>
+                      <div>
+                        <dt className="font-medium text-gray-500 dark:text-gray-400">Contact Person</dt>
+                        <dd className="mt-1 font-semibold">{company?.contactPerson || 'N/A'}</dd>
+                      </div>
+                      <div>
+                        <dt className="font-medium text-gray-500 dark:text-gray-400">Email</dt>
+                        <dd className="mt-1 font-semibold">{company?.email || 'N/A'}</dd>
+                      </div>
+                      <div>
+                        <dt className="font-medium text-gray-500 dark:text-gray-400">Phone</dt>
+                        <dd className="mt-1 font-semibold">{company?.phone || 'N/A'}</dd>
+                      </div>
+                      <div>
+                        <dt className="font-medium text-gray-500 dark:text-gray-400">Country</dt>
+                        <dd className="mt-1 font-semibold">{company?.country || 'N/A'}</dd>
+                      </div>
+                      <div>
+                        <dt className="font-medium text-gray-500 dark:text-gray-400">Address</dt>
+                        <dd className="mt-1 font-semibold whitespace-pre-line">{company?.address || 'N/A'}</dd>
+                      </div>
+                    </dl>
+                  </section>
 
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleReview(e as React.FormEvent);
-                    }}
-                    className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
-                  >
-                    <FontAwesomeIcon icon={faEye} className="mr-2" />
-                    Review Proforma Invoice
-                  </button>
+                  {/* Container & Terms Information */}
+                  <section className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                    <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center">
+                      <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+                      Container & Terms Information
+                    </h4>
+                    <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-gray-700 dark:text-gray-300">
+                      {containerType && (
+                        <>
+                          <div>
+                            <dt className="font-medium text-gray-500 dark:text-gray-400">Container Type</dt>
+                            <dd className="mt-1 font-semibold">{containerType}</dd>
+                          </div>
+                          <div>
+                            <dt className="font-medium text-gray-500 dark:text-gray-400">Number of Containers</dt>
+                            <dd className="mt-1 font-semibold">{numberOfContainers}</dd>
+                          </div>
+                          <div>
+                            <dt className="font-medium text-gray-500 dark:text-gray-400">Capacity Basis</dt>
+                            <dd className="mt-1 font-semibold">
+                              {capacityBasis === 'weight' ? 'By Weight (KG)' : 'By Volume (CBM)'}
+                            </dd>
+                          </div>
+                          {capacityBasis === 'weight' && maxPermissibleWeight && (
+                            <div>
+                              <dt className="font-medium text-gray-500 dark:text-gray-400">Max Container Weight</dt>
+                              <dd className="mt-1 font-semibold">{maxPermissibleWeight} KG</dd>
+                            </div>
+                          )}
+                        </>
+                      )}
+                      <div>
+                        <dt className="font-medium text-gray-500 dark:text-gray-400">Payment Term</dt>
+                        <dd className="mt-1 font-semibold">{paymentTermNames[paymentTerm] || paymentTerm || 'N/A'}</dd>
+                      </div>
+                      <div>
+                        <dt className="font-medium text-gray-500 dark:text-gray-400">Delivery Term</dt>
+                        <dd className="mt-1 font-semibold">{deliveryTermNames[deliveryTerm] || deliveryTerm || 'N/A'}</dd>
+                      </div>
+                      {maxShipmentWeight && (
+                        <div>
+                          <dt className="font-medium text-gray-500 dark:text-gray-400">Max Shipment Weight</dt>
+                          <dd className="mt-1 font-semibold">{maxShipmentWeight} KG</dd>
+                        </div>
+                      )}
+                      <div>
+                        <dt className="font-medium text-gray-500 dark:text-gray-400">Currency</dt>
+                        <dd className="mt-1 font-semibold">{currency}</dd>
+                      </div>
+                    </dl>
+                  </section>
+
+                  {/* Products Table */}
+                  <section className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                    <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full mr-3"></div>
+                      Products ({addedProducts.length})
+                    </h4>
+                    {addedProducts.length > 0 ? (
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-gray-700 dark:text-gray-300">
+                          <thead className="bg-gray-100 dark:bg-gray-700">
+                            <tr>
+                              <th className="px-3 py-3 text-left text-sm font-semibold">Category</th>
+                              <th className="px-3 py-3 text-left text-sm font-semibold">Product Name</th>
+                              <th className="px-3 py-3 text-left text-sm font-semibold">HS Code</th>
+                              <th className="px-3 py-3 text-right text-sm font-semibold">Quantity</th>
+                              <th className="px-3 py-3 text-left text-sm font-semibold">Unit</th>
+                              <th className="px-3 py-3 text-right text-sm font-semibold">Weight (KG)</th>
+                              <th className="px-3 py-3 text-right text-sm font-semibold">Rate</th>
+                              <th className="px-3 py-3 text-right text-sm font-semibold">Total</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-200 dark:divide-gray-600">
+                            {addedProducts.map((prod, i) => {
+                              const category = categories.find(
+                                (c) => c.id.toString() === prod.categoryId?.toString()
+                              );
+                              const productInfo = products.find(
+                                (p) => p.id.toString() === prod.productId.toString()
+                              );
+                              const weight =
+                                prod.totalWeight ||
+                                calculateTotalWeight(
+                                  prod.productId,
+                                  prod.quantity.toString(),
+                                  prod.unit
+                                );
+                              const productName =
+                                productInfo?.name || prod.name || 'Unknown Product';
+                              return (
+                                <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                  <td className="px-3 py-3 text-sm">
+                                    {category?.name || 'N/A'}
+                                  </td>
+                                  <td className="px-3 py-3 text-sm font-medium">{productName}</td>
+                                  <td className="px-3 py-3 text-sm">
+                                    {prod.hsCode || productInfo?.hsCode || 'N/A'}
+                                  </td>
+                                  <td className="px-3 py-3 text-sm text-right font-medium">
+                                    {prod.quantity}
+                                  </td>
+                                  <td className="px-3 py-3 text-sm">{prod.unit}</td>
+                                  <td className="px-3 py-3 text-sm text-right">
+                                    {weight.toFixed(2)}
+                                  </td>
+                                  <td className="px-3 py-3 text-sm text-right">
+                                    {formatCurrency(prod.rate, currency, 2, 3)}
+                                  </td>
+                                  <td className="px-3 py-3 text-sm text-right font-semibold">
+                                    {formatCurrency(prod.total, currency)}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                          <tfoot>
+                            <tr className="bg-gray-50 dark:bg-gray-700 font-semibold text-gray-900 dark:text-gray-200">
+                              <td colSpan={5} className="text-right px-3 py-3">
+                                Net Weight:
+                              </td>
+                              <td className="text-right px-3 py-3">
+                                {addedProducts
+                                  .reduce((sum, prod) => {
+                                    const weight =
+                                      prod.totalWeight ||
+                                      calculateTotalWeight(
+                                        prod.productId,
+                                        prod.quantity.toString(),
+                                        prod.unit
+                                      );
+                                    return sum + weight;
+                                  }, 0)
+                                  .toFixed(2)}{' '}
+                                KG
+                              </td>
+                              <td className="text-right px-3 py-3">Subtotal:</td>
+                              <td className="text-right px-3 py-3">
+                                {formatCurrency(
+                                  addedProducts.reduce((sum, p) => sum + p.total, 0),
+                                  currency
+                                )}
+                              </td>
+                            </tr>
+                            <tr className="bg-blue-50 dark:bg-blue-800 font-semibold text-blue-900 dark:text-blue-200">
+                              <td colSpan={5} className="text-right px-3 py-3">
+                                Gross Weight:
+                              </td>
+                              <td className="text-right px-3 py-3">
+                                {calculateGrossWeight(addedProducts).toFixed(2)} KG
+                              </td>
+                              <td colSpan={2} className="text-center px-3 py-3 text-sm">
+                                (Net + Packaging)
+                              </td>
+                            </tr>
+                          </tfoot>
+                        </table>
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 dark:text-gray-400 text-center py-8">
+                        No products added yet.
+                      </p>
+                    )}
+                  </section>
+
+                  {/* Charges Section */}
+                  {deliveryTerm && (
+                    <section className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                      <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center">
+                        <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
+                        Additional Charges Breakdown
+                      </h4>
+                      <div className="text-gray-700 dark:text-gray-300 space-y-2">
+                        {(() => {
+                          let subtotal = addedProducts.reduce((sum, p) => sum + p.total, 0);
+                          let chargesTotal = 0;
+                          let chargesList = [];
+
+                          if (deliveryTerm === 'fob' && charges.noOtherCharges) {
+                            chargesList.push(
+                              <p key="no-charges" className="text-green-600 dark:text-green-400 font-medium">
+                                ✓ No other charges applicable
+                              </p>
+                            );
+                          } else if (charges) {
+                            Object.entries(charges).forEach(([key, val]) => {
+                              if (key === 'noOtherCharges') return;
+                              if (key === 'otherCharges' && Array.isArray(val)) {
+                                val.forEach((oc, i) => {
+                                  if (oc.name && oc.amount) {
+                                    chargesTotal += parseFloat(oc.amount) || 0;
+                                    chargesList.push(
+                                      <div key={`other-${i}`} className="flex justify-between">
+                                        <span>{oc.name}:</span>
+                                        <span className="font-semibold">{formatCurrency(oc.amount, currency)}</span>
+                                      </div>
+                                    );
+                                  }
+                                });
+                              } else if ((typeof val === 'number' || !isNaN(parseFloat(val))) && parseFloat(val) > 0) {
+                                let label = '';
+                                switch (key) {
+                                  case 'freightCharge': label = 'Freight Charge'; break;
+                                  case 'insurance': label = 'Insurance'; break;
+                                  case 'destinationPortHandlingCharge': label = 'Destination Port Handling Charge'; break;
+                                  case 'dutyPercent': label = 'Duty (%)'; break;
+                                  case 'vatPercent': label = 'VAT (%)'; break;
+                                  case 'transportationCharge': label = 'Transportation Charge'; break;
+                                  default: label = key;
+                                }
+                                let amount = parseFloat(val);
+                                if (key === 'dutyPercent' || key === 'vatPercent') {
+                                  amount = (amount / 100) * subtotal;
+                                }
+                                chargesTotal += amount;
+                                chargesList.push(
+                                  <div key={key} className="flex justify-between">
+                                    <span>{label}:</span>
+                                    <span className="font-semibold">{formatCurrency(amount, currency)}</span>
+                                  </div>
+                                );
+                              }
+                            });
+                          }
+
+                          if (chargesList.length === 0) {
+                            chargesList.push(
+                              <p key="no-charges" className="text-gray-500 dark:text-gray-400">
+                                No additional charges configured.
+                              </p>
+                            );
+                          }
+
+                          return (
+                            <>
+                              {chargesList}
+                              {chargesTotal > 0 && (
+                                <div className="border-t border-gray-200 dark:border-gray-600 pt-3 mt-3">
+                                  <div className="flex justify-between font-semibold text-lg">
+                                    <span>Total Charges:</span>
+                                    <span className="text-blue-600 dark:text-blue-400">
+                                      {formatCurrency(chargesTotal, currency)}
+                                    </span>
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                          );
+                        })()}
+                      </div>
+                    </section>
+                  )}
+
+                  {/* Total Amount */}
+                  <section className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900 dark:to-blue-900 rounded-lg border-2 border-green-200 dark:border-green-700 p-6">
+                    <div className="text-center">
+                      <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">
+                        Total Invoice Amount
+                      </h4>
+                      <div className="text-3xl font-bold text-green-600 dark:text-green-400">
+                        {(() => {
+                          let subtotal = addedProducts.reduce((sum, p) => sum + p.total, 0);
+                          let chargesTotal = 0;
+
+                          if (deliveryTerm === 'fob' && charges.noOtherCharges) {
+                            // No other charges
+                          } else if (charges) {
+                            Object.entries(charges).forEach(([key, val]) => {
+                              if (key === 'noOtherCharges') return;
+                              if (key === 'otherCharges' && Array.isArray(val)) {
+                                val.forEach((oc) => {
+                                  chargesTotal += parseFloat(oc.amount) || 0;
+                                });
+                              } else if (typeof val === 'number' || !isNaN(parseFloat(val))) {
+                                let amount = parseFloat(val) || 0;
+                                if (key === 'dutyPercent' || key === 'vatPercent')
+                                  amount = (amount / 100) * subtotal;
+                                chargesTotal += amount;
+                              }
+                            });
+                          }
+
+                          return formatCurrency(subtotal + chargesTotal, currency);
+                        })()}
+                      </div>
+                    </div>
+                  </section>
                 </div>
               </div>
             )}
             {/* Navigation Buttons */}
-            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-stroke dark:border-strokedark gap-3 sm:gap-0">
+            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center mt-8 pt-6 border-t border-gray-200 gap-4">
               <button
                 type="button"
                 onClick={() => setCurrentStep(Math.max(currentStep - 1, 1))}
                 disabled={currentStep === 1}
-                className={`inline-flex items-center justify-center px-4 sm:px-6 py-2 sm:py-3 rounded-md font-medium text-sm sm:text-base ${
+                className={`inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-sm ${
                   currentStep === 1
-                    ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-gray-600 text-white'
                 }`}
               >
                 <FontAwesomeIcon icon={faChevronLeft} className="mr-2" />
                 Previous
               </button>
 
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+              <div className="flex flex-col sm:flex-row gap-3">
                 {!isEditMode && (
                   <button
                     type="button"
                     onClick={handleSaveDraft}
                     disabled={submitting}
-                    className="inline-flex items-center justify-center px-4 sm:px-6 py-2 sm:py-3 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 text-sm sm:text-base disabled:opacity-50"
+                    className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-blue-600 text-white font-semibold disabled:opacity-50"
                   >
                     {submitting ? 'Saving...' : 'Save as Draft'}
                   </button>
@@ -4039,7 +4019,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => handleStepComplete(currentStep)}
-                    className="inline-flex items-center justify-center px-4 sm:px-6 py-2 sm:py-3 rounded-md bg-green-600 text-white font-medium hover:bg-green-700 text-sm sm:text-base"
+                    className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-green-600 text-white font-semibold"
                   >
                     Next Step
                     <FontAwesomeIcon icon={faChevronRight} className="ml-2" />
@@ -4047,21 +4027,19 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                 ) : (
                   <button
                     type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleReview(e as React.FormEvent);
-                    }}
-                    className="inline-flex items-center justify-center px-4 sm:px-6 py-2 sm:py-3 rounded-md bg-green-600 text-white font-medium hover:bg-green-700 text-sm sm:text-base"
+                    onClick={handleConfirm}
+                    disabled={submitting}
+                    className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-green-600 text-white font-semibold disabled:opacity-50"
                   >
-                    <FontAwesomeIcon icon={faEye} className="mr-2" />
-                    Review & Save
+                    <FontAwesomeIcon icon={faCheck} className="mr-2" />
+                    {submitting ? 'Saving...' : (isEditMode ? 'Update PI' : 'Save PI')}
                   </button>
                 )}
 
                 <button
                   type="button"
                   onClick={() => navigate('/proforma-invoices')}
-                  className="inline-flex items-center justify-center px-4 sm:px-6 py-2 sm:py-3 rounded-md bg-red-600 text-white font-medium hover:bg-red-700 text-sm sm:text-base"
+                  className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-red-600 text-white font-semibold"
                 >
                   <FontAwesomeIcon icon={faTimes} className="mr-2" />
                   Cancel
@@ -4069,16 +4047,11 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
               </div>
             </div>
           </Form>
+          </div>
         </div>
-      </div>
 
-      <ReviewModal
-        open={reviewOpen}
-        data={reviewData}
-        onClose={() => setReviewOpen(false)}
-        onEdit={() => setReviewOpen(false)}
-        onConfirm={handleConfirm}
-      />
+
+      </div>
     </div>
   );
 };

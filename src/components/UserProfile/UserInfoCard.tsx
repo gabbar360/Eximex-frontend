@@ -10,7 +10,17 @@ interface UserData {
   name: string;
   email: string;
   mobileNum?: string;
-  role: string;
+  role: {
+    id: number;
+    name: string;
+    displayName: string;
+    description?: string;
+    permissions?: any;
+    isActive: boolean;
+    isSystem: boolean;
+    createdAt: string;
+    updatedAt: string;
+  } | string;
   status: string;
   companyId?: number;
   company?: {
@@ -95,7 +105,7 @@ export default function UserInfoCard({
                 Role
               </p>
               <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                {userData?.role || 'N/A'}
+                {typeof userData?.role === 'object' && userData.role ? userData.role.displayName : userData?.role || 'N/A'}
               </p>
             </div>
 
