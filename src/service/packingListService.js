@@ -62,6 +62,19 @@ const packingListService = {
       throw error;
     }
   },
+    // Download packing list PDF
+  downloadPDFPortPackingListPDF: async (id) => {
+    try {
+      const response = await axiosInstance.get(`/packing-lists/port-delivery/${id}/pdf`, {
+        responseType: 'blob',
+      });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  
 
   // ============ PACKAGING STEPS INTEGRATION ============
 
@@ -97,22 +110,6 @@ const packingListService = {
       throw error;
     }
   },
-
-  // Download packaging details as PDF
-  downloadPackagingPDF: async (piInvoiceId) => {
-    try {
-      const response = await axiosInstance.get(
-        `/packaging-steps/download-pdf/${piInvoiceId}`,
-        {
-          responseType: 'blob',
-        }
-      );
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  },
-
   // Download BL draft PDF
   downloadBLDraftPDF: async (id) => {
     try {
