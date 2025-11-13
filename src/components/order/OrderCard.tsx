@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { deletePackingList, downloadPackingListPdf, downloadBLDraftPdf } from '../../features/packingListSlice';
+import { deletePackingList, downloadPackingListPdf, downloadPackingListPortPdf, downloadBLDraftPdf } from '../../features/packingListSlice';
 import { deleteVgm, downloadVgmPdf } from '../../features/vgmSlice';
 import { downloadOrderInvoice } from '../../features/orderSlice';
 import { deleteShipment } from '../../features/shipmentSlice';
@@ -36,6 +36,9 @@ import {
   faWeight,
   faRulerHorizontal,
   faBalanceScale,
+  faEllipsisV,
+  faFilePdf,
+  faAnchor,
 } from '@fortawesome/free-solid-svg-icons';
 
 interface OrderCardProps {
@@ -61,7 +64,9 @@ const OrderCard: React.FC<OrderCardProps> = ({
   const [editableField, setEditableField] = useState<string | null>(null);
   const [tempValue, setTempValue] = useState<string>('');
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isDownloadingPort, setIsDownloadingPort] = useState(false);
   const [isDownloadingBL, setIsDownloadingBL] = useState(false);
+  const [showPdfDropdown, setShowPdfDropdown] = useState(false);
   const [confirmDeletePacking, setConfirmDeletePacking] = useState(false);
   const [isDownloadingVgm, setIsDownloadingVgm] = useState(false);
   const [confirmDeleteVgm, setConfirmDeleteVgm] = useState<{
@@ -304,6 +309,39 @@ const OrderCard: React.FC<OrderCardProps> = ({
       toast.error('Failed to download packing list PDF');
     } finally {
       setIsDownloading(false);
+    }
+  };
+
+  const handlePortDeliveryPDF = async () => {
+    setIsDownloadingPort(true);
+    toast.info('Preparing port delivery PDF download...', { autoClose: 2000 });
+
+    try {
+      const packingId = order.packingListId || order.piInvoiceId;
+      if (!packingId) {
+        toast.error('No packing list ID found');
+        setIsDownloadingPort(false);
+        return;
+      }
+
+      const response = await dispatch(downloadPackingListPortPdf(packingId)).unwrap();
+
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `port-delivery-${order.orderNumber || packingId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast.success('Port delivery PDF downloaded successfully!');
+    } catch (error) {
+      console.error('Error downloading port delivery PDF:', error);
+      toast.error('Failed to download port delivery PDF');
+    } finally {
+      setIsDownloadingPort(false);
     }
   };
 
@@ -939,27 +977,53 @@ const OrderCard: React.FC<OrderCardProps> = ({
                         >
                           <FontAwesomeIcon icon={faEdit} className="text-sm" />
                         </Link>
-                        <button
-                          onClick={handlePackingListPDF}
-                          disabled={isDownloading}
-                          className={`p-2 rounded-lg transition-colors flex-1 text-center ${
-                            isDownloading
-                              ? 'text-gray-400 cursor-not-allowed'
-                              : 'text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20'
-                          }`}
-                          title={
-                            isDownloading ? 'Downloading...' : 'Download Packing List PDF'
-                          }
-                        >
-                          {isDownloading ? (
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-500"></div>
-                          ) : (
-                            <FontAwesomeIcon
-                              icon={faDownload}
-                              className="text-sm"
-                            />
+                        <div className="relative flex-1">
+                          <button
+                            onClick={() => setShowPdfDropdown(!showPdfDropdown)}
+                            className="w-full p-2 rounded-lg transition-colors text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 text-center"
+                            title="Download PDF Options"
+                          >
+                            <FontAwesomeIcon icon={faEllipsisV} className="text-sm" />
+                          </button>
+                          {showPdfDropdown && (
+                            <div className="absolute bottom-full mb-2 left-0 right-0 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 z-50">
+                              <button
+                                onClick={() => {
+                                  handlePackingListPDF();
+                                  setShowPdfDropdown(false);
+                                }}
+                                disabled={isDownloading}
+                                className={`w-full px-3 py-2 text-left text-sm flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-t-lg ${
+                                  isDownloading ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 dark:text-gray-300'
+                                }`}
+                              >
+                                {isDownloading ? (
+                                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-green-500"></div>
+                                ) : (
+                                  <FontAwesomeIcon icon={faFilePdf} className="text-green-600" />
+                                )}
+                                <span>Packing List PDF</span>
+                              </button>
+                              <button
+                                onClick={() => {
+                                  handlePortDeliveryPDF();
+                                  setShowPdfDropdown(false);
+                                }}
+                                disabled={isDownloadingPort}
+                                className={`w-full px-3 py-2 text-left text-sm flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-b-lg ${
+                                  isDownloadingPort ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 dark:text-gray-300'
+                                }`}
+                              >
+                                {isDownloadingPort ? (
+                                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-purple-500"></div>
+                                ) : (
+                                  <FontAwesomeIcon icon={faAnchor} className="text-purple-600" />
+                                )}
+                                <span>Port Delivery PDF</span>
+                              </button>
+                            </div>
                           )}
-                        </button>
+                        </div>
                         <button
                           onClick={handlePackingListDelete}
                           className="p-2 rounded-lg transition-colors text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex-1 text-center"
@@ -1136,7 +1200,30 @@ const OrderCard: React.FC<OrderCardProps> = ({
                                       <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-green-500"></div>
                                     ) : (
                                       <FontAwesomeIcon
-                                        icon={faDownload}
+                                        icon={faFilePdf}
+                                        className="text-sm"
+                                      />
+                                    )}
+                                  </button>
+                                  <button
+                                    onClick={handlePortDeliveryPDF}
+                                    disabled={isDownloadingPort}
+                                    className={`p-1 rounded ${
+                                      isDownloadingPort
+                                        ? 'text-gray-400 cursor-not-allowed'
+                                        : 'text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/20'
+                                    }`}
+                                    title={
+                                      isDownloadingPort
+                                        ? 'Downloading...'
+                                        : 'Download Port Delivery PDF'
+                                    }
+                                  >
+                                    {isDownloadingPort ? (
+                                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-purple-500"></div>
+                                    ) : (
+                                      <FontAwesomeIcon
+                                        icon={faAnchor}
                                         className="text-sm"
                                       />
                                     )}
