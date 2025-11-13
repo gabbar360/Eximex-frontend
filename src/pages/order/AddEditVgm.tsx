@@ -123,12 +123,36 @@ const AddEditVgm: React.FC = () => {
       return;
     }
 
+    if (!formData.verifiedGrossMass) {
+      toast.error('Verified Gross Mass is required');
+      return;
+    }
+
+    if (!formData.verifiedBy) {
+      toast.error('Verified By is required');
+      return;
+    }
+
+    if (formData.method === 'METHOD_2') {
+      if (!formData.cargoWeight || !formData.packagingWeight || !formData.containerTareWeight) {
+        toast.error('All weight fields are required for Method 2');
+        return;
+      }
+    }
+
+    if (formData.containerType === 'HAZARDOUS') {
+      if (!formData.hazardousUnNo || !formData.imdgClass) {
+        toast.error('UN Number and IMDG Class are required for hazardous containers');
+        return;
+      }
+    }
+
     try {
       setLoading(true);
 
       const submitData = {
         ...formData,
-        piInvoiceId: formData.piInvoiceId,
+        piInvoiceId: parseInt(formData.piInvoiceId.toString()),
         productPackagingStepId: formData.productPackagingStepId
           ? parseInt(formData.productPackagingStepId)
           : null,

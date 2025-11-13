@@ -245,9 +245,12 @@ const AddEditPartyForm = () => {
                     <input
                       name="phone"
                       type="text"
-                      placeholder="Enter phone number (e.g., +91 9876543210)"
+                      placeholder="Enter phone number"
                       value={values.phone}
-                      onChange={handleChange}
+                      onChange={(e) => {
+                        const phoneValue = e.target.value.replace(/[^0-9+]/g, '');
+                        setFieldValue('phone', phoneValue);
+                      }}
                       onBlur={handleBlur}
                       className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
                     />

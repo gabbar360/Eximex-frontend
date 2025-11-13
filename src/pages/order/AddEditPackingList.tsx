@@ -37,8 +37,6 @@ const AddEditPackingList = () => {
     buyerReference: '',
     buyerDetails: '',
     sellerInfo: '',
-    vesselVoyageNo: '',
-    dateOfDeparture: '',
     containers: [
       {
         containerNumber: '',
@@ -229,19 +227,6 @@ const AddEditPackingList = () => {
             '',
           sellerInfo:
             rawPackingData.sellerInfo || detailedPackingData.sellerInfo || '',
-          vesselVoyageNo:
-            detailedPackingData.vesselVoyageNo ||
-            rawPackingData.vesselVoyageNo ||
-            '',
-          dateOfDeparture: detailedPackingData.dateOfDeparture
-            ? new Date(detailedPackingData.dateOfDeparture)
-                .toISOString()
-                .split('T')[0]
-            : rawPackingData.dateOfDeparture
-              ? new Date(rawPackingData.dateOfDeparture)
-                  .toISOString()
-                  .split('T')[0]
-              : '',
           containers:
             containerData.length > 0
               ? containerData.map((container) => ({
@@ -532,22 +517,7 @@ const AddEditPackingList = () => {
       volumeM3 = boxesNeeded * 0.0055;
     }
 
-    console.log(
-      '📊 Auto-calculation for',
-      productData.productName || productData.name,
-      ':',
-      {
-        packedQuantity: qty,
-        unit: unit,
-        boxesNeeded,
-        piTotalWeight: productData.totalWeight,
-        piTotalGrossWeight: productData.totalGrossWeight,
-        productData: productData,
-        netWeightKg: netWeightKg.toFixed(2) + 'kg',
-        grossWeightKg: grossWeightKg.toFixed(2) + 'kg',
-        volumeM3: volumeM3.toFixed(4) + 'm³',
-      }
-    );
+  
 
     // Update the product with calculated values
     const updatedContainers = [...packagingList.containers];
@@ -789,32 +759,7 @@ const AddEditPackingList = () => {
               </div>
             </div>
 
-            {/* Basic Packaging Info */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-              <div>
-                <Label>Vessel/Voyage No</Label>
-                <InputField
-                  type="text"
-                  name="vesselVoyageNo"
-                  value={packagingList.vesselVoyageNo}
-                  onChange={handlePackagingInputChange}
-                  placeholder="Enter vessel/voyage number"
-                />
-              </div>
-              <div>
-                <Label>Date</Label>
-                <DatePicker
-                  value={packagingList.dateOfDeparture}
-                  onChange={(value) =>
-                    setPackagingList((prev) => ({
-                      ...prev,
-                      dateOfDeparture: value,
-                    }))
-                  }
-                  placeholder="Select departure date"
-                />
-              </div>
-            </div>
+
 
             {/* Containers */}
             {packagingList.containers.map((container, containerIndex) => (
