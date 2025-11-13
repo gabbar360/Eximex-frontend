@@ -381,6 +381,7 @@ const AddEditPackingList = () => {
       measurement: '',
       packedQuantity: '',
       unit: 'Box',
+      perBoxWeight: '',
       productData: null
     });
 
@@ -427,12 +428,20 @@ const AddEditPackingList = () => {
     
     updatedContainers[containerIndex].products[productIndex][field] = value;
 
-    const calculatedData = calculateTotals({
-      ...packagingList,
-      containers: updatedContainers,
-    });
-
-    setPackagingList(calculatedData);
+    // If weight fields are manually updated, recalculate totals
+    if (field === 'netWeight' || field === 'grossWeight' || field === 'noOfBoxes' || field === 'measurement') {
+      const calculatedData = calculateTotals({
+        ...packagingList,
+        containers: updatedContainers,
+      });
+      setPackagingList(calculatedData);
+    } else {
+      const calculatedData = calculateTotals({
+        ...packagingList,
+        containers: updatedContainers,
+      });
+      setPackagingList(calculatedData);
+    }
   };
 
   const calculateProductValues = (
@@ -528,6 +537,10 @@ const AddEditPackingList = () => {
     productToUpdate.netWeight = netWeightKg.toFixed(2);
     productToUpdate.grossWeight = grossWeightKg.toFixed(2);
     productToUpdate.measurement = volumeM3.toFixed(4);
+    // Set per box weight for future modifications
+    if (boxesNeeded > 0) {
+      productToUpdate.perBoxWeight = (netWeightKg / boxesNeeded).toFixed(2);
+    }
 
     const calculatedData = calculateTotals({
       ...packagingList,
@@ -1077,24 +1090,112 @@ const AddEditPackingList = () => {
                           </div>
 
                           <div>
-                            <Label>Net Weight (kg)</Label>
+                            <Label>No. of Boxes</Label>
+                            <InputField
+                              type="number"
+                              value={product.noOfBoxes}
+                              onChange={(e) => {
+                                updateProductInContainer(
+                                  containerIndex,
+                                  productIndex,
+                                  'noOfBoxes',
+                                  e.target.value
+                                );
+                                // Auto-calculate net weight if per box weight is available
+                                if (product.perBoxWeight && e.target.value) {
+                                  const totalNetWeight = parseFloat(e.target.value) * parseFloat(product.perBoxWeight);
+                                  updateProductInContainer(
+                                    containerIndex,
+                                    productIndex,
+                                    'netWeight',
+                                    totalNetWeight.toFixed(2)
+                                  );
+                                  // Auto-calculate gross weight (net weight + 10% packaging)
+                                  const totalGrossWeight = totalNetWeight * 1.1;
+                                  updateProductInContainer(
+                                    containerIndex,
+                                    productIndex,
+                                    'grossWeight',
+                                    totalGrossWeight.toFixed(2)
+                                  );
+                                }
+                              }}
+                              placeholder="Enter number of boxes"
+                              step="1"
+                            />
+                          </div>
+                          <div>
+                            <Label>Per Box Weight (kg) ✏️</Label>
+                            <InputField
+                              type="number"
+                              value={product.perBoxWeight}
+                              onChange={(e) => {
+                                updateProductInContainer(
+                                  containerIndex,
+                                  productIndex,
+                                  'perBoxWeight',
+                                  e.target.value
+                                );
+                                // Auto-calculate net weight if boxes count is available
+                                if (product.noOfBoxes && e.target.value) {
+                                  const totalNetWeight = parseFloat(product.noOfBoxes) * parseFloat(e.target.value);
+                                  updateProductInContainer(
+                                    containerIndex,
+                                    productIndex,
+                                    'netWeight',
+                                    totalNetWeight.toFixed(2)
+                                  );
+                                  // Auto-calculate gross weight (net weight + 10% packaging)
+                                  const totalGrossWeight = totalNetWeight * 1.1;
+                                  updateProductInContainer(
+                                    containerIndex,
+                                    productIndex,
+                                    'grossWeight',
+                                    totalGrossWeight.toFixed(2)
+                                  );
+                                }
+                              }}
+                              placeholder="Weight per box"
+                              step="0.01"
+                              className="border-green-300 focus:border-green-500"
+                            />
+                            <div className="text-xs text-green-600 mt-1">
+                              Modify box weight
+                            </div>
+                          </div>
+                          <div>
+                            <Label>Net Weight (kg) ✏️</Label>
                             <InputField
                               type="number"
                               value={product.netWeight}
-                              onChange={(e) =>
+                              onChange={(e) => {
                                 updateProductInContainer(
                                   containerIndex,
                                   productIndex,
                                   'netWeight',
                                   e.target.value
-                                )
-                              }
-                              placeholder="Enter net weight"
+                                );
+                                // Auto-calculate gross weight when net weight changes
+                                if (e.target.value) {
+                                  const grossWeight = parseFloat(e.target.value) * 1.1;
+                                  updateProductInContainer(
+                                    containerIndex,
+                                    productIndex,
+                                    'grossWeight',
+                                    grossWeight.toFixed(2)
+                                  );
+                                }
+                              }}
+                              placeholder="Enter actual net weight"
                               step="0.01"
+                              className="border-blue-300 focus:border-blue-500"
                             />
+                            <div className="text-xs text-blue-600 mt-1">
+                              Manual entry allowed
+                            </div>
                           </div>
                           <div>
-                            <Label>Gross Weight (kg)</Label>
+                            <Label>Gross Weight (kg) ✏️</Label>
                             <InputField
                               type="number"
                               value={product.grossWeight}
@@ -1106,12 +1207,16 @@ const AddEditPackingList = () => {
                                   e.target.value
                                 )
                               }
-                              placeholder="Enter gross weight"
+                              placeholder="Enter actual gross weight"
                               step="0.01"
+                              className="border-blue-300 focus:border-blue-500"
                             />
+                            <div className="text-xs text-blue-600 mt-1">
+                              Manual entry allowed
+                            </div>
                           </div>
                           <div>
-                            <Label>Measurement (m³)</Label>
+                            <Label>Measurement (m³) ✏️</Label>
                             <InputField
                               type="number"
                               value={product.measurement}
@@ -1123,9 +1228,13 @@ const AddEditPackingList = () => {
                                   e.target.value
                                 )
                               }
-                              placeholder="Enter measurement"
+                              placeholder="Enter actual measurement"
                               step="0.01"
+                              className="border-blue-300 focus:border-blue-500"
                             />
+                            <div className="text-xs text-blue-600 mt-1">
+                              Manual entry allowed
+                            </div>
                           </div>
                         </div>
                       </div>
