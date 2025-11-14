@@ -91,6 +91,7 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
             </option>
             {!categoriesLoading &&
               categories &&
+              Array.isArray(categories) &&
               categories.map((category) => (
                 <option key={category.id} value={category.id}>
                   {category.name}
@@ -115,7 +116,7 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
             disabled={!values.categoryId}
           >
             <option value="">Select Subcategory</option>
-            {subcategories.map((sub) => (
+            {Array.isArray(subcategories) && subcategories.map((sub) => (
               <option key={sub.id} value={sub.id}>
                 {sub.name}
               </option>
