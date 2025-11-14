@@ -14,27 +14,71 @@ export const createPiInvoice = async (piData) => {
   }
 };
 
-export const getAllPiInvoices = async (
-  includeProducts = false,
-  status = null
-) => {
+export const getAllPiInvoices = async (params = {}) => {
   try {
-    const params = new URLSearchParams();
-    if (includeProducts) params.append('include', 'products');
-    if (status) params.append('status', status);
-    const queryString = params.toString() ? `?${params.toString()}` : '';
-    const { data } = await axiosInstance.get(
-      `/get-all/pi-invoices${queryString}`
-    );
-    return {
-      piInvoices: data?.data?.piInvoices || [],
-      message: data?.message || 'Success'
+    const queryParams = {
+      page: parseInt(params.page) || 1,
+      limit: parseInt(params.limit) || 10,
+      search: params.search || '',
+      ...(params.includeProducts && { include: 'products' }),
+      ...(params.status && { status: params.status })
     };
+    
+    const { data } = await axiosInstance.get('/get-all/pi-invoices', { params: queryParams });
+    return data;
   } catch (error) {
     console.error('Error in getAllPiInvoices:', error);
+    
+    // Fallback mechanism similar to product service
+    if (params.page || params.limit) {
+      try {
+        const { data } = await axiosInstance.get('/get-all/pi-invoices');
+        const piInvoices = data?.data?.piInvoices || data?.piInvoices || [];
+        
+        let filteredPIs = piInvoices;
+        if (params.search) {
+          const searchTerm = params.search.toLowerCase();
+          filteredPIs = piInvoices.filter(pi => 
+            pi.piNumber?.toLowerCase().includes(searchTerm) ||
+            pi.partyName?.toLowerCase().includes(searchTerm) ||
+            pi.party?.companyName?.toLowerCase().includes(searchTerm)
+          );
+        }
+        
+        const page = parseInt(params.page) || 1;
+        const limit = parseInt(params.limit) || 10;
+        const start = (page - 1) * limit;
+        const paginatedData = filteredPIs.slice(start, start + limit);
+        
+        return {
+          data: {
+            piInvoices: paginatedData,
+            pagination: {
+              page,
+              limit,
+              total: filteredPIs.length,
+              pages: Math.ceil(filteredPIs.length / limit)
+            }
+          }
+        };
+      } catch (fallbackError) {
+        handleAxiosError(fallbackError);
+        return {
+          data: {
+            piInvoices: [],
+            pagination: { page: 1, limit: 10, total: 0, pages: 0 }
+          },
+          message: 'Error fetching invoices'
+        };
+      }
+    }
+    
     handleAxiosError(error);
     return {
-      piInvoices: [],
+      data: {
+        piInvoices: [],
+        pagination: { page: 1, limit: 10, total: 0, pages: 0 }
+      },
       message: 'Error fetching invoices'
     };
   }

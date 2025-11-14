@@ -7,6 +7,7 @@ import { deletePackingList, downloadPackingListPdf, downloadPackingListPortPdf, 
 import { deleteVgm, downloadVgmPdf } from '../../features/vgmSlice';
 import { downloadOrderInvoice } from '../../features/orderSlice';
 import { deleteShipment } from '../../features/shipmentSlice';
+import LoadingSpinner from '../ui/LoadingSpinner';
 
 
 import {
@@ -998,7 +999,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
                                 }`}
                               >
                                 {isDownloading ? (
-                                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-green-500"></div>
+                                  <LoadingSpinner size="small" message="" />
                                 ) : (
                                   <FontAwesomeIcon icon={faFilePdf} className="text-green-600" />
                                 )}
@@ -1015,7 +1016,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
                                 }`}
                               >
                                 {isDownloadingPort ? (
-                                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-purple-500"></div>
+                                  <LoadingSpinner size="small" message="" />
                                 ) : (
                                   <FontAwesomeIcon icon={faAnchor} className="text-purple-600" />
                                 )}
@@ -1197,7 +1198,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
                                     }
                                   >
                                     {isDownloading ? (
-                                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-green-500"></div>
+                                      <LoadingSpinner size="small" message="" />
                                     ) : (
                                       <FontAwesomeIcon
                                         icon={faFilePdf}
@@ -1220,7 +1221,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
                                     }
                                   >
                                     {isDownloadingPort ? (
-                                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-purple-500"></div>
+                                      <LoadingSpinner size="small" message="" />
                                     ) : (
                                       <FontAwesomeIcon
                                         icon={faAnchor}
@@ -1391,7 +1392,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
                           }
                         >
                           {isDownloadingVgm ? (
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-500"></div>
+                            <LoadingSpinner size="small" message="" />
                           ) : (
                             <FontAwesomeIcon
                               icon={faDownload}
@@ -1451,7 +1452,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
                               }
                             >
                               {isDownloadingVgm ? (
-                                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-green-500"></div>
+                                <LoadingSpinner size="small" message="" />
                               ) : (
                                 <FontAwesomeIcon
                                   icon={faDownload}
@@ -1630,7 +1631,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
             title="Download Commercial Invoice PDF"
           >
             {downloadingOrder === order.id ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-500"></div>
+              <LoadingSpinner size="small" message="" />
             ) : (
               <FontAwesomeIcon icon={faDownload} className="text-sm" />
             )}
@@ -1646,7 +1647,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
             title={isDownloadingBL ? 'Downloading...' : 'Download BL Draft PDF'}
           >
             {isDownloadingBL ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-500"></div>
+              <LoadingSpinner size="small" message="" />
             ) : (
               <FontAwesomeIcon icon={faFileAlt} className="text-sm" />
             )}
