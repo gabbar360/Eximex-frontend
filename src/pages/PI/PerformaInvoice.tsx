@@ -346,7 +346,7 @@ const PerformaInvoice: React.FC = () => {
                                   <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
                                     <HiEye className="w-4 h-4 text-slate-600" />
                                   </div>
-                                  <span className="font-medium">View Details</span>
+                                  <span className="font-medium">View/confirm order</span>
                                 </Link>
                                 <Link
                                   to={`/edit-pi/${pi.id}`}
