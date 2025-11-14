@@ -236,7 +236,7 @@ const Category: React.FC = () => {
       <div className="p-2 lg:p-4">
         {/* Header */}
         <div className="mb-3">
-          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 lg:p-8">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 lg:p-4">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
               <div className="flex items-center gap-4">
                 <div className="p-3 rounded-lg bg-slate-700 shadow-lg">
@@ -267,7 +267,7 @@ const Category: React.FC = () => {
                 >
                   <HiPlus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                   <span className="hidden xs:inline">Add Category</span>
-                  <span className="xs:hidden">Add</span>
+                  <span className="xs:hidden">Add Category</span>
                 </Link>
               </div>
             </div>

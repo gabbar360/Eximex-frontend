@@ -2704,8 +2704,8 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                       <option value="" disabled>
                         Choose Company
                       </option>
-                      {companies
-                        ?.filter((comp) => comp.role === 'Customer')
+                      {(Array.isArray(companies) ? companies : [])
+                        .filter((comp) => comp.role === 'Customer')
                         .map((comp) => (
                           <option key={comp.id} value={comp.id}>
                             {comp?.companyName || comp?.name}

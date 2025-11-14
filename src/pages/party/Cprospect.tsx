@@ -153,7 +153,7 @@ const Cprospect = () => {
       <div className="p-2 lg:p-4">
         {/* Header */}
         <div className="mb-3">
-          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 lg:p-8">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 lg:p-4">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
               <div className="flex items-center gap-4">
                 <div className="p-3 rounded-lg bg-slate-700 shadow-lg">
