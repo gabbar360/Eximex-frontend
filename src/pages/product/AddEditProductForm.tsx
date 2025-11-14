@@ -156,11 +156,17 @@ const AddEditProductForm = () => {
   const fetchCategories = async () => {
     try {
       setCategoriesLoading(true);
-      const response = await dispatch(getAllCategories()).unwrap();
-      setCategories(response.data || []);
+      // Fetch all categories without pagination for dropdown
+      const response = await dispatch(getAllCategories({ limit: 1000 })).unwrap();
+      // Handle different response structures
+      const categoriesData = response?.data?.data || response?.data || response || [];
+      console.log('Fetched categories:', categoriesData);
+      setCategories(categoriesData);
     } catch (error) {
       console.error('Failed to fetch categories:', error);
-      toast.error(error.message);
+      toast.error(error.message || 'Failed to load categories');
+      // Set empty array on error to prevent undefined issues
+      setCategories([]);
     } finally {
       setCategoriesLoading(false);
     }
@@ -172,6 +178,12 @@ const AddEditProductForm = () => {
       fetchProduct();
     }
   }, [isEdit, id]);
+
+  // Debug logging
+  useEffect(() => {
+    console.log('Categories loaded:', categories);
+    console.log('Categories loading:', categoriesLoading);
+  }, [categories, categoriesLoading]);
 
   // Handle category loading completion for edit mode
   useEffect(() => {
@@ -216,10 +228,10 @@ const AddEditProductForm = () => {
 
       // Find the selected category and get its subcategories
       const selectedCategory = categories.find(
-        (cat) => parseInt(cat.id) === parseInt(categoryId)
+        (cat) => cat.id.toString() === categoryId.toString()
       );
 
-      if (selectedCategory && selectedCategory.subcategories) {
+      if (selectedCategory && selectedCategory.subcategories && Array.isArray(selectedCategory.subcategories)) {
         setSubcategories(selectedCategory.subcategories);
       } else {
         setSubcategories([]);

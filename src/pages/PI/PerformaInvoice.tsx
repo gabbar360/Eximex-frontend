@@ -1,11 +1,12 @@
-import { useDispatch } from 'react-redux';
-import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { HiEye, HiPencil, HiTrash, HiPlus, HiMagnifyingGlass, HiDocumentText, HiClock, HiCheckCircle, HiXCircle, HiDocument, HiCurrencyDollar, HiBuildingOffice2, HiCalendar, HiCreditCard, HiArrowDownTray, HiEnvelope, HiEllipsisVertical } from 'react-icons/hi2';
 import { toast } from 'react-toastify';
+import { Pagination } from 'antd';
 
 import {
-  getAllPiInvoices,
+  fetchPiInvoices,
   deletePiInvoice,
   downloadPiInvoicePdf,
 } from '../../features/piSlice';
@@ -21,39 +22,59 @@ const paymentTermNames: Record<string, string> = {
 const PerformaInvoice: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [piList, setPiList] = useState<any[]>([]);
+  const { piInvoices, loading, error, pagination } = useSelector(
+    (state: any) => state.pi
+  );
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [loading, setLoading] = useState<boolean>(true);
   const [downloadingPdf, setDownloadingPdf] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
-
-  
-  const fetchPiInvoicesData = async () => {
-    try {
-      setLoading(true);
-      const response = await dispatch(getAllPiInvoices()).unwrap();
-      
-      if (response && response.piInvoices && Array.isArray(response.piInvoices)) {
-        setPiList(response.piInvoices);
-      } else if (Array.isArray(response)) {
-        setPiList(response);
-      } else {
-        setPiList([]);
-      }
-    } catch (error) {
-      console.error('Error fetching PI invoices:', error);
-      setPiList([]);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
-    fetchPiInvoicesData();
-  }, []);
+    if (!searchTerm) {
+      dispatch(fetchPiInvoices({
+        page: currentPage,
+        limit: pageSize,
+        search: ''
+      }) as any);
+    }
+  }, [dispatch, currentPage, pageSize]);
+  
+  useEffect(() => {
+    dispatch(fetchPiInvoices({
+      page: 1,
+      limit: 10,
+      search: ''
+    }) as any);
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
+
+  const handleSearch = useCallback((value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+    
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+    
+    debounceTimer.current = setTimeout(() => {
+      dispatch(fetchPiInvoices({
+        page: 1,
+        limit: pageSize,
+        search: value
+      }) as any);
+    }, 500);
+  }, [dispatch, pageSize]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -76,31 +97,37 @@ const PerformaInvoice: React.FC = () => {
   const handleDelete = async (id: string) => {
     try {
       const result = await dispatch(deletePiInvoice(id)).unwrap();
-      setPiList((prevList) => prevList.filter((pi) => pi.id !== id));
-      toast.success(result.message);
       setConfirmDelete(null);
+      
+      dispatch(fetchPiInvoices({
+        page: currentPage,
+        limit: pageSize,
+        search: searchTerm
+      }) as any);
+      
+      toast.success(result.message);
     } catch (error: any) {
       toast.error(error.message);
     }
   };
 
-  const filteredPIs = piList.filter((pi) => {
+  useEffect(() => {
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
+  }, []);
+
+  // Use piInvoices directly since filtering is now handled by backend
+  const filteredPIs = piInvoices.filter((pi: any) => {
     if (!pi) return false;
-
-    try {
-      const matchesSearch =
-        searchTerm === '' ||
-        (pi.piNumber && pi.piNumber.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (pi.party?.companyName && pi.party.companyName.toLowerCase().includes(searchTerm.toLowerCase()));
-
-      const matchesStatus =
-        filterStatus === 'all' ||
-        (pi.status && pi.status.toLowerCase() === filterStatus.toLowerCase());
-
-      return matchesSearch && matchesStatus;
-    } catch (err) {
-      return false;
-    }
+    
+    const matchesStatus =
+      filterStatus === 'all' ||
+      (pi.status && pi.status.toLowerCase() === filterStatus.toLowerCase());
+    
+    return matchesStatus;
   });
 
   const getStatusConfig = (status: string) => {
@@ -142,7 +169,7 @@ const PerformaInvoice: React.FC = () => {
                     placeholder="Search invoices..."
                     className="pl-12 pr-4 py-3 w-full sm:w-72 rounded-lg border border-gray-300 bg-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-all duration-300 text-sm placeholder-gray-500 shadow-sm"
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e) => handleSearch(e.target.value)}
                   />
                 </div>
                 
@@ -559,6 +586,25 @@ const PerformaInvoice: React.FC = () => {
                 );
               })}
             </div>
+          </div>
+        )}
+
+        {/* Simple Pagination */}
+        {pagination.total > 0 && (
+          <div className="flex justify-center mt-6">
+            <Pagination 
+              current={currentPage} 
+              total={pagination.total} 
+              pageSize={pageSize}
+              onChange={(page) => {
+                setCurrentPage(page);
+                dispatch(fetchPiInvoices({
+                  page: page,
+                  limit: pageSize,
+                  search: searchTerm
+                }) as any);
+              }}
+            />
           </div>
         )}
       </div>

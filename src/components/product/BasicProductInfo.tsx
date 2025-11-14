@@ -87,16 +87,27 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
             }
           >
             <option value="">
-              {categoriesLoading ? 'Loading categories...' : 'Select Category'}
+              {categoriesLoading 
+                ? 'Loading categories...' 
+                : (!categories || categories.length === 0)
+                  ? 'No categories available - Create one first'
+                  : 'Select Category'
+              }
             </option>
             {!categoriesLoading &&
               categories &&
               Array.isArray(categories) &&
+              categories.length > 0 &&
               categories.map((category) => (
                 <option key={category.id} value={category.id}>
                   {category.name}
                 </option>
               ))}
+            {!categoriesLoading && (!categories || categories.length === 0) && (
+              <option value="" disabled>
+                Please create a category first
+              </option>
+            )}
           </select>
           {touched.categoryId && errors.categoryId && (
             <div className="text-sm text-red-500 mt-1">{errors.categoryId}</div>
