@@ -91,7 +91,7 @@ const CategoryRow: React.FC<{
             {filteredSubcategories.length > 0 ? (
               <button
                 onClick={() => toggleExpand(category.id)}
-                className="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
+                className="text-slate-600 hover:text-slate-800 font-medium flex items-center gap-1"
               >
                 <span>{filteredSubcategories.length}</span>
                 <span>{expandedCategories.includes(category.id) ? '▼' : '►'}</span>
@@ -282,20 +282,20 @@ const Category: React.FC = () => {
           </div>
         ) : categories.length === 0 && !loading ? (
           <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-12 text-center">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-r from-slate-600 to-slate-700 flex items-center justify-center shadow-lg">
               <HiMagnifyingGlass className="w-8 h-8 text-white" />
             </div>
             <h3 className="text-xl font-semibold text-slate-800 mb-2">No categories found</h3>
             <p className="text-slate-600 mb-6">
               {searchTerm ? 'Try a different search term.' : 'Add your first category to get started'}
             </p>
-            <Link
+            {/* <Link
               to="/add-category"
               className="inline-flex items-center px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg"
             >
               <HiPlus className="w-5 h-5 mr-2" />
               Add First Category
-            </Link>
+            </Link> */}
           </div>
         ) : (
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
@@ -399,7 +399,7 @@ const Category: React.FC = () => {
                         {category.subcategories?.length > 0 ? (
                           <button
                             onClick={() => toggleExpand(category.id)}
-                            className="text-blue-600 hover:text-blue-800 font-medium"
+                            className="text-slate-600 hover:text-slate-800 font-medium"
                           >
                             {category.subcategories.length} {expandedCategories.includes(category.id) ? '▼' : '►'}
                           </button>

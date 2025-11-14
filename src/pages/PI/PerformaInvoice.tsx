@@ -207,7 +207,7 @@ const PerformaInvoice: React.FC = () => {
           </div>
         ) : filteredPIs.length === 0 ? (
           <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-12 text-center">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-slate-600 flex items-center justify-center shadow-lg">
               <HiMagnifyingGlass className="w-8 h-8 text-white" />
             </div>
             <h3 className="text-xl font-semibold text-slate-800 mb-2">No invoices found</h3>
@@ -216,13 +216,13 @@ const PerformaInvoice: React.FC = () => {
                 ? 'Try adjusting your search or filters.' 
                 : 'Create your first invoice to get started.'}
             </p>
-            <Link
+            {/* <Link
               to="/add-pi"
               className="inline-flex items-center px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg"
             >
               <HiPlus className="w-5 h-5 mr-2" />
               Create Invoice
-            </Link>
+            </Link> */}
           </div>
         ) : (
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-visible">
