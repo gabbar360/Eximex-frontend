@@ -2569,44 +2569,24 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="p-4 lg:p-6 pt-6 sm:pt-8 lg:pt-12 pb-6 sm:pb-8 lg:pb-12">
-        <PageMeta
-          title={`${
-            isEditMode ? 'Edit' : 'New'
-          } Proforma Invoice | EximEx Dashboard`}
-          description={`${
-            isEditMode ? 'Edit' : 'Create'
-          } a proforma invoice in your EximEx Dashboard`}
-        />
-        <PageBreadcrumb
-          pageTitle={`${isEditMode ? 'Edit' : 'New'} Proforma Invoice`}
-        />
-
+      <div className="p-2 lg:p-4">
         {/* Header */}
-        <div className="mb-6">
-          <div className="bg-white rounded-lg border border-gray-200 p-6 lg:p-8">
+        <div className="mb-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 lg:p-4">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
               <div className="flex items-center gap-4">
-                <div className="p-3 rounded-lg bg-slate-700">
-                  <FontAwesomeIcon icon={faPlus} className="w-6 h-6 text-white" />
-                </div>
+                <button
+                  onClick={() => navigate('/proforma-invoices')}
+                  className="p-3 rounded-lg bg-slate-700 text-white hover:bg-slate-800 transition-all duration-300 hover:shadow-lg"
+                >
+                  <FontAwesomeIcon icon={faChevronLeft} className="w-5 h-5" />
+                </button>
                 <div>
-                  <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-1">
-                    {isEditMode ? 'Edit Proforma Invoice' : 'New Proforma Invoice'}
+                  <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
+                    {isEditMode ? 'Edit Proforma Invoice' : 'Add New Proforma Invoice'}
                   </h1>
-                  {/* <p className="text-gray-600 text-sm lg:text-base">
-                    {isEditMode ? 'Update your proforma invoice details' : 'Create a new proforma invoice for your client'}
-                  </p> */}
                 </div>
               </div>
-              
-              {/* <button
-                onClick={() => navigate('/proforma-invoices')}
-                className="inline-flex items-center px-4 sm:px-6 py-3 rounded-lg font-semibold text-gray-600 bg-white border border-gray-300 text-sm sm:text-base"
-              >
-                <FontAwesomeIcon icon={faTimes} className="w-4 h-4 mr-2" />
-                Cancel
-              </button> */}
             </div>
           </div>
         </div>
