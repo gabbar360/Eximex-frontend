@@ -479,18 +479,12 @@ const AddEditPackingList = () => {
       const netWeightPerBox = totalWeightFromPI / piQuantity;
       netWeightKg = qty * netWeightPerBox;
 
-      // Get gross weight from product data (in grams, convert to kg)
+      // Calculate gross weight using actual box weight
       const product = productData.product || productData;
-      const grossWeightPerBoxGrams =
-        product.grossWeightPerBox || product.totalGrossWeight || 0;
-      const grossWeightPerBoxKg = grossWeightPerBoxGrams / 1000; // Convert grams to kg
-
-      if (grossWeightPerBoxKg > 0) {
-        grossWeightKg = qty * grossWeightPerBoxKg;
-      } else {
-        // Fallback: use net weight + 10% packaging
-        grossWeightKg = netWeightKg * 1.1;
-      }
+      const boxWeightGrams = product.packagingMaterialWeight; // grams per box
+      const boxWeightKg = boxWeightGrams / 1000; // Convert to kg
+      
+      grossWeightKg = netWeightKg + (qty * boxWeightKg);
     } else {
       // If unit is Pcs, calculate boxes needed
       const product = productData.product || productData;
@@ -506,15 +500,11 @@ const AddEditPackingList = () => {
       const netWeightGrams = qty * unitWeight;
       netWeightKg = netWeightGrams / 1000;
 
-      // Calculate gross weight (net weight + packaging)
-      const packagingMaterialWeight = product.packagingMaterialWeight || 700; // grams
-      const packagingUnit = product.packagingMaterialWeightUnit || 'g';
-      const packagingWeightPerBoxKg = packagingUnit === 'kg' 
-        ? packagingMaterialWeight 
-        : packagingMaterialWeight / 1000;
+      // Calculate gross weight (net weight + actual box weight)
+      const boxWeightGrams = product.packagingMaterialWeight || product.boxWeight || 700; // grams per box
+      const boxWeightKg = boxWeightGrams / 1000; // Convert to kg
       
-      const packagingWeightTotal = boxesNeeded * packagingWeightPerBoxKg;
-      grossWeightKg = netWeightKg + packagingWeightTotal;
+      grossWeightKg = netWeightKg + (boxesNeeded * boxWeightKg);
     }
 
     // Calculate volume if available
@@ -1110,8 +1100,11 @@ const AddEditPackingList = () => {
                                     'netWeight',
                                     totalNetWeight.toFixed(2)
                                   );
-                                  // Auto-calculate gross weight (net weight + 10% packaging)
-                                  const totalGrossWeight = totalNetWeight * 1.1;
+                                  // Auto-calculate gross weight using box weight
+                                  const productInfo = product.productData?.product || product.productData || {};
+                                  const boxWeightGrams = productInfo.packagingMaterialWeight || productInfo.boxWeight || 700;
+                                  const boxWeightKg = boxWeightGrams / 1000;
+                                  const totalGrossWeight = totalNetWeight + (parseFloat(e.target.value) * boxWeightKg);
                                   updateProductInContainer(
                                     containerIndex,
                                     productIndex,
@@ -1145,8 +1138,11 @@ const AddEditPackingList = () => {
                                     'netWeight',
                                     totalNetWeight.toFixed(2)
                                   );
-                                  // Auto-calculate gross weight (net weight + 10% packaging)
-                                  const totalGrossWeight = totalNetWeight * 1.1;
+                                  // Auto-calculate gross weight using box weight
+                                  const productInfo = product.productData?.product || product.productData || {};
+                                  const boxWeightGrams = productInfo.packagingMaterialWeight || productInfo.boxWeight || 700;
+                                  const boxWeightKg = boxWeightGrams / 1000;
+                                  const totalGrossWeight = totalNetWeight + (parseFloat(product.noOfBoxes) * boxWeightKg);
                                   updateProductInContainer(
                                     containerIndex,
                                     productIndex,
@@ -1175,9 +1171,14 @@ const AddEditPackingList = () => {
                                   'netWeight',
                                   e.target.value
                                 );
-                                // Auto-calculate gross weight when net weight changes
-                                if (e.target.value) {
-                                  const grossWeight = parseFloat(e.target.value) * 1.1;
+                                // Auto-calculate gross weight using box weight
+                                if (e.target.value && product.productData) {
+                                  const netWeight = parseFloat(e.target.value);
+                                  const boxes = parseFloat(product.noOfBoxes) || 0;
+                                  const productInfo = product.productData.product || product.productData;
+                                  const boxWeightGrams = productInfo.packagingMaterialWeight || productInfo.boxWeight || 700;
+                                  const boxWeightKg = boxWeightGrams / 1000;
+                                  const grossWeight = netWeight + (boxes * boxWeightKg);
                                   updateProductInContainer(
                                     containerIndex,
                                     productIndex,
