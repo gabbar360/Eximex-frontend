@@ -73,14 +73,14 @@ const PackagingUnitDropdown: React.FC<{
       <button
         type="button"
         id={id}
-        className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm shadow-theme-xs text-left focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
+        className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm shadow-sm text-left focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200 transition-all duration-300"
         onClick={() => setIsOpen(!isOpen)}
       >
         <span
           className={
             selectedOption
-              ? 'text-gray-900 dark:text-white/90'
-              : 'text-gray-400 dark:text-white/30'
+              ? 'text-slate-800'
+              : 'text-slate-400'
           }
         >
           {selectedOption
@@ -103,14 +103,14 @@ const PackagingUnitDropdown: React.FC<{
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-60 overflow-hidden">
-          <div className="p-2 border-b border-gray-200 dark:border-gray-700">
+        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-hidden">
+          <div className="p-2 border-b border-gray-200">
             <input
               type="text"
               placeholder="Search units..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500 dark:bg-gray-800 dark:text-white"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300"
               autoFocus
             />
           </div>
@@ -120,10 +120,10 @@ const PackagingUnitDropdown: React.FC<{
                 <button
                   key={option.id}
                   type="button"
-                  className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-800 ${
+                  className={`w-full px-4 py-2 text-left text-sm hover:bg-slate-50 transition-colors ${
                     value === option.id.toString()
-                      ? 'bg-brand-50 text-brand-600 dark:bg-brand-900/20 dark:text-brand-400'
-                      : 'text-gray-900 dark:text-white/90'
+                      ? 'bg-slate-50 text-slate-700'
+                      : 'text-slate-700'
                   }`}
                   onClick={() => handleSelect(option.id.toString())}
                 >
@@ -131,7 +131,7 @@ const PackagingUnitDropdown: React.FC<{
                 </button>
               ))
             ) : (
-              <div className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
+              <div className="px-4 py-2 text-sm text-slate-500">
                 No units found
               </div>
             )}
@@ -304,7 +304,7 @@ const PackagingDetailsSection: React.FC<PackagingDetailsSectionProps> = ({
   if (loading) {
     return (
       <div className="flex justify-center items-center py-4">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-200 border-t-slate-600"></div>
       </div>
     );
   }
@@ -313,10 +313,10 @@ const PackagingDetailsSection: React.FC<PackagingDetailsSectionProps> = ({
     <div className="mt-8">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+          <h3 className="text-lg font-semibold text-slate-800">
             Packaging Details
           </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-sm text-slate-600 mt-1">
             Define packaging hierarchy for unit conversions (e.g., PCS → Box →
             Package → Pallet)
           </p>
@@ -324,14 +324,14 @@ const PackagingDetailsSection: React.FC<PackagingDetailsSectionProps> = ({
         <button
           type="button"
           onClick={addPackagingLevel}
-          className="px-3 py-1.5 bg-brand-500 text-white rounded-md text-sm hover:bg-brand-600"
+          className="px-3 py-1.5 bg-slate-700 text-white rounded-lg text-sm hover:bg-slate-800 transition-all duration-300 shadow-lg"
         >
           Add Level
         </button>
       </div>
 
       {packagingLevels.length === 0 && (
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+        <div className="text-center py-8 text-slate-500">
           <p>No packaging levels defined.</p>
           <p className="text-sm mt-1">
             Click "Add Level" to create packaging hierarchy.
@@ -342,10 +342,10 @@ const PackagingDetailsSection: React.FC<PackagingDetailsSectionProps> = ({
       {packagingLevels.map((level, index) => (
         <div
           key={index}
-          className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+          className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-4 p-4 border border-gray-200 rounded-lg shadow-sm"
         >
           <div className="md:col-span-1 flex items-center">
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <span className="text-sm font-medium text-slate-600">
               Level {index + 1}
             </span>
           </div>
@@ -364,7 +364,7 @@ const PackagingDetailsSection: React.FC<PackagingDetailsSectionProps> = ({
           </div>
 
           <div className="md:col-span-4 flex items-center justify-center">
-            <span className="text-gray-500 dark:text-gray-400">→</span>
+            <span className="text-slate-500">→</span>
           </div>
 
           <div className="md:col-span-3">
@@ -385,7 +385,7 @@ const PackagingDetailsSection: React.FC<PackagingDetailsSectionProps> = ({
               <button
                 type="button"
                 onClick={() => removePackagingLevel(index)}
-                className="px-2 py-2 bg-red-500 text-white rounded-md text-sm hover:bg-red-600 w-full"
+                className="px-2 py-2 bg-slate-500 text-white rounded-lg text-sm hover:bg-slate-800 transition-all duration-300 shadow-lg w-full"
               >
                 X
               </button>
@@ -395,11 +395,11 @@ const PackagingDetailsSection: React.FC<PackagingDetailsSectionProps> = ({
       ))}
 
       {packagingLevels.length > 0 && (
-        <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-          <h4 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">
+        <div className="mt-4 p-3 bg-slate-50 rounded-lg border border-gray-200">
+          <h4 className="text-sm font-medium text-slate-800 mb-2">
             Conversion Chain Preview:
           </h4>
-          <div className="text-sm text-blue-700 dark:text-blue-300">
+          <div className="text-sm text-slate-600">
             {packagingLevels
               .map((level, index) => {
                 const parentUnit = packagingUnits.find(

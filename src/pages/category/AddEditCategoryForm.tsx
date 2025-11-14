@@ -769,7 +769,7 @@ const AddEditCategoryForm: React.FC = () => {
                                 <button
                                   type="button"
                                   onClick={() => removeSubcategoryField(index)}
-                                  className="p-3 rounded-lg text-white bg-red-600 hover:bg-red-700 transition-all duration-300 shadow-lg"
+                                  className="p-3 rounded-lg text-white bg-slate-500 hover:bg-slate-800 transition-all duration-300 shadow-lg"
                                 >
                                   <HiTrash className="w-4 h-4" />
                                 </button>
