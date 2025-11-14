@@ -1,30 +1,47 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { fetchProducts, deleteProduct } from '../../features/productSlice';
 import { getAllCategories } from '../../features/categorySlice';
 import { HiEye, HiPencil, HiTrash, HiPlus, HiMagnifyingGlass, HiCube, HiTag, HiFunnel } from 'react-icons/hi2';
+import { Pagination } from 'antd';
 
 const Product: React.FC = () => {
   const dispatch = useDispatch();
-  const { products, loading, error } = useSelector(
+  const { products, loading, error, pagination } = useSelector(
     (state: any) => state.product
   );
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
-
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedSubCategory, setSelectedSubCategory] = useState('');
-  const itemsPerPage = 12;
 
   const { categories } = useSelector((state: any) => state.category);
 
   useEffect(() => {
-    dispatch(fetchProducts() as any);
+    if (!searchTerm) {
+      dispatch(fetchProducts({
+        page: currentPage,
+        limit: pageSize,
+        search: ''
+      }) as any);
+    }
+    dispatch(getAllCategories() as any);
+  }, [dispatch, currentPage, pageSize]);
+  
+  useEffect(() => {
+    dispatch(fetchProducts({
+      page: 1,
+      limit: 10,
+      search: ''
+    }) as any);
     dispatch(getAllCategories() as any);
   }, [dispatch]);
+  
+  const debounceTimer = React.useRef(null);
 
   useEffect(() => {
     if (error) {
@@ -32,9 +49,22 @@ const Product: React.FC = () => {
     }
   }, [error]);
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  };
+  const handleSearch = useCallback((value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+    
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+    
+    debounceTimer.current = setTimeout(() => {
+      dispatch(fetchProducts({
+        page: 1,
+        limit: pageSize,
+        search: value
+      }) as any);
+    }, 500);
+  }, [dispatch, pageSize]);
 
   const handleDeleteClick = (id: string) => {
     setConfirmDelete(id);
@@ -47,28 +77,27 @@ const Product: React.FC = () => {
       const result = await dispatch(
         deleteProduct(confirmDelete) as any
       ).unwrap();
-      toast.success(result.message);
       setConfirmDelete(null);
+      
+      dispatch(fetchProducts({
+        page: currentPage,
+        limit: pageSize,
+        search: searchTerm
+      }) as any);
+      
+      toast.success(result.message);
     } catch (error: any) {
       toast.error(error.message);
     }
   };
 
-  const filteredProducts = useMemo(() => {
-    const term = searchTerm.toLowerCase();
-    return Array.isArray(products)
-      ? products.filter((product: any) => {
-          const matchesSearch = product?.name?.toLowerCase().includes(term) ||
-            product?.sku?.toLowerCase().includes(term) ||
-            product?.category?.name?.toLowerCase().includes(term);
-          
-          const matchesCategory = !selectedCategory || product?.categoryId?.toString() === selectedCategory;
-          const matchesSubCategory = !selectedSubCategory || product?.subCategoryId?.toString() === selectedSubCategory;
-          
-          return matchesSearch && matchesCategory && matchesSubCategory;
-        })
-      : [];
-  }, [searchTerm, products, selectedCategory, selectedSubCategory]);
+  useEffect(() => {
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
+  }, []);
 
   const availableSubCategories = useMemo(() => {
     if (!selectedCategory || !categories) return [];
@@ -81,12 +110,6 @@ const Product: React.FC = () => {
     setSelectedSubCategory('');
     setCurrentPage(1);
   };
-
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-  const currentProducts = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return filteredProducts.slice(start, start + itemsPerPage);
-  }, [filteredProducts, currentPage]);
   const getProductTypeLabel = (type: string) => {
     const types: Record<string, string> = {
       tiles: 'Tiles',
@@ -147,10 +170,7 @@ const Product: React.FC = () => {
                       placeholder="Search products..."
                       className="pl-12 pr-4 py-3 w-full sm:w-64 rounded-lg border border-gray-300 bg-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-all duration-300 text-sm placeholder-gray-500 shadow-sm"
                       value={searchTerm}
-                      onChange={(e) => {
-                        setSearchTerm(e.target.value);
-                        setCurrentPage(1);
-                      }}
+                      onChange={(e) => handleSearch(e.target.value)}
                     />
                   </div>
                   
@@ -205,9 +225,9 @@ const Product: React.FC = () => {
         </div>
 
         {/* Products Display */}
-        {filteredProducts.length === 0 ? (
-          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-12 text-center">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-lg bg-slate-700 flex items-center justify-center shadow-lg">
+        {products.length === 0 && !loading ? (
+          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-12 text-center">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg">
               <HiMagnifyingGlass className="w-8 h-8 text-white" />
             </div>
             <h3 className="text-xl font-semibold text-slate-800 mb-2">No products found</h3>
@@ -257,9 +277,9 @@ const Product: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="divide-y divide-gray-200">
-                {currentProducts.map((product: any) => (
-                  <div key={product.id} className="p-4 hover:bg-gray-50 transition-all duration-300">
+              <div className="divide-y divide-white/20">
+                {products.map((product: any) => (
+                  <div key={product.id} className="p-4 hover:bg-white/50 transition-all duration-300">
                     <div className="grid grid-cols-7 gap-3 items-center">
                       {/* Product Name */}
                       <div className="flex items-center gap-2">
@@ -358,9 +378,9 @@ const Product: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="divide-y divide-gray-200">
-                    {currentProducts.map((product: any) => (
-                      <div key={product.id} className="p-4 hover:bg-gray-50 transition-all duration-300">
+                  <div className="divide-y divide-white/20">
+                    {products.map((product: any) => (
+                      <div key={product.id} className="p-4 hover:bg-white/50 transition-all duration-300">
                         <div className="grid grid-cols-7 gap-3 items-center">
                           {/* Product Name */}
                           <div className="flex items-center gap-2">
@@ -426,43 +446,22 @@ const Product: React.FC = () => {
           </div>
         )}
 
-        {/* Pagination */}
-        {filteredProducts.length > 0 && (
-          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 mt-6">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-slate-600">
-                Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredProducts.length)} of {filteredProducts.length} products
-              </p>
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="px-4 py-2 rounded-lg border border-gray-300 text-slate-600 hover:bg-slate-700 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:shadow-lg"
-                >
-                  Previous
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`px-4 py-2 rounded-lg transition-all duration-300 ${
-                      currentPage === page
-                        ? 'bg-slate-700 text-white font-semibold shadow-lg'
-                        : 'text-slate-600 hover:bg-slate-700 hover:text-white hover:shadow-lg'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-                <button
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages}
-                  className="px-4 py-2 rounded-lg border border-gray-300 text-slate-600 hover:bg-slate-700 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:shadow-lg"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
+        {/* Simple Pagination */}
+        {pagination.total > 0 && (
+          <div className="flex justify-center mt-6">
+            <Pagination 
+              current={currentPage} 
+              total={pagination.total} 
+              pageSize={pageSize}
+              onChange={(page) => {
+                setCurrentPage(page);
+                dispatch(fetchProducts({
+                  page: page,
+                  limit: pageSize,
+                  search: searchTerm
+                }) as any);
+              }}
+            />
           </div>
         )}
       </div>

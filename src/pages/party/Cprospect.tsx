@@ -1,35 +1,50 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { fetchParties, deleteParty } from '../../features/partySlice';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { HiEye, HiPencil, HiTrash, HiPlus, HiMagnifyingGlass, HiBuildingOffice2, HiUsers } from 'react-icons/hi2';
 import { toast } from 'react-toastify';
+import { Pagination } from 'antd';
+
 
 
 
 const Cprospect = () => {
   const dispatch = useDispatch();
-  const [parties, setParties] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { parties, loading, error, pagination } = useSelector((state) => state.party);
   const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState(null);
-  const itemsPerPage = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
 
   useEffect(() => {
-    const loadParties = async () => {
-      try {
-        const response = await dispatch(fetchParties()).unwrap();
-        setParties(response?.data || []);
-      } catch (err) {
-        setError('Failed to fetch parties');
-      } finally {
-        setLoading(false);
+    // Only fetch when page or pageSize changes, not searchTerm (handled by debounced search)
+    if (!searchTerm) {
+      dispatch(fetchParties({
+        page: currentPage,
+        limit: pageSize,
+        search: ''
+      }));
+    }
+  }, [dispatch, currentPage, pageSize]);
+  
+  // Initial load
+  useEffect(() => {
+    dispatch(fetchParties({
+      page: 1,
+      limit: 6,
+      search: ''
+    }));
+  }, [dispatch]);
+  
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
       }
     };
-    loadParties();
-  }, [dispatch]);
+  }, []);
 
 
 
@@ -42,35 +57,54 @@ const Cprospect = () => {
 
     try {
       const response = await dispatch(deleteParty(confirmDelete)).unwrap();
-      setParties((prev) => prev.filter((p) => p.id !== confirmDelete));
       setConfirmDelete(null);
+      
+      // Reload current page data after deletion
+      dispatch(fetchParties({
+        page: currentPage,
+        limit: pageSize,
+        search: searchTerm
+      }));
 
       const message = response?.message || 'Party deleted successfully';
       toast.success(message);
     } catch (err) {
       const errorMessage = err.message || 'Failed to delete party';
-      setError(errorMessage);
       toast.error(errorMessage);
     }
   };
 
 
 
-  const filteredParties = useMemo(() => {
-    const term = searchTerm.toLowerCase();
-    return parties.filter(
-      (p) =>
-        p.companyName.toLowerCase().includes(term) ||
-        p.contactPerson.toLowerCase().includes(term) ||
-        p.email.toLowerCase().includes(term)
-    );
-  }, [searchTerm, parties]);
+  const handlePageChange = (page, size) => {
+    setCurrentPage(page);
+    if (size !== pageSize) {
+      setPageSize(size);
+      setCurrentPage(1); // Reset to first page when changing page size
+    }
+  };
 
-  const totalPages = Math.ceil(filteredParties.length / itemsPerPage);
-  const currentParties = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return filteredParties.slice(start, start + itemsPerPage);
-  }, [filteredParties, currentPage]);
+  // Debounced search function
+  const debounceTimer = React.useRef(null);
+  
+  const handleSearch = useCallback((value) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+    
+    // Clear existing timer
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+    
+    // Set new timer for debounced search
+    debounceTimer.current = setTimeout(() => {
+      dispatch(fetchParties({
+        page: 1,
+        limit: pageSize,
+        search: value
+      }));
+    }, 500);
+  }, [dispatch, pageSize]);
 
   if (loading) {
     return (
@@ -78,6 +112,37 @@ const Cprospect = () => {
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8 text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-slate-600 mx-auto mb-4"></div>
           <p className="text-slate-600 font-medium">Loading prospects...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-8 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-blue-500 mx-auto mb-4"></div>
+          <p className="text-slate-600 font-medium">Loading prospects...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-8 text-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-r from-red-500 to-pink-600 flex items-center justify-center shadow-lg">
+            <HiTrash className="w-8 h-8 text-white" />
+          </div>
+          <h3 className="text-xl font-bold text-slate-800 mb-2">Error Loading Prospects</h3>
+          <p className="text-slate-600 mb-4">{error}</p>
+          <button
+            onClick={() => dispatch(fetchParties({ page: 1, limit: pageSize, search: '' }))}
+            className="px-6 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg"
+          >
+            Retry
+          </button>
         </div>
       </div>
     );
@@ -109,10 +174,7 @@ const Cprospect = () => {
                     placeholder="Search prospects..."
                     className="pl-12 pr-4 py-3 w-full sm:w-72 rounded-lg border border-gray-300 bg-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-all duration-300 text-sm placeholder-gray-500 shadow-sm"
                     value={searchTerm}
-                    onChange={(e) => {
-                      setSearchTerm(e.target.value);
-                      setCurrentPage(1);
-                    }}
+                    onChange={(e) => handleSearch(e.target.value)}
                   />
                 </div>
                 
@@ -129,9 +191,9 @@ const Cprospect = () => {
         </div>
 
         {/* Cards Grid */}
-        {filteredParties.length === 0 ? (
-          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-12 text-center">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-lg bg-slate-700 flex items-center justify-center shadow-lg">
+        {parties.length === 0 && !loading ? (
+          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-12 text-center">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg">
               <HiMagnifyingGlass className="w-8 h-8 text-white" />
             </div>
             <h3 className="text-xl font-semibold text-slate-800 mb-2">No prospects found</h3>
@@ -146,7 +208,7 @@ const Cprospect = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 lg:gap-6">
-            {currentParties.map((party) => (
+            {parties.map((party) => (
               <div
                 key={party.id}
                 className="group bg-white rounded-lg border border-gray-200 shadow-sm p-6 transition-all duration-300 hover:shadow-lg hover:border-gray-300"
@@ -224,43 +286,22 @@ const Cprospect = () => {
           </div>
         )}
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 mt-6">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-slate-600">
-                Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredParties.length)} of {filteredParties.length} prospects
-              </p>
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="px-4 py-2 rounded-lg border border-gray-300 text-slate-600 hover:bg-slate-700 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:shadow-lg"
-                >
-                  Previous
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`px-4 py-2 rounded-lg transition-all duration-300 ${
-                      currentPage === page
-                        ? 'bg-slate-700 text-white font-semibold shadow-lg'
-                        : 'text-slate-600 hover:bg-slate-700 hover:text-white hover:shadow-lg'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-                <button
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages}
-                  className="px-4 py-2 rounded-lg border border-gray-300 text-slate-600 hover:bg-slate-700 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:shadow-lg"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
+        {/* Simple Pagination */}
+        {pagination.total > 0 && (
+          <div className="flex justify-center mt-6">
+            <Pagination 
+              current={currentPage} 
+              total={pagination.total} 
+              pageSize={pageSize}
+              onChange={(page) => {
+                setCurrentPage(page);
+                dispatch(fetchParties({
+                  page: page,
+                  limit: pageSize,
+                  search: searchTerm
+                }));
+              }}
+            />
           </div>
         )}
       </div>

@@ -5,11 +5,9 @@ export const fetchProducts = createAsyncThunk(
   'product/fetchProducts',
   async (params = {}, { rejectWithValue }) => {
     try {
-      // Set default limit to 100 to show more products
-      const queryParams = { limit: 100, ...params };
-      return await productService.getAllProducts(queryParams);
+      return await productService.getAllProducts(params);
     } catch (err) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.message || 'Failed to fetch products');
     }
   }
 );
@@ -71,6 +69,11 @@ const productSlice = createSlice({
     loading: false,
     error: null,
     selectedProduct: null,
+    pagination: {
+      current: 1,
+      pageSize: 10,
+      total: 0,
+    },
   },
   reducers: {
     setSelectedProduct(state, { payload }) {
@@ -88,7 +91,13 @@ const productSlice = createSlice({
       })
       .addCase(fetchProducts.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.products = payload?.data || [];
+        const responseData = payload?.data || payload;
+        state.products = responseData?.data || responseData || [];
+        state.pagination = {
+          current: responseData?.pagination?.page || 1,
+          pageSize: responseData?.pagination?.limit || 10,
+          total: responseData?.pagination?.total || 0,
+        };
       })
       .addCase(fetchProducts.rejected, (state, { payload }) => {
         state.loading = false;

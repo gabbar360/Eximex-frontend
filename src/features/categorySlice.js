@@ -3,11 +3,11 @@ import categoryService from '../service/categoryService';
 
 export const fetchCategories = createAsyncThunk(
   'category/fetchCategories',
-  async (_, { rejectWithValue }) => {
+  async (params = {}, { rejectWithValue }) => {
     try {
-      return await categoryService.getAllCategories();
+      return await categoryService.getAllCategories(params);
     } catch (err) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.message || 'Failed to fetch categories');
     }
   }
 );
@@ -77,6 +77,11 @@ const categorySlice = createSlice({
     loading: false,
     error: null,
     selectedCategory: null,
+    pagination: {
+      current: 1,
+      pageSize: 10,
+      total: 0,
+    },
   },
   reducers: {
     setSelectedCategory(state, { payload }) {
@@ -94,7 +99,13 @@ const categorySlice = createSlice({
       })
       .addCase(fetchCategories.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.categories = payload?.data || [];
+        const responseData = payload?.data || payload;
+        state.categories = responseData?.data || responseData || [];
+        state.pagination = {
+          current: responseData?.pagination?.page || 1,
+          pageSize: responseData?.pagination?.limit || 10,
+          total: responseData?.pagination?.total || 0,
+        };
       })
       .addCase(fetchCategories.rejected, (state, { payload }) => {
         state.loading = false;
