@@ -724,24 +724,23 @@ const AddEditProductForm = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="p-4 lg:p-6">
+      <div className="p-2 lg:p-4">
         {/* Header */}
-        <div className="mb-6">
-          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-            <div className="flex items-center gap-4 mb-4">
-              <button
-                onClick={() => navigate('/products')}
-                className="p-3 rounded-lg bg-slate-700 text-white hover:bg-slate-800 transition-all duration-300 hover:shadow-lg"
-              >
-                <HiArrowLeft className="w-5 h-5" />
-              </button>
-              <div>
-                <h1 className="text-2xl font-bold text-slate-800">
-                  {isEdit ? 'Edit Product' : 'Add New Product'}
-                </h1>
-                <p className="text-slate-600">
-                  {isEdit ? 'Update product information' : 'Create a new product'}
-                </p>
+        <div className="mb-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 lg:p-4">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => navigate('/products')}
+                  className="p-3 rounded-lg bg-slate-700 text-white hover:bg-slate-800 transition-all duration-300 hover:shadow-lg"
+                >
+                  <HiArrowLeft className="w-5 h-5" />
+                </button>
+                <div>
+                  <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
+                    {isEdit ? 'Edit Product' : 'Add New Product'}
+                  </h1>
+                </div>
               </div>
             </div>
           </div>
