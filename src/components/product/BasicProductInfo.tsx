@@ -39,7 +39,7 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 shadow-md">
+        <div className="p-2 rounded-lg bg-slate-700 shadow-lg">
           <HiCube className="w-5 h-5 text-white" />
         </div>
         <h4 className="text-lg font-semibold text-slate-800">
@@ -50,7 +50,7 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-            <HiTag className="w-4 h-4 mr-2 text-blue-600" />
+            <HiTag className="w-4 h-4 mr-2 text-slate-600" />
             Select Category *
           </label>
           <select
@@ -81,7 +81,7 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
                 setTrackVolume(false);
               }
             }}
-            className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
+            className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
             disabled={
               categoriesLoading || !categories || categories.length === 0
             }
@@ -116,14 +116,14 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
 
         <div>
           <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-            <HiTag className="w-4 h-4 mr-2 text-blue-600" />
+            <HiTag className="w-4 h-4 mr-2 text-slate-600" />
             Subcategory (Optional)
           </label>
           <select
             name="subCategoryId"
             value={values.subCategoryId}
             onChange={(e) => setFieldValue('subCategoryId', e.target.value)}
-            className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
+            className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
             disabled={!values.categoryId}
           >
             <option value="">Select Subcategory</option>
@@ -139,14 +139,14 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-            <HiCube className="w-4 h-4 mr-2 text-blue-600" />
+            <HiCube className="w-4 h-4 mr-2 text-slate-600" />
             Product Name *
           </label>
           <Field
             type="text"
             name="name"
             placeholder="Enter product name"
-            className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
+            className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
           />
           {touched.name && errors.name && (
             <div className="text-sm text-red-500 mt-1">{errors.name}</div>
@@ -155,14 +155,14 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
 
         <div>
           <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-            <HiTag className="w-4 h-4 mr-2 text-blue-600" />
+            <HiTag className="w-4 h-4 mr-2 text-slate-600" />
             SKU
           </label>
           <Field
             type="text"
             name="sku"
             placeholder="Enter SKU"
-            className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
+            className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
           />
         </div>
       </div>
@@ -170,14 +170,14 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-            <HiDocumentText className="w-4 h-4 mr-2 text-blue-600" />
+            <HiDocumentText className="w-4 h-4 mr-2 text-slate-600" />
             Description
           </label>
           <Field
             type="text"
             name="description"
             placeholder="Enter description"
-            className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
+            className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
           />
           {touched.description && errors.description && (
             <div className="text-sm text-red-500 mt-1">{errors.description}</div>
@@ -186,7 +186,7 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
 
         <div>
           <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-            <HiCurrencyDollar className="w-4 h-4 mr-2 text-blue-600" />
+            <HiCurrencyDollar className="w-4 h-4 mr-2 text-slate-600" />
             Price
           </label>
           <div className="flex">
@@ -196,12 +196,12 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
               step="any"
               min="0"
               placeholder="Enter price"
-              className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-l-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
+              className="w-full px-4 py-3 border border-gray-300 bg-white rounded-l-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
             />
             <Field
               as="select"
               name="currency"
-              className="px-3 py-3 border border-l-0 border-white/50 bg-white/60 backdrop-blur-sm rounded-r-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
+              className="px-3 py-3 border border-l-0 border-gray-300 bg-white rounded-r-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
             >
               <option value="USD">USD</option>
               <option value="EUR">EUR</option>

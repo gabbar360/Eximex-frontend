@@ -40,7 +40,7 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 shadow-md">
+        <div className="p-2 rounded-lg bg-slate-700 shadow-lg">
           <HiCube className="w-5 h-5 text-white" />
         </div>
         <h4 className="text-lg font-semibold text-slate-800">
@@ -50,7 +50,7 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
 
       {loadingCategory ? (
         <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-slate-200 border-t-blue-500 mx-auto mb-2"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-200 border-t-slate-600 mx-auto mb-2"></div>
           <p className="text-slate-600">Loading packaging details...</p>
         </div>
       ) : (
@@ -62,7 +62,7 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
               return (
                 <div key={index}>
                   <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-                    <HiRectangleGroup className="w-4 h-4 mr-2 text-blue-600" />
+                    <HiRectangleGroup className="w-4 h-4 mr-2 text-slate-600" />
                     {level.from} per {level.to}
                   </label>
                   <Field
@@ -70,7 +70,7 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
                     name={quantityField}
                     min="1"
                     placeholder={`Enter ${level.from} per ${level.to}`}
-                    className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
+                    className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     onChange={(e) =>
                       setFieldValue(quantityField, e.target.value)
                     }
@@ -86,7 +86,7 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-                <HiScale className="w-4 h-4 mr-2 text-blue-600" />
+                <HiScale className="w-4 h-4 mr-2 text-slate-600" />
                 Weight per Unit
               </label>
               <div className="flex">
@@ -112,7 +112,7 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
             </div>
             <div>
               <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-                <HiRectangleGroup className="w-4 h-4 mr-2 text-blue-600" />
+                <HiRectangleGroup className="w-4 h-4 mr-2 text-slate-600" />
                 Unit Type
               </label>
               <Field
@@ -141,7 +141,7 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-                <HiScale className="w-4 h-4 mr-2 text-blue-600" />
+                <HiScale className="w-4 h-4 mr-2 text-slate-600" />
                 {packagingHierarchy.length > 0
                   ? packagingHierarchy[packagingHierarchy.length - 1].to
                   : 'Box'}{' '}
@@ -177,7 +177,7 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
             </div>
             <div>
               <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-                <HiCube className="w-4 h-4 mr-2 text-blue-600" />
+                <HiCube className="w-4 h-4 mr-2 text-slate-600" />
                 {packagingHierarchy.length > 0
                   ? packagingHierarchy[packagingHierarchy.length - 1].to
                   : 'Box'}{' '}
@@ -218,8 +218,8 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
                   }
                 />
               </div>
-              <div className="mt-3 p-3 bg-blue-50 rounded-xl border border-blue-200">
-                <div className="text-sm font-medium text-blue-800">
+              <div className="mt-3 p-3 bg-slate-50 rounded-lg border border-gray-200">
+                <div className="text-sm font-medium text-slate-800">
                   Volume: {(
                     (values.packagingLength || 0) *
                     (values.packagingWidth || 0) *
@@ -259,7 +259,7 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
           {trackVolume && (
             <div>
               <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-                <HiCube className="w-4 h-4 mr-2 text-blue-600" />
+                <HiCube className="w-4 h-4 mr-2 text-slate-600" />
                 {packagingHierarchy.length > 0
                   ? packagingHierarchy[packagingHierarchy.length - 1].to
                   : 'Box'}{' '}
