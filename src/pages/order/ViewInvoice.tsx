@@ -17,6 +17,7 @@ import { toast } from 'react-toastify';
 import { fetchOrderById, downloadOrderInvoicePdf } from '../../features/orderSlice';
 
 import PageMeta from '../../components/common/PageMeta';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
 const ViewInvoice: React.FC = () => {
   const { id } = useParams();
@@ -140,10 +141,10 @@ const ViewInvoice: React.FC = () => {
             <button
               onClick={handleDownloadPdf}
               disabled={downloading}
-              className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm flex-1 sm:flex-none"
+              className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm flex-1 sm:flex-none"
             >
               {downloading ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <LoadingSpinner size="small" message="" />
               ) : (
                 <FontAwesomeIcon icon={faDownload} />
               )}

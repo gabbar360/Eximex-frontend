@@ -118,7 +118,7 @@ const PIHistory: React.FC = () => {
                   <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
                     Proforma Invoice History
                   </h1>
-                  <p className="text-sm sm:text-base text-gray-600">Track all changes and activities for this invoice</p>
+                  {/* <p className="text-sm sm:text-base text-gray-600">Track all changes and activities for this invoice</p> */}
                 </div>
               </div>
             </div>

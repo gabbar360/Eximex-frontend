@@ -469,9 +469,9 @@ const AddEditCategoryForm: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-8 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-blue-500 mx-auto mb-4"></div>
+      <div className="min-h-screen flex justify-center items-center bg-gray-50">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-slate-600 mx-auto mb-4"></div>
           <p className="text-slate-600 font-medium">Loading...</p>
         </div>
       </div>
@@ -480,9 +480,9 @@ const AddEditCategoryForm: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-8 text-center max-w-md">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-r from-red-500 to-pink-600 flex items-center justify-center shadow-lg">
+      <div className="min-h-screen flex justify-center items-center bg-gray-50">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8 text-center max-w-md">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-red-600 flex items-center justify-center shadow-lg">
             <HiDocumentText className="w-8 h-8 text-white" />
           </div>
           <h3 className="text-xl font-bold text-slate-800 mb-2">Error</h3>
@@ -493,15 +493,15 @@ const AddEditCategoryForm: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gray-50">
       <div className="p-4 lg:p-6">
         {/* Header */}
         <div className="mb-6">
-          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-6">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
             <div className="flex items-center gap-4 mb-4">
               <button
                 onClick={() => navigate('/categories')}
-                className="p-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 hover:shadow-lg hover:scale-105 transform"
+                className="p-3 rounded-lg bg-slate-700 text-white hover:bg-slate-800 transition-all duration-300 hover:shadow-lg"
               >
                 <HiArrowLeft className="w-5 h-5" />
               </button>
@@ -518,7 +518,7 @@ const AddEditCategoryForm: React.FC = () => {
         </div>
 
         {/* Form */}
-        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-6 lg:p-8">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 lg:p-8">
 
           <Formik
             enableReinitialize
@@ -561,7 +561,7 @@ const AddEditCategoryForm: React.FC = () => {
                   {/* Category Name */}
                   <div>
                     <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-                      <MdCategory className="w-4 h-4 mr-2 text-blue-600" />
+                      <MdCategory className="w-4 h-4 mr-2 text-slate-600" />
                       Category Name
                     </label>
                     <input
@@ -571,7 +571,7 @@ const AddEditCategoryForm: React.FC = () => {
                       value={values.name}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
+                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     />
                     {touched.name && errors.name && (
                       <div className="text-sm text-red-500 mt-1">{errors.name}</div>
@@ -581,7 +581,7 @@ const AddEditCategoryForm: React.FC = () => {
                   {/* HSN Code */}
                   <div>
                     <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-                      <FaBarcode className="w-4 h-4 mr-2 text-blue-600" />
+                      <FaBarcode className="w-4 h-4 mr-2 text-slate-600" />
                       HSN Code
                     </label>
                     <input
@@ -591,7 +591,7 @@ const AddEditCategoryForm: React.FC = () => {
                       value={values.hsn_code}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
+                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     />
                     {touched.hsn_code && errors.hsn_code && (
                       <div className="text-sm text-red-500 mt-1">{errors.hsn_code}</div>
@@ -601,7 +601,7 @@ const AddEditCategoryForm: React.FC = () => {
                   {/* Primary Unit */}
                   <div>
                     <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-                      <FaCubes className="w-4 h-4 mr-2 text-blue-600" />
+                      <FaCubes className="w-4 h-4 mr-2 text-slate-600" />
                       Primary Unit
                     </label>
                     <UnitDropdown
@@ -619,7 +619,7 @@ const AddEditCategoryForm: React.FC = () => {
                   {/* Secondary Unit */}
                   <div>
                     <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-                      <BiPackage className="w-4 h-4 mr-2 text-blue-600" />
+                      <BiPackage className="w-4 h-4 mr-2 text-slate-600" />
                       Secondary Unit
                     </label>
                     <UnitDropdown
@@ -637,7 +637,7 @@ const AddEditCategoryForm: React.FC = () => {
                   {/* Description */}
                   <div className="md:col-span-2">
                     <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-                      <MdDescription className="w-4 h-4 mr-2 text-blue-600" />
+                      <MdDescription className="w-4 h-4 mr-2 text-slate-600" />
                       Description
                     </label>
                     <textarea
@@ -647,7 +647,7 @@ const AddEditCategoryForm: React.FC = () => {
                       value={values.desc}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
+                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     />
                     {touched.desc && errors.desc && (
                       <div className="text-sm text-red-500 mt-1">{errors.desc}</div>
@@ -659,13 +659,13 @@ const AddEditCategoryForm: React.FC = () => {
                 <div className="mt-8">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
                     <h3 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
-                      <FaLayerGroup className="w-5 h-5 text-blue-600" />
+                      <FaLayerGroup className="w-5 h-5 text-slate-600" />
                       Subcategories
                     </h3>
                     <button
                       type="button"
                       onClick={addSubcategoryField}
-                      className="inline-flex items-center justify-center px-3 sm:px-4 py-2 sm:py-2 rounded-2xl font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg transition-all duration-300 hover:scale-105 transform text-sm sm:text-base whitespace-nowrap"
+                      className="inline-flex items-center justify-center px-3 sm:px-4 py-2 sm:py-2 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg transition-all duration-300 text-sm sm:text-base whitespace-nowrap"
                     >
                       <HiPlus className="w-4 h-4 mr-2" />
                       <span className="hidden xs:inline">Add Subcategory</span>
@@ -677,7 +677,7 @@ const AddEditCategoryForm: React.FC = () => {
                     {subcategories.map((subcategory, index) => (
                       <div
                         key={index}
-                        className="bg-white/50 backdrop-blur-sm rounded-2xl border border-white/30 p-6 shadow-sm"
+                        className="bg-gray-50 rounded-lg border border-gray-200 p-6 shadow-sm"
                       >
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div>
@@ -698,7 +698,7 @@ const AddEditCategoryForm: React.FC = () => {
                                 };
                                 setSubcategories(updatedSubcategories);
                               }}
-                              className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
+                              className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                             />
                           </div>
                           
@@ -719,7 +719,7 @@ const AddEditCategoryForm: React.FC = () => {
                                     };
                                     setSubcategories(updatedSubcategories);
                                   }}
-                                  className="w-4 h-4 rounded border-2 border-white/50 text-blue-600 focus:ring-blue-200"
+                                  className="w-4 h-4 rounded border-2 border-gray-300 text-slate-600 focus:ring-slate-200"
                                 />
                                 <span className="text-sm text-slate-600">Use parent's HSN</span>
                               </label>
@@ -738,7 +738,7 @@ const AddEditCategoryForm: React.FC = () => {
                                     };
                                     setSubcategories(updatedSubcategories);
                                   }}
-                                  className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
+                                  className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                                 />
                               )}
                             </div>
@@ -763,13 +763,13 @@ const AddEditCategoryForm: React.FC = () => {
                                   };
                                   setSubcategories(updatedSubcategories);
                                 }}
-                                className="flex-1 px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
+                                className="flex-1 px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                               />
                               {subcategories.length > 1 && (
                                 <button
                                   type="button"
                                   onClick={() => removeSubcategoryField(index)}
-                                  className="p-3 rounded-2xl text-white bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 transition-all duration-300 hover:scale-105 transform shadow-lg"
+                                  className="p-3 rounded-lg text-white bg-red-600 hover:bg-red-700 transition-all duration-300 shadow-lg"
                                 >
                                   <HiTrash className="w-4 h-4" />
                                 </button>
@@ -792,18 +792,18 @@ const AddEditCategoryForm: React.FC = () => {
                 )}
 
                 {/* Buttons */}
-                <div className="flex items-center justify-end space-x-4 pt-6 border-t border-white/50">
+                <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
                   <button
                     type="button"
                     onClick={() => navigate('/categories')}
-                    className="px-6 py-3 rounded-2xl border border-white/50 text-slate-600 hover:bg-slate-50 transition-all duration-300 hover:scale-105 transform"
+                    className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50 transition-all duration-300"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="px-6 py-3 rounded-2xl font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 hover:shadow-xl hover:scale-105 transform disabled:opacity-50 shadow-lg"
+                    className="px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-xl disabled:opacity-50 shadow-lg"
                   >
                     {submitting ? (
                       <div className="flex items-center gap-2">

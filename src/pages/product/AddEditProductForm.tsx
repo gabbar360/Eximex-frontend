@@ -713,9 +713,9 @@ const AddEditProductForm = () => {
 
   if (!initialValues || loading || categoriesLoading) {
     return (
-      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-8 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-blue-500 mx-auto mb-4"></div>
+      <div className="min-h-screen flex justify-center items-center bg-gray-50">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-slate-600 mx-auto mb-4"></div>
           <p className="text-slate-600 font-medium">Loading...</p>
         </div>
       </div>
@@ -723,15 +723,15 @@ const AddEditProductForm = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gray-50">
       <div className="p-4 lg:p-6">
         {/* Header */}
         <div className="mb-6">
-          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-6">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
             <div className="flex items-center gap-4 mb-4">
               <button
                 onClick={() => navigate('/products')}
-                className="p-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 hover:shadow-lg hover:scale-105 transform"
+                className="p-3 rounded-lg bg-slate-700 text-white hover:bg-slate-800 transition-all duration-300 hover:shadow-lg"
               >
                 <HiArrowLeft className="w-5 h-5" />
               </button>
@@ -748,7 +748,7 @@ const AddEditProductForm = () => {
         </div>
 
         {/* Form */}
-        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-6 lg:p-8">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 lg:p-8">
 
         <Formik
           key={`formik-${isEdit ? product?.id || 'edit' : 'add'}`}
@@ -800,18 +800,18 @@ const AddEditProductForm = () => {
               />
 
               {/* Submit Buttons */}
-              <div className="flex items-center justify-end space-x-4 pt-6 border-t border-white/50">
+              <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
                 <button
                   type="button"
                   onClick={() => navigate('/products')}
-                  className="px-6 py-3 rounded-2xl border border-white/50 text-slate-600 hover:bg-slate-50 transition-all duration-300 hover:scale-105 transform"
+                  className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50 transition-all duration-300"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading || isSubmitting}
-                  className="px-6 py-3 rounded-2xl font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 hover:shadow-xl hover:scale-105 transform disabled:opacity-50 shadow-lg"
+                  className="px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-xl disabled:opacity-50 shadow-lg"
                 >
                   {loading || isSubmitting ? (
                     <div className="flex items-center gap-2">

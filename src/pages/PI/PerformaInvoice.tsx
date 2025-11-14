@@ -30,6 +30,7 @@ import {
   deletePiInvoice,
   downloadPiInvoicePdf,
 } from '../../features/piSlice';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
 
 const paymentTermNames: Record<string, string> = {
@@ -45,6 +46,7 @@ const PerformaInvoice: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [loading, setLoading] = useState<boolean>(true);
+  const [downloadingPdf, setDownloadingPdf] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
 
@@ -118,10 +120,10 @@ const PerformaInvoice: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
         
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Proforma Invoices</h1>
@@ -130,7 +132,7 @@ const PerformaInvoice: React.FC = () => {
             <div className="mt-4 sm:mt-0">
               <Link
                 to="/add-pi"
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                className="inline-flex items-center px-4 py-2 bg-slate-700 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors"
               >
                 <FontAwesomeIcon icon={faPlus} className="w-4 h-4 mr-2" />
                 New Invoice
@@ -144,8 +146,8 @@ const PerformaInvoice: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <div className="bg-white rounded-lg border border-gray-200 p-4">
               <div className="flex items-center">
-                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <FontAwesomeIcon icon={faFileInvoice} className="w-4 h-4 text-blue-600" />
+                <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
+                  <FontAwesomeIcon icon={faFileInvoice} className="w-4 h-4 text-slate-600" />
                 </div>
                 <div className="ml-3">
                   <p className="text-sm font-medium text-gray-600">Total</p>
@@ -209,7 +211,7 @@ const PerformaInvoice: React.FC = () => {
                 <input
                   type="text"
                   placeholder="Search invoices..."
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 text-sm"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -219,7 +221,7 @@ const PerformaInvoice: React.FC = () => {
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 text-sm bg-white"
               >
                 <option value="all">All Status</option>
                 <option value="draft">Draft</option>
@@ -234,7 +236,7 @@ const PerformaInvoice: React.FC = () => {
         {/* Content */}
         {loading ? (
           <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-200 border-t-blue-600 mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-200 border-t-slate-600 mx-auto mb-4"></div>
             <p className="text-gray-600">Loading invoices...</p>
           </div>
         ) : filteredPIs.length === 0 ? (
@@ -250,7 +252,7 @@ const PerformaInvoice: React.FC = () => {
             </p>
             <Link
               to="/add-pi"
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center px-4 py-2 bg-slate-700 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors"
             >
               <FontAwesomeIcon icon={faPlus} className="w-4 h-4 mr-2" />
               Create Invoice
@@ -266,8 +268,8 @@ const PerformaInvoice: React.FC = () => {
                   {/* Card Header */}
                   <div className="p-4 border-b border-gray-100">
                     <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <FontAwesomeIcon icon={faFileInvoice} className="w-5 h-5 text-blue-600" />
+                      <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center">
+                        <FontAwesomeIcon icon={faFileInvoice} className="w-5 h-5 text-slate-600" />
                       </div>
                       <div>
                         <h3 className="text-sm font-semibold text-gray-900">{pi.piNumber}</h3>
@@ -335,7 +337,7 @@ const PerformaInvoice: React.FC = () => {
                     <div className="flex items-center justify-center space-x-2">
                       <Link
                         to={`/pi-details/${pi.id}`}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        className="p-2 text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
                         title="View Details"
                       >
                         <FontAwesomeIcon icon={faEye} className="w-4 h-4" />
@@ -357,16 +359,26 @@ const PerformaInvoice: React.FC = () => {
                       <button
                         onClick={async () => {
                           try {
+                            setDownloadingPdf(pi.id);
+                            toast.info('Preparing PDF download...', { autoClose: 2000 });
                             await dispatch(downloadPiInvoicePdf(pi.id)).unwrap();
-                            toast.success('PDF downloaded');
+                            toast.success('PDF downloaded successfully');
                           } catch (error) {
+                            console.error('Error downloading PDF:', error);
                             toast.error('Download failed');
+                          } finally {
+                            setDownloadingPdf(null);
                           }
                         }}
-                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                        disabled={downloadingPdf === pi.id}
+                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         title="Download PDF"
                       >
-                        <FontAwesomeIcon icon={faDownload} className="w-4 h-4" />
+                        {downloadingPdf === pi.id ? (
+                          <LoadingSpinner size="small" message="" />
+                        ) : (
+                          <FontAwesomeIcon icon={faDownload} className="w-4 h-4" />
+                        )}
                       </button>
                       <button
                         onClick={() => navigate(`/proforma-invoices/${pi.id}/email`)}
@@ -395,10 +407,10 @@ const PerformaInvoice: React.FC = () => {
 
       {/* Delete Confirmation Modal */}
       {confirmDelete && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl max-w-md w-full p-8 border border-white/30">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-8 border border-gray-200">
             <div className="text-center mb-6">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-red-500 flex items-center justify-center shadow-lg">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-red-600 flex items-center justify-center shadow-lg">
                 <FontAwesomeIcon icon={faTrash} className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-slate-800 mb-2">Delete Invoice</h3>
@@ -407,13 +419,13 @@ const PerformaInvoice: React.FC = () => {
             <div className="flex items-center justify-center space-x-3">
               <button
                 onClick={() => setConfirmDelete(null)}
-                className="px-6 py-3 rounded-2xl border border-white/50 text-slate-600 hover:bg-slate-50"
+                className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleDelete(confirmDelete)}
-                className="px-6 py-3 rounded-2xl bg-red-500 text-white hover:bg-red-600 shadow-lg"
+                className="px-6 py-3 rounded-lg bg-red-600 text-white hover:bg-red-700 shadow-lg"
               >
                 Delete
               </button>

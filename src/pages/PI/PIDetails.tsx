@@ -27,6 +27,7 @@ import {
   updatePiAmount,
   downloadPiInvoicePdf
 } from '../../features/piSlice';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
 
 const PIDetails: React.FC = () => {
@@ -35,6 +36,7 @@ const PIDetails: React.FC = () => {
   const dispatch = useDispatch();
   const [piData, setPiData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [paymentReceived, setPaymentReceived] = useState<boolean | null>(null);
   const [paymentAmount, setPaymentAmount] = useState<string>('');
@@ -220,11 +222,30 @@ const PIDetails: React.FC = () => {
                 <span className="hidden sm:inline">Edit</span>
               </button> */}
               <button
-                onClick={() => dispatch(downloadPiInvoicePdf(id))}
-                className="px-3 sm:px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                onClick={async () => {
+                  try {
+                    setDownloadingPdf(true);
+                    toast.info('Preparing PDF download...', { autoClose: 2000 });
+                    await dispatch(downloadPiInvoicePdf(id)).unwrap();
+                    toast.success('PDF downloaded successfully');
+                  } catch (error) {
+                    console.error('Error downloading PDF:', error);
+                    toast.error('Failed to download PDF');
+                  } finally {
+                    setDownloadingPdf(false);
+                  }
+                }}
+                disabled={downloadingPdf}
+                className="px-3 sm:px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <FontAwesomeIcon icon={faDownload} className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">Download</span>
+                {downloadingPdf ? (
+                  <LoadingSpinner size="small" />
+                ) : (
+                  <>
+                    <FontAwesomeIcon icon={faDownload} className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Download</span>
+                  </>
+                )}
               </button>
               <button
                 onClick={() => navigate(`/proforma-invoices/${id}/email`)}
