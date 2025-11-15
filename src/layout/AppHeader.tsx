@@ -54,11 +54,11 @@ const AppHeader: React.FC = () => {
     };
   }, []);
 
-  const sidebarWidth = isExpanded || isHovered ? '290px' : '90px';
+  const sidebarWidth = isExpanded || isHovered ? '240px' : '70px';
 
   return (
     <header 
-      className="fixed top-0 right-0 flex bg-white border-gray-200 z-50 dark:border-gray-800 dark:bg-gray-900 lg:border-b shadow-sm transition-all duration-300"
+      className="fixed top-0 right-0 flex bg-white border-gray-200 z-[60] dark:border-gray-800 dark:bg-gray-900 lg:border-b shadow-sm transition-all duration-300"
       style={{
         left: isDesktop ? sidebarWidth : '0',
         width: isDesktop ? `calc(100% - ${sidebarWidth})` : '100%'
