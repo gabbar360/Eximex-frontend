@@ -11,7 +11,7 @@ import { Pagination } from 'antd';
 
 const Cprospect = () => {
   const dispatch = useDispatch();
-  const { parties, loading, error, pagination } = useSelector((state) => state.party);
+  const { parties = [], loading = false, error = null, pagination = {} } = useSelector((state) => state.party || {});
   const [searchTerm, setSearchTerm] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -191,7 +191,7 @@ const Cprospect = () => {
         </div>
 
         {/* Cards Grid */}
-        {parties.length === 0 && !loading ? (
+        {(!parties || parties.length === 0) && !loading ? (
           <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-12 text-center">
             <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-r from-slate-600 to-slate-700 flex items-center justify-center shadow-lg">
               <HiMagnifyingGlass className="w-8 h-8 text-white" />
@@ -208,7 +208,7 @@ const Cprospect = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 lg:gap-6">
-            {parties.map((party) => (
+            {parties && parties.map((party) => (
               <div
                 key={party.id}
                 className="group bg-white rounded-lg border border-gray-200 shadow-sm p-6 transition-all duration-300 hover:shadow-lg hover:border-gray-300"
@@ -287,7 +287,7 @@ const Cprospect = () => {
         )}
 
         {/* Simple Pagination */}
-        {pagination.total > 0 && (
+        {pagination && pagination.total > 0 && (
           <div className="flex justify-center mt-6">
             <Pagination 
               current={currentPage} 

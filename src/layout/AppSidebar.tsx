@@ -70,7 +70,13 @@ const getNavItems = (userRole: string): NavItem[] => [
         {
           icon: <MdShoppingCart className="w-4 h-4" />,
           name: 'Orders',
-          path: '/orders',
+          subItems: [
+            { name: 'All Orders', path: '/orders' },
+            { name: 'Shipments', path: '/orders/shipments' },
+            { name: 'Packing Lists', path: '/orders/packing-lists' },
+            { name: 'VGM Documents', path: '/orders/vgm' },
+            { name: 'Reports', path: '/orders/reports' },
+          ],
         },
         {
           icon: <HiOutlineClipboardDocumentList className="w-4 h-4" />,

@@ -400,6 +400,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   // Debug Redux state
   console.log('Redux categories:', categories);
   console.log('Redux products:', products);
+  console.log('Companies state:', companies);
 
   // Backend integration state
   const [formDataLoaded, setFormDataLoaded] = useState<boolean>(false);
@@ -513,7 +514,10 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   const loadDefaultData = async () => {
     try {
       const partiesResponse = await dispatch(getAllParties()).unwrap();
-      setCompanies(partiesResponse?.data || []);
+      console.log('Full parties response:', partiesResponse);
+      const partiesData = partiesResponse?.data?.data || partiesResponse?.data || [];
+      console.log('Extracted parties data:', partiesData);
+      setCompanies(partiesData);
       
       // Dispatch Redux actions for categories and products
       console.log('Dispatching fetchCategories and fetchProducts...');
@@ -2688,7 +2692,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                         .filter((comp) => comp.role === 'Customer')
                         .map((comp) => (
                           <option key={comp.id} value={comp.id}>
-                            {comp?.companyName || comp?.name}
+                            {comp.companyName}
                           </option>
                         ))}
                     </select>
