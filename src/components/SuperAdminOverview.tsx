@@ -209,7 +209,7 @@ const SuperAdminOverview: React.FC = () => {
           </div>
         </div>
         
-        <div className="bg-gradient-to-r from-red-500 to-red-600 text-white p-4 rounded-lg">
+        {/* <div className="bg-gradient-to-r from-red-500 to-red-600 text-white p-4 rounded-lg">
           <div className="flex items-center">
             <FontAwesomeIcon icon={faExclamationTriangle} className="mr-3" />
             <div>
@@ -219,7 +219,7 @@ const SuperAdminOverview: React.FC = () => {
               </p>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Real Stats Overview */}

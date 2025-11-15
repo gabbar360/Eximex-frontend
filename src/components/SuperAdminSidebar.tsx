@@ -248,13 +248,13 @@ const SuperAdminSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-3 sm:px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 overflow-x-hidden
+      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-3 sm:px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-40 border-r border-gray-200 overflow-x-hidden
         ${
           isExpanded || isMobileOpen
-            ? 'w-[280px] sm:w-[320px]'
+            ? 'w-[240px]'
             : isHovered
-              ? 'w-[280px] sm:w-[320px]'
-              : 'w-[70px] sm:w-[90px]'
+              ? 'w-[240px]'
+              : 'w-[70px]'
         }
         ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0`}
@@ -291,14 +291,14 @@ const SuperAdminSidebar: React.FC = () => {
       </div>
 
       {/* Super Admin Badge */}
-      {(isExpanded || isHovered || isMobileOpen) && (
+      {/* {(isExpanded || isHovered || isMobileOpen) && (
         <div className="mb-4 sm:mb-6 px-2 sm:px-4">
           <div className="bg-gradient-to-r from-red-500 to-red-600 text-white px-2 sm:px-3 py-2 rounded-lg text-center">
             <FontAwesomeIcon icon={faUserShield} className="mr-1 sm:mr-2 text-sm" />
             <span className="text-xs sm:text-sm font-semibold">SUPER ADMIN</span>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Navigation Menu */}
       <div className="flex flex-col flex-1 overflow-y-auto duration-300 ease-linear no-scrollbar min-h-0">
