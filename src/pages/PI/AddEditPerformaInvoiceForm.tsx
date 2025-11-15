@@ -3968,18 +3968,18 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
               </div>
             )}
             {/* Navigation Buttons */}
-            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center mt-8 pt-6 border-t border-gray-200 gap-4">
+            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 gap-4">
               <button
                 type="button"
                 onClick={() => setCurrentStep(Math.max(currentStep - 1, 1))}
                 disabled={currentStep === 1}
-                className={`inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-sm ${
+                className={`inline-flex items-center justify-center px-5 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 shadow-sm ${
                   currentStep === 1
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-gray-600 text-white'
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200 dark:bg-gray-800 dark:text-gray-600 dark:border-gray-700'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400 focus:ring-2 focus:ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700'
                 }`}
               >
-                <FontAwesomeIcon icon={faChevronLeft} className="mr-2" />
+                <FontAwesomeIcon icon={faChevronLeft} className="mr-2 w-4 h-4" />
                 Previous
               </button>
 
@@ -3989,7 +3989,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                     type="button"
                     onClick={handleSaveDraft}
                     disabled={submitting}
-                    className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-slate-700 text-white font-semibold disabled:opacity-50"
+                    className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-gray-600 text-white font-medium text-sm transition-all duration-200 shadow-sm hover:bg-gray-700 focus:ring-2 focus:ring-gray-200 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-700 dark:hover:bg-gray-600"
                   >
                     {submitting ? 'Saving...' : 'Save as Draft'}
                   </button>
@@ -3999,19 +3999,19 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => handleStepComplete(currentStep)}
-                    className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-green-600 text-white font-semibold"
+                    className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-slate-700 text-white font-medium text-sm transition-all duration-200 shadow-sm hover:bg-slate-800 focus:ring-2 focus:ring-slate-200 dark:focus:ring-slate-600"
                   >
                     Next Step
-                    <FontAwesomeIcon icon={faChevronRight} className="ml-2" />
+                    <FontAwesomeIcon icon={faChevronRight} className="ml-2 w-4 h-4" />
                   </button>
                 ) : (
                   <button
                     type="button"
                     onClick={handleConfirm}
                     disabled={submitting}
-                    className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-green-600 text-white font-semibold disabled:opacity-50"
+                    className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-slate-700 text-white font-medium text-sm transition-all duration-200 shadow-sm hover:bg-slate-800 focus:ring-2 focus:ring-slate-200 disabled:opacity-50 disabled:cursor-not-allowed dark:focus:ring-slate-600"
                   >
-                    <FontAwesomeIcon icon={faCheck} className="mr-2" />
+                    <FontAwesomeIcon icon={faCheck} className="mr-2 w-4 h-4" />
                     {submitting ? 'Saving...' : (isEditMode ? 'Update PI' : 'Save PI')}
                   </button>
                 )}
@@ -4019,9 +4019,9 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => navigate('/proforma-invoices')}
-                  className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-red-600 text-white font-semibold"
+                  className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-gray-500 text-white font-medium text-sm transition-all duration-200 shadow-sm hover:bg-gray-600 focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-600"
                 >
-                  <FontAwesomeIcon icon={faTimes} className="mr-2" />
+                  <FontAwesomeIcon icon={faTimes} className="mr-2 w-4 h-4" />
                   Cancel
                 </button>
               </div>

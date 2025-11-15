@@ -41,39 +41,39 @@ type NavItem = {
 
 const getNavItems = (userRole: string): NavItem[] => [
   {
-    icon: <MdDashboard className="w-6 h-6" />,
+    icon: <MdDashboard className="w-4 h-4" />,
     name: 'Dashboard',
     path: '/dashboard',
   },
   ...(userRole !== 'SUPER_ADMIN'
     ? [
         {
-          icon: <MdPeople className="w-6 h-6" />,
+          icon: <MdPeople className="w-4 h-4" />,
           name: 'Customer&prospect',
           path: '/cprospect',
         },
         {
-          icon: <MdCategory className="w-6 h-6" />,
+          icon: <MdCategory className="w-4 h-4" />,
           name: 'Categories',
           path: '/categories',
         },
         {
-          icon: <MdInventory className="w-6 h-6" />,
+          icon: <MdInventory className="w-4 h-4" />,
           name: 'Products',
           path: '/products',
         },
         {
-          icon: <HiOutlineDocumentText className="w-6 h-6" />,
+          icon: <HiOutlineDocumentText className="w-4 h-4" />,
           name: 'Proforma Invoices',
           path: '/proforma-invoices',
         },
         {
-          icon: <MdShoppingCart className="w-6 h-6" />,
+          icon: <MdShoppingCart className="w-4 h-4" />,
           name: 'Orders',
           path: '/orders',
         },
         {
-          icon: <HiOutlineClipboardDocumentList className="w-6 h-6" />,
+          icon: <HiOutlineClipboardDocumentList className="w-4 h-4" />,
           name: 'Purchase Orders',
           path: '/purchase-orders',
         },
@@ -82,12 +82,12 @@ const getNavItems = (userRole: string): NavItem[] => [
   ...(['ADMIN', 'SUPER_ADMIN'].includes(userRole)
     ? [
         {
-          icon: <MdSupervisorAccount className="w-6 h-6" />,
+          icon: <MdSupervisorAccount className="w-4 h-4" />,
           name: 'Staff Management',
           path: '/staff-management',
         },
         {
-          icon: <MdAnalytics className="w-6 h-6" />,
+          icon: <MdAnalytics className="w-4 h-4" />,
           name: 'Activity Logs',
           path: '/activity-logs',
         },
@@ -96,7 +96,7 @@ const getNavItems = (userRole: string): NavItem[] => [
   ...(userRole === 'SUPER_ADMIN'
     ? [
         {
-          icon: <MdSettings className="w-6 h-6" />,
+          icon: <MdSettings className="w-4 h-4" />,
           name: 'Super Admin',
           subItems: [
             { name: 'Dashboard', path: '/super-admin/dashboard' },
@@ -108,7 +108,7 @@ const getNavItems = (userRole: string): NavItem[] => [
       ]
     : []),
   {
-    icon: <MdAccountCircle className="w-6 h-6" />,
+    icon: <MdAccountCircle className="w-4 h-4" />,
     name: 'User Profile',
     path: '/profile',
   },
@@ -192,7 +192,7 @@ const AppSidebar: React.FC = () => {
   };
 
   const renderMenuItems = (items: NavItem[]) => (
-    <ul className="flex flex-col gap-4">
+    <ul className="flex flex-col gap-2">
       {items.map((nav, index) => (
         <li key={nav.name}>
           {nav.subItems ? (
@@ -222,7 +222,7 @@ const AppSidebar: React.FC = () => {
               )}
               {(isExpanded || isHovered || isMobileOpen) && (
                 <MdKeyboardArrowDown
-                  className={`ml-auto w-5 h-5 transition-transform duration-200 ${
+                  className={`ml-auto w-4 h-4 transition-transform duration-200 ${
                     openSubmenu?.index === index
                       ? 'rotate-180 text-slate-600'
                       : ''
@@ -283,7 +283,7 @@ const AppSidebar: React.FC = () => {
                     : '0px',
               }}
             >
-              <ul className="mt-2 space-y-1 ml-9">
+              <ul className="mt-1 space-y-1 ml-6">
                 {nav.subItems.map((subItem) => (
                   <li key={subItem.name}>
                     <Link
@@ -337,7 +337,7 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-slate-800 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
+      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-3 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-slate-800 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
         ${
           isExpanded || isMobileOpen
             ? 'w-[290px]'
@@ -406,7 +406,7 @@ const AppSidebar: React.FC = () => {
                 {isExpanded || isHovered || isMobileOpen ? (
                   'Menu'
                 ) : (
-                  <MdMoreHoriz className="w-6 h-6" />
+                  <MdMoreHoriz className="w-4 h-4" />
                 )}
               </h2>
               {renderMenuItems(navItems)}
@@ -420,14 +420,14 @@ const AppSidebar: React.FC = () => {
         <button
           onClick={handleLogout}
           disabled={isLoading}
-          className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 transition-colors ${
+          className={`w-full flex items-center gap-2 px-2 py-1 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 transition-colors ${
             !isExpanded && !isHovered && !isMobileOpen
               ? 'justify-center'
               : 'justify-start'
           } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           <MdLogout
-            className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`}
+            className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`}
           />
           {(isExpanded || isHovered || isMobileOpen) && (
             <span>{isLoading ? 'Signing out...' : 'Sign Out'}</span>

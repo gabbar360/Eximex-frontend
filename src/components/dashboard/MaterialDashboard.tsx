@@ -1,23 +1,13 @@
 import React from 'react';
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Avatar,
-  Chip,
-  IconButton,
-} from '@mui/material';
-import {
-  TrendingUp,
-  TrendingDown,
-  ShoppingCart,
-  People,
-  AttachMoney,
-  Inventory,
-  MoreVert,
-} from '@mui/icons-material';
+import { 
+  MdTrendingUp, 
+  MdTrendingDown, 
+  MdShoppingCart, 
+  MdPeople, 
+  MdAttachMoney, 
+  MdInventory, 
+  MdMoreVert 
+} from 'react-icons/md';
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 // Sample data
@@ -32,10 +22,10 @@ const salesData = [
 ];
 
 const orderData = [
-  { name: 'Pending', value: 400, color: '#ff9800' },
-  { name: 'Processing', value: 300, color: '#2196f3' },
-  { name: 'Shipped', value: 300, color: '#4caf50' },
-  { name: 'Delivered', value: 200, color: '#9c27b0' },
+  { name: 'Pending', value: 400, color: '#f79009' },
+  { name: 'Processing', value: 300, color: '#465fff' },
+  { name: 'Shipped', value: 300, color: '#12b76a' },
+  { name: 'Delivered', value: 200, color: '#7a5af8' },
 ];
 
 const revenueData = [
@@ -48,8 +38,8 @@ const revenueData = [
   { month: 'Jul', revenue: 40000 },
 ];
 
-const MetricCard = ({ title, value, change, icon, color }: any) => (
-  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 sm:p-6 h-full">
+const MetricCard = ({ title, value, change, icon, bgColor }: any) => (
+  <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 shadow-theme-sm hover:shadow-theme-md transition-all duration-300 p-4 sm:p-6 h-full">
     <div className="flex items-start justify-between">
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
@@ -60,20 +50,20 @@ const MetricCard = ({ title, value, change, icon, color }: any) => (
         </p>
         <div className="flex items-center space-x-2">
           {change > 0 ? (
-            <TrendingUp className="w-4 h-4 text-green-500" />
+            <MdTrendingUp className="w-4 h-4 text-success-500" />
           ) : (
-            <TrendingDown className="w-4 h-4 text-red-500" />
+            <MdTrendingDown className="w-4 h-4 text-error-500" />
           )}
-          <span className={`text-sm font-semibold px-2 py-1 rounded-full ${
+          <span className={`text-xs font-medium px-2 py-1 rounded-full ${
             change > 0 
-              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
-              : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+              ? 'bg-success-50 text-success-700 dark:bg-success-900/20 dark:text-success-400' 
+              : 'bg-error-50 text-error-700 dark:bg-error-900/20 dark:text-error-400'
           }`}>
             {Math.abs(change)}%
           </span>
         </div>
       </div>
-      <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center text-white ml-4`} style={{ backgroundColor: color }}>
+      <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-lg flex items-center justify-center text-white ml-4 ${bgColor}`}>
         {icon}
       </div>
     </div>
@@ -81,13 +71,13 @@ const MetricCard = ({ title, value, change, icon, color }: any) => (
 );
 
 const ChartCard = ({ title, children, height = 300 }: any) => (
-  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6 h-full">
+  <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 shadow-theme-sm p-4 sm:p-6 h-full">
     <div className="flex items-center justify-between mb-4">
-      <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
+      <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
         {title}
       </h3>
-      <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-        <MoreVert className="w-5 h-5 text-gray-500" />
+      <button className="p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors">
+        <MdMoreVert className="w-5 h-5 text-gray-500 dark:text-gray-400" />
       </button>
     </div>
     <div style={{ height: `${height}px` }} className="w-full">
@@ -106,21 +96,29 @@ export default function MaterialDashboard() {
             title="Total Revenue"
             value="$54,239"
             change={12.5}
+            icon={<MdAttachMoney className="w-6 h-6" />}
+            bgColor="bg-success-500"
           />
           <MetricCard
             title="Total Orders"
             value="1,429"
             change={-2.3}
+            icon={<MdShoppingCart className="w-6 h-6" />}
+            bgColor="bg-brand-500"
           />
           <MetricCard
             title="Total Customers"
             value="9,745"
             change={8.1}
+            icon={<MdPeople className="w-6 h-6" />}
+            bgColor="bg-orange-500"
           />
           <MetricCard
             title="Products"
             value="2,847"
             change={5.7}
+            icon={<MdInventory className="w-6 h-6" />}
+            bgColor="bg-gray-600"
           />
         </div>
 
@@ -132,12 +130,12 @@ export default function MaterialDashboard() {
                 <AreaChart data={salesData}>
                   <defs>
                     <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#1976d2" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="#1976d2" stopOpacity={0.1}/>
+                      <stop offset="5%" stopColor="#465fff" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#465fff" stopOpacity={0.1}/>
                     </linearGradient>
                     <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#4caf50" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="#4caf50" stopOpacity={0.1}/>
+                      <stop offset="5%" stopColor="#12b76a" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#12b76a" stopOpacity={0.1}/>
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -154,16 +152,16 @@ export default function MaterialDashboard() {
                   <Area
                     type="monotone"
                     dataKey="sales"
-                    stroke="#1976d2"
-                    strokeWidth={3}
+                    stroke="#465fff"
+                    strokeWidth={2}
                     fillOpacity={1}
                     fill="url(#colorSales)"
                   />
                   <Area
                     type="monotone"
                     dataKey="revenue"
-                    stroke="#4caf50"
-                    strokeWidth={3}
+                    stroke="#12b76a"
+                    strokeWidth={2}
                     fillOpacity={1}
                     fill="url(#colorRevenue)"
                   />
@@ -211,8 +209,8 @@ export default function MaterialDashboard() {
               <BarChart data={revenueData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                 <defs>
                   <linearGradient id="colorBar" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#9c27b0" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#9c27b0" stopOpacity={0.3}/>
+                    <stop offset="5%" stopColor="#7a5af8" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#7a5af8" stopOpacity={0.3}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -230,8 +228,8 @@ export default function MaterialDashboard() {
                 <Bar 
                   dataKey="revenue" 
                   fill="url(#colorBar)" 
-                  radius={[8, 8, 0, 0]}
-                  stroke="#9c27b0"
+                  radius={[6, 6, 0, 0]}
+                  stroke="#7a5af8"
                   strokeWidth={1}
                 />
               </BarChart>
@@ -241,8 +239,8 @@ export default function MaterialDashboard() {
 
         {/* Recent Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6">
-            <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4">
+          <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 shadow-theme-sm p-4 sm:p-6">
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">
               Recent Orders
             </h3>
             <div className="space-y-4">
@@ -259,11 +257,11 @@ export default function MaterialDashboard() {
                   </div>
                   <div className="flex items-center justify-between sm:flex-col sm:items-end">
                     <p className="font-bold text-gray-900 dark:text-white text-sm">{order.amount}</p>
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ml-2 sm:ml-0 sm:mt-1 ${
-                      order.status === 'Completed' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-                      order.status === 'Processing' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
-                      order.status === 'Shipped' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' :
-                      'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ml-2 sm:ml-0 sm:mt-1 ${
+                      order.status === 'Completed' ? 'bg-success-50 text-success-700 dark:bg-success-900/20 dark:text-success-400' :
+                      order.status === 'Processing' ? 'bg-brand-50 text-brand-700 dark:bg-brand-900/20 dark:text-brand-400' :
+                      order.status === 'Shipped' ? 'bg-theme-purple-500/10 text-theme-purple-500 dark:bg-theme-purple-500/20' :
+                      'bg-warning-50 text-warning-700 dark:bg-warning-900/20 dark:text-warning-400'
                     }`}>
                       {order.status}
                     </span>
@@ -273,8 +271,8 @@ export default function MaterialDashboard() {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6">
-            <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4">
+          <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 shadow-theme-sm p-4 sm:p-6">
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">
               Top Products
             </h3>
             <div className="space-y-4">
@@ -289,7 +287,7 @@ export default function MaterialDashboard() {
                     <p className="font-semibold text-gray-900 dark:text-white text-sm truncate">{product.name}</p>
                     <p className="text-gray-600 dark:text-gray-400 text-sm">{product.sales} units sold</p>
                   </div>
-                  <p className="font-bold text-blue-600 dark:text-blue-400 text-sm ml-4">
+                  <p className="font-semibold text-brand-600 dark:text-brand-400 text-sm ml-4">
                     {product.revenue}
                   </p>
                 </div>

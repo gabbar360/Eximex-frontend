@@ -206,7 +206,7 @@ layer(base);
 }
 
 @utility menu-item {
-  @apply relative flex items-center w-full gap-3 px-3 py-2 font-medium rounded-lg text-theme-sm;
+  @apply relative flex items-center w-full gap-2 px-2 py-3 font-medium rounded-lg text-theme-sm;
 }
 
 @utility menu-item-active {
@@ -222,17 +222,17 @@ layer(base);
 }
 
 @utility menu-item-icon-active {
-  @apply text-white bg-slate-700 p-2 rounded-lg dark:text-slate-400;
+  @apply text-white bg-slate-700 p-1 rounded-lg dark:text-slate-400;
 }
 
 @utility menu-item-icon-size {
   & svg {
-    @apply !size-6;
+    @apply !size-4;
   }
 }
 
 @utility menu-item-icon-inactive {
-  @apply text-slate-500 group-hover:text-white group-hover:bg-slate-700 p-2 rounded-lg transition-all duration-200 dark:text-gray-400 dark:group-hover:text-gray-300;
+  @apply text-slate-500 group-hover:text-white group-hover:bg-slate-700 p-1 rounded-lg transition-all duration-200 dark:text-gray-400 dark:group-hover:text-gray-300;
 }
 
 @utility menu-item-arrow {
