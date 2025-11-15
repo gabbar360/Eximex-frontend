@@ -55,6 +55,7 @@ const downloadVgmPdf = async (id) => {
     return response;
   } catch (error) {
     handleAxiosError(error);
+    throw error;
   }
 };
 

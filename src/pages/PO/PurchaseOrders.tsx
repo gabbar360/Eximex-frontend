@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import PageMeta from '../../components/common/PageMeta';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faEdit,
@@ -87,6 +88,7 @@ const PurchaseOrders: React.FC = () => {
 
   const handleDownload = async (id: string, poNumber: string) => {
     setDownloadingPdf(id);
+    toast.info('Preparing PDF download...', { autoClose: 2000 });
     try {
       const pdfBlob = await dispatch(downloadPurchaseOrderPDF(id)).unwrap();
 
@@ -102,6 +104,7 @@ const PurchaseOrders: React.FC = () => {
 
       toast.success('PDF downloaded successfully');
     } catch (error: any) {
+      console.error('Error downloading PDF:', error);
       toast.error(error.message || 'Failed to download PDF');
     } finally {
       setDownloadingPdf(null);
@@ -297,7 +300,7 @@ const PurchaseOrders: React.FC = () => {
                             title="Download PDF"
                           >
                             {downloadingPdf === po.id ? (
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-500"></div>
+                              <LoadingSpinner size="small" message="" />
                             ) : (
                               <FontAwesomeIcon
                                 icon={faDownload}

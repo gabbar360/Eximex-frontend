@@ -5,7 +5,7 @@ export const fetchVgmDocuments = createAsyncThunk(
   'vgm/fetchVgmDocuments',
   async (params = {}, { rejectWithValue }) => {
     try {
-      return await vgmService.getAllVgmDocuments(params);
+      return await vgmService.getVgmDocuments(params);
     } catch (err) {
       return rejectWithValue(err.message);
     }

@@ -3,9 +3,9 @@ import piService from '../service/piService';
 
 export const fetchPiInvoices = createAsyncThunk(
   'pi/fetchPiInvoices',
-  async ({ includeProducts = false, status = null } = {}, { rejectWithValue }) => {
+  async (params = {}, { rejectWithValue }) => {
     try {
-      return await piService.getAllPiInvoices(includeProducts, status);
+      return await piService.getAllPiInvoices(params);
     } catch (err) {
       return rejectWithValue(err.message);
     }
@@ -134,6 +134,11 @@ const piSlice = createSlice({
     loading: false,
     error: null,
     successMessage: null,
+    pagination: {
+      current: 1,
+      pageSize: 10,
+      total: 0,
+    },
   },
   reducers: {
     setSelectedPi(state, { payload }) {
@@ -158,7 +163,13 @@ const piSlice = createSlice({
       })
       .addCase(fetchPiInvoices.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.piInvoices = payload?.piInvoices || payload || [];
+        const responseData = payload?.data || payload;
+        state.piInvoices = responseData?.piInvoices || responseData || [];
+        state.pagination = {
+          current: responseData?.pagination?.page || 1,
+          pageSize: responseData?.pagination?.limit || 10,
+          total: responseData?.pagination?.total || 0,
+        };
       })
       .addCase(fetchPiInvoices.rejected, (state, { payload }) => {
         state.loading = false;
@@ -274,7 +285,13 @@ const piSlice = createSlice({
       })
       .addCase(getAllPiInvoices.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.piInvoices = payload?.piInvoices || payload || [];
+        const responseData = payload?.data || payload;
+        state.piInvoices = responseData?.piInvoices || responseData || [];
+        state.pagination = {
+          current: responseData?.pagination?.page || 1,
+          pageSize: responseData?.pagination?.limit || 10,
+          total: responseData?.pagination?.total || 0,
+        };
       })
       .addCase(getAllPiInvoices.rejected, (state, { payload }) => {
         state.loading = false;

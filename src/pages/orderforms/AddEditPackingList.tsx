@@ -1,13 +1,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faArrowLeft,
-  faSave,
-  faPlus,
-  faTrash,
-} from '@fortawesome/free-solid-svg-icons';
+import { HiCheckCircle, HiArrowLeft, HiPlus, HiTrash } from 'react-icons/hi';
 import { toast } from 'react-toastify';
 import { getOrderById, updateOrder } from '../../features/orderSlice';
 import { getPiInvoiceById } from '../../features/piSlice';
@@ -20,15 +14,19 @@ import InputField from '../../components/form/input/InputField';
 import TextArea from '../../components/form/input/TextArea';
 import Label from '../../components/form/Label';
 import DatePicker from '../../components/form/DatePicker';
+import OrderSelector from '../../components/order/OrderSelector';
 
 const AddEditPackingList = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [loading, setLoading] = useState(true);
+  const isEdit = !!id && id !== 'create';
+  const [loading, setLoading] = useState(isEdit);
+  const [saving, setSaving] = useState(false);
   const [orderDetails, setOrderDetails] = useState(null);
   const [piProducts, setPiProducts] = useState([]);
   const [piData, setPiData] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   // Packaging List State
   const [packagingList, setPackagingList] = useState({
@@ -59,8 +57,22 @@ const AddEditPackingList = () => {
   });
 
   useEffect(() => {
-    fetchOrderDetails();
+    if (id && id !== 'create') {
+      fetchOrderDetails();
+    } else {
+      setLoading(false);
+    }
   }, [id]);
+
+  const handleOrderSelect = async (orderId, orderData) => {
+    setSelectedOrder(orderData);
+    setOrderDetails(orderData);
+    
+    // Fetch PI products for selected order
+    if (orderData.piInvoiceId || orderData.id) {
+      await fetchPIProducts(orderData.piInvoiceId || orderData.id);
+    }
+  };
 
   useEffect(() => {
     if (orderDetails) {
@@ -69,6 +81,11 @@ const AddEditPackingList = () => {
   }, [orderDetails]);
 
   const fetchOrderDetails = async () => {
+    if (!id || id === 'create') {
+      setLoading(false);
+      return;
+    }
+    
     try {
       setLoading(true);
       const response = await dispatch(getOrderById(id)).unwrap();
@@ -381,6 +398,7 @@ const AddEditPackingList = () => {
       measurement: '',
       packedQuantity: '',
       unit: 'Box',
+      perBoxWeight: '',
       productData: null
     });
 
@@ -427,12 +445,20 @@ const AddEditPackingList = () => {
     
     updatedContainers[containerIndex].products[productIndex][field] = value;
 
-    const calculatedData = calculateTotals({
-      ...packagingList,
-      containers: updatedContainers,
-    });
-
-    setPackagingList(calculatedData);
+    // If weight fields are manually updated, recalculate totals
+    if (field === 'netWeight' || field === 'grossWeight' || field === 'noOfBoxes' || field === 'measurement') {
+      const calculatedData = calculateTotals({
+        ...packagingList,
+        containers: updatedContainers,
+      });
+      setPackagingList(calculatedData);
+    } else {
+      const calculatedData = calculateTotals({
+        ...packagingList,
+        containers: updatedContainers,
+      });
+      setPackagingList(calculatedData);
+    }
   };
 
   const calculateProductValues = (
@@ -470,18 +496,12 @@ const AddEditPackingList = () => {
       const netWeightPerBox = totalWeightFromPI / piQuantity;
       netWeightKg = qty * netWeightPerBox;
 
-      // Get gross weight from product data (in grams, convert to kg)
+      // Calculate gross weight using actual box weight
       const product = productData.product || productData;
-      const grossWeightPerBoxGrams =
-        product.grossWeightPerBox || product.totalGrossWeight || 0;
-      const grossWeightPerBoxKg = grossWeightPerBoxGrams / 1000; // Convert grams to kg
-
-      if (grossWeightPerBoxKg > 0) {
-        grossWeightKg = qty * grossWeightPerBoxKg;
-      } else {
-        // Fallback: use net weight + 10% packaging
-        grossWeightKg = netWeightKg * 1.1;
-      }
+      const boxWeightGrams = product.packagingMaterialWeight; // grams per box
+      const boxWeightKg = boxWeightGrams / 1000; // Convert to kg
+      
+      grossWeightKg = netWeightKg + (qty * boxWeightKg);
     } else {
       // If unit is Pcs, calculate boxes needed
       const product = productData.product || productData;
@@ -497,15 +517,11 @@ const AddEditPackingList = () => {
       const netWeightGrams = qty * unitWeight;
       netWeightKg = netWeightGrams / 1000;
 
-      // Calculate gross weight (net weight + packaging)
-      const packagingMaterialWeight = product.packagingMaterialWeight || 700; // grams
-      const packagingUnit = product.packagingMaterialWeightUnit || 'g';
-      const packagingWeightPerBoxKg = packagingUnit === 'kg' 
-        ? packagingMaterialWeight 
-        : packagingMaterialWeight / 1000;
+      // Calculate gross weight (net weight + actual box weight)
+      const boxWeightGrams = product.packagingMaterialWeight || product.boxWeight || 700; // grams per box
+      const boxWeightKg = boxWeightGrams / 1000; // Convert to kg
       
-      const packagingWeightTotal = boxesNeeded * packagingWeightPerBoxKg;
-      grossWeightKg = netWeightKg + packagingWeightTotal;
+      grossWeightKg = netWeightKg + (boxesNeeded * boxWeightKg);
     }
 
     // Calculate volume if available
@@ -528,6 +544,10 @@ const AddEditPackingList = () => {
     productToUpdate.netWeight = netWeightKg.toFixed(2);
     productToUpdate.grossWeight = grossWeightKg.toFixed(2);
     productToUpdate.measurement = volumeM3.toFixed(4);
+    // Set per box weight for future modifications
+    if (boxesNeeded > 0) {
+      productToUpdate.perBoxWeight = (netWeightKg / boxesNeeded).toFixed(2);
+    }
 
     const calculatedData = calculateTotals({
       ...packagingList,
@@ -589,14 +609,21 @@ const AddEditPackingList = () => {
 
   const savePackagingList = async () => {
     try {
-      if (!orderDetails?.piInvoiceId) {
+      setSaving(true);
+      if (!orderDetails && !selectedOrder) {
+        toast.error('Please select an order first');
+        return;
+      }
+      
+      const currentOrder = orderDetails || selectedOrder;
+      if (!currentOrder?.piInvoiceId) {
         toast.error('No PI Invoice associated with this order');
         return;
       }
 
       const packagingData = {
         ...packagingList,
-        piId: orderDetails.piInvoiceId,
+        piId: currentOrder.piInvoiceId,
       };
 
       const hasExistingData =
@@ -611,7 +638,7 @@ const AddEditPackingList = () => {
           ));
 
       if (hasExistingData) {
-        const updateId = packagingList.id || orderDetails.piInvoiceId;
+        const updateId = packagingList.id || currentOrder.piInvoiceId;
         const result = await dispatch(updatePackingList({
           id: updateId,
           packingData: packagingData
@@ -630,10 +657,10 @@ const AddEditPackingList = () => {
           }));
 
           // Update order with packingListId for future updates
-          if (createdId && orderDetails?.id) {
+          if (createdId && currentOrder?.id) {
             try {
               await dispatch(updateOrder({
-                id: orderDetails.id,
+                id: currentOrder.id,
                 data: { packingListId: createdId }
               })).unwrap();
               console.log('✅ Order updated with packingListId:', createdId);
@@ -672,11 +699,13 @@ const AddEditPackingList = () => {
       }
 
       setTimeout(() => {
-        navigate('/orders');
+        navigate('/orders/packing-lists');
       }, 1500);
     } catch (error) {
       console.error('Error saving packaging list:', error);
       toast.error(error.message);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -689,112 +718,137 @@ const AddEditPackingList = () => {
   }
 
   return (
-    <div className="p-3 sm:p-6">
-      <PageBreadCrumb pageTitle="Packaging List" />
-
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md">
-        <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center gap-3 sm:gap-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-4 mb-4">
             <button
-              onClick={() => navigate('/orders')}
-              className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 flex-shrink-0"
+              onClick={() => navigate('/orders/packing-lists')}
+              className="p-3 rounded-lg bg-white shadow-md hover:shadow-lg transition-all duration-300 text-slate-600 hover:text-slate-800"
             >
-              <FontAwesomeIcon icon={faArrowLeft} />
+              <HiArrowLeft className="w-5 h-5" />
             </button>
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
-              Packaging List
-            </h2>
+            <div>
+              <h1 className="text-3xl font-bold text-slate-800">
+                Packing List
+              </h1>
+              {orderDetails && (
+                <p className="text-slate-600 mt-1">
+                  Order: {orderDetails.orderNumber} | PI: {orderDetails.piNumber}
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="p-4 sm:p-6">
-          <div className="space-y-4 sm:space-y-6">
-            {/* Packaging List Header */}
-            <div className="flex flex-col gap-4">
-              <div>
-                <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
-                  Packaging List
-                </h3>
-                <div className="text-xs text-gray-500 mt-1">
-                  PI Containers:{' '}
-                  {piData?.numberOfContainers ||
-                    piData?.containerCount ||
-                    'N/A'}{' '}
-                  | Current: {packagingList.containers.length} | Boxes:{' '}
-                  {packagingList.totalBoxes}
-                </div>
-                {piData?.numberOfContainers &&
-                  packagingList.containers.length !==
-                    piData.numberOfContainers && (
-                    <div className="text-xs text-orange-600 mt-1">
-                      ⚠️ Container count mismatch! PI has{' '}
-                      {piData.numberOfContainers} containers, but form has{' '}
-                      {packagingList.containers.length}
+        {/* Form Container */}
+        <div className="bg-white rounded-xl shadow-xl border border-slate-200">
+          <div className="p-8">
+            <div className="space-y-8">
+              {/* Order Selection for new packing lists */}
+              {!isEdit && (
+                <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                  <h3 className="text-lg font-semibold text-slate-700 mb-4">Select Order</h3>
+                  <OrderSelector
+                    selectedOrderId={selectedOrder?.id || null}
+                    onOrderSelect={handleOrderSelect}
+                    placeholder="Select Order for Packing List"
+                    filterType="packingList"
+                  />
+                  {selectedOrder && (
+                    <div className="mt-4 p-4 bg-slate-100 rounded-lg border border-slate-300">
+                      <p className="text-sm text-slate-700">
+                        Selected: <strong className="text-slate-800">{selectedOrder.orderNumber}</strong> - {selectedOrder.piNumber} ({selectedOrder.buyerName})
+                      </p>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Packaging List Header */}
+              <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                <div className="flex flex-col gap-4">
+                  <div>
+                    <h3 className="text-xl font-semibold text-slate-700">
+                      Packaging List Details
+                    </h3>
+                    <div className="text-sm text-slate-600 mt-2">
+                      PI Containers:{' '}
+                      {piData?.numberOfContainers ||
+                        piData?.containerCount ||
+                        'N/A'}{' '}
+                      | Current: {packagingList.containers.length} | Boxes:{' '}
+                      {packagingList.totalBoxes}
+                    </div>
+                    {piData?.numberOfContainers &&
+                      packagingList.containers.length !==
+                        piData.numberOfContainers && (
+                        <div className="text-sm text-orange-600 mt-2 p-2 bg-orange-50 rounded border border-orange-200">
+                          ⚠️ Container count mismatch! PI has{' '}
+                          {piData.numberOfContainers} containers, but form has{' '}
+                          {packagingList.containers.length}
+                        </div>
+                      )}
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                      type="button"
+                      onClick={addContainer}
+                      className="flex items-center justify-center gap-2 px-6 py-3 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-all duration-300 shadow-md hover:shadow-lg font-medium"
+                    >
+                      <HiPlus className="w-5 h-5" />
+                      Add Container
+                      {piData?.numberOfContainers && (
+                        <span className="text-xs bg-slate-500 px-2 py-1 rounded">
+                          {packagingList.containers.length}/
+                          {piData.numberOfContainers}
+                        </span>
+                      )}
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div className="flex flex-col sm:flex-row gap-2">
-                <button
-                  onClick={savePackagingList}
-                  className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm sm:text-base"
+
+
+
+              {/* Containers */}
+              {packagingList.containers.map((container, containerIndex) => (
+                <div
+                  key={containerIndex}
+                  className="border border-slate-200 rounded-lg p-6 bg-slate-50"
                 >
-                  <FontAwesomeIcon icon={faSave} />
-                  <span className="hidden sm:inline">Save Packaging List</span>
-                  <span className="sm:hidden">Save</span>
-                </button>
-                <button
-                  onClick={addContainer}
-                  className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm sm:text-base"
-                >
-                  <FontAwesomeIcon icon={faPlus} />
-                  <span className="hidden sm:inline">Add Container</span>
-                  <span className="sm:hidden">Add</span>
-                  {piData?.numberOfContainers && (
-                    <span className="text-xs">
-                      ({packagingList.containers.length}/
-                      {piData.numberOfContainers})
-                    </span>
-                  )}
-                </button>
-              </div>
-            </div>
-
-
-
-            {/* Containers */}
-            {packagingList.containers.map((container, containerIndex) => (
-              <div
-                key={containerIndex}
-                className="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
-              >
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4">
-                  <h4 className="text-sm sm:text-base font-medium text-gray-900 dark:text-white">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-6">
+                  <h4 className="text-lg font-semibold text-slate-700">
                     Container {containerIndex + 1}
                   </h4>
-                  <div className="flex gap-2 w-full sm:w-auto">
+                  <div className="flex gap-3 w-full sm:w-auto">
                     <button
                       onClick={() => addProductToContainer(containerIndex)}
-                      className="text-green-600 hover:text-green-800 text-xs sm:text-sm font-medium px-2 sm:px-3 py-1 rounded border border-green-600 hover:bg-green-50 flex-1 sm:flex-none"
+                      className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-300 font-medium shadow-md hover:shadow-lg flex-1 sm:flex-none"
                     >
-                      + Add Product
+                      <HiPlus className="w-4 h-4" />
+                      Add Product
                     </button>
                     {packagingList.containers.length > 1 && (
                       <button
                         onClick={() => removeContainer(containerIndex)}
-                        className="text-red-600 hover:text-red-800 text-xs sm:text-sm font-medium px-2 sm:px-3 py-1 rounded border border-red-600 hover:bg-red-50 flex-1 sm:flex-none"
+                        className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-300 font-medium shadow-md hover:shadow-lg flex-1 sm:flex-none"
                       >
-                        <FontAwesomeIcon icon={faTrash} />{' '}
-                        <span className="hidden sm:inline">Remove</span>
+                        <HiTrash className="w-4 h-4" />
+                        Remove
                       </button>
                     )}
                   </div>
                 </div>
 
                 {/* Container Details */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                   <div>
-                    <Label>Container Number</Label>
-                    <InputField
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Container Number
+                    </label>
+                    <input
                       type="text"
                       value={container.containerNumber}
                       onChange={(e) =>
@@ -805,10 +859,13 @@ const AddEditPackingList = () => {
                         )
                       }
                       placeholder="Enter container number"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
                     />
                   </div>
                   <div>
-                    <Label>Select Seal Type</Label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Seal Type
+                    </label>
                     <select
                       value={container.sealType}
                       onChange={(e) =>
@@ -818,7 +875,7 @@ const AddEditPackingList = () => {
                           e.target.value
                         )
                       }
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-4 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
                     >
                       <option value="">Select Seal Type</option>
                       <option value="self seal">Self Seal</option>
@@ -826,8 +883,10 @@ const AddEditPackingList = () => {
                     </select>
                   </div>
                   <div>
-                    <Label>Seal Number</Label>
-                    <InputField
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Seal Number
+                    </label>
+                    <input
                       type="text"
                       value={container.sealNumber}
                       onChange={(e) =>
@@ -838,19 +897,21 @@ const AddEditPackingList = () => {
                         )
                       }
                       placeholder="Enter seal number"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
                     />
                   </div>
                 </div>
 
                 {/* Products in Container */}
                 {container.products.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <p>No products added to this container..</p>
+                  <div className="text-center py-12 text-slate-500 bg-white rounded-lg border border-slate-200">
+                    <p className="text-lg mb-4">No products added to this container</p>
                     <button
                       onClick={() => addProductToContainer(containerIndex)}
-                      className="mt-2 text-blue-600 hover:text-blue-800 font-medium"
+                      className="px-6 py-3 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-all duration-300 font-medium shadow-md hover:shadow-lg"
                     >
-                      + Add First Product
+                      <HiPlus className="w-5 h-5 inline mr-2" />
+                      Add First Product
                     </button>
                   </div>
                 ) : (
@@ -858,7 +919,7 @@ const AddEditPackingList = () => {
                     {container.products.map((product, productIndex) => (
                       <div
                         key={productIndex}
-                        className="p-4 border border-gray-300 rounded-lg bg-white dark:bg-gray-700"
+                        className="p-6 border border-slate-200 rounded-lg bg-white shadow-sm"
                       >
                         <div className="flex justify-between items-center mb-3">
                           <span className="font-medium text-gray-900 dark:text-white">
@@ -1077,24 +1138,123 @@ const AddEditPackingList = () => {
                           </div>
 
                           <div>
-                            <Label>Net Weight (kg)</Label>
+                            <Label>No. of Boxes</Label>
+                            <InputField
+                              type="number"
+                              value={product.noOfBoxes}
+                              onChange={(e) => {
+                                updateProductInContainer(
+                                  containerIndex,
+                                  productIndex,
+                                  'noOfBoxes',
+                                  e.target.value
+                                );
+                                // Auto-calculate net weight if per box weight is available
+                                if (product.perBoxWeight && e.target.value) {
+                                  const totalNetWeight = parseFloat(e.target.value) * parseFloat(product.perBoxWeight);
+                                  updateProductInContainer(
+                                    containerIndex,
+                                    productIndex,
+                                    'netWeight',
+                                    totalNetWeight.toFixed(2)
+                                  );
+                                  // Auto-calculate gross weight using box weight
+                                  const productInfo = product.productData?.product || product.productData || {};
+                                  const boxWeightGrams = productInfo.packagingMaterialWeight || productInfo.boxWeight || 700;
+                                  const boxWeightKg = boxWeightGrams / 1000;
+                                  const totalGrossWeight = totalNetWeight + (parseFloat(e.target.value) * boxWeightKg);
+                                  updateProductInContainer(
+                                    containerIndex,
+                                    productIndex,
+                                    'grossWeight',
+                                    totalGrossWeight.toFixed(2)
+                                  );
+                                }
+                              }}
+                              placeholder="Enter number of boxes"
+                              step="1"
+                            />
+                          </div>
+                          <div>
+                            <Label>Per Box Weight (kg) ✏️</Label>
+                            <InputField
+                              type="number"
+                              value={product.perBoxWeight}
+                              onChange={(e) => {
+                                updateProductInContainer(
+                                  containerIndex,
+                                  productIndex,
+                                  'perBoxWeight',
+                                  e.target.value
+                                );
+                                // Auto-calculate net weight if boxes count is available
+                                if (product.noOfBoxes && e.target.value) {
+                                  const totalNetWeight = parseFloat(product.noOfBoxes) * parseFloat(e.target.value);
+                                  updateProductInContainer(
+                                    containerIndex,
+                                    productIndex,
+                                    'netWeight',
+                                    totalNetWeight.toFixed(2)
+                                  );
+                                  // Auto-calculate gross weight using box weight
+                                  const productInfo = product.productData?.product || product.productData || {};
+                                  const boxWeightGrams = productInfo.packagingMaterialWeight || productInfo.boxWeight || 700;
+                                  const boxWeightKg = boxWeightGrams / 1000;
+                                  const totalGrossWeight = totalNetWeight + (parseFloat(product.noOfBoxes) * boxWeightKg);
+                                  updateProductInContainer(
+                                    containerIndex,
+                                    productIndex,
+                                    'grossWeight',
+                                    totalGrossWeight.toFixed(2)
+                                  );
+                                }
+                              }}
+                              placeholder="Weight per box"
+                              step="0.01"
+                              className="border-green-300 focus:border-green-500"
+                            />
+                            <div className="text-xs text-green-600 mt-1">
+                              Modify box weight
+                            </div>
+                          </div>
+                          <div>
+                            <Label>Net Weight (kg) ✏️</Label>
                             <InputField
                               type="number"
                               value={product.netWeight}
-                              onChange={(e) =>
+                              onChange={(e) => {
                                 updateProductInContainer(
                                   containerIndex,
                                   productIndex,
                                   'netWeight',
                                   e.target.value
-                                )
-                              }
-                              placeholder="Enter net weight"
+                                );
+                                // Auto-calculate gross weight using box weight
+                                if (e.target.value && product.productData) {
+                                  const netWeight = parseFloat(e.target.value);
+                                  const boxes = parseFloat(product.noOfBoxes) || 0;
+                                  const productInfo = product.productData.product || product.productData;
+                                  const boxWeightGrams = productInfo.packagingMaterialWeight || productInfo.boxWeight || 700;
+                                  const boxWeightKg = boxWeightGrams / 1000;
+                                  const grossWeight = netWeight + (boxes * boxWeightKg);
+                                  updateProductInContainer(
+                                    containerIndex,
+                                    productIndex,
+                                    'grossWeight',
+                                    grossWeight.toFixed(2)
+                                  );
+                                }
+                              }}
+                              placeholder="Enter actual net weight"
                               step="0.01"
+                              className="border-blue-300 focus:border-blue-500"
                             />
+                            <div className="text-xs text-blue-600 mt-1">
+                              Manual entry allowed
+                            </div>
                           </div>
                           <div>
-                            <Label>Gross Weight (kg)</Label>
+                            <Label>Gross Weight (kg) ✏️</Label>
                             <InputField
                               type="number"
                               value={product.grossWeight}
@@ -1106,12 +1266,16 @@ const AddEditPackingList = () => {
                                   e.target.value
                                 )
                               }
-                              placeholder="Enter gross weight"
+                              placeholder="Enter actual gross weight"
                               step="0.01"
+                              className="border-blue-300 focus:border-blue-500"
                             />
+                            <div className="text-xs text-blue-600 mt-1">
+                              Manual entry allowed
+                            </div>
                           </div>
                           <div>
-                            <Label>Measurement (m³)</Label>
+                            <Label>Measurement (m³) ✏️</Label>
                             <InputField
                               type="number"
                               value={product.measurement}
@@ -1123,9 +1287,13 @@ const AddEditPackingList = () => {
                                   e.target.value
                                 )
                               }
-                              placeholder="Enter measurement"
+                              placeholder="Enter actual measurement"
                               step="0.01"
+                              className="border-blue-300 focus:border-blue-500"
                             />
+                            <div className="text-xs text-blue-600 mt-1">
+                              Manual entry allowed
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1178,23 +1346,29 @@ const AddEditPackingList = () => {
               </div>
             ))}
 
-            <div>
-              <Label>Notes</Label>
-              <TextArea
-                value={packagingList.notes}
-                onChange={(value) =>
-                  setPackagingList((prev) => ({ ...prev, notes: value }))
-                }
-                rows={3}
-                placeholder="Enter additional notes"
-              />
-            </div>
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold text-slate-700 border-b border-slate-200 pb-3">Additional Information</h3>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Notes
+                  </label>
+                  <textarea
+                    value={packagingList.notes}
+                    onChange={(e) =>
+                      setPackagingList((prev) => ({ ...prev, notes: e.target.value }))
+                    }
+                    rows={3}
+                    placeholder="Enter additional notes"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
+                  />
+                </div>
+              </div>
 
-            {/* Table Preview */}
-            <div className="mt-6 p-4 bg-white dark:bg-gray-800 rounded-lg border">
-              <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Packing List Preview
-              </h4>
+              {/* Table Preview */}
+              <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                <h4 className="text-xl font-semibold text-slate-700 mb-6">
+                  Packing List Preview
+                </h4>
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse border border-gray-300 dark:border-gray-600">
                   <thead>
@@ -1349,6 +1523,36 @@ const AddEditPackingList = () => {
                     </tr>
                   </tfoot>
                 </table>
+              </div>
+            </div>
+
+              {/* Submit Buttons */}
+              <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => navigate('/orders/packing-lists')}
+                  className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50 transition-all duration-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={savePackagingList}
+                  disabled={saving || (!orderDetails && !selectedOrder)}
+                  className="px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-xl disabled:opacity-50 shadow-lg"
+                >
+                  {saving ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      {isEdit ? 'Updating...' : 'Creating...'}
+                    </div>
+                  ) : (
+                    <>
+                      <HiCheckCircle className="w-5 h-5 mr-2 inline" />
+                      {isEdit ? 'Update Packing List' : 'Create Packing List'}
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           </div>

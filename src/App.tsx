@@ -53,13 +53,19 @@ import PIDetails from './pages/PI/PIDetails';
 import ConfirmOrder from './pages/PI/ConfirmOrder';
 import OrderConfirmed from './pages/PI/OrderConfirmed';
 import EmailInvoice from './pages/PI/EmailInvoice';
-import Orders from './pages/order/Orders';
-import EditOrder from './pages/order/AddEditShipment';
-import AddEditShipment from './pages/order/AddEditShipment';
-import AddOrder from './pages/order/AddOrder';
-import AddEditPackingList from './pages/order/AddEditPackingList';
-import ViewInvoice from './pages/order/ViewInvoice';
-import AddEditVgm from './pages/order/AddEditVgm';
+import Orders from './pages/orderforms/Orders';
+import EditOrder from './pages/orderforms/AddEditShipment';
+import AddEditShipment from './pages/orderforms/AddEditShipment';
+import AddOrder from './pages/orderforms/AddOrder';
+import AddEditPackingList from './pages/orderforms/AddEditPackingList';
+import ViewInvoice from './pages/orderforms/ViewInvoice';
+import AddEditVgm from './pages/orderforms/AddEditVgm';
+import OrderLayout from './components/order/OrderLayout';
+import AllOrders from './pages/orders/AllOrders';
+import ShipmentManagement from './pages/orders/ShipmentManagement';
+import PackingListManagement from './pages/orders/PackingListManagement';
+import VgmManagement from './pages/orders/VgmManagement';
+import ReportsDownloads from './pages/orders/ReportsDownloads';
 import StaffManagement from './components/StaffManagement';
 import ActivityLogComponent from './components/ActivityLog';
 import RoleBasedDashboard from './components/RoleBasedDashboard';
@@ -135,13 +141,25 @@ function AppContent() {
           <Route path="/proforma-invoices/:id/confirm" element={<ConfirmOrder />} />
           <Route path="/proforma-invoices/:id/confirmed" element={<OrderConfirmed />} />
 
-          <Route path="/orders" element={<Orders />} />
+          {/* Order Management with Sub-menus */}
+          <Route path="/orders" element={<OrderLayout />}>
+            <Route index element={<AllOrders />} />
+            <Route path="shipments" element={<ShipmentManagement />} />
+            <Route path="packing-lists" element={<PackingListManagement />} />
+            <Route path="vgm" element={<VgmManagement />} />
+            <Route path="reports" element={<ReportsDownloads />} />
+          </Route>
+          
+          {/* Individual Order Operations */}
           <Route path="/add-order" element={<AddOrder />} />
           <Route path="/edit-order/:id" element={<EditOrder />} />
           <Route path="/shipment/:id" element={<AddEditShipment />} />
+          <Route path="/shipment/create" element={<AddEditShipment />} />
           <Route path="/view-invoice/:id" element={<ViewInvoice />} />
           <Route path="/packing-list/:id" element={<AddEditPackingList />} />
+          <Route path="/packing-list/create" element={<AddEditPackingList />} />
           <Route path="/vgm/create" element={<AddEditVgm />} />
+          <Route path="/vgm/:id" element={<AddEditVgm />} />
           <Route path="/vgm/edit/:id" element={<AddEditVgm />} />
 
           <Route path="/purchase-orders" element={<PurchaseOrders />} />

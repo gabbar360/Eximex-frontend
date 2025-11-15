@@ -400,6 +400,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   // Debug Redux state
   console.log('Redux categories:', categories);
   console.log('Redux products:', products);
+  console.log('Companies state:', companies);
 
   // Backend integration state
   const [formDataLoaded, setFormDataLoaded] = useState<boolean>(false);
@@ -513,7 +514,10 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   const loadDefaultData = async () => {
     try {
       const partiesResponse = await dispatch(getAllParties()).unwrap();
-      setCompanies(partiesResponse?.data || []);
+      console.log('Full parties response:', partiesResponse);
+      const partiesData = partiesResponse?.data?.data || partiesResponse?.data || [];
+      console.log('Extracted parties data:', partiesData);
+      setCompanies(partiesData);
       
       // Dispatch Redux actions for categories and products
       console.log('Dispatching fetchCategories and fetchProducts...');
@@ -1939,7 +1943,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
 
         {/* Product Description */}
         {prod && (
-          <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900 rounded">
+          <div className="mb-4 p-3 bg-slate-50 dark:bg-slate-900 rounded">
             <div className="text-sm text-gray-700 dark:text-gray-300">
               <strong>Product:</strong> {prod.name || prod.productName || 'N/A'} |{' '}
               <strong>HS Code:</strong>{' '}
@@ -1947,7 +1951,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
               <strong>Description:</strong> {prod.description || 'N/A'}
             </div>
             {/* Dynamic Weight Information Display */}
-            <div className="mt-2 pt-2 border-t border-blue-200 dark:border-blue-700">
+            <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">
               <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
                 {(() => {
                   const displayItems = [];
@@ -2034,7 +2038,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                     if (weight !== 'N/A') {
                       displayItems.push(
                         <div key={`weight-${unit}`}>
-                          <span className="text-blue-600 dark:text-blue-400 font-medium">
+                          <span className="text-slate-700 dark:text-slate-400 font-medium">
                             Weight per {unit}:
                           </span>
                           <br />
@@ -2051,7 +2055,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                     prod.packagingPreview.hierarchy.forEach((level, index) => {
                       displayItems.push(
                         <div key={`hierarchy-${index}`}>
-                          <span className="text-blue-600 dark:text-blue-400 font-medium">
+                          <span className="text-slate-700 dark:text-slate-400 font-medium">
                             {level.from}/{level.to}:
                           </span>
                           <br />
@@ -2070,7 +2074,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                         const [from, to] = key.split('Per');
                         displayItems.push(
                           <div key={`hierarchy-${key}`}>
-                            <span className="text-blue-600 dark:text-blue-400 font-medium">
+                            <span className="text-slate-700 dark:text-slate-400 font-medium">
                               {from}/{to}:
                             </span>
                             <br />
@@ -2265,8 +2269,8 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
               />
               {/* Real-time weight calculation display */}
               {data.productId && data.quantity && data.unit && (
-                <div className="text-xs bg-blue-50 dark:bg-blue-900 p-2 rounded mt-2 border border-blue-200 dark:border-blue-700">
-                  <div className="text-blue-700 dark:text-blue-300">
+                <div className="text-xs bg-slate-50 dark:bg-slate-900 p-2 rounded mt-2 border border-slate-200 dark:border-slate-700">
+                  <div className="text-slate-700 dark:text-slate-300">
                     <strong>📊 Weight Calculation:</strong>
                     <br />
                     <span className="font-mono">
@@ -2386,7 +2390,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                         onChange(idx, 'quantity', calculatedQty.toFixed(2));
                       }
                     }}
-                    className="ml-2 px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                    className="ml-2 px-2 py-1 text-xs bg-slate-700 text-white rounded hover:bg-slate-800 transition"
                   >
                     📊 Calculate by Weight
                   </button>
@@ -2404,7 +2408,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                     <div className="text-gray-600 dark:text-gray-400 text-xs">
                       Boxes
                     </div>
-                    <div className="font-bold text-blue-600 dark:text-blue-400">
+                    <div className="font-bold text-slate-700 dark:text-slate-400">
                       {breakdown.calculatedBoxes}
                     </div>
                   </div>
@@ -2569,44 +2573,24 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="p-4 lg:p-6 pt-6 sm:pt-8 lg:pt-12 pb-6 sm:pb-8 lg:pb-12">
-        <PageMeta
-          title={`${
-            isEditMode ? 'Edit' : 'New'
-          } Proforma Invoice | EximEx Dashboard`}
-          description={`${
-            isEditMode ? 'Edit' : 'Create'
-          } a proforma invoice in your EximEx Dashboard`}
-        />
-        <PageBreadcrumb
-          pageTitle={`${isEditMode ? 'Edit' : 'New'} Proforma Invoice`}
-        />
-
+      <div className="p-2 lg:p-4">
         {/* Header */}
-        <div className="mb-6">
-          <div className="bg-white rounded-lg border border-gray-200 p-6 lg:p-8">
+        <div className="mb-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 lg:p-4">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
               <div className="flex items-center gap-4">
-                <div className="p-3 rounded-lg bg-blue-600">
-                  <FontAwesomeIcon icon={faPlus} className="w-6 h-6 text-white" />
-                </div>
+                <button
+                  onClick={() => navigate('/proforma-invoices')}
+                  className="p-3 rounded-lg bg-slate-700 text-white hover:bg-slate-800 transition-all duration-300 hover:shadow-lg"
+                >
+                  <FontAwesomeIcon icon={faChevronLeft} className="w-5 h-5" />
+                </button>
                 <div>
-                  <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-1">
-                    {isEditMode ? 'Edit Proforma Invoice' : 'New Proforma Invoice'}
+                  <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
+                    {isEditMode ? 'Edit Proforma Invoice' : 'Add New Proforma Invoice'}
                   </h1>
-                  {/* <p className="text-gray-600 text-sm lg:text-base">
-                    {isEditMode ? 'Update your proforma invoice details' : 'Create a new proforma invoice for your client'}
-                  </p> */}
                 </div>
               </div>
-              
-              {/* <button
-                onClick={() => navigate('/proforma-invoices')}
-                className="inline-flex items-center px-4 sm:px-6 py-3 rounded-lg font-semibold text-gray-600 bg-white border border-gray-300 text-sm sm:text-base"
-              >
-                <FontAwesomeIcon icon={faTimes} className="w-4 h-4 mr-2" />
-                Cancel
-              </button> */}
             </div>
           </div>
         </div>
@@ -2622,7 +2606,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                     onClick={() => setCurrentStep(step)}
                     className={`w-12 h-12 rounded-lg flex items-center justify-center text-sm font-bold ${
                       step === currentStep
-                        ? 'bg-blue-600 text-white'
+                        ? 'bg-slate-700 text-white'
                         : step < currentStep || completedSteps.has(step)
                           ? 'bg-green-500 text-white'
                           : 'bg-white text-gray-600 border-2 border-gray-300'
@@ -2645,19 +2629,19 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
               ))}
             </div>
             <div className="flex justify-between mt-6 text-sm font-medium overflow-x-auto">
-              <span className={currentStep === 1 ? 'text-blue-600 font-bold flex-shrink-0' : 'text-gray-500 flex-shrink-0'}>
+              <span className={currentStep === 1 ? 'text-slate-700 font-bold flex-shrink-0' : 'text-gray-500 flex-shrink-0'}>
                 Company
               </span>
-              <span className={currentStep === 2 ? 'text-blue-600 font-bold flex-shrink-0' : 'text-gray-500 flex-shrink-0'}>
+              <span className={currentStep === 2 ? 'text-slate-700 font-bold flex-shrink-0' : 'text-gray-500 flex-shrink-0'}>
                 Container
               </span>
-              <span className={currentStep === 3 ? 'text-blue-600 font-bold flex-shrink-0' : 'text-gray-500 flex-shrink-0'}>
+              <span className={currentStep === 3 ? 'text-slate-700 font-bold flex-shrink-0' : 'text-gray-500 flex-shrink-0'}>
                 Terms
               </span>
-              <span className={currentStep === 4 ? 'text-blue-600 font-bold flex-shrink-0' : 'text-gray-500 flex-shrink-0'}>
+              <span className={currentStep === 4 ? 'text-slate-700 font-bold flex-shrink-0' : 'text-gray-500 flex-shrink-0'}>
                 Products
               </span>
-              <span className={currentStep === 5 ? 'text-blue-600 font-bold flex-shrink-0' : 'text-gray-500 flex-shrink-0'}>
+              <span className={currentStep === 5 ? 'text-slate-700 font-bold flex-shrink-0' : 'text-gray-500 flex-shrink-0'}>
                 Review
               </span>
             </div>
@@ -2678,14 +2662,14 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
               <div className="step-content">
                 <div className="mb-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 rounded-lg bg-blue-600">
+                    <div className="p-2 rounded-lg bg-slate-700">
                       <FontAwesomeIcon icon={faPlus} className="w-5 h-5 text-white" />
                     </div>
                     <h4 className="text-xl font-semibold text-gray-900">
                       Step 1: Company Selection
                     </h4>
                   </div>
-                  <div className="h-1 bg-blue-600 rounded w-20"></div>
+                  <div className="h-1 bg-slate-700 rounded w-20"></div>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                   <div>
@@ -2704,11 +2688,11 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                       <option value="" disabled>
                         Choose Company
                       </option>
-                      {companies
-                        ?.filter((comp) => comp.role === 'Customer')
+                      {(Array.isArray(companies) ? companies : [])
+                        .filter((comp) => comp.role === 'Customer')
                         .map((comp) => (
                           <option key={comp.id} value={comp.id}>
-                            {comp?.companyName || comp?.name}
+                            {comp.companyName}
                           </option>
                         ))}
                     </select>
@@ -2836,14 +2820,14 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
               <div className="step-content">
                 <div className="mb-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 shadow-md">
+                    <div className="p-2 rounded-xl bg-slate-700 shadow-md">
                       <FontAwesomeIcon icon={faPlus} className="w-5 h-5 text-white" />
                     </div>
                     <h4 className="text-xl font-semibold text-slate-800">
                       Step 2: Container Management
                     </h4>
                   </div>
-                  <div className="h-1 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full w-20"></div>
+                  <div className="h-1 bg-slate-700 rounded-full w-20"></div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
                   <div>
@@ -2961,9 +2945,9 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                   addedProducts.length > 0 &&
                   (containerUtilization.totalWeight > 0 ||
                     containerUtilization.totalVolume > 0) && (
-                    <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900 rounded-lg border border-blue-200 dark:border-blue-700">
+                    <div className="mt-4 p-3 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
                       <div className="flex items-center justify-between mb-2">
-                        <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                        <h4 className="text-sm font-medium text-slate-900 dark:text-slate-100">
                           Container Summary ({containerType})
                         </h4>
                       </div>
@@ -2991,7 +2975,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                           <div className="text-xs text-gray-600 dark:text-gray-400">
                             Containers
                           </div>
-                          <div className="font-bold text-blue-600 dark:text-blue-400">
+                          <div className="font-bold text-slate-700 dark:text-slate-400">
                             {containerUtilization.recommendedContainers}
                           </div>
                         </div>
@@ -3099,14 +3083,14 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
               <div className="step-content">
                 <div className="mb-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 shadow-md">
+                    <div className="p-2 rounded-xl bg-slate-700 shadow-md">
                       <FontAwesomeIcon icon={faPlus} className="w-5 h-5 text-white" />
                     </div>
                     <h4 className="text-xl font-semibold text-slate-800">
                       Step 3: Terms Configuration
                     </h4>
                   </div>
-                  <div className="h-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full w-20"></div>
+                  <div className="h-1 bg-slate-700 rounded-full w-20"></div>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                   <div>
@@ -3171,14 +3155,14 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
               <div className="step-content">
                 <div className="mb-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 shadow-md">
+                    <div className="p-2 rounded-xl bg-slate-700 shadow-md">
                       <FontAwesomeIcon icon={faPlus} className="w-5 h-5 text-white" />
                     </div>
                     <h4 className="text-xl font-semibold text-slate-800">
                       Step 4: Add Products
                     </h4>
                   </div>
-                  <div className="h-1 bg-gradient-to-r from-orange-500 to-red-500 rounded-full w-20"></div>
+                  <div className="h-1 bg-slate-700 rounded-full w-20"></div>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
                   <div>
@@ -3651,14 +3635,14 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
               <div className="step-content">
                 <div className="mb-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 shadow-md">
+                    <div className="p-2 rounded-xl bg-slate-700 shadow-md">
                       <FontAwesomeIcon icon={faEye} className="w-5 h-5 text-white" />
                     </div>
                     <h4 className="text-xl font-semibold text-slate-800">
                       Step 5: Review & Confirmation
                     </h4>
                   </div>
-                  <div className="h-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full w-20"></div>
+                  <div className="h-1 bg-slate-700 rounded-full w-20"></div>
                 </div>
 
                 {/* Review Details Section */}
@@ -3666,7 +3650,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                   {/* Company & Contact Details */}
                   <section className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
                     <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
+                      <div className="w-2 h-2 bg-slate-700 rounded-full mr-3"></div>
                       Company & Contact Details
                     </h4>
                     <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-gray-700 dark:text-gray-300">
@@ -3700,7 +3684,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                   {/* Container & Terms Information */}
                   <section className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
                     <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center">
-                      <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+                      <div className="w-2 h-2 bg-slate-700 rounded-full mr-3"></div>
                       Container & Terms Information
                     </h4>
                     <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-gray-700 dark:text-gray-300">
@@ -3752,7 +3736,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                   {/* Products Table */}
                   <section className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
                     <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center">
-                      <div className="w-2 h-2 bg-purple-500 rounded-full mr-3"></div>
+                      <div className="w-2 h-2 bg-slate-700 rounded-full mr-3"></div>
                       Products ({addedProducts.length})
                     </h4>
                     {addedProducts.length > 0 ? (
@@ -3841,7 +3825,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                                 )}
                               </td>
                             </tr>
-                            <tr className="bg-blue-50 dark:bg-blue-800 font-semibold text-blue-900 dark:text-blue-200">
+                            <tr className="bg-slate-50 dark:bg-slate-800 font-semibold text-slate-900 dark:text-slate-200">
                               <td colSpan={5} className="text-right px-3 py-3">
                                 Gross Weight:
                               </td>
@@ -3866,7 +3850,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                   {deliveryTerm && (
                     <section className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
                       <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center">
-                        <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
+                        <div className="w-2 h-2 bg-slate-700 rounded-full mr-3"></div>
                         Additional Charges Breakdown
                       </h4>
                       <div className="text-gray-700 dark:text-gray-300 space-y-2">
@@ -3956,7 +3940,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                       <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">
                         Total Invoice Amount
                       </h4>
-                      <div className="text-3xl font-bold text-green-600 dark:text-green-400">
+                      <div className="text-3xl font-bold text-slate-700 dark:text-slate-400">
                         {(() => {
                           let subtotal = addedProducts.reduce((sum, p) => sum + p.total, 0);
                           let chargesTotal = 0;
@@ -3988,18 +3972,18 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
               </div>
             )}
             {/* Navigation Buttons */}
-            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center mt-8 pt-6 border-t border-gray-200 gap-4">
+            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 gap-4">
               <button
                 type="button"
                 onClick={() => setCurrentStep(Math.max(currentStep - 1, 1))}
                 disabled={currentStep === 1}
-                className={`inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-sm ${
+                className={`inline-flex items-center justify-center px-5 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 shadow-sm ${
                   currentStep === 1
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-gray-600 text-white'
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200 dark:bg-gray-800 dark:text-gray-600 dark:border-gray-700'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400 focus:ring-2 focus:ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700'
                 }`}
               >
-                <FontAwesomeIcon icon={faChevronLeft} className="mr-2" />
+                <FontAwesomeIcon icon={faChevronLeft} className="mr-2 w-4 h-4" />
                 Previous
               </button>
 
@@ -4009,7 +3993,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                     type="button"
                     onClick={handleSaveDraft}
                     disabled={submitting}
-                    className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-blue-600 text-white font-semibold disabled:opacity-50"
+                    className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-gray-600 text-white font-medium text-sm transition-all duration-200 shadow-sm hover:bg-gray-700 focus:ring-2 focus:ring-gray-200 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-700 dark:hover:bg-gray-600"
                   >
                     {submitting ? 'Saving...' : 'Save as Draft'}
                   </button>
@@ -4019,19 +4003,19 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => handleStepComplete(currentStep)}
-                    className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-green-600 text-white font-semibold"
+                    className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-slate-700 text-white font-medium text-sm transition-all duration-200 shadow-sm hover:bg-slate-800 focus:ring-2 focus:ring-slate-200 dark:focus:ring-slate-600"
                   >
                     Next Step
-                    <FontAwesomeIcon icon={faChevronRight} className="ml-2" />
+                    <FontAwesomeIcon icon={faChevronRight} className="ml-2 w-4 h-4" />
                   </button>
                 ) : (
                   <button
                     type="button"
                     onClick={handleConfirm}
                     disabled={submitting}
-                    className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-green-600 text-white font-semibold disabled:opacity-50"
+                    className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-slate-700 text-white font-medium text-sm transition-all duration-200 shadow-sm hover:bg-slate-800 focus:ring-2 focus:ring-slate-200 disabled:opacity-50 disabled:cursor-not-allowed dark:focus:ring-slate-600"
                   >
-                    <FontAwesomeIcon icon={faCheck} className="mr-2" />
+                    <FontAwesomeIcon icon={faCheck} className="mr-2 w-4 h-4" />
                     {submitting ? 'Saving...' : (isEditMode ? 'Update PI' : 'Save PI')}
                   </button>
                 )}
@@ -4039,9 +4023,9 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => navigate('/proforma-invoices')}
-                  className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-red-600 text-white font-semibold"
+                  className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-gray-500 text-white font-medium text-sm transition-all duration-200 shadow-sm hover:bg-gray-600 focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-600"
                 >
-                  <FontAwesomeIcon icon={faTimes} className="mr-2" />
+                  <FontAwesomeIcon icon={faTimes} className="mr-2 w-4 h-4" />
                   Cancel
                 </button>
               </div>

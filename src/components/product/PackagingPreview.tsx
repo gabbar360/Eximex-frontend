@@ -83,7 +83,7 @@ const PackagingPreview: React.FC<PackagingPreviewProps> = ({
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 shadow-md">
+        <div className="p-2 rounded-lg bg-slate-700 shadow-lg">
           <HiEye className="w-5 h-5 text-white" />
         </div>
         <h4 className="text-lg font-semibold text-slate-800">
@@ -91,26 +91,26 @@ const PackagingPreview: React.FC<PackagingPreviewProps> = ({
         </h4>
       </div>
       
-      <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-200">
+      <div className="p-6 bg-slate-50 rounded-lg border border-gray-200">
 
         {/* Visual representation */}
         <div className="flex items-center mb-6 overflow-x-auto pb-2">
           {packagingHierarchy.map((level, index) => (
             <React.Fragment key={index}>
-              <div className="flex-shrink-0 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl text-white text-sm font-semibold shadow-md">
+              <div className="flex-shrink-0 px-4 py-2 bg-slate-700 rounded-lg text-white text-sm font-semibold shadow-md">
                 {level.from}
               </div>
               {index < packagingHierarchy.length - 1 && (
-                <div className="flex-shrink-0 mx-3 text-blue-600 font-bold text-lg">
+                <div className="flex-shrink-0 mx-3 text-slate-600 font-bold text-lg">
                   →
                 </div>
               )}
             </React.Fragment>
           ))}
-          <div className="flex-shrink-0 mx-3 text-blue-600 font-bold text-lg">
+          <div className="flex-shrink-0 mx-3 text-slate-600 font-bold text-lg">
             →
           </div>
-          <div className="flex-shrink-0 px-4 py-2 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl text-white text-sm font-semibold shadow-md">
+          <div className="flex-shrink-0 px-4 py-2 bg-slate-700 rounded-lg text-white text-sm font-semibold shadow-md">
             {packagingHierarchy.length > 0
               ? packagingHierarchy[packagingHierarchy.length - 1].to
               : 'box'}
@@ -130,7 +130,7 @@ const PackagingPreview: React.FC<PackagingPreviewProps> = ({
                   className="flex items-center justify-between p-3 bg-white/70 backdrop-blur-sm rounded-xl border border-white/50 shadow-sm"
                 >
                   <div className="flex items-center gap-2">
-                    <HiCube className="w-4 h-4 text-blue-600" />
+                    <HiCube className="w-4 h-4 text-slate-600" />
                     <span className="text-sm font-medium text-slate-700">
                       1 {level.to} = {quantity} {level.from}
                     </span>
@@ -144,7 +144,7 @@ const PackagingPreview: React.FC<PackagingPreviewProps> = ({
           {values.unitWeight && values.weightUnitType && (
             <div className="space-y-3">
               <h6 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
-                <HiScale className="w-4 h-4 text-blue-600" />
+                <HiScale className="w-4 h-4 text-slate-600" />
                 Weight Calculations
               </h6>
               
@@ -153,7 +153,7 @@ const PackagingPreview: React.FC<PackagingPreviewProps> = ({
                 <span className="text-sm font-medium text-slate-700">
                   Weight per {values.weightUnitType}
                 </span>
-                <span className="text-sm font-semibold text-blue-600">
+                <span className="text-sm font-semibold text-slate-700">
                   {values.unitWeight} {values.unitWeightUnit}
                 </span>
               </div>
@@ -199,15 +199,15 @@ const PackagingPreview: React.FC<PackagingPreviewProps> = ({
               )}
 
               {/* Gross weight per box */}
-              <div className="p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-200">
+              <div className="p-4 bg-slate-50 rounded-lg border border-gray-200">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-emerald-800">
+                  <span className="text-sm font-semibold text-slate-800">
                     Gross weight per{' '}
                     {packagingHierarchy[packagingHierarchy.length - 1]?.to ||
                       'Box'}
                   </span>
                   <div className="text-right">
-                    <div className="text-sm font-bold text-emerald-700">
+                    <div className="text-sm font-bold text-slate-700">
                       {(() => {
                         const lastLevel =
                           packagingHierarchy[packagingHierarchy.length - 1];
@@ -230,7 +230,7 @@ const PackagingPreview: React.FC<PackagingPreviewProps> = ({
                       })()}
                     </div>
                     {parseFloat(values.packagingMaterialWeight) > 0 && (
-                      <div className="text-xs text-emerald-600 mt-1">
+                      <div className="text-xs text-slate-600 mt-1">
                         (Net + {values.packagingMaterialWeight}{' '}
                         {values.packagingMaterialWeightUnit} box weight)
                       </div>
@@ -244,7 +244,7 @@ const PackagingPreview: React.FC<PackagingPreviewProps> = ({
           {/* Summary section */}
           <div className="space-y-3">
             <h6 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
-              <HiCube className="w-4 h-4 text-blue-600" />
+              <HiCube className="w-4 h-4 text-slate-600" />
               Summary
             </h6>
             

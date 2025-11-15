@@ -52,14 +52,14 @@ export default function ComprehensiveDashboard() {
   return (
     <div className="w-full min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Tab Navigation */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
+      <div className="bg-white dark:bg-gray-900 shadow-theme-sm border-b border-gray-200 dark:border-gray-800 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
           <div className="flex space-x-4 sm:space-x-8 overflow-x-auto">
             <button
               onClick={() => handleChange(0)}
               className={`py-3 sm:py-4 px-2 sm:px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors duration-200 ${
                 value === 0
-                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  ? 'border-brand-500 text-brand-600 dark:text-brand-400'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
               }`}
             >
@@ -69,7 +69,7 @@ export default function ComprehensiveDashboard() {
               onClick={() => handleChange(1)}
               className={`py-3 sm:py-4 px-2 sm:px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors duration-200 ${
                 value === 1
-                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  ? 'border-brand-500 text-brand-600 dark:text-brand-400'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
               }`}
             >

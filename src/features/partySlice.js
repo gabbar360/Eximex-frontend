@@ -3,11 +3,13 @@ import partyService from '../service/partyService';
 
 export const fetchParties = createAsyncThunk(
   'party/fetchParties',
-  async (_, { rejectWithValue }) => {
+  async (params = {}, { rejectWithValue }) => {
     try {
-      return await partyService.getAllParties();
+      const response = await partyService.getAllParties(params);
+      return response;
     } catch (err) {
-      return rejectWithValue(err.message);
+      console.error('Fetch parties error:', err);
+      return rejectWithValue(err.message || 'Failed to fetch parties');
     }
   }
 );
@@ -100,6 +102,11 @@ const partySlice = createSlice({
     error: null,
     selectedParty: null,
     successMessage: null,
+    pagination: {
+      current: 1,
+      pageSize: 10,
+      total: 0,
+    },
   },
   reducers: {
     setSelectedParty(state, { payload }) {
@@ -121,7 +128,14 @@ const partySlice = createSlice({
       })
       .addCase(fetchParties.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.parties = payload || [];
+        // Handle both direct data and nested data structure
+        const responseData = payload?.data || payload;
+        state.parties = responseData?.data || responseData || [];
+        state.pagination = {
+          current: responseData?.pagination?.page || 1,
+          pageSize: responseData?.pagination?.limit || 10,
+          total: responseData?.pagination?.total || 0,
+        };
       })
       .addCase(fetchParties.rejected, (state, { payload }) => {
         state.loading = false;

@@ -106,9 +106,9 @@ const AddEditPartyForm = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-8 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-blue-500 mx-auto mb-4"></div>
+      <div className="min-h-screen flex justify-center items-center bg-gray-50">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-slate-600 mx-auto mb-4"></div>
           <p className="text-slate-600 font-medium">Loading...</p>
         </div>
       </div>
@@ -133,32 +133,31 @@ const AddEditPartyForm = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      <div className="p-4 lg:p-6">
+    <div className="min-h-screen bg-gray-50">
+      <div className="p-2 lg:p-4">
         {/* Header */}
-        <div className="mb-6">
-          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-6">
-            <div className="flex items-center gap-4 mb-4">
-              <button
-                onClick={() => navigate('/cprospect')}
-                className="p-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 hover:shadow-lg hover:scale-105 transform"
-              >
-                <HiArrowLeft className="w-5 h-5" />
-              </button>
-              <div>
-                <h1 className="text-2xl font-bold text-slate-800">
-                  {isEditMode ? 'Edit Party' : 'Add New Party'}
-                </h1>
-                <p className="text-slate-600">
-                  {isEditMode ? 'Update party information' : 'Create a new business relationship'}
-                </p>
+        <div className="mb-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 lg:p-4">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => navigate('/cprospect')}
+                  className="p-3 rounded-lg bg-slate-700 text-white hover:bg-slate-800 transition-all duration-300 hover:shadow-lg"
+                >
+                  <HiArrowLeft className="w-5 h-5" />
+                </button>
+                <div>
+                  <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
+                    {isEditMode ? 'Edit Party' : 'Add New Party'}
+                  </h1>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Form */}
-        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-6 lg:p-8">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 lg:p-8">
           <Formik
             enableReinitialize={true}
             initialValues={getInitialValues()}
@@ -182,7 +181,7 @@ const AddEditPartyForm = () => {
                   {/* Company Name */}
                   <div>
                     <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-                      <HiBuildingOffice2 className="w-4 h-4 mr-2 text-blue-600" />
+                      <HiBuildingOffice2 className="w-4 h-4 mr-2 text-slate-600" />
                       Company Name
                     </label>
                     <input
@@ -192,7 +191,7 @@ const AddEditPartyForm = () => {
                       value={values.companyName}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
+                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     />
                     {touched.companyName && errors.companyName && (
                       <div className="text-sm text-red-500 mt-1">{errors.companyName}</div>
@@ -202,7 +201,7 @@ const AddEditPartyForm = () => {
                   {/* Contact Person */}
                   <div>
                     <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-                      <HiUser className="w-4 h-4 mr-2 text-blue-600" />
+                      <HiUser className="w-4 h-4 mr-2 text-slate-600" />
                       Contact Person
                     </label>
                     <input
@@ -212,14 +211,14 @@ const AddEditPartyForm = () => {
                       value={values.contactPerson}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
+                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     />
                   </div>
 
                   {/* Email */}
                   <div>
                     <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-                      <HiEnvelope className="w-4 h-4 mr-2 text-blue-600" />
+                      <HiEnvelope className="w-4 h-4 mr-2 text-slate-600" />
                       Email
                     </label>
                     <input
@@ -229,7 +228,7 @@ const AddEditPartyForm = () => {
                       value={values.email}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
+                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     />
                     {touched.email && errors.email && (
                       <div className="text-sm text-red-500 mt-1">{errors.email}</div>
@@ -239,7 +238,7 @@ const AddEditPartyForm = () => {
                   {/* Phone */}
                   <div>
                     <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-                      <HiPhone className="w-4 h-4 mr-2 text-blue-600" />
+                      <HiPhone className="w-4 h-4 mr-2 text-slate-600" />
                       Phone
                     </label>
                     <input
@@ -252,7 +251,7 @@ const AddEditPartyForm = () => {
                         setFieldValue('phone', phoneValue);
                       }}
                       onBlur={handleBlur}
-                      className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
+                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     />
                     {touched.phone && errors.phone && (
                       <div className="text-sm text-red-500 mt-1">{errors.phone}</div>
@@ -262,7 +261,7 @@ const AddEditPartyForm = () => {
                   {/* Role */}
                   <div>
                     <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-                      <HiTag className="w-4 h-4 mr-2 text-blue-600" />
+                      <HiTag className="w-4 h-4 mr-2 text-slate-600" />
                       Role
                     </label>
                     <select
@@ -270,7 +269,7 @@ const AddEditPartyForm = () => {
                       value={values.role}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
+                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     >
                       <option value="">Select Role</option>
                       <option value="Customer">Customer</option>
@@ -285,7 +284,7 @@ const AddEditPartyForm = () => {
                   {/* Country */}
                   <div>
                     <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-                      <HiGlobeAlt className="w-4 h-4 mr-2 text-blue-600" />
+                      <HiGlobeAlt className="w-4 h-4 mr-2 text-slate-600" />
                       Country
                     </label>
                     <select
@@ -300,7 +299,7 @@ const AddEditPartyForm = () => {
                         }
                       }}
                       onBlur={handleBlur}
-                      className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
+                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     >
                       <option value="">Select Country</option>
                       {countries.map((country) => (
@@ -317,7 +316,7 @@ const AddEditPartyForm = () => {
                   {/* State */}
                   <div>
                     <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-                      <HiMapPin className="w-4 h-4 mr-2 text-blue-600" />
+                      <HiMapPin className="w-4 h-4 mr-2 text-slate-600" />
                       State
                     </label>
                     <select
@@ -325,7 +324,7 @@ const AddEditPartyForm = () => {
                       value={values.state}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
+                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     >
                       <option value="">Select State</option>
                       {availableStates.map((state) => (
@@ -342,7 +341,7 @@ const AddEditPartyForm = () => {
                   {/* City */}
                   <div>
                     <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-                      <HiMapPin className="w-4 h-4 mr-2 text-blue-600" />
+                      <HiMapPin className="w-4 h-4 mr-2 text-slate-600" />
                       City
                     </label>
                     <input
@@ -352,7 +351,7 @@ const AddEditPartyForm = () => {
                       value={values.city}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
+                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     />
                     {touched.city && errors.city && (
                       <div className="text-sm text-red-500 mt-1">{errors.city}</div>
@@ -362,7 +361,7 @@ const AddEditPartyForm = () => {
                   {/* Pincode */}
                   <div>
                     <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-                      <HiMapPin className="w-4 h-4 mr-2 text-blue-600" />
+                      <HiMapPin className="w-4 h-4 mr-2 text-slate-600" />
                       Pincode
                     </label>
                     <input
@@ -375,7 +374,7 @@ const AddEditPartyForm = () => {
                         setFieldValue('pincode', numericValue);
                       }}
                       onBlur={handleBlur}
-                      className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
+                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     />
                     {touched.pincode && errors.pincode && (
                       <div className="text-sm text-red-500 mt-1">{errors.pincode}</div>
@@ -385,7 +384,7 @@ const AddEditPartyForm = () => {
                   {/* Currency */}
                   <div>
                     <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-                      <HiGlobeAlt className="w-4 h-4 mr-2 text-blue-600" />
+                      <HiGlobeAlt className="w-4 h-4 mr-2 text-slate-600" />
                       Currency
                     </label>
                     <select
@@ -393,7 +392,7 @@ const AddEditPartyForm = () => {
                       value={values.currency}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
+                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     >
                       <option value="">Select Currency</option>
                       {currencies.map((currency) => (
@@ -410,7 +409,7 @@ const AddEditPartyForm = () => {
                   {/* Tags */}
                   <div>
                     <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-                      <HiTag className="w-4 h-4 mr-2 text-blue-600" />
+                      <HiTag className="w-4 h-4 mr-2 text-slate-600" />
                       Tags
                     </label>
                     <input
@@ -420,14 +419,14 @@ const AddEditPartyForm = () => {
                       value={values.tags}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
+                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     />
                   </div>
 
                   {/* Address */}
                   <div className="md:col-span-2">
                     <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-                      <HiMapPin className="w-4 h-4 mr-2 text-blue-600" />
+                      <HiMapPin className="w-4 h-4 mr-2 text-slate-600" />
                       Address
                     </label>
                     <input
@@ -437,7 +436,7 @@ const AddEditPartyForm = () => {
                       value={values.address}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
+                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     />
                     {touched.address && errors.address && (
                       <div className="text-sm text-red-500 mt-1">{errors.address}</div>
@@ -447,7 +446,7 @@ const AddEditPartyForm = () => {
                   {/* Notes */}
                   <div className="md:col-span-2">
                     <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-                      <HiDocumentText className="w-4 h-4 mr-2 text-blue-600" />
+                      <HiDocumentText className="w-4 h-4 mr-2 text-slate-600" />
                       Notes
                     </label>
                     <textarea
@@ -457,7 +456,7 @@ const AddEditPartyForm = () => {
                       value={values.notes}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm"
+                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     />
                   </div>
 
@@ -468,7 +467,7 @@ const AddEditPartyForm = () => {
                         type="checkbox"
                         checked={values.status}
                         onChange={(e) => setFieldValue('status', e.target.checked)}
-                        className="w-5 h-5 rounded border-2 border-white/50 text-blue-600 focus:ring-blue-200"
+                        className="w-5 h-5 rounded border-2 border-gray-300 text-slate-600 focus:ring-slate-200"
                       />
                       <span className="text-sm font-semibold text-slate-700">Active Status</span>
                     </label>
@@ -476,18 +475,18 @@ const AddEditPartyForm = () => {
                 </div>
 
                 {/* Buttons */}
-                <div className="flex items-center justify-end space-x-4 pt-6 border-t border-white/50">
+                <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
                   <button
                     type="button"
                     onClick={() => navigate('/cprospect')}
-                    className="px-6 py-3 rounded-2xl border border-white/50 text-slate-600 hover:bg-slate-50 transition-all duration-300 hover:scale-105 transform"
+                    className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50 transition-all duration-300"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="px-6 py-3 rounded-2xl font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 hover:shadow-xl hover:scale-105 transform disabled:opacity-50 shadow-lg"
+                    className="px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-xl disabled:opacity-50 shadow-lg"
                   >
                     {submitting ? (
                       <div className="flex items-center gap-2">

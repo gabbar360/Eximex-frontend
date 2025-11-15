@@ -1,35 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { getAllRoles, createRole, updateRole, deleteRole } from '../../features/roleSlice';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { HiPlus, HiPencil, HiTrash, HiEye, HiArrowLeft, HiCheckCircle } from 'react-icons/hi';
 
 const RoleManagement: React.FC = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { roles, loading, error } = useSelector((state: any) => state.role);
   
-  const [showModal, setShowModal] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [editingRole, setEditingRole] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredRoles, setFilteredRoles] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     displayName: '',
-    description: '',
-    permissions: {
-      canManageRoles: false,
-      canManageStaff: false,
-      canManageUsers: false,
-      canViewAllData: false,
-      canManageSystem: false,
-      canReassignData: false,
-      canManageCompanies: false,
-      canViewActivityLogs: false
-    }
+    description: ''
   });
 
   useEffect(() => {
     dispatch(getAllRoles());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (roles) {
+      const filtered = roles.filter((role: any) =>
+        role.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        role.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        role.description?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredRoles(filtered);
+    }
+  }, [roles, searchTerm]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,8 +51,8 @@ const RoleManagement: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this role?')) {
+  const handleDelete = async (id: number, roleName: string) => {
+    if (window.confirm(`Are you sure you want to delete the role "${roleName}"?`)) {
       try {
         await dispatch(deleteRole(id)).unwrap();
         toast.success('Role deleted successfully');
@@ -62,20 +66,10 @@ const RoleManagement: React.FC = () => {
     setFormData({
       name: '',
       displayName: '',
-      description: '',
-      permissions: {
-        canManageRoles: false,
-        canManageStaff: false,
-        canManageUsers: false,
-        canViewAllData: false,
-        canManageSystem: false,
-        canReassignData: false,
-        canManageCompanies: false,
-        canViewActivityLogs: false
-      }
+      description: ''
     });
     setEditingRole(null);
-    setShowModal(false);
+    setShowForm(false);
   };
 
   const handleEdit = (role: any) => {
@@ -83,162 +77,280 @@ const RoleManagement: React.FC = () => {
     setFormData({
       name: role.name,
       displayName: role.displayName,
-      description: role.description,
-      permissions: role.permissions || {}
+      description: role.description
     });
-    setShowModal(true);
+    setShowForm(true);
   };
 
-  return (
-    <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
-      <div className="mb-6 flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Role Management</h1>
-          <p className="text-gray-600 dark:text-gray-400">Manage system roles and permissions</p>
-        </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-        >
-          Add New Role
-        </button>
-      </div>
+  const handleAddNew = () => {
+    resetForm();
+    setShowForm(true);
+  };
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-700">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Display Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Description</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-600">
-              {roles.map((role: any) => (
-                <tr key={role.id}>
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">{role.name}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">{role.displayName}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">{role.description}</td>
-                  <td className="px-6 py-4 text-sm space-x-2">
-                    <button
-                      onClick={() => handleEdit(role)}
-                      className="text-blue-600 hover:text-blue-800 p-2 rounded hover:bg-blue-50"
-                      title="Edit Role"
-                    >
-                      <FontAwesomeIcon icon={faEdit} />
-                    </button>
-                    {!role.isSystem && (
-                      <button
-                        onClick={() => handleDelete(role.id)}
-                        className="text-red-600 hover:text-red-800 p-2 rounded hover:bg-red-50"
-                        title="Delete Role"
-                      >
-                        <FontAwesomeIcon icon={faTrash} />
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+  if (loading && !roles.length) {
+    return (
+      <div className="min-h-screen flex justify-center items-center bg-gray-50">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-slate-600 mx-auto mb-4"></div>
+          <p className="text-slate-600 font-medium">Loading roles...</p>
         </div>
       </div>
+    );
+  }
 
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
-              {editingRole ? 'Edit Role' : 'Add New Role'}
-            </h2>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Role Name
-                </label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
-                  required
-                />
+  if (showForm) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="p-2 lg:p-4">
+          {/* Header */}
+          <div className="mb-3">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 lg:p-4">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => setShowForm(false)}
+                    className="p-3 rounded-lg bg-slate-700 text-white hover:bg-slate-800 transition-all duration-300 hover:shadow-lg"
+                  >
+                    <HiArrowLeft className="w-5 h-5" />
+                  </button>
+                  <div>
+                    <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
+                      {editingRole ? 'Edit Role' : 'Add New Role'}
+                    </h1>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Form */}
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 lg:p-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Role Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                    placeholder="Enter role name"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Display Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.displayName}
+                    onChange={(e) => setFormData({...formData, displayName: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                    placeholder="Enter display name"
+                    required
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Display Name
-                </label>
-                <input
-                  type="text"
-                  value={formData.displayName}
-                  onChange={(e) => setFormData({...formData, displayName: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
                   Description
                 </label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                  placeholder="Enter role description"
                   rows={3}
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Permissions
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {Object.keys(formData.permissions).map((permission) => (
-                    <label key={permission} className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={formData.permissions[permission]}
-                        onChange={(e) => setFormData({
-                          ...formData,
-                          permissions: {
-                            ...formData.permissions,
-                            [permission]: e.target.checked
-                          }
-                        })}
-                        className="mr-2"
-                      />
-                      <span className="text-sm text-gray-700 dark:text-gray-300">
-                        {permission.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
 
-              <div className="flex justify-end space-x-2 pt-4">
+
+              {/* Submit Buttons */}
+              <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                  className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50 transition-all duration-300"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  className="px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-xl disabled:opacity-50 shadow-lg"
                 >
-                  {loading ? 'Saving...' : (editingRole ? 'Update' : 'Create')}
+                  {loading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      {editingRole ? 'Updating...' : 'Creating...'}
+                    </div>
+                  ) : (
+                    <>
+                      <HiCheckCircle className="w-5 h-5 mr-2 inline" />
+                      {editingRole ? 'Update Role' : 'Create Role'}
+                    </>
+                  )}
                 </button>
               </div>
             </form>
           </div>
         </div>
-      )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="p-2 lg:p-4">
+        {/* Header */}
+        <div className="mb-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 lg:p-4">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <div>
+                <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
+                  Role Management
+                </h1>
+                {/* <p className="text-slate-600">Manage system roles and permissions</p> */}
+              </div>
+              <button
+                onClick={handleAddNew}
+                className="flex items-center gap-2 px-4 py-3 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-all duration-300 hover:shadow-lg font-medium"
+              >
+                <HiPlus className="w-5 h-5" />
+                Add New Role
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Search */}
+        <div className="mb-4">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
+            <input
+              type="text"
+              placeholder="Search roles by name, display name, or description..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+            />
+          </div>
+        </div>
+
+        {/* Roles Table */}
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+          {filteredRoles.length === 0 ? (
+            <div className="p-8 text-center">
+              <div className="text-slate-400 mb-4">
+                <HiEye className="w-16 h-16 mx-auto" />
+              </div>
+              <h3 className="text-lg font-medium text-slate-600 mb-2">No roles found</h3>
+              <p className="text-slate-500 mb-4">
+                {searchTerm ? 'No roles match your search criteria.' : 'Get started by creating your first role.'}
+              </p>
+              {!searchTerm && (
+                <button
+                  onClick={handleAddNew}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-colors"
+                >
+                  <HiPlus className="w-4 h-4" />
+                  Add First Role
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+                      Role Name
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+                      Display Name
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+                      Description
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+                      Type
+                    </th>
+                    <th className="px-6 py-4 text-right text-xs font-medium text-slate-600 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredRoles.map((role: any) => (
+                    <tr key={role.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-slate-900">{role.name}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-slate-600">{role.displayName}</div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-slate-600 max-w-xs truncate">
+                          {role.description || 'No description'}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          role.isSystem 
+                            ? 'bg-blue-100 text-blue-800' 
+                            : 'bg-green-100 text-green-800'
+                        }`}>
+                          {role.isSystem ? 'System' : 'Custom'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => handleEdit(role)}
+                            className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-all duration-200"
+                            title="Edit Role"
+                          >
+                            <HiPencil className="w-4 h-4" />
+                          </button>
+                          {!role.isSystem && (
+                            <button
+                              onClick={() => handleDelete(role.id, role.name)}
+                              className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200"
+                              title="Delete Role"
+                            >
+                              <HiTrash className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* Summary */}
+        {filteredRoles.length > 0 && (
+          <div className="mt-4 bg-white rounded-lg border border-gray-200 shadow-sm p-4">
+            <div className="flex items-center justify-between text-sm text-slate-600">
+              <span>
+                Showing {filteredRoles.length} of {roles.length} roles
+              </span>
+              <span>
+                {roles.filter((r: any) => r.isSystem).length} system roles, {' '}
+                {roles.filter((r: any) => !r.isSystem).length} custom roles
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

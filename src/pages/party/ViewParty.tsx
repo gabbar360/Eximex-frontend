@@ -29,9 +29,9 @@ const ViewParty = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-8 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-blue-500 mx-auto mb-4"></div>
+      <div className="min-h-screen flex justify-center items-center bg-gray-50">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-slate-600 mx-auto mb-4"></div>
           <p className="text-slate-600 font-medium">Loading party details...</p>
         </div>
       </div>
@@ -40,16 +40,16 @@ const ViewParty = () => {
 
   if (error || !party) {
     return (
-      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-12 text-center max-w-md">
-          <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-r from-red-500 to-pink-600 flex items-center justify-center shadow-lg">
+      <div className="min-h-screen flex justify-center items-center bg-gray-50">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-12 text-center max-w-md">
+          <div className="w-16 h-16 mx-auto mb-6 rounded-lg bg-red-600 flex items-center justify-center shadow-lg">
             <HiBuildingOffice2 className="text-white text-xl" />
           </div>
           <h3 className="text-xl font-semibold text-slate-800 mb-2">Party Not Found</h3>
           <p className="text-slate-600 mb-6">{error || 'The requested party could not be found'}</p>
           <button
             onClick={() => navigate('/cprospect')}
-            className="px-6 py-3 rounded-2xl font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 hover:scale-105 transform shadow-lg"
+            className="px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 shadow-lg"
           >
             Back to Prospects
           </button>
@@ -59,21 +59,21 @@ const ViewParty = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gray-50">
       <div className="p-3 sm:p-4 lg:p-6 pt-6 sm:pt-8 lg:pt-12 pb-6 sm:pb-8 lg:pb-12">
         {/* Header */}
         <div className="mb-4 sm:mb-6">
-          <div className="bg-white/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl border border-white/30 p-4 sm:p-6">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center gap-3 sm:gap-4">
                 <button
                   onClick={() => navigate('/cprospect')}
-                  className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 hover:shadow-lg hover:scale-105 transform"
+                  className="p-2 sm:p-3 rounded-lg bg-slate-700 text-white hover:bg-slate-800 transition-all duration-300 hover:shadow-lg"
                 >
                   <HiArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
                 <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg">
+                  <div className="p-2 sm:p-3 rounded-lg bg-slate-700 shadow-lg">
                     <HiBuildingOffice2 className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   </div>
                   <div className="min-w-0">
@@ -86,10 +86,10 @@ const ViewParty = () => {
               </div>
               
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
-                <span className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-semibold shadow-lg inline-flex items-center ${
+                <span className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold shadow-lg inline-flex items-center ${
                   party.status 
-                    ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white' 
-                    : 'bg-gradient-to-r from-red-500 to-pink-500 text-white'
+                    ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' 
+                    : 'bg-red-100 text-red-800 border border-red-200'
                 }`}>
                   {party.status ? (
                     <><HiCheckBadge className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />Active</>
@@ -99,7 +99,7 @@ const ViewParty = () => {
                 </span>
                 <Link
                   to={`/edit-party/${party.id}`}
-                  className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 rounded-xl sm:rounded-2xl font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 hover:shadow-xl hover:scale-105 transform shadow-lg text-center text-sm sm:text-base"
+                  className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-xl shadow-lg text-center text-sm sm:text-base"
                 >
                   <HiPencil className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 inline" />
                   Edit Party
@@ -112,9 +112,9 @@ const ViewParty = () => {
         {/* Party Details */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Basic Information */}
-          <div className="bg-white/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl border border-white/30 p-4 sm:p-6 lg:p-8">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 sm:p-6 lg:p-8">
             <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-              <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg">
+              <div className="p-2 sm:p-3 rounded-lg bg-slate-700 shadow-lg">
                 <HiBuildingOffice2 className="text-white w-4 h-4 sm:w-5 sm:h-5" />
               </div>
               <h2 className="text-lg sm:text-xl font-bold text-slate-800">Basic Information</h2>
@@ -123,46 +123,46 @@ const ViewParty = () => {
             <div className="space-y-4 sm:space-y-6">
               <div>
                 <label className="flex items-center text-xs sm:text-sm font-semibold text-slate-600 mb-2">
-                  <HiBuildingOffice2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-blue-600" />
+                  <HiBuildingOffice2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-slate-600" />
                   Company Name
                 </label>
-                <p className="text-base sm:text-lg font-semibold text-slate-800 bg-white/50 rounded-xl p-2 sm:p-3 break-words">{party.companyName}</p>
+                <p className="text-base sm:text-lg font-semibold text-slate-800 bg-gray-50 rounded-lg p-2 sm:p-3 break-words">{party.companyName}</p>
               </div>
               
               <div>
                 <label className="flex items-center text-xs sm:text-sm font-semibold text-slate-600 mb-2">
-                  <HiTag className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-blue-600" />
+                  <HiTag className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-slate-600" />
                   Role
                 </label>
-                <span className="inline-flex px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg">
+                <span className="inline-flex px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold bg-slate-700 text-white shadow-lg">
                   {party.role}
                 </span>
               </div>
               
               <div>
                 <label className="flex items-center text-xs sm:text-sm font-semibold text-slate-600 mb-2">
-                  <HiUser className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-blue-600" />
+                  <HiUser className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-slate-600" />
                   Contact Person
                 </label>
-                <p className="text-sm sm:text-base text-slate-800 font-medium bg-white/50 rounded-xl p-2 sm:p-3 break-words">{party.contactPerson}</p>
+                <p className="text-sm sm:text-base text-slate-800 font-medium bg-gray-50 rounded-lg p-2 sm:p-3 break-words">{party.contactPerson}</p>
               </div>
               
               {party.currency && (
                 <div>
                   <label className="flex items-center text-xs sm:text-sm font-semibold text-slate-600 mb-2">
-                    <HiGlobeAlt className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-blue-600" />
+                    <HiGlobeAlt className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-slate-600" />
                     Currency
                   </label>
-                  <p className="text-sm sm:text-base text-slate-800 font-medium bg-white/50 rounded-xl p-2 sm:p-3">{party.currency}</p>
+                  <p className="text-sm sm:text-base text-slate-800 font-medium bg-gray-50 rounded-lg p-2 sm:p-3">{party.currency}</p>
                 </div>
               )}
             </div>
           </div>
 
           {/* Contact Information */}
-          <div className="bg-white/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl border border-white/30 p-4 sm:p-6 lg:p-8">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 sm:p-6 lg:p-8">
             <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-              <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-r from-emerald-500 to-green-500 shadow-lg">
+              <div className="p-2 sm:p-3 rounded-lg bg-slate-700 shadow-lg">
                 <HiPhone className="text-white w-4 h-4 sm:w-5 sm:h-5" />
               </div>
               <h2 className="text-lg sm:text-xl font-bold text-slate-800">Contact Information</h2>
@@ -171,59 +171,59 @@ const ViewParty = () => {
             <div className="space-y-4 sm:space-y-6">
               <div>
                 <label className="flex items-center text-xs sm:text-sm font-semibold text-slate-600 mb-2">
-                  <HiEnvelope className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-emerald-600" />
+                  <HiEnvelope className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-slate-600" />
                   Email Address
                 </label>
-                <p className="text-sm sm:text-base text-slate-800 font-medium break-all bg-white/50 rounded-xl p-2 sm:p-3">{party.email}</p>
+                <p className="text-sm sm:text-base text-slate-800 font-medium break-all bg-gray-50 rounded-lg p-2 sm:p-3">{party.email}</p>
               </div>
               
               <div>
                 <label className="flex items-center text-xs sm:text-sm font-semibold text-slate-600 mb-2">
-                  <HiPhone className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-emerald-600" />
+                  <HiPhone className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-slate-600" />
                   Phone Number
                 </label>
-                <p className="text-sm sm:text-base text-slate-800 font-medium bg-white/50 rounded-xl p-2 sm:p-3">{party.phone}</p>
+                <p className="text-sm sm:text-base text-slate-800 font-medium bg-gray-50 rounded-lg p-2 sm:p-3">{party.phone}</p>
               </div>
               
               <div>
                 <label className="flex items-center text-xs sm:text-sm font-semibold text-slate-600 mb-2">
-                  <HiMapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-emerald-600" />
+                  <HiMapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-slate-600" />
                   Address
                 </label>
-                <p className="text-sm sm:text-base text-slate-800 font-medium bg-white/50 rounded-xl p-2 sm:p-3 break-words">{party.address}</p>
+                <p className="text-sm sm:text-base text-slate-800 font-medium bg-gray-50 rounded-lg p-2 sm:p-3 break-words">{party.address}</p>
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <label className="flex items-center text-xs sm:text-sm font-semibold text-slate-600 mb-2">
-                    <HiMapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-emerald-600" />
+                    <HiMapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-slate-600" />
                     City
                   </label>
-                  <p className="text-sm sm:text-base text-slate-800 font-medium bg-white/50 rounded-xl p-2 sm:p-3">{party.city}</p>
+                  <p className="text-sm sm:text-base text-slate-800 font-medium bg-gray-50 rounded-lg p-2 sm:p-3">{party.city}</p>
                 </div>
                 <div>
                   <label className="flex items-center text-xs sm:text-sm font-semibold text-slate-600 mb-2">
-                    <HiMapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-emerald-600" />
+                    <HiMapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-slate-600" />
                     Pincode
                   </label>
-                  <p className="text-sm sm:text-base text-slate-800 font-medium bg-white/50 rounded-xl p-2 sm:p-3">{party.pincode}</p>
+                  <p className="text-sm sm:text-base text-slate-800 font-medium bg-gray-50 rounded-lg p-2 sm:p-3">{party.pincode}</p>
                 </div>
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <label className="flex items-center text-xs sm:text-sm font-semibold text-slate-600 mb-2">
-                    <HiMapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-emerald-600" />
+                    <HiMapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-slate-600" />
                     State
                   </label>
-                  <p className="text-sm sm:text-base text-slate-800 font-medium bg-white/50 rounded-xl p-2 sm:p-3">{party.state}</p>
+                  <p className="text-sm sm:text-base text-slate-800 font-medium bg-gray-50 rounded-lg p-2 sm:p-3">{party.state}</p>
                 </div>
                 <div>
                   <label className="flex items-center text-xs sm:text-sm font-semibold text-slate-600 mb-2">
-                    <HiGlobeAlt className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-emerald-600" />
+                    <HiGlobeAlt className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-slate-600" />
                     Country
                   </label>
-                  <p className="text-sm sm:text-base text-slate-800 font-medium bg-white/50 rounded-xl p-2 sm:p-3">{party.country}</p>
+                  <p className="text-sm sm:text-base text-slate-800 font-medium bg-gray-50 rounded-lg p-2 sm:p-3">{party.country}</p>
                 </div>
               </div>
             </div>
@@ -232,9 +232,9 @@ const ViewParty = () => {
           {/* Additional Information */}
           {(party.tags || party.notes) && (
             <div className="lg:col-span-2">
-              <div className="bg-white/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-xl border border-white/30 p-4 sm:p-6 lg:p-8">
+              <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 sm:p-6 lg:p-8">
                 <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-                  <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 shadow-lg">
+                  <div className="p-2 sm:p-3 rounded-lg bg-slate-700 shadow-lg">
                     <HiDocumentText className="text-white w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
                   <h2 className="text-lg sm:text-xl font-bold text-slate-800">Additional Information</h2>
@@ -244,14 +244,14 @@ const ViewParty = () => {
                   {party.tags && (
                     <div>
                       <label className="flex items-center text-xs sm:text-sm font-semibold text-slate-600 mb-2 sm:mb-3">
-                        <HiTag className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-purple-600" />
+                        <HiTag className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-slate-600" />
                         Tags
                       </label>
                       <div className="flex flex-wrap gap-1.5 sm:gap-2">
                         {party.tags.split(',').map((tag, index) => (
                           <span
                             key={index}
-                            className="px-2 sm:px-3 py-1 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-medium bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
+                            className="px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-medium bg-slate-700 text-white shadow-lg"
                           >
                             {tag.trim()}
                           </span>
@@ -263,10 +263,10 @@ const ViewParty = () => {
                   {party.notes && (
                     <div className={party.tags ? '' : 'md:col-span-2'}>
                       <label className="flex items-center text-xs sm:text-sm font-semibold text-slate-600 mb-2 sm:mb-3">
-                        <HiDocumentText className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-purple-600" />
+                        <HiDocumentText className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-slate-600" />
                         Notes
                       </label>
-                      <div className="bg-white/60 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-white/50">
+                      <div className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
                         <p className="text-sm sm:text-base text-slate-800 leading-relaxed break-words">{party.notes}</p>
                       </div>
                     </div>

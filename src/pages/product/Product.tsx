@@ -1,30 +1,47 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { fetchProducts, deleteProduct } from '../../features/productSlice';
 import { getAllCategories } from '../../features/categorySlice';
 import { HiEye, HiPencil, HiTrash, HiPlus, HiMagnifyingGlass, HiCube, HiTag, HiFunnel } from 'react-icons/hi2';
+import { Pagination } from 'antd';
 
 const Product: React.FC = () => {
   const dispatch = useDispatch();
-  const { products, loading, error } = useSelector(
+  const { products, loading, error, pagination } = useSelector(
     (state: any) => state.product
   );
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
-
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedSubCategory, setSelectedSubCategory] = useState('');
-  const itemsPerPage = 12;
 
   const { categories } = useSelector((state: any) => state.category);
 
   useEffect(() => {
-    dispatch(fetchProducts() as any);
+    if (!searchTerm) {
+      dispatch(fetchProducts({
+        page: currentPage,
+        limit: pageSize,
+        search: ''
+      }) as any);
+    }
+    dispatch(getAllCategories() as any);
+  }, [dispatch, currentPage, pageSize]);
+  
+  useEffect(() => {
+    dispatch(fetchProducts({
+      page: 1,
+      limit: 10,
+      search: ''
+    }) as any);
     dispatch(getAllCategories() as any);
   }, [dispatch]);
+  
+  const debounceTimer = React.useRef(null);
 
   useEffect(() => {
     if (error) {
@@ -32,9 +49,22 @@ const Product: React.FC = () => {
     }
   }, [error]);
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  };
+  const handleSearch = useCallback((value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+    
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+    
+    debounceTimer.current = setTimeout(() => {
+      dispatch(fetchProducts({
+        page: 1,
+        limit: pageSize,
+        search: value
+      }) as any);
+    }, 500);
+  }, [dispatch, pageSize]);
 
   const handleDeleteClick = (id: string) => {
     setConfirmDelete(id);
@@ -47,28 +77,27 @@ const Product: React.FC = () => {
       const result = await dispatch(
         deleteProduct(confirmDelete) as any
       ).unwrap();
-      toast.success(result.message);
       setConfirmDelete(null);
+      
+      dispatch(fetchProducts({
+        page: currentPage,
+        limit: pageSize,
+        search: searchTerm
+      }) as any);
+      
+      toast.success(result.message);
     } catch (error: any) {
       toast.error(error.message);
     }
   };
 
-  const filteredProducts = useMemo(() => {
-    const term = searchTerm.toLowerCase();
-    return Array.isArray(products)
-      ? products.filter((product: any) => {
-          const matchesSearch = product?.name?.toLowerCase().includes(term) ||
-            product?.sku?.toLowerCase().includes(term) ||
-            product?.category?.name?.toLowerCase().includes(term);
-          
-          const matchesCategory = !selectedCategory || product?.categoryId?.toString() === selectedCategory;
-          const matchesSubCategory = !selectedSubCategory || product?.subCategoryId?.toString() === selectedSubCategory;
-          
-          return matchesSearch && matchesCategory && matchesSubCategory;
-        })
-      : [];
-  }, [searchTerm, products, selectedCategory, selectedSubCategory]);
+  useEffect(() => {
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
+  }, []);
 
   const availableSubCategories = useMemo(() => {
     if (!selectedCategory || !categories) return [];
@@ -81,12 +110,6 @@ const Product: React.FC = () => {
     setSelectedSubCategory('');
     setCurrentPage(1);
   };
-
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-  const currentProducts = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return filteredProducts.slice(start, start + itemsPerPage);
-  }, [filteredProducts, currentPage]);
   const getProductTypeLabel = (type: string) => {
     const types: Record<string, string> = {
       tiles: 'Tiles',
@@ -110,9 +133,9 @@ const Product: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-        <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-8 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-blue-500 mx-auto mb-4"></div>
+      <div className="min-h-screen flex justify-center items-center bg-gray-50">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-slate-600 mx-auto mb-4"></div>
           <p className="text-slate-600 font-medium">Loading products...</p>
         </div>
       </div>
@@ -120,14 +143,14 @@ const Product: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      <div className="p-4 lg:p-6 pt-6 sm:pt-8 lg:pt-12 pb-6 sm:pb-8 lg:pb-12">
+    <div className="min-h-screen bg-gray-50">
+      <div className="p-2 lg:p-4">
         {/* Header */}
-        <div className="mb-6">
-          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-6 lg:p-8">
+        <div className="mb-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 lg:p-4">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
               <div className="flex items-center gap-4">
-                <div className="p-3 rounded-2xl bg-blue-600 shadow-lg">
+                <div className="p-3 rounded-lg bg-slate-700 shadow-lg">
                   <HiCube className="w-6 h-6 text-white" />
                 </div>
                 <div>
@@ -145,12 +168,9 @@ const Product: React.FC = () => {
                     <input
                       type="text"
                       placeholder="Search products..."
-                      className="pl-12 pr-4 py-3 w-full sm:w-64 rounded-2xl border border-white/50 bg-white/60 backdrop-blur-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-200 transition-all duration-300 text-sm placeholder-slate-500 shadow-sm"
+                      className="pl-12 pr-4 py-3 w-full sm:w-64 rounded-lg border border-gray-300 bg-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-all duration-300 text-sm placeholder-gray-500 shadow-sm"
                       value={searchTerm}
-                      onChange={(e) => {
-                        setSearchTerm(e.target.value);
-                        setCurrentPage(1);
-                      }}
+                      onChange={(e) => handleSearch(e.target.value)}
                     />
                   </div>
                   
@@ -159,7 +179,7 @@ const Product: React.FC = () => {
                     <select
                       value={selectedCategory}
                       onChange={(e) => handleCategoryChange(e.target.value)}
-                      className="pl-11 pr-4 py-3 w-full sm:w-48 rounded-2xl border border-white/50 bg-white/60 backdrop-blur-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-200 transition-all duration-300 text-sm shadow-sm appearance-none"
+                      className="pl-11 pr-4 py-3 w-full sm:w-48 rounded-lg border border-gray-300 bg-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-all duration-300 text-sm shadow-sm appearance-none"
                     >
                       <option value="">All Categories</option>
                       {categories?.map((category: any) => (
@@ -179,7 +199,7 @@ const Product: React.FC = () => {
                           setSelectedSubCategory(e.target.value);
                           setCurrentPage(1);
                         }}
-                        className="pl-11 pr-4 py-3 w-full sm:w-48 rounded-2xl border border-white/50 bg-white/60 backdrop-blur-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-200 transition-all duration-300 text-sm shadow-sm appearance-none"
+                        className="pl-11 pr-4 py-3 w-full sm:w-48 rounded-lg border border-gray-300 bg-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-all duration-300 text-sm shadow-sm appearance-none"
                       >
                         <option value="">All Subcategories</option>
                         {availableSubCategories.map((subCategory: any) => (
@@ -194,7 +214,7 @@ const Product: React.FC = () => {
                 
                 <Link
                   to="/add-product"
-                  className="inline-flex items-center justify-center px-6 py-3 rounded-2xl font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-lg flex-shrink-0"
+                  className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg flex-shrink-0"
                 >
                   <HiPlus className="w-5 h-5 mr-2" />
                   Add Product
@@ -205,65 +225,65 @@ const Product: React.FC = () => {
         </div>
 
         {/* Products Display */}
-        {filteredProducts.length === 0 ? (
+        {products.length === 0 && !loading ? (
           <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-12 text-center">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-slate-600 flex items-center justify-center shadow-lg">
               <HiMagnifyingGlass className="w-8 h-8 text-white" />
             </div>
             <h3 className="text-xl font-semibold text-slate-800 mb-2">No products found</h3>
             <p className="text-slate-600 mb-6">Add your first product to get started</p>
-            <Link
+            {/* <Link
               to="/add-product"
-              className="inline-flex items-center px-6 py-3 rounded-2xl font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-lg"
+              className="inline-flex items-center px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg"
             >
               <HiPlus className="w-5 h-5 mr-2" />
               Add First Product
-            </Link>
+            </Link> */}
           </div>
         ) : (
-          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 overflow-hidden">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
             {/* Desktop Table View */}
             <div className="hidden lg:block">
               {/* Table Header */}
-              <div className="bg-blue-50 border-b border-white/30 p-4">
+              <div className="bg-gray-50 border-b border-gray-200 p-4">
                 <div className="grid grid-cols-7 gap-3 text-sm font-semibold text-slate-700">
                   <div className="flex items-center gap-2">
-                    <HiCube className="w-4 h-4 text-blue-600" />
+                    <HiCube className="w-4 h-4 text-slate-600" />
                     <span>Product Name</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <HiTag className="w-4 h-4 text-blue-600" />
+                    <HiTag className="w-4 h-4 text-slate-600" />
                     <span>SKU</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <HiTag className="w-4 h-4 text-blue-600" />
+                    <HiTag className="w-4 h-4 text-slate-600" />
                     <span>Category</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <HiCube className="w-4 h-4 text-blue-600" />
+                    <HiCube className="w-4 h-4 text-slate-600" />
                     <span>Unit Weight</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <HiCube className="w-4 h-4 text-blue-600" />
+                    <HiCube className="w-4 h-4 text-slate-600" />
                     <span>Total Weight</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <HiCube className="w-4 h-4 text-blue-600" />
+                    <HiCube className="w-4 h-4 text-slate-600" />
                     <span>Price</span>
                   </div>
                   <div className="flex items-center justify-end gap-2">
-                    <HiCube className="w-4 h-4 text-blue-600" />
+                    <HiCube className="w-4 h-4 text-slate-600" />
                     <span>Actions</span>
                   </div>
                 </div>
               </div>
               <div className="divide-y divide-white/20">
-                {currentProducts.map((product: any) => (
+                {products.map((product: any) => (
                   <div key={product.id} className="p-4 hover:bg-white/50 transition-all duration-300">
                     <div className="grid grid-cols-7 gap-3 items-center">
                       {/* Product Name */}
                       <div className="flex items-center gap-2">
-                        <HiCube className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                        <HiCube className="w-4 h-4 text-slate-600 flex-shrink-0" />
                         <span className="text-slate-800 font-medium truncate" title={product.name}>
                           {product.name}
                         </span>
@@ -304,13 +324,13 @@ const Product: React.FC = () => {
                       <div className="flex items-center justify-end space-x-2">
                         <Link
                           to={`/edit-product/${product.id}`}
-                          className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-500 transition-all duration-300 hover:scale-110 transform"
+                          className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-600 transition-all duration-300"
                         >
                           <HiPencil className="w-4 h-4" />
                         </Link>
                         <button
                           onClick={() => handleDeleteClick(product.id)}
-                          className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-500 transition-all duration-300 hover:scale-110 transform"
+                          className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
                         >
                           <HiTrash className="w-4 h-4" />
                         </button>
@@ -326,45 +346,45 @@ const Product: React.FC = () => {
               <div className="overflow-x-auto">
                 <div className="min-w-[800px]">
                   {/* Table Header */}
-                  <div className="bg-blue-50 border-b border-white/30 p-4">
+                  <div className="bg-gray-50 border-b border-gray-200 p-4">
                     <div className="grid grid-cols-7 gap-3 text-sm font-semibold text-slate-700">
                       <div className="flex items-center gap-2">
-                        <HiCube className="w-4 h-4 text-blue-600" />
+                        <HiCube className="w-4 h-4 text-slate-600" />
                         <span>Product Name</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <HiTag className="w-4 h-4 text-blue-600" />
+                        <HiTag className="w-4 h-4 text-slate-600" />
                         <span>SKU</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <HiTag className="w-4 h-4 text-blue-600" />
+                        <HiTag className="w-4 h-4 text-slate-600" />
                         <span>Category</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <HiCube className="w-4 h-4 text-blue-600" />
+                        <HiCube className="w-4 h-4 text-slate-600" />
                         <span>Unit Weight</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <HiCube className="w-4 h-4 text-blue-600" />
+                        <HiCube className="w-4 h-4 text-slate-600" />
                         <span>Total Weight</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <HiCube className="w-4 h-4 text-blue-600" />
+                        <HiCube className="w-4 h-4 text-slate-600" />
                         <span>Price</span>
                       </div>
                       <div className="flex items-center justify-end gap-2">
-                        <HiCube className="w-4 h-4 text-blue-600" />
+                        <HiCube className="w-4 h-4 text-slate-600" />
                         <span>Actions</span>
                       </div>
                     </div>
                   </div>
                   <div className="divide-y divide-white/20">
-                    {currentProducts.map((product: any) => (
+                    {products.map((product: any) => (
                       <div key={product.id} className="p-4 hover:bg-white/50 transition-all duration-300">
                         <div className="grid grid-cols-7 gap-3 items-center">
                           {/* Product Name */}
                           <div className="flex items-center gap-2">
-                            <HiCube className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                            <HiCube className="w-4 h-4 text-slate-600 flex-shrink-0" />
                             <span className="text-slate-800 font-medium truncate" title={product.name}>
                               {product.name}
                             </span>
@@ -405,13 +425,13 @@ const Product: React.FC = () => {
                           <div className="flex items-center justify-end space-x-2">
                             <Link
                               to={`/edit-product/${product.id}`}
-                              className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-500 transition-all duration-300 hover:scale-110 transform"
+                              className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-600 transition-all duration-300"
                             >
                               <HiPencil className="w-4 h-4" />
                             </Link>
                             <button
                               onClick={() => handleDeleteClick(product.id)}
-                              className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-500 transition-all duration-300 hover:scale-110 transform"
+                              className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
                             >
                               <HiTrash className="w-4 h-4" />
                             </button>
@@ -426,53 +446,32 @@ const Product: React.FC = () => {
           </div>
         )}
 
-        {/* Pagination */}
-        {filteredProducts.length > 0 && (
-          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-6 mt-6">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-slate-600">
-                Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredProducts.length)} of {filteredProducts.length} products
-              </p>
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="px-4 py-2 rounded-xl border border-white/50 text-slate-600 hover:bg-blue-500 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:shadow-lg"
-                >
-                  Previous
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`px-4 py-2 rounded-xl transition-all duration-300 ${
-                      currentPage === page
-                        ? 'bg-blue-600 text-white font-semibold shadow-lg'
-                        : 'text-slate-600 hover:bg-blue-500 hover:text-white hover:shadow-lg'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-                <button
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages}
-                  className="px-4 py-2 rounded-xl border border-white/50 text-slate-600 hover:bg-blue-500 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:shadow-lg"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
+        {/* Simple Pagination */}
+        {pagination.total > 0 && (
+          <div className="flex justify-center mt-6">
+            <Pagination 
+              current={currentPage} 
+              total={pagination.total} 
+              pageSize={pageSize}
+              onChange={(page) => {
+                setCurrentPage(page);
+                dispatch(fetchProducts({
+                  page: page,
+                  limit: pageSize,
+                  search: searchTerm
+                }) as any);
+              }}
+            />
           </div>
         )}
       </div>
 
       {/* Delete Confirmation Modal */}
       {confirmDelete && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl max-w-md w-full p-8 border border-white/30">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-8 border border-gray-200">
             <div className="text-center mb-6">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-red-500 flex items-center justify-center shadow-lg">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-red-600 flex items-center justify-center shadow-lg">
                 <HiTrash className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-slate-800 mb-2">Delete Product</h3>
@@ -481,13 +480,13 @@ const Product: React.FC = () => {
             <div className="flex items-center justify-center space-x-3">
               <button
                 onClick={() => setConfirmDelete(null)}
-                className="px-6 py-3 rounded-2xl border border-white/50 text-slate-600 hover:bg-slate-50"
+                className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmDelete}
-                className="px-6 py-3 rounded-2xl bg-red-500 text-white hover:bg-red-600 shadow-lg"
+                className="px-6 py-3 rounded-lg bg-red-600 text-white hover:bg-red-700 shadow-lg"
               >
                 Delete
               </button>

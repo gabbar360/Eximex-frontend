@@ -3,47 +3,29 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 // Assume these icons are imported from an icon library
 import {
-  BoxCubeIcon,
-  CalenderIcon,
-  ChevronDownIcon,
-  GridIcon,
-  HorizontaLDots,
-  ListIcon,
-  PageIcon,
-  PieChartIcon,
-  PlugInIcon,
-  TableIcon,
-  UserCircleIcon,
-} from '../icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+  MdDashboard,
+  MdPeople,
+  MdCategory,
+  MdInventory,
+  MdDescription,
+  MdShoppingCart,
+  MdAssignment,
+  MdSupervisorAccount,
+  MdAnalytics,
+  MdSettings,
+  MdAccountCircle,
+  MdLogout,
+  MdKeyboardArrowDown,
+  MdMoreHoriz,
+} from 'react-icons/md';
 import {
-  faPlus,
-  faDownload,
-  faEllipsisV,
-  faSun,
-  faBell,
-  faChevronDown,
-  faBars,
-  faSignOutAlt,
-  faBuilding,
-  faFileAlt,
-  faFileInvoice,
-  faPalette,
-  faUsers,
-  faBox,
-  faShoppingCart,
-  faFileInvoiceDollar,
-  faTruck,
-  faCheckSquare,
-  faChartLine,
-  faCog,
-  faHandshake,
-  faUser,
-  faTimes,
-  faCube,
-  faFileContract,
-  faCreditCard,
-} from '@fortawesome/free-solid-svg-icons';
+  HiOutlineDocumentText,
+  HiOutlineClipboardDocumentList,
+} from 'react-icons/hi2';
+import {
+  ChevronDownIcon,
+  HorizontaLDots,
+} from '../icons';
 import { useSidebar } from '../context/SidebarContext';
 import { useAuth } from '../hooks/useAuth';
 import { useSelector } from 'react-redux';
@@ -59,58 +41,59 @@ type NavItem = {
 
 const getNavItems = (userRole: string): NavItem[] => [
   {
-    icon: <GridIcon />,
+    icon: <MdDashboard className="w-4 h-4" />,
     name: 'Dashboard',
     path: '/dashboard',
   },
   ...(userRole !== 'SUPER_ADMIN'
     ? [
         {
-          icon: <FontAwesomeIcon icon={faUsers} />,
+          icon: <MdPeople className="w-4 h-4" />,
           name: 'Customer&prospect',
           path: '/cprospect',
         },
         {
-          icon: <FontAwesomeIcon icon={faBox} />,
+          icon: <MdCategory className="w-4 h-4" />,
           name: 'Categories',
           path: '/categories',
         },
         {
-          icon: <FontAwesomeIcon icon={faCube} />,
+          icon: <MdInventory className="w-4 h-4" />,
           name: 'Products',
           path: '/products',
         },
         {
-          icon: <FontAwesomeIcon icon={faFileAlt} />,
+          icon: <HiOutlineDocumentText className="w-4 h-4" />,
           name: 'Proforma Invoices',
           path: '/proforma-invoices',
         },
         {
-          icon: <FontAwesomeIcon icon={faShoppingCart} />,
+          icon: <MdShoppingCart className="w-4 h-4" />,
           name: 'Orders',
-          path: '/orders',
+          subItems: [
+            { name: 'All Orders', path: '/orders' },
+            { name: 'Shipments', path: '/orders/shipments' },
+            { name: 'Packing Lists', path: '/orders/packing-lists' },
+            { name: 'VGM Documents', path: '/orders/vgm' },
+            { name: 'Reports', path: '/orders/reports' },
+          ],
         },
         {
-          icon: <FontAwesomeIcon icon={faFileContract} />,
+          icon: <HiOutlineClipboardDocumentList className="w-4 h-4" />,
           name: 'Purchase Orders',
           path: '/purchase-orders',
         },
-        // {
-        //   icon: <FontAwesomeIcon icon={faCreditCard} />,
-        //   name: 'Payment Tracking',
-        //   path: '/payments',
-        // },
       ]
     : []),
   ...(['ADMIN', 'SUPER_ADMIN'].includes(userRole)
     ? [
         {
-          icon: <FontAwesomeIcon icon={faUsers} />,
+          icon: <MdSupervisorAccount className="w-4 h-4" />,
           name: 'Staff Management',
           path: '/staff-management',
         },
         {
-          icon: <FontAwesomeIcon icon={faChartLine} />,
+          icon: <MdAnalytics className="w-4 h-4" />,
           name: 'Activity Logs',
           path: '/activity-logs',
         },
@@ -119,7 +102,7 @@ const getNavItems = (userRole: string): NavItem[] => [
   ...(userRole === 'SUPER_ADMIN'
     ? [
         {
-          icon: <FontAwesomeIcon icon={faCog} />,
+          icon: <MdSettings className="w-4 h-4" />,
           name: 'Super Admin',
           subItems: [
             { name: 'Dashboard', path: '/super-admin/dashboard' },
@@ -131,7 +114,7 @@ const getNavItems = (userRole: string): NavItem[] => [
       ]
     : []),
   {
-    icon: <UserCircleIcon />,
+    icon: <MdAccountCircle className="w-4 h-4" />,
     name: 'User Profile',
     path: '/profile',
   },
@@ -215,7 +198,7 @@ const AppSidebar: React.FC = () => {
   };
 
   const renderMenuItems = (items: NavItem[]) => (
-    <ul className="flex flex-col gap-4">
+    <ul className="flex flex-col gap-2">
       {items.map((nav, index) => (
         <li key={nav.name}>
           {nav.subItems ? (
@@ -244,10 +227,10 @@ const AppSidebar: React.FC = () => {
                 <span className="menu-item-text">{nav.name}</span>
               )}
               {(isExpanded || isHovered || isMobileOpen) && (
-                <ChevronDownIcon
-                  className={`ml-auto w-5 h-5 transition-transform duration-200 ${
+                <MdKeyboardArrowDown
+                  className={`ml-auto w-4 h-4 transition-transform duration-200 ${
                     openSubmenu?.index === index
-                      ? 'rotate-180 text-brand-500'
+                      ? 'rotate-180 text-slate-600'
                       : ''
                   }`}
                 />
@@ -306,7 +289,7 @@ const AppSidebar: React.FC = () => {
                     : '0px',
               }}
             >
-              <ul className="mt-2 space-y-1 ml-9">
+              <ul className="mt-1 space-y-1 ml-6">
                 {nav.subItems.map((subItem) => (
                   <li key={subItem.name}>
                     <Link
@@ -360,13 +343,13 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
+      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-slate-800 h-screen transition-all duration-300 ease-in-out z-40 border-r border-gray-200 
         ${
           isExpanded || isMobileOpen
-            ? 'w-[290px]'
+            ? 'w-[240px]'
             : isHovered
-              ? 'w-[290px]'
-              : 'w-[90px]'
+              ? 'w-[240px]'
+              : 'w-[70px]'
         }
         ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0`}
@@ -420,7 +403,7 @@ const AppSidebar: React.FC = () => {
           <div className="flex flex-col gap-4">
             <div>
               <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
+                className={`mb-4 text-xs uppercase flex leading-[20px] text-slate-500 ${
                   !isExpanded && !isHovered
                     ? 'lg:justify-center'
                     : 'justify-start'
@@ -429,7 +412,7 @@ const AppSidebar: React.FC = () => {
                 {isExpanded || isHovered || isMobileOpen ? (
                   'Menu'
                 ) : (
-                  <HorizontaLDots className="size-6" />
+                  <MdMoreHoriz className="w-4 h-4" />
                 )}
               </h2>
               {renderMenuItems(navItems)}
@@ -443,15 +426,14 @@ const AppSidebar: React.FC = () => {
         <button
           onClick={handleLogout}
           disabled={isLoading}
-          className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 transition-colors ${
+          className={`w-full flex items-center gap-2 px-2 py-1 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 transition-colors ${
             !isExpanded && !isHovered && !isMobileOpen
               ? 'justify-center'
               : 'justify-start'
           } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
-          <FontAwesomeIcon
-            icon={faSignOutAlt}
-            className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`}
+          <MdLogout
+            className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`}
           />
           {(isExpanded || isHovered || isMobileOpen) && (
             <span>{isLoading ? 'Signing out...' : 'Sign Out'}</span>
