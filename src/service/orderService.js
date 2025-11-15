@@ -77,7 +77,7 @@ export const deleteOrder = async (id) => {
 
 export const downloadOrderInvoicePdf = async (id) => {
   try {
-    const response = await axiosInstance.get(`/${id}/download-invoice-pdf`, {
+    const response = await axiosInstance.get(`/orders/${id}/download-invoice-pdf`, {
       responseType: 'blob', // Important for handling binary data
     });
 
