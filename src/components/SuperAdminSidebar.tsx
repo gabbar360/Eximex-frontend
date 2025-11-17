@@ -55,6 +55,11 @@ const getSuperAdminNavItems = (): SuperAdminNavItem[] => [
     icon: <FontAwesomeIcon icon={faUserShield} />,
     name: 'Role Management',
     path: '/super-admin/roles',
+  },
+  {
+    icon: <FontAwesomeIcon icon={faUsers} />,
+    name: 'User Management',
+    path: '/super-admin/users',
   }
 ];
 

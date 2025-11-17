@@ -69,10 +69,10 @@ import ReportsDownloads from './pages/orders/ReportsDownloads';
 import StaffManagement from './components/StaffManagement';
 import ActivityLogComponent from './components/ActivityLog';
 import RoleBasedDashboard from './components/RoleBasedDashboard';
-import UserManagement from './pages/SuperAdmin/UserManagement';
 import SuperAdminDashboard from './pages/SuperAdmin/SuperAdminDashboard';
 import EnhancedSuperAdminDashboard from './pages/SuperAdmin/EnhancedSuperAdminDashboard';
 import RoleManagement from './pages/SuperAdmin/RoleManagement';
+import UserManagement from './pages/SuperAdmin/UserManagement';
 import PurchaseOrders from './pages/PO/PurchaseOrders';
 import AddEditPurchaseOrderForm from './pages/PO/AddEditPurchaseOrderForm';
 import PaymentTracking from './pages/PaymentTracking';
@@ -177,6 +177,7 @@ function AppContent() {
           {/* Super Admin Routes */}
           <Route path="/super-admin/dashboard" element={<EnhancedSuperAdminDashboard />} />
           <Route path="/super-admin/roles" element={<RoleManagement />} />
+          <Route path="/super-admin/users" element={<UserManagement />} />
 
           <Route path="/payments" element={<PaymentTracking />} />
 

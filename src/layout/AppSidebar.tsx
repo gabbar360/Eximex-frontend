@@ -99,20 +99,7 @@ const getNavItems = (userRole: string): NavItem[] => [
         },
       ]
     : []),
-  ...(userRole === 'SUPER_ADMIN'
-    ? [
-        {
-          icon: <MdSettings className="w-4 h-4" />,
-          name: 'Super Admin',
-          subItems: [
-            { name: 'Dashboard', path: '/super-admin/dashboard' },
-            { name: 'User Management', path: '/super-admin/users' },
-            { name: 'Password Management', path: '/super-admin/passwords' },
-            { name: 'Company Management', path: '/super-admin/companies' },
-          ],
-        },
-      ]
-    : []),
+
   {
     icon: <MdAccountCircle className="w-4 h-4" />,
     name: 'User Profile',
@@ -136,6 +123,10 @@ const AppSidebar: React.FC = () => {
   const { theme } = useTheme();
 
   const navItems = getNavItems(currentUser?.role || 'STAFF');
+  
+  // Debug: Check current user role
+  console.log('Current User Role:', currentUser?.role);
+  console.log('Nav Items:', navItems);
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     index: number;

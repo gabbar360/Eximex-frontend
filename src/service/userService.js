@@ -10,33 +10,33 @@ export const userService = {
   // Get current user
   getCurrentUser,
 
-  // Get user by ID
+  // Get user by ID (Super Admin)
   getUser: async (id) => {
-    const response = await axiosInstance.get(`/users/${id}`);
+    const response = await axiosInstance.get(`/super-admin/get-users/${id}`);
     return response.data.data;
   },
 
-  // Update user
+  // Update user (Super Admin)
   updateUser: async (id, userData) => {
-    const response = await axiosInstance.put(`/users/${id}`, userData);
+    const response = await axiosInstance.put(`/super-admin/update-users/${id}`, userData);
     return { data: response.data.data, message: response.data.message };
   },
 
-  // Create user
+  // Create user (Super Admin)
   createUser: async (userData) => {
-    const response = await axiosInstance.post('/users', userData);
+    const response = await axiosInstance.post('/super-admin/create-users', userData);
     return { data: response.data.data, message: response.data.message };
   },
 
-  // Delete user
+  // Delete user (Super Admin)
   deleteUser: async (id) => {
-    const response = await axiosInstance.delete(`/users/${id}`);
+    const response = await axiosInstance.delete(`/super-admin/delete-users/${id}`);
     return { id, message: response.data.message };
   },
 
-  // Get all users
+  // Get all users (Super Admin)
   getAllUsers: async (params = {}) => {
-    const response = await axiosInstance.get('/users', { params });
+    const response = await axiosInstance.get('/super-admin/get-users', { params });
     return response.data.data;
   },
 
