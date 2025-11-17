@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { shipmentService } from '../services/shipmentService';
+import { shipmentService } from '../service/shipmentService';
 import handleAxiosError from '../utils/handleAxiosError';
 
 // Async thunks
