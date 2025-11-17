@@ -144,8 +144,9 @@ const AddEditShipment = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
+        <div className="mb-3">
+          <div className='bg-white rounded-lg border border-gray-200 shadow-sm p-3 lg:p-4"'> 
+            <div className="flex items-center gap-4 mb-4">
             <button
               onClick={() => navigate('/orders/shipments')}
               className="p-3 rounded-lg bg-white shadow-md hover:shadow-lg transition-all duration-300 text-slate-600 hover:text-slate-800"
@@ -162,6 +163,7 @@ const AddEditShipment = () => {
                 </p>
               )}
             </div>
+          </div>
           </div>
         </div>
 

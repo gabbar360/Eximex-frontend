@@ -100,29 +100,7 @@ export const getUserDataSummary = createAsyncThunk(
   }
 );
 
-export const fetchActivityLogs = createAsyncThunk(
-  'user/fetchActivityLogs',
-  async (params = {}, { rejectWithValue }) => {
-    try {
-      return await userService.getActivityLogs(params);
-    } catch (err) {
-      return rejectWithValue(err.message);
-    }
-  }
-);
 
-export const fetchActivityStats = createAsyncThunk(
-  'user/fetchActivityStats',
-  async (userId = null, { rejectWithValue }) => {
-    try {
-      return await userService.getActivityStats(userId);
-    } catch (err) {
-      return rejectWithValue(err.message);
-    }
-  }
-);
-
-export const getActivityLogs = fetchActivityLogs;
 
 export const getCompanyDashboardStats = createAsyncThunk(
   'user/getCompanyDashboardStats',

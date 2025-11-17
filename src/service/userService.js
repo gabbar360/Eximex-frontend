@@ -90,19 +90,7 @@ export const userService = {
     return { message: response.data.message };
   },
 
-  // Activity logs
-  getActivityLogs: async (params = {}) => {
-    const response = await axiosInstance.get('/activity-logs', { params });
-    return response.data.data;
-  },
 
-  getActivityStats: async (userId = null) => {
-    const params = userId ? { userId } : {};
-    const response = await axiosInstance.get('/activity-logs/stats', {
-      params,
-    });
-    return response.data.data;
-  },
 
   // Data assignment
   assignData: async (entityType, entityIds, fromUserId, toUserId) => {

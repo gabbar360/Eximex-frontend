@@ -66,8 +66,6 @@ import ShipmentManagement from './pages/orders/ShipmentManagement';
 import PackingListManagement from './pages/orders/PackingListManagement';
 import VgmManagement from './pages/orders/VgmManagement';
 import ReportsDownloads from './pages/orders/ReportsDownloads';
-
-import ActivityLogComponent from './components/ActivityLog';
 import RoleBasedDashboard from './components/RoleBasedDashboard';
 import SuperAdminDashboard from './pages/SuperAdmin/SuperAdminDashboard';
 import EnhancedSuperAdminDashboard from './pages/SuperAdmin/EnhancedSuperAdminDashboard';
@@ -171,7 +169,6 @@ function AppContent() {
           />
 
 
-          <Route path="/activity-logs" element={<ActivityLogComponent />} />
           {/* Super Admin Routes */}
           <Route path="/super-admin/dashboard" element={<EnhancedSuperAdminDashboard />} />
           <Route path="/super-admin/roles" element={<RoleManagement />} />
