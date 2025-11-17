@@ -67,7 +67,7 @@ import PackingListManagement from './pages/orders/PackingListManagement';
 import VgmManagement from './pages/orders/VgmManagement';
 import ReportsDownloads from './pages/orders/ReportsDownloads';
 import StaffManagement from './components/StaffManagement';
-import ActivityLogComponent from './components/ActivityLog';
+
 import RoleBasedDashboard from './components/RoleBasedDashboard';
 import UserManagement from './pages/SuperAdmin/UserManagement';
 import SuperAdminDashboard from './pages/SuperAdmin/SuperAdminDashboard';
@@ -173,7 +173,7 @@ function AppContent() {
           />
 
           <Route path="/staff-management" element={<StaffManagement />} />
-          <Route path="/activity-logs" element={<ActivityLogComponent />} />
+
           {/* Super Admin Routes */}
           <Route path="/super-admin/dashboard" element={<EnhancedSuperAdminDashboard />} />
           <Route path="/super-admin/roles" element={<RoleManagement />} />

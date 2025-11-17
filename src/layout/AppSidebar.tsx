@@ -92,11 +92,7 @@ const getNavItems = (userRole: string): NavItem[] => [
           name: 'Staff Management',
           path: '/staff-management',
         },
-        {
-          icon: <MdAnalytics className="w-4 h-4" />,
-          name: 'Activity Logs',
-          path: '/activity-logs',
-        },
+
       ]
     : []),
   ...(userRole === 'SUPER_ADMIN'
