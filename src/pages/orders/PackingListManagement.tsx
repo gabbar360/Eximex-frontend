@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { HiPencil, HiTrash, HiPlus, HiMagnifyingGlass, HiDocumentText, HiCube, HiArrowDownTray } from 'react-icons/hi2';
 import { Pagination } from 'antd';
 import { fetchOrders } from '../../features/orderSlice';
-import { downloadPackingListPdf } from '../../features/packingListSlice';
+import { downloadPackingListPdf, downloadPackingListPortPdf } from '../../features/packingListSlice';
 import { toast } from 'react-toastify';
 
 const PackingListManagement: React.FC = () => {
@@ -75,6 +75,37 @@ const PackingListManagement: React.FC = () => {
     } catch (error) {
       console.error('Error downloading PDF:', error);
       toast.error('Failed to download PDF');
+    }
+  };
+
+  const handlePortDeliveryPDFDownload = async (order: any) => {
+    try {
+      toast.info('Preparing Port Delivery PDF...', { autoClose: 2000 });
+      
+      // Get packing list ID from order
+      const packingListId = order.packingList?.id || order.piInvoice?.packingLists?.[0]?.id;
+      
+      if (!packingListId) {
+        toast.error('No packing list found for this order');
+        return;
+      }
+      
+      const response = await dispatch(downloadPackingListPortPdf(packingListId)).unwrap();
+      
+      const blob = new Blob([response.data]);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `port-delivery-${order.orderNumber}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+      toast.success('Port Delivery PDF downloaded successfully');
+    } catch (error) {
+      console.error('Error downloading Port Delivery PDF:', error);
+      toast.error('Failed to download Port Delivery PDF');
     }
   };
 
@@ -260,9 +291,16 @@ const PackingListManagement: React.FC = () => {
                           <button
                             onClick={() => handlePDFDownload(order)}
                             className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-blue-600 transition-all duration-300"
-                            title="Download PDF"
+                            title="Download Packing List PDF"
                           >
                             <HiArrowDownTray className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handlePortDeliveryPDFDownload(order)}
+                            className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-purple-600 transition-all duration-300"
+                            title="Download Port Delivery PDF"
+                          >
+                            <HiDocumentText className="w-4 h-4" />
                           </button>
                           <Link
                             to={`/packing-list/${order.id}`}
@@ -384,9 +422,16 @@ const PackingListManagement: React.FC = () => {
                               <button
                                 onClick={() => handlePDFDownload(order)}
                                 className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-blue-600 transition-all duration-300"
-                                title="Download PDF"
+                                title="Download Packing List PDF"
                               >
                                 <HiArrowDownTray className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handlePortDeliveryPDFDownload(order)}
+                                className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-purple-600 transition-all duration-300"
+                                title="Download Port Delivery PDF"
+                              >
+                                <HiDocumentText className="w-4 h-4" />
                               </button>
                               <Link
                                 to={`/packing-list/${order.id}`}

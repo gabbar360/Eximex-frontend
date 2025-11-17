@@ -54,11 +54,11 @@ const UserManagement: React.FC = () => {
         if (!userData.password) {
           delete userData.password;
         }
-        await dispatch(updateUser({ id: editingUser.id, userData })).unwrap();
-        toast.success('User updated successfully');
+        const result = await dispatch(updateUser({ id: editingUser.id, userData })).unwrap();
+        toast.success(result.message || 'User updated successfully');
       } else {
-        await dispatch(createUser(userData)).unwrap();
-        toast.success('User created successfully');
+        const result = await dispatch(createUser(userData)).unwrap();
+        toast.success(result.message || 'User created successfully');
       }
       resetForm();
     } catch (error) {
@@ -69,8 +69,8 @@ const UserManagement: React.FC = () => {
   const handleDelete = async (id: number, userName: string) => {
     if (window.confirm(`Are you sure you want to delete the user "${userName}"?`)) {
       try {
-        await dispatch(deleteUser(id)).unwrap();
-        toast.success('User deleted successfully');
+        const result = await dispatch(deleteUser(id)).unwrap();
+        toast.success(result.message || 'User deleted successfully');
       } catch (error) {
         toast.error(error || 'Delete failed');
       }
