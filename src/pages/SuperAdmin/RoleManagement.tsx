@@ -39,11 +39,11 @@ const RoleManagement: React.FC = () => {
     e.preventDefault();
     try {
       if (editingRole) {
-        await dispatch(updateRole({ id: editingRole.id, roleData: formData })).unwrap();
-        toast.success('Role updated successfully');
+        const result = await dispatch(updateRole({ id: editingRole.id, roleData: formData })).unwrap();
+        toast.success(result.message || 'Role updated successfully');
       } else {
-        await dispatch(createRole(formData)).unwrap();
-        toast.success('Role created successfully');
+        const result = await dispatch(createRole(formData)).unwrap();
+        toast.success(result.message || 'Role created successfully');
       }
       resetForm();
     } catch (error) {
@@ -54,8 +54,8 @@ const RoleManagement: React.FC = () => {
   const handleDelete = async (id: number, roleName: string) => {
     if (window.confirm(`Are you sure you want to delete the role "${roleName}"?`)) {
       try {
-        await dispatch(deleteRole(id)).unwrap();
-        toast.success('Role deleted successfully');
+        const result = await dispatch(deleteRole(id)).unwrap();
+        toast.success(result.message || 'Role deleted successfully');
       } catch (error) {
         toast.error(error || 'Delete failed');
       }

@@ -3,8 +3,7 @@ import { SidebarProvider, useSidebar } from '../context/SidebarContext';
 import { Outlet } from 'react-router-dom';
 import AppHeader from './AppHeader';
 import Backdrop from './Backdrop';
-import AppSidebar from './AppSidebar';
-import SuperAdminSidebar from '../components/SuperAdminSidebar';
+import Sidebar from '../components/Sidebar';
 import OnboardingModal from '../pages/Comanyform';
 import { useSelector } from 'react-redux';
 
@@ -12,19 +11,13 @@ const LayoutContent: React.FC = () => {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
   const user = useSelector((state: any) => state.user.user);
   const isProfileComplete = user?.companyId || user?.role?.name === 'SUPER_ADMIN';
-  const isSuperAdmin = user?.role?.name === 'SUPER_ADMIN';
-  
-  console.log('AppLayout Debug:', { 
-    userRole: user?.role?.name, 
-    isSuperAdmin, 
-    user: user 
-  });
+
 
   return (
     <div className="min-h-screen xl:flex">
       {!isProfileComplete && user?.role?.name !== 'SUPER_ADMIN' && <OnboardingModal onClose={() => {}} />}
       <div>
-        {isSuperAdmin ? <SuperAdminSidebar /> : <AppSidebar />}
+        <Sidebar />
         <Backdrop />
       </div>
       <div

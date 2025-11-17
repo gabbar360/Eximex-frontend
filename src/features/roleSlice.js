@@ -91,8 +91,8 @@ const roleSlice = createSlice({
       })
       .addCase(createRole.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.roles.push(payload.data);
-        state.successMessage = payload.message;
+        state.roles.push(payload?.data || payload);
+        state.successMessage = payload?.message;
       })
       .addCase(createRole.rejected, (state, { payload }) => {
         state.loading = false;
@@ -106,11 +106,12 @@ const roleSlice = createSlice({
       })
       .addCase(updateRole.fulfilled, (state, { payload }) => {
         state.loading = false;
-        const index = state.roles.findIndex(role => role.id === payload.data.id);
+        const roleData = payload?.data || payload;
+        const index = state.roles.findIndex(role => role.id === roleData.id);
         if (index !== -1) {
-          state.roles[index] = payload.data;
+          state.roles[index] = roleData;
         }
-        state.successMessage = payload.message;
+        state.successMessage = payload?.message;
       })
       .addCase(updateRole.rejected, (state, { payload }) => {
         state.loading = false;
@@ -125,7 +126,7 @@ const roleSlice = createSlice({
       .addCase(deleteRole.fulfilled, (state, { payload }) => {
         state.loading = false;
         state.roles = state.roles.filter(role => role.id !== payload.deletedId);
-        state.successMessage = payload.message;
+        state.successMessage = payload?.message;
       })
       .addCase(deleteRole.rejected, (state, { payload }) => {
         state.loading = false;

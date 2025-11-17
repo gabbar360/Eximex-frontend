@@ -49,7 +49,8 @@ export const deleteUser = createAsyncThunk(
   'userManagement/deleteUser',
   async (id, { rejectWithValue }) => {
     try {
-      return await userService.deleteUser(id);
+      const result = await userService.deleteUser(id);
+      return { ...result, deletedId: id };
     } catch (err) {
       return rejectWithValue(err.message);
     }
@@ -109,8 +110,8 @@ const userManagementSlice = createSlice({
       })
       .addCase(createUser.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.users.unshift(payload.data);
-        state.successMessage = payload.message;
+        state.users.unshift(payload?.data || payload);
+        state.successMessage = payload?.message;
       })
       .addCase(createUser.rejected, (state, { payload }) => {
         state.loading = false;
@@ -122,10 +123,11 @@ const userManagementSlice = createSlice({
       })
       .addCase(updateUser.fulfilled, (state, { payload }) => {
         state.loading = false;
+        const userData = payload?.data || payload;
         state.users = state.users.map((user) =>
-          user.id === payload.data.id ? payload.data : user
+          user.id === userData.id ? userData : user
         );
-        state.successMessage = payload.message;
+        state.successMessage = payload?.message;
       })
       .addCase(updateUser.rejected, (state, { payload }) => {
         state.loading = false;
@@ -137,8 +139,8 @@ const userManagementSlice = createSlice({
       })
       .addCase(deleteUser.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.users = state.users.filter((user) => user.id !== payload.id);
-        state.successMessage = payload.message;
+        state.users = state.users.filter((user) => user.id !== payload.deletedId);
+        state.successMessage = payload?.message;
       })
       .addCase(deleteUser.rejected, (state, { payload }) => {
         state.loading = false;

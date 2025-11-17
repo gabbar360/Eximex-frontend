@@ -60,13 +60,13 @@ import AddOrder from './pages/orderforms/AddOrder';
 import AddEditPackingList from './pages/orderforms/AddEditPackingList';
 import ViewInvoice from './pages/orderforms/ViewInvoice';
 import AddEditVgm from './pages/orderforms/AddEditVgm';
-import OrderLayout from './components/order/OrderLayout';
+
 import AllOrders from './pages/orders/AllOrders';
 import ShipmentManagement from './pages/orders/ShipmentManagement';
 import PackingListManagement from './pages/orders/PackingListManagement';
 import VgmManagement from './pages/orders/VgmManagement';
 import ReportsDownloads from './pages/orders/ReportsDownloads';
-import StaffManagement from './components/StaffManagement';
+
 import ActivityLogComponent from './components/ActivityLog';
 import RoleBasedDashboard from './components/RoleBasedDashboard';
 import SuperAdminDashboard from './pages/SuperAdmin/SuperAdminDashboard';
@@ -141,14 +141,12 @@ function AppContent() {
           <Route path="/proforma-invoices/:id/confirm" element={<ConfirmOrder />} />
           <Route path="/proforma-invoices/:id/confirmed" element={<OrderConfirmed />} />
 
-          {/* Order Management with Sub-menus */}
-          <Route path="/orders" element={<OrderLayout />}>
-            <Route index element={<AllOrders />} />
-            <Route path="shipments" element={<ShipmentManagement />} />
-            <Route path="packing-lists" element={<PackingListManagement />} />
-            <Route path="vgm" element={<VgmManagement />} />
-            <Route path="reports" element={<ReportsDownloads />} />
-          </Route>
+          {/* Order Management Routes */}
+          <Route path="/orders" element={<AllOrders />} />
+          <Route path="/orders/shipments" element={<ShipmentManagement />} />
+          <Route path="/orders/packing-lists" element={<PackingListManagement />} />
+          <Route path="/orders/vgm" element={<VgmManagement />} />
+          <Route path="/orders/reports" element={<ReportsDownloads />} />
           
           {/* Individual Order Operations */}
           <Route path="/add-order" element={<AddOrder />} />
@@ -172,7 +170,7 @@ function AppContent() {
             element={<AddEditPurchaseOrderForm />}
           />
 
-          <Route path="/staff-management" element={<StaffManagement />} />
+
           <Route path="/activity-logs" element={<ActivityLogComponent />} />
           {/* Super Admin Routes */}
           <Route path="/super-admin/dashboard" element={<EnhancedSuperAdminDashboard />} />
