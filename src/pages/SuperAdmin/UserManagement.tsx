@@ -1,49 +1,64 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { getAllRoles, createRole, updateRole, deleteRole } from '../../features/roleSlice';
+import { fetchUsers, createUser, updateUser, deleteUser } from '../../features/userManagementSlice';
+import { getAllRoles } from '../../features/roleSlice';
 import { HiPlus, HiPencil, HiTrash, HiEye, HiArrowLeft, HiCheckCircle } from 'react-icons/hi';
 
-const RoleManagement: React.FC = () => {
+const UserManagement: React.FC = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const { roles, loading, error } = useSelector((state: any) => state.role);
+  const { users, loading, error } = useSelector((state: any) => state.userManagement);
+  const { roles } = useSelector((state: any) => state.role);
   
   const [showForm, setShowForm] = useState(false);
-  const [editingRole, setEditingRole] = useState(null);
+  const [editingUser, setEditingUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredRoles, setFilteredRoles] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
   const [formData, setFormData] = useState({
-    name: '',
-    displayName: '',
-    description: ''
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    roleId: '',
+    isActive: true
   });
 
   useEffect(() => {
+    dispatch(fetchUsers());
     dispatch(getAllRoles());
   }, [dispatch]);
 
   useEffect(() => {
-    if (roles) {
-      const filtered = roles.filter((role: any) =>
-        role.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        role.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        role.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    if (users) {
+      const filtered = users.filter((user: any) =>
+        user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.role?.displayName?.toLowerCase().includes(searchTerm.toLowerCase())
       );
-      setFilteredRoles(filtered);
+      setFilteredUsers(filtered);
     }
-  }, [roles, searchTerm]);
+  }, [users, searchTerm]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      if (editingRole) {
-        const result = await dispatch(updateRole({ id: editingRole.id, roleData: formData })).unwrap();
-        toast.success(result.message || 'Role updated successfully');
+      const userData = {
+        name: `${formData.firstName} ${formData.lastName}`.trim(),
+        email: formData.email,
+        password: formData.password,
+        roleId: parseInt(formData.roleId),
+        status: formData.isActive ? 'ACTIVE' : 'INACTIVE'
+      };
+
+      if (editingUser) {
+        if (!userData.password) {
+          delete userData.password;
+        }
+        const result = await dispatch(updateUser({ id: editingUser.id, userData })).unwrap();
+        toast.success(result.message || 'User updated successfully');
       } else {
-        const result = await dispatch(createRole(formData)).unwrap();
-        toast.success(result.message || 'Role created successfully');
+        const result = await dispatch(createUser(userData)).unwrap();
+        toast.success(result.message || 'User created successfully');
       }
       resetForm();
     } catch (error) {
@@ -51,11 +66,11 @@ const RoleManagement: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: number, roleName: string) => {
-    if (window.confirm(`Are you sure you want to delete the role "${roleName}"?`)) {
+  const handleDelete = async (id: number, userName: string) => {
+    if (window.confirm(`Are you sure you want to delete the user "${userName}"?`)) {
       try {
-        const result = await dispatch(deleteRole(id)).unwrap();
-        toast.success(result.message || 'Role deleted successfully');
+        const result = await dispatch(deleteUser(id)).unwrap();
+        toast.success(result.message || 'User deleted successfully');
       } catch (error) {
         toast.error(error || 'Delete failed');
       }
@@ -64,20 +79,26 @@ const RoleManagement: React.FC = () => {
 
   const resetForm = () => {
     setFormData({
-      name: '',
-      displayName: '',
-      description: ''
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      roleId: '',
+      isActive: true
     });
-    setEditingRole(null);
+    setEditingUser(null);
     setShowForm(false);
   };
 
-  const handleEdit = (role: any) => {
-    setEditingRole(role);
+  const handleEdit = (user: any) => {
+    setEditingUser(user);
     setFormData({
-      name: role.name,
-      displayName: role.displayName,
-      description: role.description
+      firstName: user.name?.split(' ')[0] || '',
+      lastName: user.name?.split(' ').slice(1).join(' ') || '',
+      email: user.email,
+      password: '',
+      roleId: user.roleId?.toString() || '',
+      isActive: user.status === 'ACTIVE'
     });
     setShowForm(true);
   };
@@ -87,12 +108,12 @@ const RoleManagement: React.FC = () => {
     setShowForm(true);
   };
 
-  if (loading && !roles.length) {
+  if (loading && !users.length) {
     return (
       <div className="min-h-screen flex justify-center items-center bg-gray-50">
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8 text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-slate-600 mx-auto mb-4"></div>
-          <p className="text-slate-600 font-medium">Loading roles...</p>
+          <p className="text-slate-600 font-medium">Loading users...</p>
         </div>
       </div>
     );
@@ -115,7 +136,7 @@ const RoleManagement: React.FC = () => {
                   </button>
                   <div>
                     <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
-                      {editingRole ? 'Edit Role' : 'Add New Role'}
+                      {editingUser ? 'Edit User' : 'Add New User'}
                     </h1>
                   </div>
                 </div>
@@ -129,47 +150,97 @@ const RoleManagement: React.FC = () => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Role Name *
+                    First Name *
                   </label>
                   <input
                     type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    value={formData.firstName}
+                    onChange={(e) => setFormData({...formData, firstName: e.target.value})}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-                    placeholder="Enter role name"
+                    placeholder="Enter first name"
                     required
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Display Name *
+                    Last Name *
                   </label>
                   <input
                     type="text"
-                    value={formData.displayName}
-                    onChange={(e) => setFormData({...formData, displayName: e.target.value})}
+                    value={formData.lastName}
+                    onChange={(e) => setFormData({...formData, lastName: e.target.value})}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-                    placeholder="Enter display name"
+                    placeholder="Enter last name"
                     required
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Description
-                </label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-                  placeholder="Enter role description"
-                  rows={3}
-                />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                    placeholder="Enter email address"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    {editingUser ? 'Password (leave blank to keep current)' : 'Password *'}
+                  </label>
+                  <input
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({...formData, password: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                    placeholder="Enter password"
+                    required={!editingUser}
+                  />
+                </div>
               </div>
 
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Role *
+                  </label>
+                  <select
+                    value={formData.roleId}
+                    onChange={(e) => setFormData({...formData, roleId: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                    required
+                  >
+                    <option value="">Select a role</option>
+                    {roles?.map((role: any) => (
+                      <option key={role.id} value={role.id}>
+                        {role.displayName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Status
+                  </label>
+                  <select
+                    value={formData.isActive?.toString() || 'true'}
+                    onChange={(e) => setFormData({...formData, isActive: e.target.value === 'true'})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                  >
+                    <option value="true">Active</option>
+                    <option value="false">Inactive</option>
+                  </select>
+                </div>
+              </div>
 
               {/* Submit Buttons */}
               <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
@@ -188,12 +259,12 @@ const RoleManagement: React.FC = () => {
                   {loading ? (
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      {editingRole ? 'Updating...' : 'Creating...'}
+                      {editingUser ? 'Updating...' : 'Creating...'}
                     </div>
                   ) : (
                     <>
                       <HiCheckCircle className="w-5 h-5 mr-2 inline" />
-                      {editingRole ? 'Update Role' : 'Create Role'}
+                      {editingUser ? 'Update User' : 'Create User'}
                     </>
                   )}
                 </button>
@@ -214,16 +285,15 @@ const RoleManagement: React.FC = () => {
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
               <div>
                 <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
-                  Role Management
+                  User Management
                 </h1>
-                {/* <p className="text-slate-600">Manage system roles and permissions</p> */}
               </div>
               <button
                 onClick={handleAddNew}
                 className="flex items-center gap-2 px-4 py-3 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-all duration-300 hover:shadow-lg font-medium"
               >
                 <HiPlus className="w-5 h-5" />
-                Add New Role
+                Add New User
               </button>
             </div>
           </div>
@@ -234,7 +304,7 @@ const RoleManagement: React.FC = () => {
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
             <input
               type="text"
-              placeholder="Search roles by name, display name, or description..."
+              placeholder="Search users by name, email, or role..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
@@ -242,16 +312,16 @@ const RoleManagement: React.FC = () => {
           </div>
         </div>
 
-        {/* Roles Table */}
+        {/* Users Table */}
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-          {filteredRoles.length === 0 ? (
+          {filteredUsers.length === 0 ? (
             <div className="p-8 text-center">
               <div className="text-slate-400 mb-4">
                 <HiEye className="w-16 h-16 mx-auto" />
               </div>
-              <h3 className="text-lg font-medium text-slate-600 mb-2">No roles found</h3>
+              <h3 className="text-lg font-medium text-slate-600 mb-2">No users found</h3>
               <p className="text-slate-500 mb-4">
-                {searchTerm ? 'No roles match your search criteria.' : 'Get started by creating your first role.'}
+                {searchTerm ? 'No users match your search criteria.' : 'Get started by creating your first user.'}
               </p>
               {!searchTerm && (
                 <button
@@ -259,7 +329,7 @@ const RoleManagement: React.FC = () => {
                   className="inline-flex items-center gap-2 px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-colors"
                 >
                   <HiPlus className="w-4 h-4" />
-                  Add First Role
+                  Add First User
                 </button>
               )}
             </div>
@@ -269,16 +339,19 @@ const RoleManagement: React.FC = () => {
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
-                      Role Name
+                      Name
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
-                      Display Name
+                      Email
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
-                      Description
+                      Role
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
-                      Type
+                      Status
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+                      Created At
                     </th>
                     <th className="px-6 py-4 text-right text-xs font-medium text-slate-600 uppercase tracking-wider">
                       Actions
@@ -286,46 +359,51 @@ const RoleManagement: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredRoles.map((role: any) => (
-                    <tr key={role.id} className="hover:bg-gray-50 transition-colors">
+                  {filteredUsers.map((user: any) => (
+                    <tr key={user.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-slate-900">{role.name}</div>
+                        <div className="text-sm font-medium text-slate-900">
+                          {user.name}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-slate-600">{role.displayName}</div>
+                        <div className="text-sm text-slate-600">{user.email}</div>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm text-slate-600 max-w-xs truncate">
-                          {role.description || 'No description'}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-slate-600">
+                          {user.role?.displayName || 'No Role'}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          role.isSystem 
-                            ? 'bg-blue-100 text-blue-800' 
-                            : 'bg-green-100 text-green-800'
+                          user.status === 'ACTIVE' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-red-100 text-red-800'
                         }`}>
-                          {role.isSystem ? 'System' : 'Custom'}
+                          {user.status === 'ACTIVE' ? 'Active' : 'Inactive'}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-slate-600">
+                          {new Date(user.createdAt).toLocaleDateString()}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex items-center justify-end gap-2">
                           <button
-                            onClick={() => handleEdit(role)}
+                            onClick={() => handleEdit(user)}
                             className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-all duration-200"
-                            title="Edit Role"
+                            title="Edit User"
                           >
                             <HiPencil className="w-4 h-4" />
                           </button>
-                          {!role.isSystem && (
-                            <button
-                              onClick={() => handleDelete(role.id, role.name)}
-                              className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200"
-                              title="Delete Role"
-                            >
-                              <HiTrash className="w-4 h-4" />
-                            </button>
-                          )}
+                          <button
+                            onClick={() => handleDelete(user.id, user.name)}
+                            className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200"
+                            title="Delete User"
+                          >
+                            <HiTrash className="w-4 h-4" />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -337,15 +415,15 @@ const RoleManagement: React.FC = () => {
         </div>
 
         {/* Summary */}
-        {filteredRoles.length > 0 && (
+        {filteredUsers.length > 0 && (
           <div className="mt-4 bg-white rounded-lg border border-gray-200 shadow-sm p-4">
             <div className="flex items-center justify-between text-sm text-slate-600">
               <span>
-                Showing {filteredRoles.length} of {roles.length} roles
+                Showing {filteredUsers.length} of {users.length} users
               </span>
               <span>
-                {roles.filter((r: any) => r.isSystem).length} system roles, {' '}
-                {roles.filter((r: any) => !r.isSystem).length} custom roles
+                {users.filter((u: any) => u.status === 'ACTIVE').length} active users, {' '}
+                {users.filter((u: any) => u.status !== 'ACTIVE').length} inactive users
               </span>
             </div>
           </div>
@@ -355,4 +433,4 @@ const RoleManagement: React.FC = () => {
   );
 };
 
-export default RoleManagement;
+export default UserManagement;
