@@ -200,7 +200,7 @@ const partySlice = createSlice({
       })
       .addCase(getAllParties.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.parties = payload?.data || payload || [];
+        state.parties = payload?.data?.data || payload?.data || payload || [];
       })
       .addCase(getAllParties.rejected, (state, { payload }) => {
         state.loading = false;

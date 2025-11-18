@@ -18,6 +18,11 @@ import {
 import {
   HiOutlineDocumentText,
   HiOutlineClipboardDocumentList,
+  HiOutlineShoppingBag,
+  HiOutlineTruck,
+  HiOutlineArchiveBox,
+  HiOutlineScale,
+  HiOutlineChartBarSquare,
 } from 'react-icons/hi2';
 import { GridIcon, HorizontaLDots, ChevronDownIcon } from '../icons';
 import { useSidebar } from '../context/SidebarContext';
@@ -29,7 +34,7 @@ type NavItem = {
   name: string;
   icon: React.ReactNode;
   path?: string;
-  subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
+  subItems?: { name: string; path: string; icon?: React.ReactNode; pro?: boolean; new?: boolean }[];
 };
 
 const getNavItems = (userRole: string): NavItem[] => {
@@ -83,11 +88,11 @@ const getNavItems = (userRole: string): NavItem[] => {
       icon: <MdShoppingCart className="w-4 h-4" />,
       name: 'Orders',
       subItems: [
-        { name: 'All Orders', path: '/orders' },
-        { name: 'Shipments', path: '/orders/shipments' },
-        { name: 'Packing Lists', path: '/orders/packing-lists' },
-        { name: 'VGM Documents', path: '/orders/vgm' },
-        { name: 'Reports', path: '/orders/reports' },
+        { name: 'All Orders', path: '/orders', icon: <HiOutlineShoppingBag className="w-4 h-4" /> },
+        { name: 'Shipments', path: '/orders/shipments', icon: <HiOutlineTruck className="w-4 h-4" /> },
+        { name: 'Packing Lists', path: '/orders/packing-lists', icon: <HiOutlineArchiveBox className="w-4 h-4" /> },
+        { name: 'VGM Documents', path: '/orders/vgm', icon: <HiOutlineScale className="w-4 h-4" /> },
+        { name: 'Reports', path: '/orders/reports', icon: <HiOutlineChartBarSquare className="w-4 h-4" /> },
       ],
     },
     {
@@ -271,17 +276,26 @@ const Sidebar: React.FC = () => {
                         
                         navigate(subItem.path);
                       }}
-                      className={`menu-dropdown-item w-full text-left ${
+                      className={`menu-dropdown-item w-full text-left flex items-center gap-2 ${
                         isActive(subItem.path)
                           ? 'menu-dropdown-item-active'
                           : 'menu-dropdown-item-inactive'
                       }`}
                     >
-                      {subItem.name}
-                      <span className="flex items-center gap-1 ml-auto">
+                      {subItem.icon && (
+                        <span className={`${
+                          isActive(subItem.path)
+                            ? 'text-slate-600'
+                            : 'text-slate-400'
+                        }`}>
+                          {subItem.icon}
+                        </span>
+                      )}
+                      <span className="flex-1">{subItem.name}</span>
+                      <span className="flex items-center gap-1">
                         {subItem.new && (
                           <span
-                            className={`ml-auto ${
+                            className={`${
                               isActive(subItem.path)
                                 ? 'menu-dropdown-badge-active'
                                 : 'menu-dropdown-badge-inactive'
@@ -292,7 +306,7 @@ const Sidebar: React.FC = () => {
                         )}
                         {subItem.pro && (
                           <span
-                            className={`ml-auto ${
+                            className={`${
                               isActive(subItem.path)
                                 ? 'menu-dropdown-badge-active'
                                 : 'menu-dropdown-badge-inactive'

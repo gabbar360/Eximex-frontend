@@ -4,11 +4,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import { toast } from 'react-toastify';
+import { HiArrowLeft, HiCheckCircle } from 'react-icons/hi2';
 import { getPurchaseOrderById, updatePurchaseOrder, createPurchaseOrder, getFormData } from '../../features/purchaseOrderSlice';
 import { fetchProducts } from '../../features/productSlice';
-
-import PageBreadCrumb from '../../components/common/PageBreadCrumb';
-
+import { getAllParties } from '../../features/partySlice';
 
 import DatePicker from '../../components/form/DatePicker';
 import SearchableDropdown from '../../components/SearchableDropdown';
@@ -70,6 +69,9 @@ const AddEditPurchaseOrderForm: React.FC = () => {
     total: 0,
   });
 
+  // Redux state
+  const { parties } = useSelector((state: any) => state.party);
+  
   // Company and vendor data
   const [company, setCompany] = useState<Company | null>(null);
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -79,7 +81,6 @@ const AddEditPurchaseOrderForm: React.FC = () => {
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
 
   const validationSchema = Yup.object().shape({
-    companyName: Yup.string().required('Company name is required'),
     poDate: Yup.date().required('PO date is required'),
     supplierName: Yup.string().required('Supplier name is required'),
   });
@@ -87,13 +88,6 @@ const AddEditPurchaseOrderForm: React.FC = () => {
   const [formData, setFormData] = useState(null);
 
   const getInitialValues = () => ({
-    companyName: formData?.companyName || company?.name || 'vegnar-greens',
-    companyAddress: formData?.companyAddress || company?.address || '',
-    gstin:
-      formData?.deliverToGstin ||
-      formData?.companyGstin ||
-      company?.gstNumber ||
-      '',
     poNumber: formData?.poNumber || '',
     poDate: formData?.poDate
       ? new Date(formData.poDate).toISOString().split('T')[0]
@@ -106,10 +100,6 @@ const AddEditPurchaseOrderForm: React.FC = () => {
     supplierName: formData?.vendorName || '',
     supplierAddress: formData?.vendorAddress || '',
     supplierGstNumber: formData?.vendorGstin || '',
-    deliverToName: formData?.deliverToName || company?.name || 'vegnar-greens',
-    deliverToAddress: formData?.deliverToAddress || company?.address || '',
-    deliverToGstin: formData?.deliverToGstin || company?.gstNumber || '',
-    deliverToContact: formData?.deliverToContact || company?.phoneNo || '',
     notes: formData?.notes || '',
     termsConditions: formData?.termsConditions || '',
     signatureCompany: formData?.signatureCompany || '',
@@ -117,35 +107,29 @@ const AddEditPurchaseOrderForm: React.FC = () => {
     authorizedBy: formData?.authorizedBy || '',
   });
 
-  // Load company and vendor data
+  // Load vendor and product data
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
       try {
-        const [formResponse, productsResponse] = await Promise.all([
-          dispatch(getFormData()).unwrap(),
-          dispatch(fetchProducts()).unwrap(),
-        ]);
-
-        // Set company and vendors data (same as old working code)
-        setCompany(formResponse.data.company);
-        setVendors(formResponse.data.vendors);
-        console.log('Form Data Response:', formResponse);
-        console.log('Vendors Data:', formResponse.data.vendors);
-        
-        // Set products data
-        console.log('Products API Response:', productsResponse);
+        // Fetch products
+        const productsResponse = await dispatch(fetchProducts()).unwrap();
         const productsData = productsResponse?.products || productsResponse?.data || [];
         setProducts(Array.isArray(productsData) ? productsData : []);
-        
-        // Filter only suppliers (same as old working code)
-        const supplierList = formResponse.data.vendors.filter(
-          (vendor) => vendor.role === 'Supplier'
-        );
-        setSuppliers(supplierList);
-        console.log('Filtered Suppliers:', supplierList);
-
-
+      } catch (error) {
+        console.error('Error loading products:', error);
+      }
+      
+      // Fetch parties separately
+      try {
+        console.log('Fetching parties...');
+        const partiesResponse = await dispatch(getAllParties()).unwrap();
+        console.log('Parties response:', partiesResponse);
+      } catch (error) {
+        console.error('Error loading parties:', error);
+      }
+      
+      try {
         if (isEdit && id) {
           const { data: poData } =
             await dispatch(getPurchaseOrderById(id)).unwrap();
@@ -161,13 +145,13 @@ const AddEditPurchaseOrderForm: React.FC = () => {
           setSgstRate(poData.sgstRate || 6);
 
           if (poData.vendorId) {
-            const vendor = supplierList.find((v) => v.id === poData.vendorId);
+            const vendor = suppliers.find((v) => v.id === poData.vendorId);
             setSelectedVendor(vendor || null);
           }
         }
       } catch (error) {
-        console.error('Error loading data:', error);
-        toast.error('Failed to load data');
+        console.error('Error loading PO data:', error);
+        toast.error('Failed to load purchase order data');
       } finally {
         setLoading(false);
       }
@@ -179,6 +163,18 @@ const AddEditPurchaseOrderForm: React.FC = () => {
       addNewItem();
     }
   }, [id, isEdit]);
+
+  // Update suppliers when parties data changes
+  useEffect(() => {
+    if (Array.isArray(parties)) {
+      console.log('All parties:', parties);
+      console.log('Party roles:', parties.map(p => ({ id: p.id, name: p.companyName || p.name, role: p.role })));
+      const supplierList = parties.filter(party => party.role === 'Supplier');
+      console.log('Filtered suppliers:', supplierList);
+      setSuppliers(supplierList);
+      setVendors(supplierList);
+    }
+  }, [parties]);
 
   useEffect(() => {
     calculateTotals();
@@ -267,12 +263,6 @@ const AddEditPurchaseOrderForm: React.FC = () => {
     }
 
     // Check required fields
-    if (!values.companyName) {
-      toast.error('Company name is required');
-      setSubmitting(false);
-      return;
-    }
-
     if (!values.poDate) {
       toast.error('PO date is required');
       setSubmitting(false);
@@ -351,19 +341,30 @@ const AddEditPurchaseOrderForm: React.FC = () => {
   // Removed itemColumns as we're now using native HTML table
 
   return (
-    <>
-      <PageBreadCrumb
-        items={[
-          { title: 'Dashboard', href: '/' },
-          { title: 'Purchase Orders', href: '/purchase-orders' },
-          { title: isEdit ? 'Edit Purchase Order' : 'Create Purchase Order' },
-        ]}
-      />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="mb-3">
+           <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 lg:p-4">
+          <div className="flex items-center gap-4 mb-4">
+            <button
+              onClick={() => navigate('/purchase-orders')}
+              className="p-3 rounded-lg bg-white shadow-md hover:shadow-lg transition-all duration-300 text-slate-600 hover:text-slate-800"
+            >
+              <HiArrowLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <h1 className="text-3xl font-bold text-slate-800">
+                {isEdit ? 'Edit Purchase Order' : 'Create Purchase Order'}
+              </h1>
+            </div>
+          </div>
+          </div>
+        </div>
 
-      <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90 mb-6">
-          {isEdit ? 'Edit Purchase Order' : 'Create Purchase Order'}
-        </h3>
+        {/* Form Container */}
+        <div className="bg-white rounded-xl shadow-xl border border-slate-200">
+          <div className="p-8">
 
         <Formik
           initialValues={getInitialValues()}
@@ -374,134 +375,139 @@ const AddEditPurchaseOrderForm: React.FC = () => {
           {({ values, errors, touched, setFieldValue, isSubmitting }) => {
             return (
               <Form className="space-y-6">
-                {/* Company Information */}
-                <div className="rounded-lg border border-gray-200 bg-gray-50/50 p-4 dark:border-gray-700 dark:bg-gray-800/50">
-                  <div className="flex justify-between items-center mb-4">
-                    <h4 className="text-base font-medium text-gray-800 dark:text-gray-200">
-                      Company Information
-                    </h4>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (company) {
-                          setFieldValue('companyName', company.name, false);
-                          setFieldValue(
-                            'companyAddress',
-                            company.address,
-                            false
-                          );
-                          setFieldValue('gstin', company.gstNumber, false);
-                          setFieldValue(
-                            'deliverToGstin',
-                            company.gstNumber,
-                            false
-                          );
-                        }
-                      }}
-                      className="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
-                    >
-                      Load Company Data
-                    </button>
-                  </div>
+                {/* Vendor Information */}
+                <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                  <h3 className="text-xl font-semibold text-slate-700 mb-6">
+                    Vendor Information
+                  </h3>
                   <div className="space-y-4">
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
+                        Select Vendor <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={selectedVendor?.id || ''}
+                        onChange={(e) => {
+                          const vendorId = e.target.value;
+                          const vendor = vendors.find(
+                            (v) => v.id === parseInt(vendorId) && v.role === 'Supplier'
+                          );
+                          setSelectedVendor(vendor || null);
+
+                          if (vendor) {
+                            setFieldValue('supplierName', vendor.companyName);
+                            setFieldValue('supplierAddress', vendor.address);
+                            setFieldValue('supplierGstNumber', vendor.gstNumber);
+                          } else {
+                            setFieldValue('supplierName', '');
+                            setFieldValue('supplierAddress', '');
+                            setFieldValue('supplierGstNumber', '');
+                          }
+                        }}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
+                      >
+                        <option value="">
+                          Choose Vendor 
+                        </option>
+                        {vendors.filter(v => v.role === 'Supplier').map((vendor) => (
+                          <option key={vendor.id} value={vendor.id}>
+                            {vendor.companyName} - {vendor.contactPerson || 'No Contact'}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <label className="mb-2 block text-sm font-medium text-gray-700">
                           Company Name <span className="text-red-500">*</span>
                         </label>
                         <Field
-                          name="companyName"
-                          placeholder="Enter company name"
-                          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                          type="text"
+                          name="supplierName"
+                          placeholder="Company Name"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
                         />
-                        {touched.companyName && errors.companyName && (
+                        {touched.supplierName && errors.supplierName && (
                           <div className="mt-1 text-sm text-red-600">
-                            {errors.companyName}
+                            {errors.supplierName}
                           </div>
                         )}
                       </div>
                       <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Currency
-                        </label>
-                        <select
-                          value={currency}
-                          onChange={(e) => setCurrency(e.target.value)}
-                          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                        >
-                          <option value="INR">INR (₹)</option>
-                          <option value="USD">USD ($)</option>
-                          <option value="EUR">EUR (€)</option>
-                          <option value="GBP">GBP (£)</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Company Address
+                        <label className="mb-2 block text-sm font-medium text-gray-700">
+                          GSTIN
                         </label>
                         <Field
-                          as="textarea"
-                          name="companyAddress"
-                          rows={3}
-                          placeholder="Enter complete address"
-                          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                          GSTIN Number
-                        </label>
-                        <input
                           type="text"
-                          name="gstin"
-                          value={values.gstin}
-                          placeholder="Enter GSTIN"
-                          onChange={(e) => {
-                            setFieldValue('gstin', e.target.value);
-                            setFieldValue('deliverToGstin', e.target.value);
-                            if (company) {
-                              setCompany((prev) =>
-                                prev
-                                  ? { ...prev, gstNumber: e.target.value }
-                                  : null
-                              );
-                            }
-                          }}
-                          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                          name="supplierGstNumber"
+                          placeholder="GSTIN"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
                         />
                       </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                          CGST %
-                        </label>
-                        <input
-                          type="number"
-                          min={0}
-                          max={50}
-                          value={cgstRate}
-                          onChange={(e) => setCgstRate(Number(e.target.value))}
-                          placeholder="0"
-                          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                          SGST %
-                        </label>
-                        <input
-                          type="number"
-                          min={0}
-                          max={50}
-                          value={sgstRate}
-                          onChange={(e) => setSgstRate(Number(e.target.value))}
-                          placeholder="0"
-                          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                        />
-                      </div>
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
+                        Address
+                      </label>
+                      <Field
+                        as="textarea"
+                        name="supplierAddress"
+                        rows={3}
+                        placeholder="Address"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Currency and Tax Settings */}
+                <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                  <h3 className="text-xl font-semibold text-slate-700 mb-6">
+                    Currency & Tax Settings
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
+                        Currency
+                      </label>
+                      <select
+                        value={currency}
+                        onChange={(e) => setCurrency(e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
+                      >
+                        <option value="INR">INR (₹)</option>
+                        <option value="USD">USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
+                        <option value="GBP">GBP (£)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
+                        CGST %
+                      </label>
+                      <input
+                        type="number"
+                        min={0}
+                        max={50}
+                        value={cgstRate}
+                        onChange={(e) => setCgstRate(Number(e.target.value))}
+                        placeholder="0"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
+                        SGST %
+                      </label>
+                      <input
+                        type="number"
+                        min={0}
+                        max={50}
+                        value={sgstRate}
+                        onChange={(e) => setSgstRate(Number(e.target.value))}
+                        placeholder="0"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
+                      />
                     </div>
                   </div>
                 </div>
@@ -519,7 +525,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                       <Field
                         type="text"
                         name="poNumber"
-                        placeholder="PO-00002"
+                        placeholder="PO Number"
                         className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                       />
                     </div>
@@ -557,7 +563,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                       <Field
                         type="text"
                         name="refNumber"
-                        placeholder="Enter reference"
+                        placeholder="Reference Number"
                         className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                       />
                     </div>
@@ -568,7 +574,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                       <Field
                         type="text"
                         name="placeOfSupply"
-                        placeholder="Gujarat (24)"
+                        placeholder="Place of Supply"
                         className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                       />
                     </div>
@@ -581,126 +587,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                 <Field type="hidden" name="deliverToGstin" />
                 <Field type="hidden" name="deliverToContact" />
 
-                {/* Vendor Information */}
-                <div className="rounded-lg border border-gray-200 bg-gray-50/50 p-4 dark:border-gray-700 dark:bg-gray-800/50">
-                  <h4 className="text-base font-medium text-gray-800 dark:text-gray-200 mb-4">
-                    Vendor Information
-                  </h4>
-                  <div className="rounded-lg border border-gray-300 bg-white p-4 dark:border-gray-600 dark:bg-gray-700">
-                    <div className="flex justify-between items-center mb-3">
-                      <h5 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                        Vendor Details
-                      </h5>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (selectedVendor) {
-                            setFieldValue(
-                              'supplierName',
-                              selectedVendor.companyName,
-                              false
-                            );
-                            setFieldValue(
-                              'supplierAddress',
-                              selectedVendor.address,
-                              false
-                            );
-                            setFieldValue(
-                              'supplierGstNumber',
-                              selectedVendor.gstNumber,
-                              false
-                            );
-                          }
-                        }}
-                        className="text-xs bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
-                      >
-                        Load Vendor Data
-                      </button>
-                    </div>
-                    <div className="space-y-3">
-                      <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Select Vendor <span className="text-red-500">*</span>
-                        </label>
-
-                        <select
-                          value={selectedVendor?.id || ''}
-                          onChange={(e) => {
-                            const vendorId = e.target.value;
-                            const vendor = suppliers.find(
-                              (v) => v.id === parseInt(vendorId)
-                            );
-                            setSelectedVendor(vendor || null);
-
-                            if (vendor) {
-                              console.log('Selected vendor:', vendor); // Debug log
-                              setFieldValue('supplierName', vendor.companyName);
-                              setFieldValue('supplierAddress', vendor.address);
-                              setFieldValue(
-                                'supplierGstNumber',
-                                vendor.gstNumber
-                              );
-                            } else {
-                              setFieldValue('supplierName', '');
-                              setFieldValue('supplierAddress', '');
-                              setFieldValue('supplierGstNumber', '');
-                            }
-                          }}
-                          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                        >
-                          <option value="">
-                            Choose Vendor ({suppliers.length} available)
-                          </option>
-                          {suppliers.map((vendor) => (
-                            <option key={vendor.id} value={vendor.id}>
-                              {vendor.companyName} -{' '}
-                              {vendor.contactPerson || 'No Contact'}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Company Name <span className="text-red-500">*</span>
-                        </label>
-                        <Field
-                          type="text"
-                          name="supplierName"
-                          placeholder="Enter vendor company name"
-                          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                        />
-                        {touched.supplierName && errors.supplierName && (
-                          <div className="mt-1 text-sm text-red-600">
-                            {errors.supplierName}
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Address
-                        </label>
-                        <Field
-                          as="textarea"
-                          name="supplierAddress"
-                          rows={3}
-                          placeholder="Enter vendor address"
-                          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                          GSTIN
-                        </label>
-                        <Field
-                          type="text"
-                          name="supplierGstNumber"
-                          placeholder="Enter GSTIN number"
-                          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              
 
                 {/* Items Section */}
                 <div className="rounded-lg border border-gray-200 bg-gray-50/50 p-4 dark:border-gray-700 dark:bg-gray-800/50">
@@ -945,7 +832,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                         as="textarea"
                         name="notes"
                         rows={4}
-                        placeholder="Enter any special notes or instructions..."
+                        placeholder="Notes"
                         className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                       />
                     </div>
@@ -957,7 +844,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                         as="textarea"
                         name="termsConditions"
                         rows={4}
-                        placeholder="Enter terms and conditions..."
+                        placeholder="Terms & Conditions"
                         className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                       />
                     </div>
@@ -977,7 +864,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                       <Field
                         type="text"
                         name="signatureCompany"
-                        placeholder="Company Name"
+                        placeholder="For Company"
                         className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                       />
                     </div>
@@ -988,7 +875,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                       <Field
                         type="text"
                         name="signatureTitle"
-                        placeholder="Designation"
+                        placeholder="Title"
                         className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                       />
                     </div>
@@ -999,7 +886,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                       <Field
                         type="text"
                         name="authorizedBy"
-                        placeholder="Authorized Person Name"
+                        placeholder="Authorized By"
                         className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                       />
                     </div>
@@ -1007,70 +894,42 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                 </div>
 
                 {/* Submit Buttons */}
-                <div className="flex gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/purchase-orders')}
+                    className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50 transition-all duration-300"
+                  >
+                    Cancel
+                  </button>
                   <button
                     type="submit"
                     disabled={loading || isSubmitting}
-                    className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    className="px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-xl disabled:opacity-50 shadow-lg"
                   >
                     {loading || isSubmitting ? (
-                      <>
-                        <svg
-                          className="animate-spin h-4 w-4"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                          ></path>
-                        </svg>
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                         {isEdit ? 'Updating...' : 'Creating...'}
-                      </>
+                      </div>
                     ) : (
                       <>
-                        <svg
-                          className="h-4 w-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
-                          />
-                        </svg>
+                        <HiCheckCircle className="w-5 h-5 mr-2 inline" />
                         {isEdit
                           ? 'Update Purchase Order'
                           : 'Create Purchase Order'}
                       </>
                     )}
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => navigate('/purchase-orders')}
-                    className="rounded-lg border border-gray-300 px-6 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
-                  >
-                    Cancel
-                  </button>
                 </div>
               </Form>
             );
           }}
         </Formik>
+          </div>
+        </div>
       </div>
-    </>
+    </div>
   );
 };
 
