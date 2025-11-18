@@ -53,7 +53,7 @@ import PIDetails from './pages/PI/PIDetails';
 import ConfirmOrder from './pages/PI/ConfirmOrder';
 import OrderConfirmed from './pages/PI/OrderConfirmed';
 import EmailInvoice from './pages/PI/EmailInvoice';
-import Orders from './pages/orderforms/Orders';
+
 import EditOrder from './pages/orderforms/AddEditShipment';
 import AddEditShipment from './pages/orderforms/AddEditShipment';
 import AddOrder from './pages/orderforms/AddOrder';
@@ -67,13 +67,11 @@ import PackingListManagement from './pages/orders/PackingListManagement';
 import VgmManagement from './pages/orders/VgmManagement';
 import ReportsDownloads from './pages/orders/ReportsDownloads';
 import RoleBasedDashboard from './components/RoleBasedDashboard';
-import SuperAdminDashboard from './pages/SuperAdmin/SuperAdminDashboard';
-import EnhancedSuperAdminDashboard from './pages/SuperAdmin/EnhancedSuperAdminDashboard';
 import RoleManagement from './pages/SuperAdmin/RoleManagement';
 import UserManagement from './pages/SuperAdmin/UserManagement';
 import PurchaseOrders from './pages/PO/PurchaseOrders';
 import AddEditPurchaseOrderForm from './pages/PO/AddEditPurchaseOrderForm';
-import PaymentTracking from './pages/PaymentTracking';
+
 import CompanySetup from './pages/Comanyform';
 
 function AppContent() {
@@ -169,12 +167,11 @@ function AppContent() {
           />
 
 
-          {/* Super Admin Routes */}
-          <Route path="/super-admin/dashboard" element={<EnhancedSuperAdminDashboard />} />
+       
           <Route path="/super-admin/roles" element={<RoleManagement />} />
           <Route path="/super-admin/users" element={<UserManagement />} />
 
-          <Route path="/payments" element={<PaymentTracking />} />
+      
 
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/blank" element={<Blank />} />
