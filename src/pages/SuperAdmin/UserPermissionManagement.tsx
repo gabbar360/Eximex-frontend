@@ -446,16 +446,8 @@ const UserPermissionManagement = () => {
                 key={menu.id}
                 className="mb-2"
               >
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="font-medium text-slate-800 mb-3 flex items-center gap-2">
-                      <MdSecurity className="w-4 h-4" />
-                      Menu Permissions
-                    </h4>
-                    {renderPermissionControls(menu, 'menu')}
-                  </div>
-                  
-                  {menu.submenus && menu.submenus.length > 0 && (
+                <div className="space-y-4">
+                  {menu.submenus && menu.submenus.length > 0 ? (
                     <div>
                       <h4 className="font-medium text-slate-800 mb-3 flex items-center gap-2">
                         <HiCog6Tooth className="w-4 h-4" />
@@ -469,6 +461,11 @@ const UserPermissionManagement = () => {
                           </div>
                         ))}
                       </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <h4 className="font-medium mb-2">Menu Permissions</h4>
+                      {renderPermissionControls(menu, 'menu')}
                     </div>
                   )}
                 </div>

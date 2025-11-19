@@ -72,7 +72,7 @@ const convertSidebarMenuToNavItems = (sidebarMenu: any[]): NavItem[] => {
     if (menu.submenus && menu.submenus.length > 0) {
       navItem.subItems = menu.submenus.map(submenu => ({
         name: submenu.name,
-        path: submenu.path,
+        path: submenu.path || `/${menu.slug}/${submenu.slug}`,
         icon: iconMap[submenu.slug] || <MdDashboard className="w-4 h-4" />
       }));
       delete navItem.path; // Remove path for parent menu if it has submenus
@@ -113,55 +113,8 @@ const getNavItems = (userRole: string): NavItem[] => {
     ];
   }
 
-  return [
-    {
-      icon: <MdDashboard className="w-4 h-4" />,
-      name: 'Dashboard',
-      path: '/dashboard',
-    },
-    {
-      icon: <MdPeople className="w-4 h-4" />,
-      name: 'Customer&prospect',
-      path: '/cprospect',
-    },
-    {
-      icon: <MdCategory className="w-4 h-4" />,
-      name: 'Categories',
-      path: '/categories',
-    },
-    {
-      icon: <MdInventory className="w-4 h-4" />,
-      name: 'Products',
-      path: '/products',
-    },
-    {
-      icon: <HiOutlineDocumentText className="w-4 h-4" />,
-      name: 'Proforma Invoices',
-      path: '/proforma-invoices',
-    },
-    {
-      icon: <MdShoppingCart className="w-4 h-4" />,
-      name: 'Orders',
-      subItems: [
-        { name: 'All Orders', path: '/orders', icon: <HiOutlineShoppingBag className="w-4 h-4" /> },
-        { name: 'Shipments', path: '/orders/shipments', icon: <HiOutlineTruck className="w-4 h-4" /> },
-        { name: 'Packing Lists', path: '/orders/packing-lists', icon: <HiOutlineArchiveBox className="w-4 h-4" /> },
-        { name: 'VGM Documents', path: '/orders/vgm', icon: <HiOutlineScale className="w-4 h-4" /> },
-        { name: 'Reports', path: '/orders/reports', icon: <HiOutlineChartBarSquare className="w-4 h-4" /> },
-      ],
-    },
-    {
-      icon: <HiOutlineClipboardDocumentList className="w-4 h-4" />,
-      name: 'Purchase Orders',
-      path: '/purchase-orders',
-    },
-
-    {
-      icon: <MdAccountCircle className="w-4 h-4" />,
-      name: 'User Profile',
-      path: '/profile',
-    },
-  ];
+  // For regular users, return empty array - only use permission-based menus
+  return [];
 };
 
 const Sidebar: React.FC = () => {
@@ -188,9 +141,7 @@ const Sidebar: React.FC = () => {
   // Use permission-based menu for regular users, static menu for super admin
   const navItems = isSuperAdmin 
     ? getNavItems(userRole) 
-    : (sidebarMenu && sidebarMenu.length > 0) 
-      ? convertSidebarMenuToNavItems(sidebarMenu)
-      : []; // Empty array if no permissions
+    : convertSidebarMenuToNavItems(sidebarMenu || []);
 
   const [openSubmenu, setOpenSubmenu] = useState<{ index: number } | null>(null);
   const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>({});
@@ -216,6 +167,7 @@ const Sidebar: React.FC = () => {
     console.log('👤 Current user:', currentUser);
     console.log('🔑 Is Super Admin:', isSuperAdmin);
     console.log('📊 Nav items count:', navItems.length);
+    console.log('🗺 Converted nav items:', navItems);
   }, [sidebarMenu, currentUser, isSuperAdmin, navItems]);
 
   const handleLogout = async () => {
