@@ -100,7 +100,7 @@ const AddEditVgm: React.FC = () => {
       }
     } catch (error) {
       console.error('Error fetching VGM data:', error);
-      toast.error(error.message);
+      toast.error(error || 'Failed to load VGM data');
     } finally {
       setLoading(false);
     }
@@ -204,7 +204,7 @@ const AddEditVgm: React.FC = () => {
       }
     } catch (error) {
       console.error('Error saving VGM:', error);
-      toast.error(error.message);
+      toast.error(error || 'Failed to save VGM document');
     } finally {
       setLoading(false);
     }

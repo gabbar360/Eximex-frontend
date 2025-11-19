@@ -6,7 +6,7 @@ const createVgm = async (vgmData) => {
     const { data } = await axiosInstance.post('/vgm', vgmData);
     return { data: data.data, message: data.message, success: data.success };
   } catch (error) {
-    handleAxiosError(error);
+    throw handleAxiosError(error);
   }
 };
 
@@ -25,7 +25,7 @@ const getVgmById = async (id) => {
     const { data } = await axiosInstance.get(`/vgm/${id}`);
     return data;
   } catch (error) {
-    handleAxiosError(error);
+    throw handleAxiosError(error);
   }
 };
 
@@ -34,7 +34,7 @@ const updateVgm = async (id, vgmData) => {
     const { data } = await axiosInstance.put(`/vgm/${id}`, vgmData);
     return { data: data.data, message: data.message, success: data.success };
   } catch (error) {
-    handleAxiosError(error);
+    throw handleAxiosError(error);
   }
 };
 
@@ -43,7 +43,7 @@ const deleteVgm = async (id) => {
     const { data } = await axiosInstance.delete(`/vgm/${id}`);
     return { id, message: data.message };
   } catch (error) {
-    handleAxiosError(error);
+    throw handleAxiosError(error);
   }
 };
 

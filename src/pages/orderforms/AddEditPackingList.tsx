@@ -107,7 +107,7 @@ const AddEditPackingList = () => {
       }
     } catch (error) {
       console.error('Error fetching order details:', error);
-      toast.error(error.message);
+      toast.error(error || 'Failed to fetch order details');
       navigate('/orders');
     } finally {
       setLoading(false);
@@ -744,7 +744,7 @@ const AddEditPackingList = () => {
       }, 1500);
     } catch (error) {
       console.error('Error saving packaging list:', error);
-      toast.error(error.message);
+      toast.error(error || 'Failed to save packing list');
     } finally {
       setSaving(false);
     }

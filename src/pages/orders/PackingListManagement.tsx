@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { HiPencil, HiTrash, HiPlus, HiMagnifyingGlass, HiDocumentText, HiCube, HiArrowDownTray } from 'react-icons/hi2';
 import { Pagination } from 'antd';
 import { fetchOrders } from '../../features/orderSlice';
-import { downloadPackingListPdf, downloadPackingListPortPdf } from '../../features/packingListSlice';
+import { downloadPackingListPdf, downloadPackingListPortPdf, deletePackingList } from '../../features/packingListSlice';
 import { toast } from 'react-toastify';
 
 const PackingListManagement: React.FC = () => {
@@ -33,8 +33,17 @@ const PackingListManagement: React.FC = () => {
 
   const handleConfirmDelete = async () => {
     if (!confirmDelete) return;
-    // Add delete logic here
-    setConfirmDelete(null);
+    
+    try {
+      await dispatch(deletePackingList(confirmDelete)).unwrap();
+      toast.success('Packing list deleted successfully');
+      setConfirmDelete(null);
+      // Refresh orders to update the UI
+      dispatch(fetchOrders());
+    } catch (error: any) {
+      console.log('Delete packing list error:', error);
+      toast.error(error || 'Failed to delete packing list');
+    }
   };
 
   const handlePDFDownload = async (order: any) => {

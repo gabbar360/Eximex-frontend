@@ -3,7 +3,9 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { HiEye, HiPencil, HiTrash, HiPlus, HiMagnifyingGlass, HiTruck, HiCube } from 'react-icons/hi2';
 import { Pagination } from 'antd';
+import { toast } from 'react-toastify';
 import { fetchOrders } from '../../features/orderSlice';
+import { deleteShipment } from '../../features/shipmentSlice';
 
 const ShipmentManagement: React.FC = () => {
   const dispatch = useDispatch();
@@ -29,7 +31,17 @@ const ShipmentManagement: React.FC = () => {
 
   const handleConfirmDelete = async () => {
     if (!confirmDelete) return;
-    setConfirmDelete(null);
+    
+    try {
+      await dispatch(deleteShipment(confirmDelete)).unwrap();
+      toast.success('Shipment deleted successfully');
+      setConfirmDelete(null);
+      // Refresh orders to update the UI
+      dispatch(fetchOrders());
+    } catch (error: any) {
+      console.log('Delete shipment error:', error);
+      toast.error(error || 'Failed to delete shipment');
+    }
   };
 
   const formatDate = (dateString: string) => {

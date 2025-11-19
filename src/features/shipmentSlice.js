@@ -70,7 +70,7 @@ export const deleteShipment = createAsyncThunk(
       const { data } = await shipmentService.delete(shipmentId);
       return { shipmentId, ...data };
     } catch (error) {
-      return rejectWithValue(handleAxiosError(error, 'shipment', 'delete'));
+      return rejectWithValue(error.message);
     }
   }
 );
