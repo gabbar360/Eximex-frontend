@@ -37,6 +37,7 @@ import PublicRoute from './components/auth/PublicRoute';
 import { useEffect, useState } from 'react';
 import { setUser } from './features/userSlice';
 import { getCurrentUser } from './features/authSlice';
+import { fetchUserSidebarMenu } from './features/userPermissionSlice';
 import authService from './service/authService';
 
 import Cprospect from '../src/pages/party/Cprospect';
@@ -69,6 +70,8 @@ import ReportsDownloads from './pages/orders/ReportsDownloads';
 import RoleBasedDashboard from './components/RoleBasedDashboard';
 import RoleManagement from './pages/SuperAdmin/RoleManagement';
 import UserManagement from './pages/SuperAdmin/UserManagement';
+import MenuManagement from './pages/SuperAdmin/MenuManagement';
+import UserPermissionManagement from './pages/SuperAdmin/UserPermissionManagement';
 import PurchaseOrders from './pages/PO/PurchaseOrders';
 import AddEditPurchaseOrderForm from './pages/PO/AddEditPurchaseOrderForm';
 
@@ -170,6 +173,8 @@ function AppContent() {
        
           <Route path="/super-admin/roles" element={<RoleManagement />} />
           <Route path="/super-admin/users" element={<UserManagement />} />
+          <Route path="/super-admin/menus" element={<MenuManagement />} />
+          <Route path="/super-admin/permissions" element={<UserPermissionManagement />} />
 
       
 
@@ -227,6 +232,14 @@ export default function App() {
             const res = await dispatch(getCurrentUser()).unwrap();
             if (res?.data) {
               dispatch(setUser(res.data));
+              
+              // Fetch sidebar menu for regular users
+              if (res.data.role?.name !== 'SUPER_ADMIN') {
+                console.log('🔄 Fetching sidebar menu after user login');
+                dispatch(fetchUserSidebarMenu());
+              } else if (!res.data.role) {
+                console.log('⚠️ User has no role assigned - showing warning');
+              }
             }
           }
         }

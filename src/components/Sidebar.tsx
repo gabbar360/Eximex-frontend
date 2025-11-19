@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUserShield, faUsers, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { faUserShield, faUsers, faSignOutAlt, faCogs, faKey } from '@fortawesome/free-solid-svg-icons';
 import {
   MdDashboard,
   MdPeople,
@@ -27,8 +27,10 @@ import {
 import { GridIcon, HorizontaLDots, ChevronDownIcon } from '../icons';
 import { useSidebar } from '../context/SidebarContext';
 import { useAuth } from '../hooks/useAuth';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useTheme } from '../context/ThemeContext';
+import { fetchUserSidebarMenu } from '../features/userPermissionSlice';
+// import DebugSidebar from './DebugSidebar'; // Debug component - removed
 
 type NavItem = {
   name: string;
@@ -37,13 +39,56 @@ type NavItem = {
   subItems?: { name: string; path: string; icon?: React.ReactNode; pro?: boolean; new?: boolean }[];
 };
 
+// Convert sidebar menu from backend to NavItem format
+const convertSidebarMenuToNavItems = (sidebarMenu: any[]): NavItem[] => {
+  if (!sidebarMenu || sidebarMenu.length === 0) {
+    return [];
+  }
+
+  const iconMap: { [key: string]: React.ReactNode } = {
+    'dashboard': <MdDashboard className="w-4 h-4" />,
+    'customer-prospect': <MdPeople className="w-4 h-4" />,
+    'categories': <MdCategory className="w-4 h-4" />,
+    'products': <MdInventory className="w-4 h-4" />,
+    'proforma-invoices': <HiOutlineDocumentText className="w-4 h-4" />,
+    'orders': <MdShoppingCart className="w-4 h-4" />,
+    'purchase-orders': <HiOutlineClipboardDocumentList className="w-4 h-4" />,
+    'staff-management': <MdSupervisorAccount className="w-4 h-4" />,
+    'user-profile': <MdAccountCircle className="w-4 h-4" />,
+    'all-orders': <HiOutlineShoppingBag className="w-4 h-4" />,
+    'shipments': <HiOutlineTruck className="w-4 h-4" />,
+    'packing-lists': <HiOutlineArchiveBox className="w-4 h-4" />,
+    'vgm-documents': <HiOutlineScale className="w-4 h-4" />,
+    'reports': <HiOutlineChartBarSquare className="w-4 h-4" />
+  };
+
+  return sidebarMenu.map(menu => {
+    const navItem: NavItem = {
+      name: menu.name,
+      icon: iconMap[menu.slug] || <MdDashboard className="w-4 h-4" />,
+      path: menu.path
+    };
+
+    if (menu.submenus && menu.submenus.length > 0) {
+      navItem.subItems = menu.submenus.map(submenu => ({
+        name: submenu.name,
+        path: submenu.path,
+        icon: iconMap[submenu.slug] || <MdDashboard className="w-4 h-4" />
+      }));
+      delete navItem.path; // Remove path for parent menu if it has submenus
+    }
+
+    return navItem;
+  });
+};
+
 const getNavItems = (userRole: string): NavItem[] => {
   if (userRole === 'SUPER_ADMIN') {
     return [
       {
         icon: <GridIcon />,
         name: 'Dashboard',
-        path: '/super-admin/dashboard',
+        path: '/dashboard',
       },
       {
         icon: <FontAwesomeIcon icon={faUserShield} />,
@@ -54,6 +99,16 @@ const getNavItems = (userRole: string): NavItem[] => {
         icon: <FontAwesomeIcon icon={faUsers} />,
         name: 'User Management',
         path: '/super-admin/users',
+      },
+      {
+        icon: <FontAwesomeIcon icon={faCogs} />,
+        name: 'Menu Management',
+        path: '/super-admin/menus',
+      },
+      {
+        icon: <FontAwesomeIcon icon={faKey} />,
+        name: 'User Permissions',
+        path: '/super-admin/permissions',
       }
     ];
   }
@@ -119,18 +174,49 @@ const Sidebar: React.FC = () => {
   } = useSidebar();
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { user, logout } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const currentUser = useSelector((state: any) => state.user.user);
+  const { sidebarMenu } = useSelector((state: any) => state.userPermission);
   const { theme } = useTheme();
 
-  const userRole = currentUser?.role?.name || 'STAFF';
+  const userRole = currentUser?.role?.name || null;
   const isSuperAdmin = userRole === 'SUPER_ADMIN';
-  const navItems = getNavItems(userRole);
+  const hasNoRole = !currentUser?.role;
+  
+  // Use permission-based menu for regular users, static menu for super admin
+  const navItems = isSuperAdmin 
+    ? getNavItems(userRole) 
+    : (sidebarMenu && sidebarMenu.length > 0) 
+      ? convertSidebarMenuToNavItems(sidebarMenu)
+      : []; // Empty array if no permissions
 
   const [openSubmenu, setOpenSubmenu] = useState<{ index: number } | null>(null);
   const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>({});
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  // Fetch user sidebar menu for regular users
+  useEffect(() => {
+    if (currentUser && !isSuperAdmin) {
+      console.log('🔄 Fetching sidebar menu for user:', currentUser.id, 'Role:', userRole);
+      dispatch(fetchUserSidebarMenu())
+        .then((result) => {
+          console.log('✅ Sidebar menu fetch result:', result);
+        })
+        .catch((error) => {
+          console.error('❌ Sidebar menu fetch error:', error);
+        });
+    }
+  }, [dispatch, currentUser, isSuperAdmin, userRole]);
+
+  // Debug log for sidebar menu
+  useEffect(() => {
+    console.log('📋 Current sidebar menu state:', sidebarMenu);
+    console.log('👤 Current user:', currentUser);
+    console.log('🔑 Is Super Admin:', isSuperAdmin);
+    console.log('📊 Nav items count:', navItems.length);
+  }, [sidebarMenu, currentUser, isSuperAdmin, navItems]);
 
   const handleLogout = async () => {
     setIsLoading(true);
@@ -328,7 +414,9 @@ const Sidebar: React.FC = () => {
   );
 
   return (
-    <aside
+    <>
+      {/* Debug component removed - system working */}
+      <aside
       className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-slate-800 h-screen transition-all duration-300 ease-in-out z-40 border-r border-gray-200 
         ${
           isExpanded || isMobileOpen
@@ -348,7 +436,7 @@ const Sidebar: React.FC = () => {
           !isExpanded && !isHovered ? 'lg:justify-center' : 'justify-center'
         }`}
       >
-        <Link to={isSuperAdmin ? "/super-admin/dashboard" : "/"}>
+        <Link to={isSuperAdmin ? "/dashboard" : "/"}>
           {isExpanded || isHovered || isMobileOpen ? (
             <img
               src={
@@ -391,7 +479,20 @@ const Sidebar: React.FC = () => {
                   <MdMoreHoriz className="w-4 h-4" />
                 )}
               </h2>
-              {renderMenuItems(navItems)}
+              {navItems.length > 0 ? (
+                renderMenuItems(navItems)
+              ) : !isSuperAdmin ? (
+                <div className="text-center py-4">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {isExpanded || isHovered || isMobileOpen 
+                      ? 'No menu permissions assigned. Contact your administrator.' 
+                      : '⚠️'
+                    }
+                  </p>
+                </div>
+              ) : (
+                renderMenuItems(navItems)
+              )}
             </div>
           </div>
         </nav>
@@ -424,6 +525,7 @@ const Sidebar: React.FC = () => {
         </button>
       </div>
     </aside>
+    </>
   );
 };
 
