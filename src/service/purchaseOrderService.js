@@ -80,9 +80,7 @@ class PurchaseOrderService {
       const response = await axiosInstance.post('/purchase-order', data);
       return response.data;
     } catch (error) {
-      throw new Error(
-        error.response?.data?.message || 'Failed to create purchase order'
-      );
+      throw error;
     }
   }
 
@@ -116,9 +114,7 @@ class PurchaseOrderService {
       const response = await axiosInstance.put(`/purchase-order/${id}`, data);
       return response.data;
     } catch (error) {
-      throw new Error(
-        error.response?.data?.message || 'Failed to update purchase order'
-      );
+      throw error;
     }
   }
 

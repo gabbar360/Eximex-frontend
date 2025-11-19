@@ -116,8 +116,9 @@ const AddEditPurchaseOrderForm: React.FC = () => {
         const productsResponse = await dispatch(fetchProducts()).unwrap();
         const productsData = productsResponse?.products || productsResponse?.data || [];
         setProducts(Array.isArray(productsData) ? productsData : []);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error loading products:', error);
+        toast.error(error);
       }
       
       // Fetch parties separately
@@ -125,8 +126,9 @@ const AddEditPurchaseOrderForm: React.FC = () => {
         console.log('Fetching parties...');
         const partiesResponse = await dispatch(getAllParties()).unwrap();
         console.log('Parties response:', partiesResponse);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error loading parties:', error);
+        toast.error(error);
       }
       
       try {
@@ -149,9 +151,9 @@ const AddEditPurchaseOrderForm: React.FC = () => {
             setSelectedVendor(vendor || null);
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error loading PO data:', error);
-        toast.error('Failed to load purchase order data');
+        toast.error(error);
       } finally {
         setLoading(false);
       }
@@ -324,14 +326,11 @@ const AddEditPurchaseOrderForm: React.FC = () => {
       }
 
       navigate('/purchase-orders');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Purchase Order Save Error:', error);
-      console.error('Error response:', error.response);
-      console.error('Error message:', error.message);
-      console.error('Submit data:', submitData);
       
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to save purchase order';
-      toast.error(errorMessage);
+      // Error is already the message string from Redux
+      toast.error(error);
     } finally {
       setLoading(false);
       setSubmitting(false);

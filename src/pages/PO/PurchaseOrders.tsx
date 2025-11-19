@@ -37,7 +37,7 @@ const PurchaseOrders: React.FC = () => {
       setPurchaseOrders(purchaseOrdersData);
     } catch (error: any) {
       console.error('Error fetching purchase orders:', error);
-      toast.error(error.message);
+      toast.error(error);
       setPurchaseOrders([]);
     } finally {
       setLoading(false);
@@ -64,7 +64,7 @@ const PurchaseOrders: React.FC = () => {
       setConfirmDelete(null);
       loadPurchaseOrders();
     } catch (error: any) {
-      toast.error(error.message || 'Failed to delete purchase order');
+      toast.error(error);
     }
   };
 
@@ -87,7 +87,7 @@ const PurchaseOrders: React.FC = () => {
       toast.success('PDF downloaded successfully');
     } catch (error: any) {
       console.error('Error downloading PDF:', error);
-      toast.error(error.message || 'Failed to download PDF');
+      toast.error(error);
     } finally {
       setDownloadingPdf(null);
     }
