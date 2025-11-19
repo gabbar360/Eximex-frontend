@@ -165,11 +165,7 @@ const Category: React.FC = () => {
   
   const debounceTimer = React.useRef(null);
 
-  useEffect(() => {
-    if (error) {
-      toast.error(error);
-    }
-  }, [error]);
+
 
   const handleSearch = useCallback((value: string) => {
     setSearchTerm(value);
@@ -209,7 +205,7 @@ const Category: React.FC = () => {
       
       toast.success(result.message);
     } catch (error: any) {
-      toast.error(error.message);
+      toast.error(error);
     }
   };
 

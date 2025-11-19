@@ -69,8 +69,7 @@ const Cprospect = () => {
       const message = response?.message || 'Party deleted successfully';
       toast.success(message);
     } catch (err) {
-      const errorMessage = err.message || 'Failed to delete party';
-      toast.error(errorMessage);
+      toast.error(err);
     }
   };
 

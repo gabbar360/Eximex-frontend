@@ -53,11 +53,7 @@ const PerformaInvoice: React.FC = () => {
     }) as any);
   }, [dispatch]);
 
-  useEffect(() => {
-    if (error) {
-      toast.error(error);
-    }
-  }, [error]);
+
 
   const handleSearch = useCallback((value: string) => {
     setSearchTerm(value);
@@ -107,7 +103,7 @@ const PerformaInvoice: React.FC = () => {
       
       toast.success(result.message);
     } catch (error: any) {
-      toast.error(error.message);
+      toast.error(error);
     }
   };
 

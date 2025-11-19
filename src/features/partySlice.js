@@ -9,7 +9,7 @@ export const fetchParties = createAsyncThunk(
       return response;
     } catch (err) {
       console.error('Fetch parties error:', err);
-      return rejectWithValue(err.message || 'Failed to fetch parties');
+      return rejectWithValue(err.message);
     }
   }
 );
@@ -44,7 +44,7 @@ export const updateParty = createAsyncThunk(
       const response = await partyService.updateParty(id, party);
       return response;
     } catch (err) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );

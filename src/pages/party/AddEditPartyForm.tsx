@@ -71,7 +71,7 @@ const AddEditPartyForm = () => {
           const response = await dispatch(getPartyById(Number(id))).unwrap();
           setParty(response.data || response);
         } catch (err) {
-          toast.error(err.message || 'Failed to fetch party details');
+          toast.error(err.message);
           if (err.response?.status === 401) {
             setTimeout(() => navigate('/login'), 2000);
           }
@@ -95,7 +95,7 @@ const AddEditPartyForm = () => {
       toast.success(response.message);
       setTimeout(() => navigate('/cprospect'), 1500);
     } catch (err) {
-      toast.error(err.message);
+      toast.error(err);
       if (err.response?.status === 401) {
         setTimeout(() => navigate('/login'), 2000);
       }

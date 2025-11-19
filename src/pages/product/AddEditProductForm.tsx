@@ -164,7 +164,7 @@ const AddEditProductForm = () => {
       setCategories(categoriesData);
     } catch (error) {
       console.error('Failed to fetch categories:', error);
-      toast.error(error.message || 'Failed to load categories');
+      toast.error(error);
       // Set empty array on error to prevent undefined issues
       setCategories([]);
     } finally {
@@ -212,7 +212,7 @@ const AddEditProductForm = () => {
       }
     } catch (error) {
       console.error('Fetch product error:', error);
-      toast.error(error.message);
+      toast.error(error);
       navigate('/products');
     } finally {
       setLoading(false);
@@ -702,7 +702,7 @@ const AddEditProductForm = () => {
       }, 2000);
     } catch (error) {
       console.error('Product submission error:', error);
-      toast.error(error.message);
+      toast.error(error);
     } finally {
       setLoading(false);
       setSubmitting(false);

@@ -57,7 +57,7 @@ export const getCategoryById = async (id) => {
     const response = await axiosInstance.get(`/get/category/${id}`);
     return response.data.data;
   } catch (error) {
-    throw handleAxiosError(error, 'category', 'fetch');
+    throw error;
   }
 };
 
@@ -69,7 +69,7 @@ export const createCategory = async (categoryData) => {
       message: response.data.message,
     };
   } catch (error) {
-    throw handleAxiosError(error, 'category', 'create');
+    throw error;
   }
 };
 
@@ -84,7 +84,7 @@ export const updateCategory = async (id, category) => {
       message: response.data.message,
     };
   } catch (error) {
-    throw handleAxiosError(error, 'category', 'update');
+    throw error;
   }
 };
 
@@ -96,7 +96,7 @@ export const deleteCategory = async (id) => {
       message: response.data.message,
     };
   } catch (error) {
-    throw handleAxiosError(error, 'category', 'delete');
+    throw error;
   }
 };
 
