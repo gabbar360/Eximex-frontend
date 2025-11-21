@@ -18,7 +18,6 @@ const UserManagement: React.FC = () => {
     firstName: '',
     lastName: '',
     email: '',
-    password: '',
     roleId: '',
     isActive: true
   });
@@ -45,15 +44,11 @@ const UserManagement: React.FC = () => {
       const userData = {
         name: `${formData.firstName} ${formData.lastName}`.trim(),
         email: formData.email,
-        password: formData.password,
         roleId: parseInt(formData.roleId),
         status: formData.isActive ? 'ACTIVE' : 'INACTIVE'
       };
 
       if (editingUser) {
-        if (!userData.password) {
-          delete userData.password;
-        }
         const result = await dispatch(updateUser({ id: editingUser.id, userData })).unwrap();
         toast.success(result.message || 'User updated successfully');
       } else {
@@ -82,7 +77,6 @@ const UserManagement: React.FC = () => {
       firstName: '',
       lastName: '',
       email: '',
-      password: '',
       roleId: '',
       isActive: true
     });
@@ -96,7 +90,6 @@ const UserManagement: React.FC = () => {
       firstName: user.name?.split(' ')[0] || '',
       lastName: user.name?.split(' ').slice(1).join(' ') || '',
       email: user.email,
-      password: '',
       roleId: user.roleId?.toString() || '',
       isActive: user.status === 'ACTIVE'
     });
@@ -177,36 +170,18 @@ const UserManagement: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Email *
-                  </label>
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-                    placeholder="Enter email address"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Password (Optional - User will receive invitation email)
-                  </label>
-                  <input
-                    type="password"
-                    value={formData.password}
-                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-                    placeholder="Leave blank to send invitation email"
-                  />
-                  <p className="text-xs text-slate-500 mt-1">
-                    If no password is provided, user will receive an invitation email to set their password
-                  </p>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Email *
+                </label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                  placeholder="Enter email address"
+                  required
+                />
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

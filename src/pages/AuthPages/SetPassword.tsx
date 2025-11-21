@@ -98,7 +98,7 @@ const SetPassword: React.FC = () => {
     setIsLoading(true);
     try {
       // Use fetch instead of axiosInstance to avoid auth headers
-      const response = await fetch(`${API_URL || 'http://localhost:8000/api/v1'}/invitation/set-password`, {
+      const response = await fetch(`${API_URL}/invitation/set-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
