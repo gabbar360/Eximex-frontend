@@ -10,6 +10,7 @@ const productService = {
         limit: parseInt(params.limit) || 10,
         search: params.search || '',
         ...(params.categoryId && { categoryId: params.categoryId }),
+        ...(params.subCategoryId && { subCategoryId: params.subCategoryId }),
         ...(params.status !== undefined && { status: params.status })
       };
       
