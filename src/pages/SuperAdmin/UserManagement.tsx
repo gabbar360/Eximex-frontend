@@ -194,16 +194,18 @@ const UserManagement: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    {editingUser ? 'Password (leave blank to keep current)' : 'Password *'}
+                    Password (Optional - User will receive invitation email)
                   </label>
                   <input
                     type="password"
                     value={formData.password}
                     onChange={(e) => setFormData({...formData, password: e.target.value})}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-                    placeholder="Enter password"
-                    required={!editingUser}
+                    placeholder="Leave blank to send invitation email"
                   />
+                  <p className="text-xs text-slate-500 mt-1">
+                    If no password is provided, user will receive an invitation email to set their password
+                  </p>
                 </div>
               </div>
 

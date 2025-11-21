@@ -16,14 +16,24 @@ export const userService = {
     return response.data.data;
   },
 
-  // Update user (Super Admin)
+  // Update user
   updateUser: async (id, userData) => {
+    const response = await axiosInstance.put(`/users/${id}`, userData);
+    return { data: response.data.data, message: response.data.message };
+  },
+
+  // Update user (Super Admin)
+  updateUserBySuperAdmin: async (id, userData) => {
     const response = await axiosInstance.put(`/super-admin/update-users/${id}`, userData);
     return { data: response.data.data, message: response.data.message };
   },
 
   // Create user (Super Admin)
   createUser: async (userData) => {
+    // If no password provided, remove it from data to trigger invitation
+    if (!userData.password || userData.password.trim() === '') {
+      delete userData.password;
+    }
     const response = await axiosInstance.post('/super-admin/create-users', userData);
     return { data: response.data.data, message: response.data.message };
   },
