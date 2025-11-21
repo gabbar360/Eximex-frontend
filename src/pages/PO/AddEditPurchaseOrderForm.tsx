@@ -112,13 +112,31 @@ const AddEditPurchaseOrderForm: React.FC = () => {
     const loadData = async () => {
       setLoading(true);
       try {
-        // Fetch products
+        // Fetch products with better data extraction
+        console.log('Fetching products...');
         const productsResponse = await dispatch(fetchProducts()).unwrap();
-        const productsData = productsResponse?.products || productsResponse?.data || [];
+        console.log('Products response:', productsResponse);
+        
+        // Handle different response structures
+        let productsData = [];
+        if (productsResponse?.data?.data) {
+          productsData = productsResponse.data.data;
+        } else if (productsResponse?.data) {
+          productsData = productsResponse.data;
+        } else if (Array.isArray(productsResponse)) {
+          productsData = productsResponse;
+        }
+        
+        console.log('Processed products data:', productsData);
         setProducts(Array.isArray(productsData) ? productsData : []);
+        
+        if (productsData.length === 0) {
+          toast.warning('No products available. Please add products first.');
+        }
       } catch (error: any) {
         console.error('Error loading products:', error);
-        toast.error(error);
+        toast.error(`Failed to load products: ${error.message || error}`);
+        setProducts([]);
       }
       
       // Fetch parties separately
@@ -128,7 +146,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
         console.log('Parties response:', partiesResponse);
       } catch (error: any) {
         console.error('Error loading parties:', error);
-        toast.error(error);
+        toast.error(`Failed to load suppliers: ${error.message || error}`);
       }
       
       try {
@@ -153,7 +171,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
         }
       } catch (error: any) {
         console.error('Error loading PO data:', error);
-        toast.error(error);
+        toast.error(`Failed to load purchase order: ${error.message || error}`);
       } finally {
         setLoading(false);
       }
@@ -164,7 +182,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
     if (!isEdit) {
       addNewItem();
     }
-  }, [id, isEdit]);
+  }, [id, isEdit, dispatch]);
 
   // Update suppliers when parties data changes
   useEffect(() => {
@@ -661,16 +679,23 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                                   }
                                   className="w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                                 >
-                                  <option value="">Select product</option>
+                                  <option value="">
+                                    {products.length === 0 ? 'No products available' : 'Select product'}
+                                  </option>
                                   {products.map((product) => (
                                     <option
                                       key={product.id}
                                       value={product.id.toString()}
                                     >
-                                      {product.name}
+                                      {product.name} {product.sku ? `(${product.sku})` : ''}
                                     </option>
                                   ))}
                                 </select>
+                                {products.length === 0 && (
+                                  <div className="text-xs text-red-500 mt-1">
+                                    No products found. Please add products first.
+                                  </div>
+                                )}
                                 <textarea
                                   value={item.itemDescription}
                                   placeholder="Enter item description"

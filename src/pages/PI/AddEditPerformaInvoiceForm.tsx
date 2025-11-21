@@ -522,7 +522,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
       // Dispatch Redux actions for categories and products
       console.log('Dispatching fetchCategories and fetchProducts...');
       const categoriesResult = await dispatch(fetchCategories()).unwrap();
-      const productsResult = await dispatch(fetchProducts()).unwrap();
+      const productsResult = await dispatch(fetchProducts({ limit: 1000 })).unwrap();
       
       console.log('Categories loaded:', categoriesResult);
       console.log('Products loaded:', productsResult);

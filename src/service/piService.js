@@ -117,7 +117,7 @@ export const deletePiInvoice = async (id) => {
 
 export const downloadPiInvoicePdf = async (id) => {
   try {
-    const response = await axiosInstance.get(`/${id}/download-pdf`, {
+    const response = await axiosInstance.get(`/download-pi-pdf/${id}`, {
       responseType: 'blob', // Important for handling binary data
     });
 

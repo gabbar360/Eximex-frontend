@@ -16,8 +16,14 @@ export const userService = {
     return response.data.data;
   },
 
-  // Update user (Super Admin)
+  // Update user
   updateUser: async (id, userData) => {
+    const response = await axiosInstance.put(`/users/${id}`, userData);
+    return { data: response.data.data, message: response.data.message };
+  },
+
+  // Update user (Super Admin)
+  updateUserBySuperAdmin: async (id, userData) => {
     const response = await axiosInstance.put(`/super-admin/update-users/${id}`, userData);
     return { data: response.data.data, message: response.data.message };
   },
