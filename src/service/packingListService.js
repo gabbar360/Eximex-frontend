@@ -1,4 +1,5 @@
 import axiosInstance from '../utils/axiosInstance';
+import handleAxiosError from '../utils/handleAxiosError';
 
 const packingListService = {
   // Get all packing lists
@@ -7,7 +8,7 @@ const packingListService = {
       const response = await axiosInstance.get('/packing-lists', { params });
       return response.data;
     } catch (error) {
-      throw error;
+      throw handleAxiosError(error);
     }
   },
 
@@ -17,7 +18,7 @@ const packingListService = {
       const response = await axiosInstance.get(`/packing-lists/${id}`);
       return response.data;
     } catch (error) {
-      throw error;
+      throw handleAxiosError(error);
     }
   },
 
@@ -27,7 +28,7 @@ const packingListService = {
       const response = await axiosInstance.post('/packing-lists', data);
       return { data: response.data.data, message: response.data.message };
     } catch (error) {
-      throw error;
+      throw handleAxiosError(error);
     }
   },
 
@@ -37,7 +38,7 @@ const packingListService = {
       const response = await axiosInstance.put(`/packing-lists/${id}`, data);
       return { data: response.data.data, message: response.data.message };
     } catch (error) {
-      throw error;
+      throw handleAxiosError(error);
     }
   },
 
@@ -47,7 +48,7 @@ const packingListService = {
       const response = await axiosInstance.delete(`/packing-lists/${id}`);
       return { id, message: response.data.message };
     } catch (error) {
-      throw error;
+      throw handleAxiosError(error);
     }
   },
 

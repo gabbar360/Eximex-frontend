@@ -28,7 +28,7 @@ axiosInstance.interceptors.response.use(
 
     // Skip token refresh for login requests
     if (originalRequest.skipAuthRefresh) {
-      return Promise.reject(handleAxiosError(error));
+      return Promise.reject(error);
     }
 
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -62,13 +62,11 @@ axiosInstance.interceptors.response.use(
         console.error('Token refresh failed', refreshError);
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        return Promise.reject(
-          handleAxiosError(refreshError, 'auth', 'token_refresh')
-        );
+        return Promise.reject(refreshError);
       }
     }
-    // Return user-friendly error for all other cases
-    return Promise.reject(handleAxiosError(error));
+    // Return original error to preserve response data
+    return Promise.reject(error);
   }
 );
 

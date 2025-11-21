@@ -342,8 +342,8 @@ const AddEditCategoryForm: React.FC = () => {
             }
           }
         } catch (err: any) {
-          setError(err.message);
-          toast.error(err.message);
+          setError(err);
+          toast.error(err);
         } finally {
           setLoading(false);
         }
@@ -453,7 +453,7 @@ const AddEditCategoryForm: React.FC = () => {
 
       setTimeout(() => navigate('/categories'), 1500);
     } catch (err: any) {
-      toast.error(err.message);
+      toast.error(err);
       if (err.response && err.response.status === 401) {
         toast.error('Session expired. Please log in again.');
         setTimeout(() => {

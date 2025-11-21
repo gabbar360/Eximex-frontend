@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { HiPencil, HiTrash, HiPlus, HiMagnifyingGlass, HiDocumentText, HiCube, HiArrowDownTray } from 'react-icons/hi2';
 import { Pagination } from 'antd';
 import { fetchOrders } from '../../features/orderSlice';
-import { downloadVgmPdf } from '../../features/vgmSlice';
+import { downloadVgmPdf, deleteVgm } from '../../features/vgmSlice';
 import { toast } from 'react-toastify';
 
 const VgmManagement: React.FC = () => {
@@ -31,7 +31,17 @@ const VgmManagement: React.FC = () => {
 
   const handleConfirmDelete = async () => {
     if (!confirmDelete) return;
-    setConfirmDelete(null);
+    
+    try {
+      await dispatch(deleteVgm(confirmDelete)).unwrap();
+      toast.success('VGM document deleted successfully');
+      setConfirmDelete(null);
+      // Refresh orders to update the UI
+      dispatch(fetchOrders());
+    } catch (error: any) {
+      console.log('Delete VGM error:', error);
+      toast.error(error || 'Failed to delete VGM document');
+    }
   };
 
   const handlePDFDownload = async (order: any) => {

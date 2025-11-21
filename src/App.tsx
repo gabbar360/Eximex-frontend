@@ -37,6 +37,7 @@ import PublicRoute from './components/auth/PublicRoute';
 import { useEffect, useState } from 'react';
 import { setUser } from './features/userSlice';
 import { getCurrentUser } from './features/authSlice';
+import { fetchUserSidebarMenu } from './features/userPermissionSlice';
 import authService from './service/authService';
 
 import Cprospect from '../src/pages/party/Cprospect';
@@ -53,29 +54,27 @@ import PIDetails from './pages/PI/PIDetails';
 import ConfirmOrder from './pages/PI/ConfirmOrder';
 import OrderConfirmed from './pages/PI/OrderConfirmed';
 import EmailInvoice from './pages/PI/EmailInvoice';
-import Orders from './pages/orderforms/Orders';
+
 import EditOrder from './pages/orderforms/AddEditShipment';
 import AddEditShipment from './pages/orderforms/AddEditShipment';
 import AddOrder from './pages/orderforms/AddOrder';
 import AddEditPackingList from './pages/orderforms/AddEditPackingList';
 import ViewInvoice from './pages/orderforms/ViewInvoice';
 import AddEditVgm from './pages/orderforms/AddEditVgm';
-import OrderLayout from './components/order/OrderLayout';
+
 import AllOrders from './pages/orders/AllOrders';
 import ShipmentManagement from './pages/orders/ShipmentManagement';
 import PackingListManagement from './pages/orders/PackingListManagement';
 import VgmManagement from './pages/orders/VgmManagement';
 import ReportsDownloads from './pages/orders/ReportsDownloads';
-import StaffManagement from './components/StaffManagement';
-import ActivityLogComponent from './components/ActivityLog';
 import RoleBasedDashboard from './components/RoleBasedDashboard';
-import UserManagement from './pages/SuperAdmin/UserManagement';
-import SuperAdminDashboard from './pages/SuperAdmin/SuperAdminDashboard';
-import EnhancedSuperAdminDashboard from './pages/SuperAdmin/EnhancedSuperAdminDashboard';
 import RoleManagement from './pages/SuperAdmin/RoleManagement';
+import UserManagement from './pages/SuperAdmin/UserManagement';
+import MenuManagement from './pages/SuperAdmin/MenuManagement';
+import UserPermissionManagement from './pages/SuperAdmin/UserPermissionManagement';
 import PurchaseOrders from './pages/PO/PurchaseOrders';
 import AddEditPurchaseOrderForm from './pages/PO/AddEditPurchaseOrderForm';
-import PaymentTracking from './pages/PaymentTracking';
+
 import CompanySetup from './pages/Comanyform';
 
 function AppContent() {
@@ -141,14 +140,12 @@ function AppContent() {
           <Route path="/proforma-invoices/:id/confirm" element={<ConfirmOrder />} />
           <Route path="/proforma-invoices/:id/confirmed" element={<OrderConfirmed />} />
 
-          {/* Order Management with Sub-menus */}
-          <Route path="/orders" element={<OrderLayout />}>
-            <Route index element={<AllOrders />} />
-            <Route path="shipments" element={<ShipmentManagement />} />
-            <Route path="packing-lists" element={<PackingListManagement />} />
-            <Route path="vgm" element={<VgmManagement />} />
-            <Route path="reports" element={<ReportsDownloads />} />
-          </Route>
+          {/* Order Management Routes */}
+          <Route path="/orders" element={<AllOrders />} />
+          <Route path="/orders/shipments" element={<ShipmentManagement />} />
+          <Route path="/orders/packing-lists" element={<PackingListManagement />} />
+          <Route path="/orders/vgm" element={<VgmManagement />} />
+          <Route path="/orders/reports" element={<ReportsDownloads />} />
           
           {/* Individual Order Operations */}
           <Route path="/add-order" element={<AddOrder />} />
@@ -172,13 +169,14 @@ function AppContent() {
             element={<AddEditPurchaseOrderForm />}
           />
 
-          <Route path="/staff-management" element={<StaffManagement />} />
-          <Route path="/activity-logs" element={<ActivityLogComponent />} />
-          {/* Super Admin Routes */}
-          <Route path="/super-admin/dashboard" element={<EnhancedSuperAdminDashboard />} />
-          <Route path="/super-admin/roles" element={<RoleManagement />} />
 
-          <Route path="/payments" element={<PaymentTracking />} />
+       
+          <Route path="/super-admin/roles" element={<RoleManagement />} />
+          <Route path="/super-admin/users" element={<UserManagement />} />
+          <Route path="/super-admin/menus" element={<MenuManagement />} />
+          <Route path="/super-admin/permissions" element={<UserPermissionManagement />} />
+
+      
 
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/blank" element={<Blank />} />
@@ -234,6 +232,14 @@ export default function App() {
             const res = await dispatch(getCurrentUser()).unwrap();
             if (res?.data) {
               dispatch(setUser(res.data));
+              
+              // Fetch sidebar menu for regular users
+              if (res.data.role?.name !== 'SUPER_ADMIN') {
+                console.log('🔄 Fetching sidebar menu after user login');
+                dispatch(fetchUserSidebarMenu());
+              } else if (!res.data.role) {
+                console.log('⚠️ User has no role assigned - showing warning');
+              }
             }
           }
         }

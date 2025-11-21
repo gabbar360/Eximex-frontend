@@ -54,7 +54,7 @@ const AddOrder = () => {
         setPiList(availablePIs);
       } catch (error) {
         console.error('Error fetching PI list:', error);
-        toast.error('Failed to load PI invoices');
+        toast.error(error || 'Failed to load PI invoices');
         setPiList([]);
       } finally {
         setPiLoading(false);
@@ -110,7 +110,31 @@ const AddOrder = () => {
         return;
       }
 
-      // Step 1: Update PI total amount if advance payment is provided
+      console.log('Step 1: Creating order with all details');
+
+      // Step 1: Create order first
+      const orderPayload = {
+        piInvoiceId: selectedPI.id,
+        paymentAmount:
+          orderData.advanceAmount && orderData.advanceAmount !== ''
+            ? parseFloat(orderData.advanceAmount)
+            : null,
+      };
+
+      // Remove null values to avoid validation issues
+      Object.keys(orderPayload).forEach((key) => {
+        if (orderPayload[key] === null || orderPayload[key] === '') {
+          delete orderPayload[key];
+        }
+      });
+
+      console.log('Order payload:', orderPayload);
+
+      // Create the order with all details
+      const result = await dispatch(createOrder(orderPayload)).unwrap();
+      console.log('Order created successfully:', result);
+
+      // Step 2: Update PI total amount if advance payment is provided
       if (orderData.advanceAmount && parseFloat(orderData.advanceAmount) > 0) {
         const advancePayment = parseFloat(orderData.advanceAmount);
         const currentTotal = selectedPI.totalAmount || 0;
@@ -134,7 +158,7 @@ const AddOrder = () => {
           console.log('PI amount updated successfully');
         } catch (error) {
           console.error('Failed to update PI amount:', error);
-          toast.error('Failed to update PI amount');
+          toast.error(error || 'Failed to update PI amount');
           return;
         }
 
@@ -143,41 +167,11 @@ const AddOrder = () => {
         );
       }
 
-      console.log('Step 2: Creating order with all details');
-
-      // Step 2: Create order with all form data
-      const orderPayload = {
-        piInvoiceId: selectedPI.id,
-        paymentAmount:
-          orderData.advanceAmount && orderData.advanceAmount !== ''
-            ? parseFloat(orderData.advanceAmount)
-            : null,
-      };
-
-      // Remove null values to avoid validation issues
-      Object.keys(orderPayload).forEach((key) => {
-        if (orderPayload[key] === null || orderPayload[key] === '') {
-          delete orderPayload[key];
-        }
-      });
-
-      console.log('Order payload:', orderPayload);
-
-      // Create the order with all details
-      const result = await dispatch(createOrder(orderPayload)).unwrap();
-      console.log('Order created successfully:', result);
-
       toast.success(result.message);
       navigate('/orders');
     } catch (error) {
       console.error('Error creating order:', error);
-      if (error.response?.data?.message?.includes('Order already exists')) {
-        toast.error(
-          'This PI Invoice already has an order. Please select a different PI.'
-        );
-      } else {
-        toast.error(error.message);
-      }
+      toast.error(error || 'Failed to create order');
     } finally {
       setLoading(false);
     }

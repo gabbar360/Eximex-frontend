@@ -27,7 +27,8 @@ const AllOrders: React.FC = () => {
       toast.success('Order deleted successfully');
       setConfirmDelete(null);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to delete order');
+      console.log('Delete error:', error);
+      toast.error(error || 'Failed to delete order');
     }
   };
 

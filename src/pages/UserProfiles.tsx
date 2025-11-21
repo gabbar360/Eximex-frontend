@@ -160,20 +160,19 @@ export default function UserProfiles() {
                     <div className="relative">
                       <div className="w-32 h-32 bg-white rounded-full border-4 border-white shadow-2xl flex items-center justify-center overflow-hidden">
                         {userData?.profilePicture ? (
-                          <Image
+                          <img
                             src={userData.profilePicture}
                             alt={userData.name || 'User'}
-                            className="w-full h-full object-cover rounded-full"
-                            preview={{
-                              mask: (
-                                <EyeOutlined style={{ fontSize: '20px', color: 'white' }} />
-                              ),
+                            className="w-full h-full object-cover"
+                            onLoad={() => console.log('Profile image loaded successfully:', userData.profilePicture)}
+                            onError={(e) => {
+                              console.log('Profile image failed to load:', userData.profilePicture);
+                              console.log('Error details:', e);
                             }}
                           />
                         ) : (
                           <HiUser className="text-4xl text-slate-400" />
-                        )}
-                      </div>
+                        )}                      </div>
 
                     </div>
                   </div>

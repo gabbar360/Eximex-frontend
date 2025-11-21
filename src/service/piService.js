@@ -1,5 +1,4 @@
 import axiosInstance from '../utils/axiosInstance';
-import handleAxiosError from '../utils/handleAxiosError';
 
 export const createPiInvoice = async (piData) => {
   try {
@@ -9,7 +8,6 @@ export const createPiInvoice = async (piData) => {
       message: response.data.message,
     };
   } catch (error) {
-    handleAxiosError(error);
     throw error;
   }
 };
@@ -62,25 +60,11 @@ export const getAllPiInvoices = async (params = {}) => {
           }
         };
       } catch (fallbackError) {
-        handleAxiosError(fallbackError);
-        return {
-          data: {
-            piInvoices: [],
-            pagination: { page: 1, limit: 10, total: 0, pages: 0 }
-          },
-          message: 'Error fetching invoices'
-        };
+        throw fallbackError;
       }
     }
     
-    handleAxiosError(error);
-    return {
-      data: {
-        piInvoices: [],
-        pagination: { page: 1, limit: 10, total: 0, pages: 0 }
-      },
-      message: 'Error fetching invoices'
-    };
+    throw error;
   }
 };
 
@@ -89,7 +73,6 @@ export const getPiInvoiceHistory = async (id) => {
     const { data } = await axiosInstance.get(`/${id}/history`);
     return data.data;
   } catch (error) {
-    handleAxiosError(error);
     throw error;
   }
 };
@@ -100,7 +83,6 @@ export const getPiInvoiceById = async (id) => {
     return response.data;
   } catch (error) {
     console.error('Error fetching PI invoice:', error);
-    handleAxiosError(error);
     throw error;
   }
 };
@@ -117,7 +99,6 @@ export const updatePiInvoice = async (id, piData) => {
     };
   } catch (error) {
     console.error('Error updating PI invoice:', error);
-    handleAxiosError(error);
     throw error;
   }
 };
@@ -130,14 +111,13 @@ export const deletePiInvoice = async (id) => {
       message: response.data.message,
     };
   } catch (error) {
-    handleAxiosError(error);
     throw error;
   }
 };
 
 export const downloadPiInvoicePdf = async (id) => {
   try {
-    const response = await axiosInstance.get(`/${id}/download-pdf`, {
+    const response = await axiosInstance.get(`/download-pi-pdf/${id}`, {
       responseType: 'blob', // Important for handling binary data
     });
 
@@ -166,7 +146,6 @@ export const downloadPiInvoicePdf = async (id) => {
     return { success: true, filename };
   } catch (error) {
     console.error('Error downloading PDF:', error);
-    handleAxiosError(error);
     throw error;
   }
 };
@@ -179,7 +158,6 @@ export const updatePiStatus = async (id, status) => {
     return response.data.data;
   } catch (error) {
     console.error('Error updating PI status:', error);
-    handleAxiosError(error);
     throw error;
   }
 };
@@ -189,7 +167,6 @@ export const updatePiAmount = async (id, amountData) => {
     const response = await axiosInstance.put(`/${id}/update-amount`, amountData);
     return response.data;
   } catch (error) {
-    handleAxiosError(error);
     throw error;
   }
 };
@@ -199,7 +176,6 @@ export const emailInvoice = async (id, email) => {
     const response = await axiosInstance.post(`/${id}/email`, { email });
     return response.data;
   } catch (error) {
-    handleAxiosError(error);
     throw error;
   }
 };

@@ -10,6 +10,7 @@ const productService = {
         limit: parseInt(params.limit) || 10,
         search: params.search || '',
         ...(params.categoryId && { categoryId: params.categoryId }),
+        ...(params.subCategoryId && { subCategoryId: params.subCategoryId }),
         ...(params.status !== undefined && { status: params.status })
       };
       
@@ -61,7 +62,7 @@ const productService = {
       const { data } = await axiosInstance.get(`/get/product/${id}`);
       return data;
     } catch (error) {
-      throw handleAxiosError(error, 'product', 'fetch');
+      throw error;
     }
   },
 
@@ -71,7 +72,7 @@ const productService = {
       const response = await axiosInstance.post('/create/product', productData);
       return response.data;
     } catch (error) {
-      throw handleAxiosError(error, 'product', 'create');
+      throw error;
     }
   },
 
@@ -84,7 +85,7 @@ const productService = {
       );
       return response.data;
     } catch (error) {
-      throw handleAxiosError(error, 'product', 'update');
+      throw error;
     }
   },
 
@@ -97,7 +98,7 @@ const productService = {
         message: response.data.message,
       };
     } catch (error) {
-      throw handleAxiosError(error, 'product', 'delete');
+      throw error;
     }
   },
 

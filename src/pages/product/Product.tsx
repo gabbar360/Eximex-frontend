@@ -22,32 +22,19 @@ const Product: React.FC = () => {
   const { categories } = useSelector((state: any) => state.category);
 
   useEffect(() => {
-    if (!searchTerm) {
-      dispatch(fetchProducts({
-        page: currentPage,
-        limit: pageSize,
-        search: ''
-      }) as any);
-    }
-    dispatch(getAllCategories() as any);
-  }, [dispatch, currentPage, pageSize]);
-  
-  useEffect(() => {
     dispatch(fetchProducts({
-      page: 1,
-      limit: 10,
-      search: ''
+      page: currentPage,
+      limit: pageSize,
+      search: searchTerm,
+      categoryId: selectedCategory || undefined,
+      subCategoryId: selectedSubCategory || undefined
     }) as any);
     dispatch(getAllCategories() as any);
-  }, [dispatch]);
+  }, [dispatch, currentPage, pageSize, searchTerm, selectedCategory, selectedSubCategory]);
   
   const debounceTimer = React.useRef(null);
 
-  useEffect(() => {
-    if (error) {
-      toast.error(error);
-    }
-  }, [error]);
+
 
   const handleSearch = useCallback((value: string) => {
     setSearchTerm(value);
@@ -61,10 +48,12 @@ const Product: React.FC = () => {
       dispatch(fetchProducts({
         page: 1,
         limit: pageSize,
-        search: value
+        search: value,
+        categoryId: selectedCategory || undefined,
+        subCategoryId: selectedSubCategory || undefined
       }) as any);
     }, 500);
-  }, [dispatch, pageSize]);
+  }, [dispatch, pageSize, selectedCategory, selectedSubCategory]);
 
   const handleDeleteClick = (id: string) => {
     setConfirmDelete(id);
@@ -82,12 +71,14 @@ const Product: React.FC = () => {
       dispatch(fetchProducts({
         page: currentPage,
         limit: pageSize,
-        search: searchTerm
+        search: searchTerm,
+        categoryId: selectedCategory || undefined,
+        subCategoryId: selectedSubCategory || undefined
       }) as any);
       
       toast.success(result.message);
     } catch (error: any) {
-      toast.error(error.message);
+      toast.error(error);
     }
   };
 
@@ -109,6 +100,14 @@ const Product: React.FC = () => {
     setSelectedCategory(categoryId);
     setSelectedSubCategory('');
     setCurrentPage(1);
+    
+    dispatch(fetchProducts({
+      page: 1,
+      limit: pageSize,
+      search: searchTerm,
+      categoryId: categoryId || undefined,
+      subCategoryId: undefined
+    }) as any);
   };
   const getProductTypeLabel = (type: string) => {
     const types: Record<string, string> = {
@@ -198,6 +197,14 @@ const Product: React.FC = () => {
                         onChange={(e) => {
                           setSelectedSubCategory(e.target.value);
                           setCurrentPage(1);
+                          
+                          dispatch(fetchProducts({
+                            page: 1,
+                            limit: pageSize,
+                            search: searchTerm,
+                            categoryId: selectedCategory || undefined,
+                            subCategoryId: e.target.value || undefined
+                          }) as any);
                         }}
                         className="pl-11 pr-4 py-3 w-full sm:w-48 rounded-lg border border-gray-300 bg-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-all duration-300 text-sm shadow-sm appearance-none"
                       >
@@ -458,7 +465,9 @@ const Product: React.FC = () => {
                 dispatch(fetchProducts({
                   page: page,
                   limit: pageSize,
-                  search: searchTerm
+                  search: searchTerm,
+                  categoryId: selectedCategory || undefined,
+                  subCategoryId: selectedSubCategory || undefined
                 }) as any);
               }}
             />

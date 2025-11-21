@@ -1,26 +1,10 @@
 import { useDispatch, useSelector } from 'react-redux';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { HiEye, HiPencil, HiTrash, HiPlus, HiMagnifyingGlass, HiDocumentText, HiClock, HiCheckCircle, HiXCircle, HiDocument, HiCurrencyDollar, HiBuildingOffice2, HiCalendar, HiCreditCard, HiArrowDownTray, HiEnvelope } from 'react-icons/hi2';
 import { fetchPurchaseOrders, deletePurchaseOrder, downloadPurchaseOrderPDF } from '../../features/purchaseOrderSlice';
 import { toast } from 'react-toastify';
-
-import PageBreadcrumb from '../../components/common/PageBreadCrumb';
-import PageMeta from '../../components/common/PageMeta';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faEdit,
-  faTrash,
-  faEye,
-  faDownload,
-} from '@fortawesome/free-solid-svg-icons';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from '../../components/ui/table';
 
 const PurchaseOrders: React.FC = () => {
   const navigate = useNavigate();
@@ -53,7 +37,7 @@ const PurchaseOrders: React.FC = () => {
       setPurchaseOrders(purchaseOrdersData);
     } catch (error: any) {
       console.error('Error fetching purchase orders:', error);
-      toast.error(error.message);
+      toast.error(error);
       setPurchaseOrders([]);
     } finally {
       setLoading(false);
@@ -64,9 +48,7 @@ const PurchaseOrders: React.FC = () => {
     loadPurchaseOrders();
   }, []);
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  };
+
 
   const handleDeleteClick = (id: string) => {
     setConfirmDelete(id);
@@ -82,7 +64,7 @@ const PurchaseOrders: React.FC = () => {
       setConfirmDelete(null);
       loadPurchaseOrders();
     } catch (error: any) {
-      toast.error(error.message || 'Failed to delete purchase order');
+      toast.error(error);
     }
   };
 
@@ -105,7 +87,7 @@ const PurchaseOrders: React.FC = () => {
       toast.success('PDF downloaded successfully');
     } catch (error: any) {
       console.error('Error downloading PDF:', error);
-      toast.error(error.message || 'Failed to download PDF');
+      toast.error(error);
     } finally {
       setDownloadingPdf(null);
     }
@@ -140,216 +122,349 @@ const PurchaseOrders: React.FC = () => {
     return colors[type] || 'bg-gray-100 text-gray-800';
   };
 
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+
+  const handleSearch = useCallback((value: string) => {
+    setSearchTerm(value);
+  }, []);
+
+  const getStatusConfig = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'approved':
+        return { icon: HiCheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200' };
+      case 'pending':
+        return { icon: HiClock, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-200' };
+      case 'rejected':
+      case 'cancelled':
+        return { icon: HiXCircle, color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-200' };
+      case 'completed':
+        return { icon: HiCheckCircle, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' };
+      default:
+        return { icon: HiDocument, color: 'text-gray-600', bg: 'bg-gray-50', border: 'border-gray-200' };
+    }
+  };
+
   return (
-    <>
-      <PageMeta
-        title="Purchase Orders | EximEx Dashboard"
-        description="Manage your purchase orders in EximEx Dashboard"
-      />
-      <PageBreadcrumb pageTitle="Purchase Orders" />
-
-      <div className="rounded-sm bg-white shadow-default dark:border-strokedark dark:bg-gray-900">
-        <div className="py-6 px-4 md:px-6 xl:px-7.5">
-          <div className="flex items-center justify-between">
-            <h4 className="text-xl font-semibold text-black dark:text-white">
-              Purchase Orders
-            </h4>
-            <Link
-              to="/purchase-orders/create"
-              className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-black hover:bg-opacity-90 dark:text-white"
-            >
-              <svg className="mr-2" width="16" height="16" viewBox="0 0 16 16">
-                <path
-                  d="M8 3.33331V12.6666M3.33337 7.99998H12.6667"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              Create Purchase Order
-            </Link>
-          </div>
-
-          <div className="mt-4">
-            <input
-              type="text"
-              placeholder="Search purchase orders..."
-              value={searchTerm}
-              onChange={handleSearch}
-              className="w-full md:w-1/3 rounded-lg border border-gray-300 dark:text-gray-400 bg-transparent py-2 px-4 outline-none focus:border-primary focus:shadow-sm dark:border-gray-700 dark:bg-gray-800"
-            />
+    <div className="min-h-screen bg-gray-50">
+      <div className="p-2 lg:p-4">
+        {/* Header */}
+        <div className="mb-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 lg:p-4">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-lg bg-slate-700 shadow-lg">
+                  <HiDocumentText className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
+                    Purchase Orders
+                  </h1>
+                </div>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative">
+                  <HiMagnifyingGlass className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <input
+                    type="text"
+                    placeholder="Search purchase orders..."
+                    className="pl-12 pr-4 py-3 w-full sm:w-72 rounded-lg border border-gray-300 bg-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-all duration-300 text-sm placeholder-gray-500 shadow-sm"
+                    value={searchTerm}
+                    onChange={(e) => handleSearch(e.target.value)}
+                  />
+                </div>
+                
+                <Link
+                  to="/purchase-orders/create"
+                  className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg"
+                >
+                  <HiPlus className="w-5 h-5 mr-2" />
+                  New Purchase Order
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03] mx-4 md:mx-6 xl:mx-7.5">
-          <div className="max-w-full overflow-x-auto">
-            {loading ? (
-              <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        {/* Purchase Orders Display */}
+        {loading ? (
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-12 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-slate-600 mx-auto mb-4"></div>
+            <p className="text-slate-600 font-medium">Loading purchase orders...</p>
+          </div>
+        ) : filteredPurchaseOrders.length === 0 ? (
+          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-12 text-center">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-slate-600 flex items-center justify-center shadow-lg">
+              <HiMagnifyingGlass className="w-8 h-8 text-white" />
+            </div>
+            <h3 className="text-xl font-semibold text-slate-800 mb-2">No purchase orders found</h3>
+            <p className="text-slate-600 mb-6">
+              {searchTerm 
+                ? 'Try adjusting your search.' 
+                : 'Create your first purchase order to get started.'}
+            </p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-visible">
+            {/* Desktop Table View */}
+            <div className="hidden lg:block">
+              {/* Table Header */}
+              <div className="bg-gray-50 border-b border-gray-200 p-4">
+                <div className="grid gap-2 text-sm font-semibold text-slate-700" style={{gridTemplateColumns: '1.5fr 1.2fr 1fr 1fr 1fr 1fr 0.8fr'}}>
+                  <div className="flex items-center gap-2">
+                    <HiDocumentText className="w-4 h-4 text-slate-600" />
+                    <span>PO Number</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <HiBuildingOffice2 className="w-4 h-4 text-slate-600" />
+                    <span>Supplier</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <HiCalendar className="w-4 h-4 text-slate-600" />
+                    <span>Date</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <HiClock className="w-4 h-4 text-slate-600" />
+                    <span>Status</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <HiDocument className="w-4 h-4 text-slate-600" />
+                    <span>Type</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <HiCurrencyDollar className="w-4 h-4 text-slate-600" />
+                    <span>Amount</span>
+                  </div>
+                  <div className="flex items-center justify-end gap-2">
+                    <HiDocumentText className="w-4 h-4 text-slate-600" />
+                    <span>Actions</span>
+                  </div>
+                </div>
               </div>
-            ) : filteredPurchaseOrders.length === 0 ? (
-              <div className="flex justify-center items-center h-64">
-                <p className="text-gray-500 dark:text-gray-400">
-                  No purchase orders found.{' '}
-                  {searchTerm && 'Try a different search term.'}
-                </p>
-              </div>
-            ) : (
-              <Table>
-                <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
-                  <TableRow>
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                    >
-                      PO Number
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                    >
-                      Supplier
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                    >
-                      Type
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                    >
-                      Status
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                    >
-                      Total Amount
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                    >
-                      Date
-                    </TableCell>
-                    <TableCell
-                      isHeader
-                      className="px-5 py-3 font-medium text-gray-500 text-end text-theme-xs dark:text-gray-400"
-                    >
-                      Actions
-                    </TableCell>
-                  </TableRow>
-                </TableHeader>
-                <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                  {filteredPurchaseOrders.map((po: any) => (
-                    <TableRow key={po.id}>
-                      <TableCell className="px-5 py-4 text-start">
-                        <div className="flex flex-col gap-1">
-                          <Link
-                            to={`/purchase-orders/${po.id}`}
-                            className="font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400"
-                          >
+              <div className="divide-y divide-white/20">
+                {filteredPurchaseOrders.map((po: any) => {
+                  const statusConfig = getStatusConfig(po.status);
+                  const StatusIcon = statusConfig.icon;
+                  
+                  return (
+                    <div key={po.id} className="p-4 hover:bg-white/50 transition-all duration-300">
+                      <div className="grid gap-2 items-center" style={{gridTemplateColumns: '1.5fr 1.2fr 1fr 1fr 1fr 1fr 0.8fr'}}>
+                        {/* PO Number */}
+                        <div className="flex items-center gap-2">
+                          <HiDocumentText className="w-4 h-4 text-slate-600 flex-shrink-0" />
+                          <span className="text-slate-800 font-medium truncate" title={po.poNumber}>
                             {po.poNumber}
-                          </Link>
+                          </span>
                         </div>
-                      </TableCell>
-                      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                        {po.vendorName || 'N/A'}
-                      </TableCell>
-                      <TableCell className="px-4 py-3 text-start">
-                        <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
-                          DOMESTIC
-                        </span>
-                      </TableCell>
-                      <TableCell className="px-4 py-3 text-start">
-                        <span
-                          className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(po.status?.toLowerCase())}`}
-                        >
-                          {po.status?.toUpperCase() || 'N/A'}
-                        </span>
-                      </TableCell>
-                      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                        {po.totalAmount && po.currency
-                          ? `${po.currency} ${po.totalAmount.toFixed(2)}`
-                          : 'N/A'}
-                      </TableCell>
-                      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                        {po.poDate
-                          ? new Date(po.poDate).toLocaleDateString()
-                          : 'N/A'}
-                      </TableCell>
-                      <TableCell className="px-4 py-3 text-gray-500 text-end text-theme-sm dark:text-gray-400">
-                        <div className="flex items-center justify-end gap-2">
-                          <Link
-                            to={`/purchase-orders/edit/${po.id}`}
-                            className="hover:text-primary"
-                            title="Edit"
-                          >
-                            <FontAwesomeIcon
-                              icon={faEdit}
-                              className="text-green-500 hover:text-green-700"
-                            />
-                          </Link>
+                        
+                        {/* Supplier */}
+                        <div className="text-slate-700 text-sm truncate" title={po.vendorName}>
+                          {po.vendorName || '-'}
+                        </div>
+                        
+                        {/* Date */}
+                        <div className="text-slate-700 text-sm">
+                          {po.poDate ? new Date(po.poDate).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric'
+                          }) : '-'}
+                        </div>
+                        
+                        {/* Status */}
+                        <div>
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${statusConfig.bg} ${statusConfig.color} ${statusConfig.border}`}>
+                            <StatusIcon className="w-3 h-3 mr-1" />
+                            {po.status?.charAt(0).toUpperCase() + po.status?.slice(1) || 'Draft'}
+                          </span>
+                        </div>
+                        
+                        {/* Type */}
+                        <div className="text-slate-700 text-sm">
+                          <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
+                            DOMESTIC
+                          </span>
+                        </div>
+                        
+                        {/* Amount */}
+                        <div className="text-slate-700 text-sm font-medium">
+                          {po.totalAmount && po.currency
+                            ? new Intl.NumberFormat('en-US', {
+                                style: 'currency',
+                                currency: po.currency,
+                                maximumFractionDigits: 0,
+                              }).format(po.totalAmount)
+                            : '-'}
+                        </div>
+                        
+                        {/* Actions */}
+                        <div className="flex items-center justify-end space-x-2">
                           <button
-                            onClick={() => handleDownload(po.id, po.poNumber)}
+                            onClick={async () => await handleDownload(po.id, po.poNumber)}
                             disabled={downloadingPdf === po.id}
-                            className="hover:text-primary disabled:opacity-50"
+                            className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-blue-600 transition-all duration-300"
                             title="Download PDF"
                           >
                             {downloadingPdf === po.id ? (
-                              <LoadingSpinner size="small" message="" />
+                              <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-300 border-t-blue-600"></div>
                             ) : (
-                              <FontAwesomeIcon
-                                icon={faDownload}
-                                className="text-purple-500 hover:text-purple-700"
-                              />
+                              <HiArrowDownTray className="w-4 h-4" />
                             )}
                           </button>
+                          <Link
+                            to={`/purchase-orders/edit/${po.id}`}
+                            className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-600 transition-all duration-300"
+                            title="Edit"
+                          >
+                            <HiPencil className="w-4 h-4" />
+                          </Link>
                           <button
-                            onClick={() => handleDeleteClick(po.id)}
-                            className="hover:text-primary"
+                            onClick={() => setConfirmDelete(po.id)}
+                            className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
                             title="Delete"
                           >
-                            <FontAwesomeIcon
-                              icon={faTrash}
-                              className="text-red-500 hover:text-red-700"
-                            />
+                            <HiTrash className="w-4 h-4" />
                           </button>
                         </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            
+            {/* Mobile Card View */}
+            <div className="lg:hidden divide-y divide-white/20">
+              {filteredPurchaseOrders.map((po: any) => {
+                const statusConfig = getStatusConfig(po.status);
+                const StatusIcon = statusConfig.icon;
+                
+                return (
+                  <div key={po.id} className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <HiDocumentText className="w-5 h-5 text-slate-600 flex-shrink-0" />
+                        <h3 className="font-semibold text-slate-800">{po.poNumber}</h3>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Link
+                          to={`/purchase-orders/edit/${po.id}`}
+                          className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-600 transition-all duration-300"
+                        >
+                          <HiPencil className="w-4 h-4" />
+                        </Link>
+                        <button
+                          onClick={() => setConfirmDelete(po.id)}
+                          className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
+                        >
+                          <HiTrash className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <span className="font-medium text-slate-500 text-xs">Supplier:</span>
+                        <div className="text-slate-700 truncate">{po.vendorName || '-'}</div>
+                      </div>
+                      <div>
+                        <span className="font-medium text-slate-500 text-xs">Date:</span>
+                        <div className="text-slate-700">
+                          {po.poDate ? new Date(po.poDate).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric'
+                          }) : '-'}
+                        </div>
+                      </div>
+                      <div>
+                        <span className="font-medium text-slate-500 text-xs">Status:</span>
+                        <div>
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${statusConfig.bg} ${statusConfig.color} ${statusConfig.border}`}>
+                            <StatusIcon className="w-3 h-3 mr-1" />
+                            {po.status?.charAt(0).toUpperCase() + po.status?.slice(1) || 'Draft'}
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <span className="font-medium text-slate-500 text-xs">Type:</span>
+                        <div className="text-slate-700">
+                          <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
+                            DOMESTIC
+                          </span>
+                        </div>
+                      </div>
+                      <div className="col-span-2">
+                        <span className="font-medium text-slate-500 text-xs">Amount:</span>
+                        <div className="text-slate-700 font-medium">
+                          {po.totalAmount && po.currency
+                            ? new Intl.NumberFormat('en-US', {
+                                style: 'currency',
+                                currency: po.currency,
+                                maximumFractionDigits: 0,
+                              }).format(po.totalAmount)
+                            : '-'}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-center space-x-2 pt-3 mt-3 border-t border-gray-200">
+                      <button
+                        onClick={async () => await handleDownload(po.id, po.poNumber)}
+                        disabled={downloadingPdf === po.id}
+                        className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-blue-600 transition-all duration-300"
+                        title="Download PDF"
+                      >
+                        {downloadingPdf === po.id ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-300 border-t-blue-600"></div>
+                        ) : (
+                          <HiArrowDownTray className="w-4 h-4" />
+                        )}
+                      </button>
+                      <Link
+                        to={`/purchase-orders/edit/${po.id}`}
+                        className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-600 transition-all duration-300"
+                        title="Edit"
+                      >
+                        <HiPencil className="w-4 h-4" />
+                      </Link>
+                      <button
+                        onClick={() => setConfirmDelete(po.id)}
+                        className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
+                        title="Delete"
+                      >
+                        <HiTrash className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Delete Confirmation Modal */}
       {confirmDelete && (
-        <div className="fixed inset-0 z-999999 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 dark:bg-gray-800">
-            <h3 className="mb-4 text-lg font-semibold text-black dark:text-white">
-              Confirm Delete
-            </h3>
-            <p className="mb-6 text-gray-600 dark:text-gray-400">
-              Are you sure you want to delete this purchase order? This action
-              cannot be undone.
-            </p>
-            <div className="flex justify-end gap-4">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-60 p-4">
+          <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-8 border border-gray-200">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-red-600 flex items-center justify-center shadow-lg">
+                <HiTrash className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 mb-2">Delete Purchase Order</h3>
+              <p className="text-slate-600">Are you sure you want to delete this purchase order? This action cannot be undone.</p>
+            </div>
+            <div className="flex items-center justify-center space-x-3">
               <button
                 onClick={() => setConfirmDelete(null)}
-                className="rounded-md bg-gray-200 py-2 px-4 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmDelete}
-                className="rounded-md bg-red-500 py-2 px-4 text-white hover:bg-red-600"
+                className="px-6 py-3 rounded-lg bg-red-600 text-white hover:bg-red-700 shadow-lg"
               >
                 Delete
               </button>
@@ -357,7 +472,7 @@ const PurchaseOrders: React.FC = () => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

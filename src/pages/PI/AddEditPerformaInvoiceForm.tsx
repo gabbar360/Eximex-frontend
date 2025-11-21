@@ -522,7 +522,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
       // Dispatch Redux actions for categories and products
       console.log('Dispatching fetchCategories and fetchProducts...');
       const categoriesResult = await dispatch(fetchCategories()).unwrap();
-      const productsResult = await dispatch(fetchProducts()).unwrap();
+      const productsResult = await dispatch(fetchProducts({ limit: 1000 })).unwrap();
       
       console.log('Categories loaded:', categoriesResult);
       console.log('Products loaded:', productsResult);
@@ -1586,9 +1586,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
       }
     } catch (err: any) {
       console.error('Error saving draft:', err);
-      toast.error(
-        err.response?.data?.message || err.message || 'Failed to save draft'
-      );
+      toast.error(err);
     } finally {
       setSubmitting(false);
     }
@@ -1660,11 +1658,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
       setTimeout(() => navigate('/proforma-invoices'), 1500);
     } catch (err: any) {
       console.error('Error saving PI:', err);
-      toast.error(
-        err.response?.data?.message ||
-          err.message ||
-          (isEditMode ? 'Failed to update PI' : 'Failed to create PI')
-      );
+      toast.error(err);
     } finally {
       setSubmitting(false);
       setReviewOpen(false);

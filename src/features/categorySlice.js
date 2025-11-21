@@ -7,7 +7,7 @@ export const fetchCategories = createAsyncThunk(
     try {
       return await categoryService.getAllCategories(params);
     } catch (err) {
-      return rejectWithValue(err.message || 'Failed to fetch categories');
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
@@ -18,7 +18,7 @@ export const addCategory = createAsyncThunk(
     try {
       return await categoryService.createCategory(category);
     } catch (err) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
@@ -29,7 +29,7 @@ export const updateCategory = createAsyncThunk(
     try {
       return await categoryService.updateCategory(id, category);
     } catch (err) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
@@ -41,7 +41,7 @@ export const deleteCategory = createAsyncThunk(
       const response = await categoryService.deleteCategory(id);
       return response;
     } catch (err) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
@@ -52,7 +52,7 @@ export const getCategoryById = createAsyncThunk(
     try {
       return await categoryService.getCategoryById(id);
     } catch (err) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
@@ -63,7 +63,7 @@ export const createCategory = createAsyncThunk(
     try {
       return await categoryService.createCategory(categoryData);
     } catch (err) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );

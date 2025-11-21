@@ -311,73 +311,7 @@ const SuperAdminOverview: React.FC = () => {
         </div>
       )}
 
-      {/* Quick Actions */}
-      <div className="mb-12">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-          Quick Access Dashboard
-        </h2>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6">
-          {quickActions.map((action, index) => (
-            <ActionCard key={index} action={action} />
-          ))}
-        </div>
-      </div>
-
-      {/* System Features */}
-      <div className="mb-12">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-          System Capabilities
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {systemFeatures.map((feature, index) => (
-            <FeatureSection key={index} feature={feature} />
-          ))}
-        </div>
-      </div>
-
-      {/* Additional Information */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-          Super Admin Exclusive Features
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="text-center">
-            <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 mb-3 inline-block">
-              <FontAwesomeIcon icon={faDatabase} className="text-2xl text-blue-600 dark:text-blue-400" />
-            </div>
-            <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
-              Complete Database Access
-            </h4>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              View, export, and manage all database tables with advanced filtering and search capabilities.
-            </p>
-          </div>
-          
-          <div className="text-center">
-            <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 mb-3 inline-block">
-              <FontAwesomeIcon icon={faUsers} className="text-2xl text-purple-600 dark:text-purple-400" />
-            </div>
-            <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
-              Cross-Company Management
-            </h4>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Manage users and data across all companies in the system with comprehensive oversight tools.
-            </p>
-          </div>
-          
-          <div className="text-center">
-            <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 mb-3 inline-block">
-              <FontAwesomeIcon icon={faShield} className="text-2xl text-green-600 dark:text-green-400" />
-            </div>
-            <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
-              Advanced Security Controls
-            </h4>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Monitor system security, manage access controls, and track all administrative activities.
-            </p>
-          </div>
-        </div>
-      </div>
+      
     </div>
   );
 };

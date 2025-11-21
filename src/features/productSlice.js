@@ -7,7 +7,7 @@ export const fetchProducts = createAsyncThunk(
     try {
       return await productService.getAllProducts(params);
     } catch (err) {
-      return rejectWithValue(err.message || 'Failed to fetch products');
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
@@ -22,7 +22,7 @@ export const addProduct = createAsyncThunk(
       return response;
     } catch (err) {
       console.error('Redux thunk: createProduct error:', err);
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
@@ -34,7 +34,7 @@ export const updateProduct = createAsyncThunk(
       const response = await productService.updateProduct(id, product);
       return response;
     } catch (err) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
@@ -46,7 +46,7 @@ export const deleteProduct = createAsyncThunk(
       const response = await productService.deleteProduct(id);
       return response;
     } catch (err) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
@@ -57,7 +57,7 @@ export const getProductById = createAsyncThunk(
     try {
       return await productService.getProductById(id);
     } catch (err) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );

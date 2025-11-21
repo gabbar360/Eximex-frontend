@@ -29,7 +29,7 @@ export const createPurchaseOrder = createAsyncThunk(
     try {
       return await purchaseOrderService.createPurchaseOrder(poData);
     } catch (err) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
@@ -40,7 +40,7 @@ export const updatePurchaseOrder = createAsyncThunk(
     try {
       return await purchaseOrderService.updatePurchaseOrder(id, data);
     } catch (err) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );

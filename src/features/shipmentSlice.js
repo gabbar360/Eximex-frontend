@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { shipmentService } from '../services/shipmentService';
+import { shipmentService } from '../service/shipmentService';
 import handleAxiosError from '../utils/handleAxiosError';
 
 // Async thunks
@@ -70,7 +70,7 @@ export const deleteShipment = createAsyncThunk(
       const { data } = await shipmentService.delete(shipmentId);
       return { shipmentId, ...data };
     } catch (error) {
-      return rejectWithValue(handleAxiosError(error, 'shipment', 'delete'));
+      return rejectWithValue(error.message);
     }
   }
 );

@@ -7,7 +7,7 @@ export const fetchPiInvoices = createAsyncThunk(
     try {
       return await piService.getAllPiInvoices(params);
     } catch (err) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
@@ -18,7 +18,7 @@ export const fetchPiInvoiceById = createAsyncThunk(
     try {
       return await piService.getPiInvoiceById(id);
     } catch (err) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
@@ -29,7 +29,7 @@ export const fetchPiInvoiceHistory = createAsyncThunk(
     try {
       return await piService.getPiInvoiceHistory(id);
     } catch (err) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
@@ -40,7 +40,7 @@ export const createPiInvoice = createAsyncThunk(
     try {
       return await piService.createPiInvoice(piData);
     } catch (err) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
@@ -51,7 +51,7 @@ export const updatePiInvoice = createAsyncThunk(
     try {
       return await piService.updatePiInvoice(id, piData);
     } catch (err) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
@@ -63,7 +63,7 @@ export const updatePiStatus = createAsyncThunk(
       const result = await piService.updatePiStatus(id, status);
       return { id, status, ...result };
     } catch (err) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
@@ -74,7 +74,7 @@ export const deletePiInvoice = createAsyncThunk(
     try {
       return await piService.deletePiInvoice(id);
     } catch (err) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
@@ -85,7 +85,7 @@ export const downloadPiInvoicePdf = createAsyncThunk(
     try {
       return await piService.downloadPiInvoicePdf(id);
     } catch (err) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
@@ -96,7 +96,7 @@ export const updatePiAmount = createAsyncThunk(
     try {
       return await piService.updatePiAmount(id, amountData);
     } catch (err) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
@@ -107,7 +107,7 @@ export const emailInvoice = createAsyncThunk(
     try {
       return await piService.emailInvoice(id, email);
     } catch (err) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
@@ -118,7 +118,7 @@ export const getAllPiInvoices = createAsyncThunk(
     try {
       return await piService.getAllPiInvoices();
     } catch (err) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );

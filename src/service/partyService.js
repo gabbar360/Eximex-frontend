@@ -100,8 +100,7 @@ export const updateParty = async (id, party) => {
       message: response.data.message,
     };
   } catch (error) {
-    console.error('Error updating party:', error);
-    throw handleAxiosError(error, 'party', 'update');
+    throw error;
   }
 };
 
