@@ -370,8 +370,8 @@ const AddEditPartyForm = () => {
                       placeholder="Enter pincode"
                       value={values.pincode}
                       onChange={(e) => {
-                        const alphanumericValue = e.target.value.replace(/[^a-zA-Z0-9]/g, '');
-                        setFieldValue('pincode', alphanumericValue);
+                        const validValue = e.target.value.replace(/[^a-zA-Z0-9\s-]/g, '');
+                        setFieldValue('pincode', validValue);
                       }}
                       onBlur={handleBlur}
                       className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
