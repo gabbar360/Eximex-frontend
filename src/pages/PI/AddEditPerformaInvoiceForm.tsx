@@ -740,6 +740,9 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
       
       // Calculate packaging weight based on quantity and unit
       let packagingWeight = 0;
+      const packagingData = prod.packagingHierarchyData?.dynamicFields;
+      
+      // Get packaging material weight from product data
       const packagingMaterialWeight = prod.packagingMaterialWeight || 0;
       const packagingUnit = prod.packagingMaterialWeightUnit || 'g';
       
@@ -751,26 +754,32 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         
         // Calculate how many boxes based on unit and quantity
         let boxes = 0;
-        const packagingData = prod.packagingHierarchyData?.dynamicFields;
         
         if (product.unit.toLowerCase() === 'box') {
           boxes = product.quantity;
         } else if (product.unit.toLowerCase() === 'pcs' || product.unit.toLowerCase() === 'pieces') {
-          const piecesPerPack = packagingData?.PiecesPerPack || 1;
-          const packPerBox = packagingData?.PackPerBox || 1;
+          const piecesPerPack = packagingData?.PiecesPerPack || packagingData?.PiecesPerPackage || 1;
+          const packPerBox = packagingData?.PackPerBox || packagingData?.PackagePerBox || 1;
           boxes = Math.ceil(product.quantity / (piecesPerPack * packPerBox));
         } else if (product.unit.toLowerCase() === 'pack' || product.unit.toLowerCase() === 'package') {
-          const packPerBox = packagingData?.PackPerBox || 1;
+          const packPerBox = packagingData?.PackPerBox || packagingData?.PackagePerBox || 1;
           boxes = Math.ceil(product.quantity / packPerBox);
         } else if (product.unit.toLowerCase() === 'pallet') {
-          const boxPerPallet = packagingData?.BoxPerPallet || packagingData?.boxesPerPallet || 1;
+          const boxPerPallet = packagingData?.BoxPerPallet || packagingData?.boxesPerPallet || 32;
           boxes = product.quantity * boxPerPallet;
         } else {
-          // Fallback: assume 1 box per unit
           boxes = product.quantity;
         }
         
-        packagingWeight = boxes * packagingWeightKg;
+        // For tiles, if unit is pallet and packagingMaterialWeight is in kg, 
+        // it might be per pallet, not per box
+        if (product.unit.toLowerCase() === 'pallet' && packagingUnit === 'kg') {
+          // Use packaging weight per pallet directly
+          packagingWeight = product.quantity * packagingWeightKg;
+        } else {
+          // Use packaging weight per box
+          packagingWeight = boxes * packagingWeightKg;
+        }
       }
       
       return sum + netWeight + packagingWeight;
@@ -802,6 +811,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
     const weightPerPiecesUnit = packagingData?.weightPerPiecesUnit || 'g';
     const weightPerPackageUnit = packagingData?.weightPerPackageUnit || 'g';
     const weightPerBoxUnit = packagingData?.weightPerBoxUnit || 'kg';
+    const weightPerPalletUnit = packagingData?.weightPerPalletUnit || 'kg';
 
     const weightPerPieces = packagingData?.weightPerPieces
       ? weightPerPiecesUnit === 'kg'
@@ -818,10 +828,16 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         ? packagingData.weightPerBox
         : packagingData.weightPerBox / 1000
       : 0;
+    const weightPerPallet = packagingData?.weightPerPallet
+      ? weightPerPalletUnit === 'kg'
+        ? packagingData.weightPerPallet
+        : packagingData.weightPerPallet / 1000
+      : 0;
 
     // Get packaging conversion factors
     const piecesPerPackage = packagingData?.PiecesPerPackage || 1;
     const packagePerBox = packagingData?.PackagePerBox || 1;
+    const boxPerPallet = packagingData?.BoxPerPallet || packagingData?.boxesPerPallet || 1;
 
     // Calculate weight based on selected unit using stored values
     switch (unit.toLowerCase()) {
@@ -857,6 +873,24 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         }
         break;
 
+      case 'pallet':
+        if (weightPerPallet > 0) {
+          return qty * weightPerPallet;
+        }
+        // Fallback: calculate from boxes
+        if (weightPerBox > 0 && boxPerPallet > 0) {
+          return qty * weightPerBox * boxPerPallet;
+        }
+        // Fallback: calculate from packages
+        if (weightPerPackage > 0 && packagePerBox > 0 && boxPerPallet > 0) {
+          return qty * weightPerPackage * packagePerBox * boxPerPallet;
+        }
+        // Fallback: calculate from pieces
+        if (weightPerPieces > 0 && piecesPerPackage > 0 && packagePerBox > 0 && boxPerPallet > 0) {
+          return qty * weightPerPieces * piecesPerPackage * packagePerBox * boxPerPallet;
+        }
+        break;
+
       case 'kg':
         return qty;
 
@@ -874,7 +908,8 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
       pieces: 0.014,
       package: 0.7, // 700g per package in kg
       pack: 0.7,
-      box: 7.0, // 7000g per box in kg
+      box: 31.0, // 31kg per box for tiles
+      pallet: 992.0, // 992kg per pallet for tiles
     };
 
     const defaultWeight = defaultWeights[unit.toLowerCase()] || 0.014;
