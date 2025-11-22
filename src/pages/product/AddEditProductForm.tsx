@@ -335,7 +335,7 @@ const AddEditProductForm = () => {
       }`;
       const toWeightUnitField = `${toWeightField}Unit`;
 
-      baseSchema[quantityField] = Yup.number().integer().min(1).optional();
+      baseSchema[quantityField] = Yup.number().min(0).optional();
       baseSchema[weightField] = Yup.number().min(0).optional();
       baseSchema[weightUnitField] = Yup.string().optional();
       baseSchema[toWeightField] = Yup.number().min(0).optional();
@@ -414,7 +414,7 @@ const AddEditProductForm = () => {
           ? 'g'
           : 'kg';
       const defaultToUnit =
-        level.to.toLowerCase() === 'box' || level.to.toLowerCase() === 'carton'
+        level.to.toLowerCase() === 'box' || level.to.toLowerCase() === 'carton' || level.to.toLowerCase() === 'pallet'
           ? 'kg'
           : 'g';
 
@@ -426,36 +426,14 @@ const AddEditProductForm = () => {
         product?.[toWeightUnitField] ??
         product?.packagingHierarchyData?.dynamicFields?.[toWeightUnitField];
 
-      // Override incorrect units: if pieces/pack weight is in kg but value is small (< 100), it should be grams
-      const fromWeight =
-        product?.[weightField] ??
-        product?.packagingHierarchyData?.dynamicFields?.[weightField];
-      const shouldOverrideFromUnit =
-        existingFromUnit === 'kg' &&
-        fromWeight &&
-        fromWeight < 100 &&
-        (level.from.toLowerCase() === 'pieces' ||
-          level.from.toLowerCase() === 'pack');
-
-      baseValues[weightUnitField] = shouldOverrideFromUnit
-        ? 'g'
-        : (existingFromUnit ?? defaultFromUnit);
+      baseValues[weightUnitField] = existingFromUnit ?? defaultFromUnit;
 
       // Add 'to' unit weight fields
       const toWeight =
         product?.[toWeightField] ??
         product?.packagingHierarchyData?.dynamicFields?.[toWeightField];
       baseValues[toWeightField] = toWeight ?? '';
-
-      // Override incorrect Box units: if box weight is in kg but value is very large (> 100), it should be grams
-      const shouldOverrideToUnit =
-        existingToUnit === 'kg' &&
-        toWeight &&
-        toWeight > 100 &&
-        level.to.toLowerCase() === 'box';
-      baseValues[toWeightUnitField] = shouldOverrideToUnit
-        ? 'g'
-        : (existingToUnit ?? defaultToUnit);
+      baseValues[toWeightUnitField] = existingToUnit ?? defaultToUnit;
     });
 
     // If editing and unitWeight is empty, try to populate from packaging hierarchy data
@@ -563,7 +541,7 @@ const AddEditProductForm = () => {
           const toWeightUnitField = `${toWeightField}Unit`;
 
           acc[quantityField] = values[quantityField]
-            ? parseInt(values[quantityField])
+            ? parseFloat(values[quantityField])
             : null;
           acc[weightField] = values[weightField]
             ? parseFloat(values[weightField])
@@ -577,7 +555,8 @@ const AddEditProductForm = () => {
               : 'kg';
           const defaultToUnit =
             level.to.toLowerCase() === 'box' ||
-            level.to.toLowerCase() === 'carton'
+            level.to.toLowerCase() === 'carton' ||
+            level.to.toLowerCase() === 'pallet'
               ? 'kg'
               : 'g';
 
@@ -592,28 +571,21 @@ const AddEditProductForm = () => {
             (level.from.toLowerCase() === 'pieces' ||
               level.from.toLowerCase() === 'pack');
 
-          acc[weightUnitField] = shouldOverrideFromUnit
-            ? 'g'
-            : values[weightUnitField] || defaultFromUnit;
+          acc[weightUnitField] = values[weightUnitField] || defaultFromUnit;
 
-          // Add 'to' unit weight fields
-          acc[toWeightField] = values[toWeightField]
-            ? parseFloat(values[toWeightField])
-            : null;
-
-          // Apply unit correction for 'to' units as well
-          const toWeight = values[toWeightField]
-            ? parseFloat(values[toWeightField])
-            : null;
-          const shouldOverrideToUnit =
-            values[toWeightUnitField] === 'kg' &&
-            toWeight &&
-            toWeight > 100 &&
-            level.to.toLowerCase() === 'box';
-
-          acc[toWeightUnitField] = shouldOverrideToUnit
-            ? 'g'
-            : values[toWeightUnitField] || defaultToUnit;
+          // Add 'to' unit weight fields with proper unit conversion
+          const toWeight = values[toWeightField] ? parseFloat(values[toWeightField]) : null;
+          const toWeightUnit = values[toWeightUnitField] || defaultToUnit;
+          
+          // Convert weight to match the unit being sent
+          if (toWeight && values.unitWeightUnit && toWeightUnit !== values.unitWeightUnit) {
+            // Convert from display unit (unitWeightUnit) to target unit (toWeightUnit)
+            const weightInKg = convertToKg(toWeight, values.unitWeightUnit);
+            acc[toWeightField] = convertFromKg(weightInKg, toWeightUnit);
+          } else {
+            acc[toWeightField] = toWeight;
+          }
+          acc[toWeightUnitField] = toWeightUnit;
 
           return acc;
         }, {}),
@@ -659,7 +631,7 @@ const AddEditProductForm = () => {
         const toWeightUnitField = `${toWeightField}Unit`;
 
         if (values[quantityField])
-          dynamicFields[quantityField] = parseInt(values[quantityField]);
+          dynamicFields[quantityField] = parseFloat(values[quantityField]);
         if (values[weightField])
           dynamicFields[weightField] = parseFloat(values[weightField]);
         if (values[weightUnitField])
