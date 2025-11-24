@@ -4,7 +4,16 @@ import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { fetchProducts, deleteProduct } from '../../features/productSlice';
 import { getAllCategories } from '../../features/categorySlice';
-import { HiEye, HiPencil, HiTrash, HiPlus, HiMagnifyingGlass, HiCube, HiTag, HiFunnel } from 'react-icons/hi2';
+import {
+  HiEye,
+  HiPencil,
+  HiTrash,
+  HiPlus,
+  HiMagnifyingGlass,
+  HiCube,
+  HiTag,
+  HiFunnel,
+} from 'react-icons/hi2';
 import { Pagination } from 'antd';
 
 const Product: React.FC = () => {
@@ -22,38 +31,50 @@ const Product: React.FC = () => {
   const { categories } = useSelector((state: any) => state.category);
 
   useEffect(() => {
-    dispatch(fetchProducts({
-      page: currentPage,
-      limit: pageSize,
-      search: searchTerm,
-      categoryId: selectedCategory || undefined,
-      subCategoryId: selectedSubCategory || undefined
-    }) as any);
+    dispatch(
+      fetchProducts({
+        page: currentPage,
+        limit: pageSize,
+        search: searchTerm,
+        categoryId: selectedCategory || undefined,
+        subCategoryId: selectedSubCategory || undefined,
+      }) as any
+    );
     dispatch(getAllCategories() as any);
-  }, [dispatch, currentPage, pageSize, searchTerm, selectedCategory, selectedSubCategory]);
-  
+  }, [
+    dispatch,
+    currentPage,
+    pageSize,
+    searchTerm,
+    selectedCategory,
+    selectedSubCategory,
+  ]);
+
   const debounceTimer = React.useRef(null);
 
+  const handleSearch = useCallback(
+    (value: string) => {
+      setSearchTerm(value);
+      setCurrentPage(1);
 
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
 
-  const handleSearch = useCallback((value: string) => {
-    setSearchTerm(value);
-    setCurrentPage(1);
-    
-    if (debounceTimer.current) {
-      clearTimeout(debounceTimer.current);
-    }
-    
-    debounceTimer.current = setTimeout(() => {
-      dispatch(fetchProducts({
-        page: 1,
-        limit: pageSize,
-        search: value,
-        categoryId: selectedCategory || undefined,
-        subCategoryId: selectedSubCategory || undefined
-      }) as any);
-    }, 500);
-  }, [dispatch, pageSize, selectedCategory, selectedSubCategory]);
+      debounceTimer.current = setTimeout(() => {
+        dispatch(
+          fetchProducts({
+            page: 1,
+            limit: pageSize,
+            search: value,
+            categoryId: selectedCategory || undefined,
+            subCategoryId: selectedSubCategory || undefined,
+          }) as any
+        );
+      }, 500);
+    },
+    [dispatch, pageSize, selectedCategory, selectedSubCategory]
+  );
 
   const handleDeleteClick = (id: string) => {
     setConfirmDelete(id);
@@ -67,15 +88,17 @@ const Product: React.FC = () => {
         deleteProduct(confirmDelete) as any
       ).unwrap();
       setConfirmDelete(null);
-      
-      dispatch(fetchProducts({
-        page: currentPage,
-        limit: pageSize,
-        search: searchTerm,
-        categoryId: selectedCategory || undefined,
-        subCategoryId: selectedSubCategory || undefined
-      }) as any);
-      
+
+      dispatch(
+        fetchProducts({
+          page: currentPage,
+          limit: pageSize,
+          search: searchTerm,
+          categoryId: selectedCategory || undefined,
+          subCategoryId: selectedSubCategory || undefined,
+        }) as any
+      );
+
       toast.success(result.message);
     } catch (error: any) {
       toast.error(error);
@@ -92,7 +115,9 @@ const Product: React.FC = () => {
 
   const availableSubCategories = useMemo(() => {
     if (!selectedCategory || !categories) return [];
-    const category = categories.find((cat: any) => cat.id.toString() === selectedCategory);
+    const category = categories.find(
+      (cat: any) => cat.id.toString() === selectedCategory
+    );
     return category?.subcategories || [];
   }, [selectedCategory, categories]);
 
@@ -100,14 +125,16 @@ const Product: React.FC = () => {
     setSelectedCategory(categoryId);
     setSelectedSubCategory('');
     setCurrentPage(1);
-    
-    dispatch(fetchProducts({
-      page: 1,
-      limit: pageSize,
-      search: searchTerm,
-      categoryId: categoryId || undefined,
-      subCategoryId: undefined
-    }) as any);
+
+    dispatch(
+      fetchProducts({
+        page: 1,
+        limit: pageSize,
+        search: searchTerm,
+        categoryId: categoryId || undefined,
+        subCategoryId: undefined,
+      }) as any
+    );
   };
   const getProductTypeLabel = (type: string) => {
     const types: Record<string, string> = {
@@ -159,7 +186,7 @@ const Product: React.FC = () => {
                   {/* <p className="text-slate-600 text-sm lg:text-base">Manage your product inventory</p> */}
                 </div>
               </div>
-              
+
               <div className="flex flex-col sm:flex-row gap-3">
                 <div className="flex flex-col sm:flex-row gap-3">
                   <div className="relative">
@@ -172,7 +199,7 @@ const Product: React.FC = () => {
                       onChange={(e) => handleSearch(e.target.value)}
                     />
                   </div>
-                  
+
                   <div className="relative">
                     <HiFunnel className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
                     <select
@@ -188,7 +215,7 @@ const Product: React.FC = () => {
                       ))}
                     </select>
                   </div>
-                  
+
                   {selectedCategory && availableSubCategories.length > 0 && (
                     <div className="relative">
                       <HiFunnel className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
@@ -197,14 +224,16 @@ const Product: React.FC = () => {
                         onChange={(e) => {
                           setSelectedSubCategory(e.target.value);
                           setCurrentPage(1);
-                          
-                          dispatch(fetchProducts({
-                            page: 1,
-                            limit: pageSize,
-                            search: searchTerm,
-                            categoryId: selectedCategory || undefined,
-                            subCategoryId: e.target.value || undefined
-                          }) as any);
+
+                          dispatch(
+                            fetchProducts({
+                              page: 1,
+                              limit: pageSize,
+                              search: searchTerm,
+                              categoryId: selectedCategory || undefined,
+                              subCategoryId: e.target.value || undefined,
+                            }) as any
+                          );
                         }}
                         className="pl-11 pr-4 py-3 w-full sm:w-48 rounded-lg border border-gray-300 bg-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-all duration-300 text-sm shadow-sm appearance-none"
                       >
@@ -218,7 +247,7 @@ const Product: React.FC = () => {
                     </div>
                   )}
                 </div>
-                
+
                 <Link
                   to="/add-product"
                   className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg flex-shrink-0"
@@ -237,8 +266,12 @@ const Product: React.FC = () => {
             <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-slate-600 flex items-center justify-center shadow-lg">
               <HiMagnifyingGlass className="w-8 h-8 text-white" />
             </div>
-            <h3 className="text-xl font-semibold text-slate-800 mb-2">No products found</h3>
-            <p className="text-slate-600 mb-6">Add your first product to get started</p>
+            <h3 className="text-xl font-semibold text-slate-800 mb-2">
+              No products found
+            </h3>
+            <p className="text-slate-600 mb-6">
+              Add your first product to get started
+            </p>
             {/* <Link
               to="/add-product"
               className="inline-flex items-center px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg"
@@ -286,26 +319,32 @@ const Product: React.FC = () => {
               </div>
               <div className="divide-y divide-white/20">
                 {products.map((product: any) => (
-                  <div key={product.id} className="p-4 hover:bg-white/50 transition-all duration-300">
+                  <div
+                    key={product.id}
+                    className="p-4 hover:bg-white/50 transition-all duration-300"
+                  >
                     <div className="grid grid-cols-7 gap-3 items-center">
                       {/* Product Name */}
                       <div className="flex items-center gap-2">
                         <HiCube className="w-4 h-4 text-slate-600 flex-shrink-0" />
-                        <span className="text-slate-800 font-medium truncate" title={product.name}>
+                        <span
+                          className="text-slate-800 font-medium truncate"
+                          title={product.name}
+                        >
                           {product.name}
                         </span>
                       </div>
-                      
+
                       {/* SKU */}
                       <div className="text-slate-700 text-sm">
                         {product.sku || '-'}
                       </div>
-                      
+
                       {/* Category */}
                       <div className="text-slate-700 text-sm">
                         {product.category?.name || '-'}
                       </div>
-                      
+
                       {/* Unit Weight */}
                       <div className="text-slate-700 text-sm">
                         {product.unitWeight && product.weightUnitType
@@ -314,19 +353,21 @@ const Product: React.FC = () => {
                             ? `${product.weight} ${product.weightUnit}`
                             : '-'}
                       </div>
-                      
+
                       {/* Total Weight */}
                       <div className="text-slate-700 text-sm">
                         {product.totalGrossWeight
                           ? `${product.totalGrossWeight} ${product.totalGrossWeightUnit}`
                           : '-'}
                       </div>
-                      
+
                       {/* Price */}
                       <div className="text-slate-700 text-sm">
-                        {product.price ? `${product.currency} ${product.price}` : '-'}
+                        {product.price
+                          ? `${product.currency} ${product.price}`
+                          : '-'}
                       </div>
-                      
+
                       {/* Actions */}
                       <div className="flex items-center justify-end space-x-2">
                         <Link
@@ -347,7 +388,7 @@ const Product: React.FC = () => {
                 ))}
               </div>
             </div>
-            
+
             {/* Tablet/Mobile Table View with Horizontal Scroll */}
             <div className="lg:hidden">
               <div className="overflow-x-auto">
@@ -387,26 +428,32 @@ const Product: React.FC = () => {
                   </div>
                   <div className="divide-y divide-white/20">
                     {products.map((product: any) => (
-                      <div key={product.id} className="p-4 hover:bg-white/50 transition-all duration-300">
+                      <div
+                        key={product.id}
+                        className="p-4 hover:bg-white/50 transition-all duration-300"
+                      >
                         <div className="grid grid-cols-7 gap-3 items-center">
                           {/* Product Name */}
                           <div className="flex items-center gap-2">
                             <HiCube className="w-4 h-4 text-slate-600 flex-shrink-0" />
-                            <span className="text-slate-800 font-medium truncate" title={product.name}>
+                            <span
+                              className="text-slate-800 font-medium truncate"
+                              title={product.name}
+                            >
                               {product.name}
                             </span>
                           </div>
-                          
+
                           {/* SKU */}
                           <div className="text-slate-700 text-sm">
                             {product.sku || '-'}
                           </div>
-                          
+
                           {/* Category */}
                           <div className="text-slate-700 text-sm">
                             {product.category?.name || '-'}
                           </div>
-                          
+
                           {/* Unit Weight */}
                           <div className="text-slate-700 text-sm">
                             {product.unitWeight && product.weightUnitType
@@ -415,19 +462,21 @@ const Product: React.FC = () => {
                                 ? `${product.weight} ${product.weightUnit}`
                                 : '-'}
                           </div>
-                          
+
                           {/* Total Weight */}
                           <div className="text-slate-700 text-sm">
                             {product.totalGrossWeight
                               ? `${product.totalGrossWeight} ${product.totalGrossWeightUnit}`
                               : '-'}
                           </div>
-                          
+
                           {/* Price */}
                           <div className="text-slate-700 text-sm">
-                            {product.price ? `${product.currency} ${product.price}` : '-'}
+                            {product.price
+                              ? `${product.currency} ${product.price}`
+                              : '-'}
                           </div>
-                          
+
                           {/* Actions */}
                           <div className="flex items-center justify-end space-x-2">
                             <Link
@@ -456,19 +505,21 @@ const Product: React.FC = () => {
         {/* Simple Pagination */}
         {pagination.total > 0 && (
           <div className="flex justify-center mt-6">
-            <Pagination 
-              current={currentPage} 
-              total={pagination.total} 
+            <Pagination
+              current={currentPage}
+              total={pagination.total}
               pageSize={pageSize}
               onChange={(page) => {
                 setCurrentPage(page);
-                dispatch(fetchProducts({
-                  page: page,
-                  limit: pageSize,
-                  search: searchTerm,
-                  categoryId: selectedCategory || undefined,
-                  subCategoryId: selectedSubCategory || undefined
-                }) as any);
+                dispatch(
+                  fetchProducts({
+                    page: page,
+                    limit: pageSize,
+                    search: searchTerm,
+                    categoryId: selectedCategory || undefined,
+                    subCategoryId: selectedSubCategory || undefined,
+                  }) as any
+                );
               }}
             />
           </div>
@@ -483,8 +534,13 @@ const Product: React.FC = () => {
               <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-red-600 flex items-center justify-center shadow-lg">
                 <HiTrash className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-slate-800 mb-2">Delete Product</h3>
-              <p className="text-slate-600">Are you sure you want to delete this product? This action cannot be undone.</p>
+              <h3 className="text-xl font-bold text-slate-800 mb-2">
+                Delete Product
+              </h3>
+              <p className="text-slate-600">
+                Are you sure you want to delete this product? This action cannot
+                be undone.
+              </p>
             </div>
             <div className="flex items-center justify-center space-x-3">
               <button

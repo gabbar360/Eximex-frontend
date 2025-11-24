@@ -10,21 +10,21 @@ import { useSelector } from 'react-redux';
 const LayoutContent: React.FC = () => {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
   const user = useSelector((state: any) => state.user.user);
-  const isProfileComplete = user?.companyId || user?.role?.name === 'SUPER_ADMIN';
-
+  const isProfileComplete =
+    user?.companyId || user?.role?.name === 'SUPER_ADMIN';
 
   return (
     <div className="min-h-screen xl:flex">
-      {!isProfileComplete && user?.role?.name !== 'SUPER_ADMIN' && <OnboardingModal onClose={() => {}} />}
+      {!isProfileComplete && user?.role?.name !== 'SUPER_ADMIN' && (
+        <OnboardingModal onClose={() => {}} />
+      )}
       <div>
         <Sidebar />
         <Backdrop />
       </div>
       <div
         className={`flex-1 transition-all duration-300 ease-in-out ${
-          isExpanded || isHovered 
-            ? 'lg:ml-[240px]' 
-            : 'lg:ml-[70px]'
+          isExpanded || isHovered ? 'lg:ml-[240px]' : 'lg:ml-[70px]'
         } ${isMobileOpen ? 'ml-0' : ''} relative`}
       >
         <AppHeader />

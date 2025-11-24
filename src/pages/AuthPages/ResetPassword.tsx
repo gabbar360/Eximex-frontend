@@ -4,7 +4,6 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { resetPassword } from '../../features/authSlice';
 import { toast } from 'react-toastify';
 
-
 const ResetPassword: React.FC = () => {
   const dispatch = useDispatch();
   const [formData, setFormData] = useState({
@@ -74,11 +73,13 @@ const ResetPassword: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const response = await dispatch(resetPassword({
-        token,
-        newPassword: formData.newPassword,
-        confirmPassword: formData.confirmPassword,
-      })).unwrap();
+      const response = await dispatch(
+        resetPassword({
+          token,
+          newPassword: formData.newPassword,
+          confirmPassword: formData.confirmPassword,
+        })
+      ).unwrap();
 
       toast.success(response.message || 'Password reset successfully!');
 

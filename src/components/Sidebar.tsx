@@ -1,7 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUserShield, faUsers, faSignOutAlt, faCogs, faKey } from '@fortawesome/free-solid-svg-icons';
+import {
+  faUserShield,
+  faUsers,
+  faSignOutAlt,
+  faCogs,
+  faKey,
+} from '@fortawesome/free-solid-svg-icons';
 import {
   MdDashboard,
   MdPeople,
@@ -36,7 +42,13 @@ type NavItem = {
   name: string;
   icon: React.ReactNode;
   path?: string;
-  subItems?: { name: string; path: string; icon?: React.ReactNode; pro?: boolean; new?: boolean }[];
+  subItems?: {
+    name: string;
+    path: string;
+    icon?: React.ReactNode;
+    pro?: boolean;
+    new?: boolean;
+  }[];
 };
 
 // Convert sidebar menu from backend to NavItem format
@@ -46,34 +58,34 @@ const convertSidebarMenuToNavItems = (sidebarMenu: any[]): NavItem[] => {
   }
 
   const iconMap: { [key: string]: React.ReactNode } = {
-    'dashboard': <MdDashboard className="w-4 h-4" />,
+    dashboard: <MdDashboard className="w-4 h-4" />,
     'customer-prospect': <MdPeople className="w-4 h-4" />,
-    'categories': <MdCategory className="w-4 h-4" />,
-    'products': <MdInventory className="w-4 h-4" />,
+    categories: <MdCategory className="w-4 h-4" />,
+    products: <MdInventory className="w-4 h-4" />,
     'proforma-invoices': <HiOutlineDocumentText className="w-4 h-4" />,
-    'orders': <MdShoppingCart className="w-4 h-4" />,
+    orders: <MdShoppingCart className="w-4 h-4" />,
     'purchase-orders': <HiOutlineClipboardDocumentList className="w-4 h-4" />,
     'staff-management': <MdSupervisorAccount className="w-4 h-4" />,
     'user-profile': <MdAccountCircle className="w-4 h-4" />,
     'all-orders': <HiOutlineShoppingBag className="w-4 h-4" />,
-    'shipments': <HiOutlineTruck className="w-4 h-4" />,
+    shipments: <HiOutlineTruck className="w-4 h-4" />,
     'packing-lists': <HiOutlineArchiveBox className="w-4 h-4" />,
     'vgm-documents': <HiOutlineScale className="w-4 h-4" />,
-    'reports': <HiOutlineChartBarSquare className="w-4 h-4" />
+    reports: <HiOutlineChartBarSquare className="w-4 h-4" />,
   };
 
-  return sidebarMenu.map(menu => {
+  return sidebarMenu.map((menu) => {
     const navItem: NavItem = {
       name: menu.name,
       icon: iconMap[menu.slug] || <MdDashboard className="w-4 h-4" />,
-      path: menu.path
+      path: menu.path,
     };
 
     if (menu.submenus && menu.submenus.length > 0) {
-      navItem.subItems = menu.submenus.map(submenu => ({
+      navItem.subItems = menu.submenus.map((submenu) => ({
         name: submenu.name,
         path: submenu.path || `/${menu.slug}/${submenu.slug}`,
-        icon: iconMap[submenu.slug] || <MdDashboard className="w-4 h-4" />
+        icon: iconMap[submenu.slug] || <MdDashboard className="w-4 h-4" />,
       }));
       delete navItem.path; // Remove path for parent menu if it has submenus
     }
@@ -109,7 +121,7 @@ const getNavItems = (userRole: string): NavItem[] => {
         icon: <FontAwesomeIcon icon={faKey} />,
         name: 'User Permissions',
         path: '/super-admin/permissions',
-      }
+      },
     ];
   }
 
@@ -137,20 +149,29 @@ const Sidebar: React.FC = () => {
   const userRole = currentUser?.role?.name || null;
   const isSuperAdmin = userRole === 'SUPER_ADMIN';
   const hasNoRole = !currentUser?.role;
-  
+
   // Use permission-based menu for regular users, static menu for super admin
-  const navItems = isSuperAdmin 
-    ? getNavItems(userRole) 
+  const navItems = isSuperAdmin
+    ? getNavItems(userRole)
     : convertSidebarMenuToNavItems(sidebarMenu || []);
 
-  const [openSubmenu, setOpenSubmenu] = useState<{ index: number } | null>(null);
-  const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>({});
+  const [openSubmenu, setOpenSubmenu] = useState<{ index: number } | null>(
+    null
+  );
+  const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>(
+    {}
+  );
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   // Fetch user sidebar menu for regular users
   useEffect(() => {
     if (currentUser && !isSuperAdmin) {
-      console.log('🔄 Fetching sidebar menu for user:', currentUser.id, 'Role:', userRole);
+      console.log(
+        '🔄 Fetching sidebar menu for user:',
+        currentUser.id,
+        'Role:',
+        userRole
+      );
       dispatch(fetchUserSidebarMenu())
         .then((result) => {
           console.log('✅ Sidebar menu fetch result:', result);
@@ -210,7 +231,7 @@ const Sidebar: React.FC = () => {
         }
       });
     }, 100);
-    
+
     return () => clearTimeout(timeoutId);
   }, [isExpanded, isHovered, isMobileOpen]);
 
@@ -307,11 +328,11 @@ const Sidebar: React.FC = () => {
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        
+
                         if (isMobileOpen) {
                           toggleMobileSidebar();
                         }
-                        
+
                         navigate(subItem.path);
                       }}
                       className={`menu-dropdown-item w-full text-left flex items-center gap-2 ${
@@ -321,11 +342,13 @@ const Sidebar: React.FC = () => {
                       }`}
                     >
                       {subItem.icon && (
-                        <span className={`${
-                          isActive(subItem.path)
-                            ? 'text-slate-600'
-                            : 'text-slate-400'
-                        }`}>
+                        <span
+                          className={`${
+                            isActive(subItem.path)
+                              ? 'text-slate-600'
+                              : 'text-slate-400'
+                          }`}
+                        >
                           {subItem.icon}
                         </span>
                       )}
@@ -369,7 +392,7 @@ const Sidebar: React.FC = () => {
     <>
       {/* Debug component removed - system working */}
       <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-slate-800 h-screen transition-all duration-300 ease-in-out z-40 border-r border-gray-200 
+        className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-slate-800 h-screen transition-all duration-300 ease-in-out z-40 border-r border-gray-200 
         ${
           isExpanded || isMobileOpen
             ? 'w-[240px]'
@@ -379,104 +402,107 @@ const Sidebar: React.FC = () => {
         }
         ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0`}
-      onMouseEnter={() => !isExpanded && setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* Logo Section */}
-      <div
-        className={`flex ${
-          !isExpanded && !isHovered ? 'lg:justify-center' : 'justify-center'
-        }`}
+        onMouseEnter={() => !isExpanded && setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
-        <Link to={isSuperAdmin ? "/dashboard" : "/"}>
-          {isExpanded || isHovered || isMobileOpen ? (
-            <img
-              src={
-                theme === 'dark'
-                  ? '/dark-theme-logo.png'
-                  : '/light-theme-logo.png'
-              }
-              alt="Exim-Ex Logo"
-              className="h-28 w-52"
-            />
-          ) : (
-            <img
-              src={
-                theme === 'dark'
-                  ? '/dark-theme-logo.png'
-                  : '/light-theme-logo.png'
-              }
-              alt="Exim-Ex Logo"
-              className="h-12 w-30"
-            />
-          )}
-        </Link>
-      </div>
-
-      {/* Navigation Menu */}
-      <div className="flex flex-col flex-1 overflow-y-auto duration-300 ease-linear no-scrollbar">
-        <nav className="mb-6">
-          <div className="flex flex-col gap-4">
-            <div>
-              <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-slate-500 ${
-                  !isExpanded && !isHovered
-                    ? 'lg:justify-center'
-                    : 'justify-start'
-                }`}
-              >
-                {isExpanded || isHovered || isMobileOpen ? (
-                  isSuperAdmin ? 'SUPER ADMIN MENU' : 'Menu'
-                ) : (
-                  <MdMoreHoriz className="w-4 h-4" />
-                )}
-              </h2>
-              {navItems.length > 0 ? (
-                renderMenuItems(navItems)
-              ) : !isSuperAdmin ? (
-                <div className="text-center py-4">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {isExpanded || isHovered || isMobileOpen 
-                      ? 'No menu permissions assigned. Contact your administrator.' 
-                      : '⚠️'
-                    }
-                  </p>
-                </div>
-              ) : (
-                renderMenuItems(navItems)
-              )}
-            </div>
-          </div>
-        </nav>
-      </div>
-
-      {/* Logout Section */}
-      <div className="py-4 border-t border-gray-200 dark:border-gray-800">
-        <button
-          onClick={handleLogout}
-          disabled={isLoading}
-          className={`w-full flex items-center gap-2 px-2 py-1 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 transition-colors ${
-            !isExpanded && !isHovered && !isMobileOpen
-              ? 'justify-center'
-              : 'justify-start'
-          } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+        {/* Logo Section */}
+        <div
+          className={`flex ${
+            !isExpanded && !isHovered ? 'lg:justify-center' : 'justify-center'
+          }`}
         >
-          {isSuperAdmin ? (
-            <FontAwesomeIcon
-              icon={faSignOutAlt}
-              className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`}
-            />
-          ) : (
-            <MdLogout
-              className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`}
-            />
-          )}
-          {(isExpanded || isHovered || isMobileOpen) && (
-            <span>{isLoading ? 'Signing out...' : 'Sign Out'}</span>
-          )}
-        </button>
-      </div>
-    </aside>
+          <Link to={isSuperAdmin ? '/dashboard' : '/'}>
+            {isExpanded || isHovered || isMobileOpen ? (
+              <img
+                src={
+                  theme === 'dark'
+                    ? '/dark-theme-logo.png'
+                    : '/light-theme-logo.png'
+                }
+                alt="Exim-Ex Logo"
+                className="h-28 w-52"
+              />
+            ) : (
+              <img
+                src={
+                  theme === 'dark'
+                    ? '/dark-theme-logo.png'
+                    : '/light-theme-logo.png'
+                }
+                alt="Exim-Ex Logo"
+                className="h-12 w-30"
+              />
+            )}
+          </Link>
+        </div>
+
+        {/* Navigation Menu */}
+        <div className="flex flex-col flex-1 overflow-y-auto duration-300 ease-linear no-scrollbar">
+          <nav className="mb-6">
+            <div className="flex flex-col gap-4">
+              <div>
+                <h2
+                  className={`mb-4 text-xs uppercase flex leading-[20px] text-slate-500 ${
+                    !isExpanded && !isHovered
+                      ? 'lg:justify-center'
+                      : 'justify-start'
+                  }`}
+                >
+                  {isExpanded || isHovered || isMobileOpen ? (
+                    isSuperAdmin ? (
+                      'SUPER ADMIN MENU'
+                    ) : (
+                      'Menu'
+                    )
+                  ) : (
+                    <MdMoreHoriz className="w-4 h-4" />
+                  )}
+                </h2>
+                {navItems.length > 0 ? (
+                  renderMenuItems(navItems)
+                ) : !isSuperAdmin ? (
+                  <div className="text-center py-4">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {isExpanded || isHovered || isMobileOpen
+                        ? 'No menu permissions assigned. Contact your administrator.'
+                        : '⚠️'}
+                    </p>
+                  </div>
+                ) : (
+                  renderMenuItems(navItems)
+                )}
+              </div>
+            </div>
+          </nav>
+        </div>
+
+        {/* Logout Section */}
+        <div className="py-4 border-t border-gray-200 dark:border-gray-800">
+          <button
+            onClick={handleLogout}
+            disabled={isLoading}
+            className={`w-full flex items-center gap-2 px-2 py-1 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 transition-colors ${
+              !isExpanded && !isHovered && !isMobileOpen
+                ? 'justify-center'
+                : 'justify-start'
+            } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {isSuperAdmin ? (
+              <FontAwesomeIcon
+                icon={faSignOutAlt}
+                className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`}
+              />
+            ) : (
+              <MdLogout
+                className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`}
+              />
+            )}
+            {(isExpanded || isHovered || isMobileOpen) && (
+              <span>{isLoading ? 'Signing out...' : 'Sign Out'}</span>
+            )}
+          </button>
+        </div>
+      </aside>
     </>
   );
 };

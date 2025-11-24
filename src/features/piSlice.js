@@ -248,7 +248,9 @@ const piSlice = createSlice({
       })
       .addCase(deletePiInvoice.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.piInvoices = state.piInvoices.filter((pi) => pi.id !== payload.id);
+        state.piInvoices = state.piInvoices.filter(
+          (pi) => pi.id !== payload.id
+        );
         state.successMessage = payload.message;
       })
       .addCase(deletePiInvoice.rejected, (state, { payload }) => {

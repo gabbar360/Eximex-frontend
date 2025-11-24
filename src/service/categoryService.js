@@ -8,46 +8,54 @@ export const getAllCategories = async (params = {}) => {
       page: parseInt(params.page) || 1,
       limit: parseInt(params.limit) || 10,
       search: params.search || '',
-      ...(params.status !== undefined && { status: params.status })
+      ...(params.status !== undefined && { status: params.status }),
     };
-    
-    const { data } = await axiosInstance.get('/get-all/categories', { params: queryParams });
+
+    const { data } = await axiosInstance.get('/get-all/categories', {
+      params: queryParams,
+    });
     return data;
   } catch (error) {
-    console.error('Category service error:', error.response?.data || error.message);
-    
+    console.error(
+      'Category service error:',
+      error.response?.data || error.message
+    );
+
     if (params.page || params.limit) {
       try {
-        const { data } = await axiosInstance.get('/get-all/categories?parentId=null');
+        const { data } = await axiosInstance.get(
+          '/get-all/categories?parentId=null'
+        );
         const categories = data.data || data;
-        
+
         let filteredCategories = categories;
         if (params.search) {
           const searchTerm = params.search.toLowerCase();
-          filteredCategories = categories.filter(category => 
-            category.name?.toLowerCase().includes(searchTerm) ||
-            category.description?.toLowerCase().includes(searchTerm)
+          filteredCategories = categories.filter(
+            (category) =>
+              category.name?.toLowerCase().includes(searchTerm) ||
+              category.description?.toLowerCase().includes(searchTerm)
           );
         }
-        
+
         const page = parseInt(params.page) || 1;
         const limit = parseInt(params.limit) || 10;
         const start = (page - 1) * limit;
         const paginatedData = filteredCategories.slice(start, start + limit);
-        
+
         return {
           data: paginatedData,
           pagination: {
             page,
             limit,
-            total: filteredCategories.length
-          }
+            total: filteredCategories.length,
+          },
         };
       } catch (fallbackError) {
         throw handleAxiosError(fallbackError, 'category', 'fetch');
       }
     }
-    
+
     throw handleAxiosError(error, 'category', 'fetch');
   }
 };

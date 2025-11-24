@@ -3,11 +3,15 @@ import { fetchPiInvoices, updatePiAmount } from '../../features/piSlice';
 import { fetchOrders, createOrder } from '../../features/orderSlice';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HiArrowLeft, HiCheckCircle, HiDocumentText, HiCurrencyDollar } from 'react-icons/hi2';
+import {
+  HiArrowLeft,
+  HiCheckCircle,
+  HiDocumentText,
+  HiCurrencyDollar,
+} from 'react-icons/hi2';
 import { toast } from 'react-toastify';
 import PageBreadCrumb from '../../components/common/PageBreadCrumb';
 import PageMeta from '../../components/common/PageMeta';
-
 
 import DatePicker from '../../components/form/DatePicker';
 
@@ -37,15 +41,17 @@ const AddOrder = () => {
         console.log('PI Response:', piResponse);
         console.log('Orders Response:', ordersResponse);
 
-        const allPIs = piResponse?.data?.piInvoices || piResponse?.piInvoices || [];
-        const existingOrders = ordersResponse?.data?.orders || ordersResponse?.orders || [];
+        const allPIs =
+          piResponse?.data?.piInvoices || piResponse?.piInvoices || [];
+        const existingOrders =
+          ordersResponse?.data?.orders || ordersResponse?.orders || [];
 
         console.log('All PIs:', allPIs);
         console.log('Existing Orders:', existingOrders);
 
         // Filter for pending PIs that don't have orders
         const availablePIs = allPIs.filter(
-          (pi) => 
+          (pi) =>
             pi.status === 'pending' &&
             !existingOrders.some((order) => order.piInvoiceId === pi.id)
         );
@@ -148,13 +154,15 @@ const AddOrder = () => {
 
         // Update PI total amount in backend using Redux
         try {
-          await dispatch(updatePiAmount({
-            id: selectedPI.id,
-            amountData: {
-              totalAmount: updatedTotalAmount,
-              advanceAmount: advancePayment,
-            }
-          })).unwrap();
+          await dispatch(
+            updatePiAmount({
+              id: selectedPI.id,
+              amountData: {
+                totalAmount: updatedTotalAmount,
+                advanceAmount: advancePayment,
+              },
+            })
+          ).unwrap();
           console.log('PI amount updated successfully');
         } catch (error) {
           console.error('Failed to update PI amount:', error);
@@ -200,7 +208,6 @@ const AddOrder = () => {
         {/* Form Container */}
         <div className="bg-white rounded-xl shadow-xl border border-slate-200">
           <div className="p-8">
-
             <form onSubmit={handleSubmit} className="space-y-8">
               {/* PI Selection Section */}
               <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
@@ -218,28 +225,30 @@ const AddOrder = () => {
                     value={selectedPI?.id || ''}
                     onChange={(e) => {
                       const selectedId = parseInt(e.target.value);
-                      const selected = piList.find((pi) => pi.id === selectedId);
+                      const selected = piList.find(
+                        (pi) => pi.id === selectedId
+                      );
                       if (selected) handlePISelect(selected);
                     }}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
                     required
                   >
-                <option value="">Choose a PI Invoice...</option>
-                {piLoading ? (
-                  <option disabled>Loading PI invoices...</option>
-                ) : Array.isArray(piList) && piList.length > 0 ? (
-                  piList.map((pi) => (
-                    <option key={pi.id} value={pi.id}>
-                      {pi.piNumber || pi.invoiceNumber} -{' '}
-                      {pi.party?.companyName || pi.customerName} - $
-                      {(pi.totalAmount || 0).toLocaleString()}
-                    </option>
-                  ))
-                ) : (
-                  <option disabled>No PI invoices available</option>
-                )}
-              </select>
-            </div>
+                    <option value="">Choose a PI Invoice...</option>
+                    {piLoading ? (
+                      <option disabled>Loading PI invoices...</option>
+                    ) : Array.isArray(piList) && piList.length > 0 ? (
+                      piList.map((pi) => (
+                        <option key={pi.id} value={pi.id}>
+                          {pi.piNumber || pi.invoiceNumber} -{' '}
+                          {pi.party?.companyName || pi.customerName} - $
+                          {(pi.totalAmount || 0).toLocaleString()}
+                        </option>
+                      ))
+                    ) : (
+                      <option disabled>No PI invoices available</option>
+                    )}
+                  </select>
+                </div>
 
                 {/* Selected PI Details */}
                 {selectedPI && (
@@ -249,25 +258,20 @@ const AddOrder = () => {
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
                       <div>
-                        <span className="text-slate-600">
-                          PI Number:
-                        </span>
+                        <span className="text-slate-600">PI Number:</span>
                         <p className="font-medium text-slate-800">
                           {selectedPI.piNumber || selectedPI.invoiceNumber}
                         </p>
                       </div>
                       <div>
-                        <span className="text-slate-600">
-                          Company:
-                        </span>
+                        <span className="text-slate-600">Company:</span>
                         <p className="font-medium text-slate-800">
-                          {selectedPI.party?.companyName || selectedPI.customerName}
+                          {selectedPI.party?.companyName ||
+                            selectedPI.customerName}
                         </p>
                       </div>
                       <div>
-                        <span className="text-slate-600">
-                          Total Amount:
-                        </span>
+                        <span className="text-slate-600">Total Amount:</span>
                         <p className="font-medium text-slate-800">
                           ${(selectedPI.totalAmount || 0).toLocaleString()}
                         </p>
@@ -288,7 +292,7 @@ const AddOrder = () => {
                   {/* Advance Amount */}
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Advance Amount 
+                      Advance Amount
                     </label>
                     <input
                       type="number"

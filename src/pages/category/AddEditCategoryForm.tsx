@@ -15,10 +15,10 @@ import { useDispatch } from 'react-redux';
 import PackagingDetailsSection from '../../components/form/PackagingDetailsSection';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { 
-  HiArrowLeft, 
-  HiCheckCircle, 
-  HiPlus, 
+import {
+  HiArrowLeft,
+  HiCheckCircle,
+  HiPlus,
   HiTrash,
   HiSparkles,
   HiClipboardDocumentList,
@@ -29,26 +29,23 @@ import {
   HiCog6Tooth,
   HiShieldCheck,
   HiAcademicCap,
-  HiChartBarSquare
+  HiChartBarSquare,
 } from 'react-icons/hi2';
-import { 
-  MdCategory, 
-  MdInventory, 
-  MdDescription, 
+import {
+  MdCategory,
+  MdInventory,
+  MdDescription,
   MdQrCode2,
-  MdPrecisionManufacturing
+  MdPrecisionManufacturing,
 } from 'react-icons/md';
-import { 
-  FaBoxes, 
-  FaCubes, 
-  FaLayerGroup, 
+import {
+  FaBoxes,
+  FaCubes,
+  FaLayerGroup,
   FaIndustry,
-  FaBarcode
+  FaBarcode,
 } from 'react-icons/fa';
-import { 
-  BiCategory, 
-  BiPackage 
-} from 'react-icons/bi';
+import { BiCategory, BiPackage } from 'react-icons/bi';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
 
@@ -175,13 +172,7 @@ const UnitDropdown: React.FC<{
         className="w-full px-4 py-3 border border-white/50 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all duration-300 shadow-sm text-left"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <span
-          className={
-            selectedUnit
-              ? 'text-slate-800'
-              : 'text-slate-400'
-          }
-        >
+        <span className={selectedUnit ? 'text-slate-800' : 'text-slate-400'}>
           {selectedUnit ? selectedUnit.label : placeholder}
         </span>
         <svg
@@ -265,7 +256,7 @@ const AddEditCategoryForm: React.FC = () => {
         // Filter out categories that could create circular references
         const filteredCategories = isEditMode
           ? (data.data || data).filter((cat: any) => cat.id !== id)
-          : (data.data || data);
+          : data.data || data;
         setParentCategories(filteredCategories || []);
       } catch (err: any) {
         console.error('Failed to fetch parent categories:', err);
@@ -319,7 +310,9 @@ const AddEditCategoryForm: React.FC = () => {
           } else {
             // Fallback to separate API call if not included in category data
             try {
-              const packagingResponse = await dispatch(fetchPackagingHierarchy(id)).unwrap();
+              const packagingResponse = await dispatch(
+                fetchPackagingHierarchy(id)
+              ).unwrap();
               if (
                 packagingResponse.success &&
                 packagingResponse.data.length > 0
@@ -402,7 +395,9 @@ const AddEditCategoryForm: React.FC = () => {
         };
 
         console.log('Updating category:', categoryData);
-        const result = await dispatch(updateCategory({ id, category: categoryData })).unwrap();
+        const result = await dispatch(
+          updateCategory({ id, category: categoryData })
+        ).unwrap();
 
         toast.success(result.message);
 
@@ -518,7 +513,6 @@ const AddEditCategoryForm: React.FC = () => {
 
         {/* Form */}
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 lg:p-8">
-
           <Formik
             enableReinitialize
             initialValues={{
@@ -573,7 +567,9 @@ const AddEditCategoryForm: React.FC = () => {
                       className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     />
                     {touched.name && errors.name && (
-                      <div className="text-sm text-red-500 mt-1">{errors.name}</div>
+                      <div className="text-sm text-red-500 mt-1">
+                        {errors.name}
+                      </div>
                     )}
                   </div>
 
@@ -593,7 +589,9 @@ const AddEditCategoryForm: React.FC = () => {
                       className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     />
                     {touched.hsn_code && errors.hsn_code && (
-                      <div className="text-sm text-red-500 mt-1">{errors.hsn_code}</div>
+                      <div className="text-sm text-red-500 mt-1">
+                        {errors.hsn_code}
+                      </div>
                     )}
                   </div>
 
@@ -611,7 +609,9 @@ const AddEditCategoryForm: React.FC = () => {
                       placeholder="Select Primary Unit"
                     />
                     {touched.primary_unit && errors.primary_unit && (
-                      <div className="text-sm text-red-500 mt-1">{errors.primary_unit}</div>
+                      <div className="text-sm text-red-500 mt-1">
+                        {errors.primary_unit}
+                      </div>
                     )}
                   </div>
 
@@ -625,11 +625,15 @@ const AddEditCategoryForm: React.FC = () => {
                       id="secondary_unit"
                       name="secondary_unit"
                       value={values.secondary_unit || ''}
-                      onChange={(value) => setFieldValue('secondary_unit', value)}
+                      onChange={(value) =>
+                        setFieldValue('secondary_unit', value)
+                      }
                       placeholder="Select Secondary Unit"
                     />
                     {touched.secondary_unit && errors.secondary_unit && (
-                      <div className="text-sm text-red-500 mt-1">{errors.secondary_unit}</div>
+                      <div className="text-sm text-red-500 mt-1">
+                        {errors.secondary_unit}
+                      </div>
                     )}
                   </div>
 
@@ -649,7 +653,9 @@ const AddEditCategoryForm: React.FC = () => {
                       className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     />
                     {touched.desc && errors.desc && (
-                      <div className="text-sm text-red-500 mt-1">{errors.desc}</div>
+                      <div className="text-sm text-red-500 mt-1">
+                        {errors.desc}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -700,7 +706,7 @@ const AddEditCategoryForm: React.FC = () => {
                               className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                             />
                           </div>
-                          
+
                           <div>
                             <label className="block text-sm font-semibold text-slate-700 mb-2">
                               HSN Code
@@ -709,9 +715,13 @@ const AddEditCategoryForm: React.FC = () => {
                               <label className="flex items-center space-x-2">
                                 <input
                                   type="checkbox"
-                                  checked={subcategory.useParentHsnCode || false}
+                                  checked={
+                                    subcategory.useParentHsnCode || false
+                                  }
                                   onChange={(e) => {
-                                    const updatedSubcategories = [...subcategories];
+                                    const updatedSubcategories = [
+                                      ...subcategories,
+                                    ];
                                     updatedSubcategories[index] = {
                                       ...updatedSubcategories[index],
                                       useParentHsnCode: e.target.checked,
@@ -720,7 +730,9 @@ const AddEditCategoryForm: React.FC = () => {
                                   }}
                                   className="w-4 h-4 rounded border-2 border-gray-300 text-slate-600 focus:ring-slate-200"
                                 />
-                                <span className="text-sm text-slate-600">Use parent's HSN</span>
+                                <span className="text-sm text-slate-600">
+                                  Use parent's HSN
+                                </span>
                               </label>
                               {!subcategory.useParentHsnCode && (
                                 <input
@@ -730,7 +742,9 @@ const AddEditCategoryForm: React.FC = () => {
                                   value={subcategory.hsn_code}
                                   onChange={(e) => {
                                     const { name, value } = e.target;
-                                    const updatedSubcategories = [...subcategories];
+                                    const updatedSubcategories = [
+                                      ...subcategories,
+                                    ];
                                     updatedSubcategories[index] = {
                                       ...updatedSubcategories[index],
                                       [name]: value,
@@ -742,7 +756,7 @@ const AddEditCategoryForm: React.FC = () => {
                               )}
                             </div>
                           </div>
-                          
+
                           <div>
                             <label className="block text-sm font-semibold text-slate-700 mb-2">
                               Description
@@ -755,7 +769,9 @@ const AddEditCategoryForm: React.FC = () => {
                                 value={subcategory.desc}
                                 onChange={(e) => {
                                   const { name, value } = e.target;
-                                  const updatedSubcategories = [...subcategories];
+                                  const updatedSubcategories = [
+                                    ...subcategories,
+                                  ];
                                   updatedSubcategories[index] = {
                                     ...updatedSubcategories[index],
                                     [name]: value,

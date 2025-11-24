@@ -7,17 +7,19 @@ interface UserData {
   name: string;
   email: string;
   mobileNum?: string;
-  role: {
-    id: number;
-    name: string;
-    displayName: string;
-    description?: string;
-    permissions?: any;
-    isActive: boolean;
-    isSystem: boolean;
-    createdAt: string;
-    updatedAt: string;
-  } | string;
+  role:
+    | {
+        id: number;
+        name: string;
+        displayName: string;
+        description?: string;
+        permissions?: any;
+        isActive: boolean;
+        isSystem: boolean;
+        createdAt: string;
+        updatedAt: string;
+      }
+    | string;
   status: string;
   companyId?: number;
   company?: {
@@ -99,7 +101,7 @@ export default function UserInfoCard({
             />
           </div>
         </div>
-        
+
         <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
           <button
             onClick={onCancel}
@@ -154,7 +156,9 @@ export default function UserInfoCard({
           Role
         </p>
         <p className="text-lg font-bold text-slate-800">
-          {typeof userData?.role === 'object' && userData.role ? userData.role.displayName : userData?.role || 'N/A'}
+          {typeof userData?.role === 'object' && userData.role
+            ? userData.role.displayName
+            : userData?.role || 'N/A'}
         </p>
       </div>
 

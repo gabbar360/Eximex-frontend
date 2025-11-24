@@ -109,7 +109,7 @@
 #           script: |
 #             # Create temp directory
 #             mkdir -p /tmp/deploy
-            
+
 #       - name: Copy files to server
 #         uses: appleboy/scp-action@v0.1.7
 #         with:
@@ -121,7 +121,7 @@
 #           target: '/tmp/deploy/'
 #           strip_components: 1
 #           overwrite: true
-          
+
 #       - name: Move files to final location
 #         uses: appleboy/ssh-action@v1.0.3
 #         with:

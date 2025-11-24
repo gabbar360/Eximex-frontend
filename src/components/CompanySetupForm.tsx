@@ -6,7 +6,14 @@ import { Spin } from 'antd';
 import { createCompany } from '../features/companySlice';
 import { getCurrentUser } from '../features/authSlice';
 import { setUser } from '../features/userSlice';
-import { FaCheck, FaChevronRight, FaChevronLeft, FaBuilding, FaAddressCard, FaUniversity } from 'react-icons/fa';
+import {
+  FaCheck,
+  FaChevronRight,
+  FaChevronLeft,
+  FaBuilding,
+  FaAddressCard,
+  FaUniversity,
+} from 'react-icons/fa';
 
 interface CompanyFormData {
   name: string;
@@ -30,15 +37,25 @@ interface CompanyFormData {
 }
 
 const steps = [
-  { id: 1, title: 'Company & Contact Info', description: 'Basic details & contact', icon: FaBuilding },
-  { id: 2, title: 'Banking Info', description: 'Financial setup', icon: FaUniversity }
+  {
+    id: 1,
+    title: 'Company & Contact Info',
+    description: 'Basic details & contact',
+    icon: FaBuilding,
+  },
+  {
+    id: 2,
+    title: 'Banking Info',
+    description: 'Financial setup',
+    icon: FaUniversity,
+  },
 ];
 
 export default function CompanySetupForm() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, error } = useSelector((state: any) => state.company || {});
-  
+
   const [currentStep, setCurrentStep] = useState(1);
   const [form, setForm] = useState<CompanyFormData>({
     name: '',
@@ -61,9 +78,11 @@ export default function CompanySetupForm() {
     swift_code: '',
   });
 
-  const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value, type, files } = e.target as HTMLInputElement;
 
     if (type === 'file' && files) {
@@ -91,17 +110,17 @@ export default function CompanySetupForm() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
     if (currentStep < 2) {
       nextStep();
       return;
     }
-    
+
     setFieldErrors({});
 
     // Client-side validation
-    const errors: {[key: string]: string} = {};
-    
+    const errors: { [key: string]: string } = {};
+
     if (!form.name.trim()) errors.name = 'Company name is required';
     if (!form.email.trim()) errors.email = 'Email is required';
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
@@ -110,10 +129,13 @@ export default function CompanySetupForm() {
     if (!form.address.trim()) errors.address = 'Company address is required';
     if (!form.gst_number.trim()) errors.gst_number = 'GST number is required';
     if (!form.iec_number.trim()) errors.iec_number = 'IEC number is required';
-    if (!form.default_currency) errors.default_currency = 'Please select a currency';
+    if (!form.default_currency)
+      errors.default_currency = 'Please select a currency';
     if (!form.bank_name.trim()) errors.bank_name = 'Bank name is required';
-    if (!form.account_number.trim()) errors.account_number = 'Account number is required';
-    if (!form.bank_address.trim()) errors.bank_address = 'Bank address is required';
+    if (!form.account_number.trim())
+      errors.account_number = 'Account number is required';
+    if (!form.bank_address.trim())
+      errors.bank_address = 'Bank address is required';
     if (!form.ifsc_code.trim()) errors.ifsc_code = 'IFSC code is required';
 
     if (Object.keys(errors).length > 0) {
@@ -125,10 +147,10 @@ export default function CompanySetupForm() {
     try {
       const formData = new FormData();
       const excludedFields = ['industry', 'website'];
-      
+
       Object.entries(form).forEach(([key, value]) => {
         if (excludedFields.includes(key)) return;
-        
+
         if (key === 'logo' && value) {
           formData.append(key, value);
         } else if (Array.isArray(value)) {
@@ -139,7 +161,7 @@ export default function CompanySetupForm() {
       });
 
       const resultAction = await dispatch(createCompany(formData)).unwrap();
-      
+
       // Refresh user data to include the new company
       try {
         const userResponse = await dispatch(getCurrentUser()).unwrap();
@@ -149,17 +171,20 @@ export default function CompanySetupForm() {
       } catch (userError) {
         console.warn('Failed to refresh user data:', userError);
       }
-      
+
       toast.success('Company created successfully!');
       navigate('/dashboard');
     } catch (error: any) {
       console.error('API Error:', error);
-      
+
       if (error?.response?.data?.errors) {
         setFieldErrors(error.response.data.errors);
         toast.error('Please check the highlighted fields');
       } else {
-        const errorMessage = error?.response?.data?.message || error?.message || 'Failed to create company. Please try again.';
+        const errorMessage =
+          error?.response?.data?.message ||
+          error?.message ||
+          'Failed to create company. Please try again.';
         toast.error(errorMessage);
       }
     }
@@ -176,7 +201,9 @@ export default function CompanySetupForm() {
               <div className="space-y-2">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
                   <div className="group">
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Company Name *</label>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Company Name *
+                    </label>
                     <input
                       name="name"
                       value={form.name}
@@ -188,12 +215,16 @@ export default function CompanySetupForm() {
                       required
                     />
                     {fieldErrors.name && (
-                      <p className="text-red-500 text-xs mt-1">{fieldErrors.name}</p>
+                      <p className="text-red-500 text-xs mt-1">
+                        {fieldErrors.name}
+                      </p>
                     )}
                   </div>
-                  
+
                   <div className="group">
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Company Logo</label>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Company Logo
+                    </label>
                     <input
                       type="file"
                       name="logo"
@@ -208,11 +239,15 @@ export default function CompanySetupForm() {
 
             {/* Contact Details Section */}
             <div className="bg-gray-50 p-2 lg:p-3 rounded-lg flex-1">
-              <h3 className="text-xs lg:text-sm font-semibold text-gray-700 mb-2">Contact Information</h3>
+              <h3 className="text-xs lg:text-sm font-semibold text-gray-700 mb-2">
+                Contact Information
+              </h3>
               <div className="space-y-2">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
                   <div className="group">
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Email Address *</label>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Email Address *
+                    </label>
                     <input
                       name="email"
                       type="email"
@@ -225,12 +260,16 @@ export default function CompanySetupForm() {
                       required
                     />
                     {fieldErrors.email && (
-                      <p className="text-red-500 text-xs mt-1">{fieldErrors.email}</p>
+                      <p className="text-red-500 text-xs mt-1">
+                        {fieldErrors.email}
+                      </p>
                     )}
                   </div>
-                  
+
                   <div className="group">
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Phone Number</label>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Phone Number
+                    </label>
                     <input
                       name="phone_no"
                       value={form.phone_no}
@@ -242,7 +281,9 @@ export default function CompanySetupForm() {
                 </div>
 
                 <div className="group">
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Company Address *</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Company Address *
+                  </label>
                   <textarea
                     name="address"
                     value={form.address}
@@ -256,7 +297,9 @@ export default function CompanySetupForm() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                   <div className="group">
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">GST Number *</label>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      GST Number *
+                    </label>
                     <input
                       name="gst_number"
                       value={form.gst_number}
@@ -266,9 +309,11 @@ export default function CompanySetupForm() {
                       required
                     />
                   </div>
-                  
+
                   <div className="group">
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">IEC Number *</label>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      IEC Number *
+                    </label>
                     <input
                       name="iec_number"
                       value={form.iec_number}
@@ -280,7 +325,9 @@ export default function CompanySetupForm() {
                   </div>
 
                   <div className="group">
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Default Currency *</label>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Default Currency *
+                    </label>
                     <select
                       name="default_currency"
                       value={form.default_currency}
@@ -309,42 +356,56 @@ export default function CompanySetupForm() {
               <div className="space-y-2">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
                   <div className="group">
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Bank Name *</label>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Bank Name *
+                    </label>
                     <input
                       name="bank_name"
                       value={form.bank_name}
                       onChange={handleChange}
                       placeholder="Enter bank name"
                       className={`w-full px-2 py-1.5 lg:px-3 lg:py-2 border-2 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 text-xs lg:text-sm ${
-                        fieldErrors.bank_name ? 'border-red-500' : 'border-gray-200'
+                        fieldErrors.bank_name
+                          ? 'border-red-500'
+                          : 'border-gray-200'
                       }`}
                       required
                     />
                     {fieldErrors.bank_name && (
-                      <p className="text-red-500 text-xs mt-1">{fieldErrors.bank_name}</p>
+                      <p className="text-red-500 text-xs mt-1">
+                        {fieldErrors.bank_name}
+                      </p>
                     )}
                   </div>
 
                   <div className="group">
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Account Number *</label>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Account Number *
+                    </label>
                     <input
                       name="account_number"
                       value={form.account_number}
                       onChange={handleChange}
                       placeholder="Enter account number"
                       className={`w-full px-2 py-1.5 lg:px-3 lg:py-2 border-2 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 text-xs lg:text-sm ${
-                        fieldErrors.account_number ? 'border-red-500' : 'border-gray-200'
+                        fieldErrors.account_number
+                          ? 'border-red-500'
+                          : 'border-gray-200'
                       }`}
                       required
                     />
                     {fieldErrors.account_number && (
-                      <p className="text-red-500 text-xs mt-1">{fieldErrors.account_number}</p>
+                      <p className="text-red-500 text-xs mt-1">
+                        {fieldErrors.account_number}
+                      </p>
                     )}
                   </div>
                 </div>
 
                 <div className="group">
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Bank Address *</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Bank Address *
+                  </label>
                   <textarea
                     name="bank_address"
                     value={form.bank_address}
@@ -352,35 +413,47 @@ export default function CompanySetupForm() {
                     placeholder="Enter bank address"
                     rows={2}
                     className={`w-full px-2 py-1.5 lg:px-3 lg:py-2 border-2 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 resize-none text-xs lg:text-sm ${
-                      fieldErrors.bank_address ? 'border-red-500' : 'border-gray-200'
+                      fieldErrors.bank_address
+                        ? 'border-red-500'
+                        : 'border-gray-200'
                     }`}
                     required
                   />
                   {fieldErrors.bank_address && (
-                    <p className="text-red-500 text-xs mt-1">{fieldErrors.bank_address}</p>
+                    <p className="text-red-500 text-xs mt-1">
+                      {fieldErrors.bank_address}
+                    </p>
                   )}
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
                   <div className="group">
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">IFSC Code *</label>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      IFSC Code *
+                    </label>
                     <input
                       name="ifsc_code"
                       value={form.ifsc_code}
                       onChange={handleChange}
                       placeholder="SBIN0001234"
                       className={`w-full px-2 py-1.5 lg:px-3 lg:py-2 border-2 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 text-xs lg:text-sm ${
-                        fieldErrors.ifsc_code ? 'border-red-500' : 'border-gray-200'
+                        fieldErrors.ifsc_code
+                          ? 'border-red-500'
+                          : 'border-gray-200'
                       }`}
                       required
                     />
                     {fieldErrors.ifsc_code && (
-                      <p className="text-red-500 text-xs mt-1">{fieldErrors.ifsc_code}</p>
+                      <p className="text-red-500 text-xs mt-1">
+                        {fieldErrors.ifsc_code}
+                      </p>
                     )}
                   </div>
-                  
+
                   <div className="group">
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">SWIFT Code</label>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      SWIFT Code
+                    </label>
                     <input
                       name="swift_code"
                       value={form.swift_code}
@@ -403,51 +476,70 @@ export default function CompanySetupForm() {
   return (
     <div className="bg-white/95 backdrop-blur-xl rounded-xl lg:rounded-2xl shadow-2xl border border-white/20 overflow-hidden h-full flex flex-col">
       {/* Progress Header - Compact */}
-      <div className="bg-white px-3 py-2 lg:p-4 border-b-2 flex-shrink-0" style={{borderColor: '#86a0b2'}}>
+      <div
+        className="bg-white px-3 py-2 lg:p-4 border-b-2 flex-shrink-0"
+        style={{ borderColor: '#86a0b2' }}
+      >
         <div className="flex items-center justify-center mb-2">
           {steps.map((step, index) => {
             const IconComponent = step.icon;
             return (
               <div key={step.id} className="flex items-center">
-                <div className={`relative flex items-center justify-center w-6 h-6 lg:w-8 lg:h-8 rounded-lg transition-all duration-300 ${
-                  currentStep >= step.id 
-                    ? 'shadow-lg scale-110' 
-                    : 'bg-gray-100'
-                }`} style={{
-                  backgroundColor: currentStep >= step.id ? '#86a0b2' : undefined,
-                  color: currentStep >= step.id ? 'white' : '#4a5568'
-                }}>
+                <div
+                  className={`relative flex items-center justify-center w-6 h-6 lg:w-8 lg:h-8 rounded-lg transition-all duration-300 ${
+                    currentStep >= step.id
+                      ? 'shadow-lg scale-110'
+                      : 'bg-gray-100'
+                  }`}
+                  style={{
+                    backgroundColor:
+                      currentStep >= step.id ? '#86a0b2' : undefined,
+                    color: currentStep >= step.id ? 'white' : '#4a5568',
+                  }}
+                >
                   {currentStep > step.id ? (
-                    <FaCheck className="w-3 h-3 lg:w-4 lg:h-4" style={{color: '#4a5568'}} />
+                    <FaCheck
+                      className="w-3 h-3 lg:w-4 lg:h-4"
+                      style={{ color: '#4a5568' }}
+                    />
                   ) : (
-                    <IconComponent className="w-3 h-3 lg:w-4 lg:h-4" style={{color: '#4a5568'}} />
+                    <IconComponent
+                      className="w-3 h-3 lg:w-4 lg:h-4"
+                      style={{ color: '#4a5568' }}
+                    />
                   )}
                 </div>
                 {index < steps.length - 1 && (
-                  <div className={`w-6 lg:w-8 h-0.5 mx-1 lg:mx-2 rounded-full transition-all duration-500`} style={{
-                    backgroundColor: currentStep > step.id ? '#86a0b2' : '#e5e7eb'
-                  }} />
+                  <div
+                    className={`w-6 lg:w-8 h-0.5 mx-1 lg:mx-2 rounded-full transition-all duration-500`}
+                    style={{
+                      backgroundColor:
+                        currentStep > step.id ? '#86a0b2' : '#e5e7eb',
+                    }}
+                  />
                 )}
               </div>
             );
           })}
         </div>
-        
+
         <div className="text-center">
-          <h2 className="text-sm lg:text-lg font-bold mb-1" style={{color: '#86a0b2'}}>
+          <h2
+            className="text-sm lg:text-lg font-bold mb-1"
+            style={{ color: '#86a0b2' }}
+          >
             {steps[currentStep - 1].title}
           </h2>
           <p className="text-gray-600 text-xs lg:text-sm hidden sm:block">
-            Step {currentStep} of {steps.length} • {steps[currentStep - 1].description}
+            Step {currentStep} of {steps.length} •{' '}
+            {steps[currentStep - 1].description}
           </p>
         </div>
       </div>
 
       {/* Form Content - Flexible height */}
       <div className="flex-1 overflow-y-auto px-2 py-1 sm:p-3 lg:p-4 min-h-0">
-        <div className="h-full">
-          {renderStep()}
-        </div>
+        <div className="h-full">{renderStep()}</div>
       </div>
 
       {/* Navigation Buttons - Compact */}
@@ -459,7 +551,10 @@ export default function CompanySetupForm() {
             disabled={currentStep === 1}
             className="flex items-center justify-center px-3 py-1.5 lg:px-4 lg:py-2 text-gray-900 bg-gray-300 rounded-lg hover:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-xs lg:text-sm"
           >
-            <FaChevronLeft className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2" style={{color: '#4a5568'}} />
+            <FaChevronLeft
+              className="w-3 h-3 lg:w-4 lg:h-4 mr-1 lg:mr-2"
+              style={{ color: '#4a5568' }}
+            />
             Previous
           </button>
 
@@ -467,7 +562,11 @@ export default function CompanySetupForm() {
             type="button"
             disabled={loading}
             className="flex items-center justify-center px-4 py-1.5 lg:px-6 lg:py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:shadow-lg disabled:opacity-50 transition-all duration-200 text-xs lg:text-sm"
-            onClick={currentStep < 2 ? nextStep : () => handleSubmit({ preventDefault: () => {} } as any)}
+            onClick={
+              currentStep < 2
+                ? nextStep
+                : () => handleSubmit({ preventDefault: () => {} } as any)
+            }
           >
             {loading ? (
               <>

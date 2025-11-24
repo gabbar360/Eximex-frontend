@@ -24,7 +24,10 @@ export const userService = {
 
   // Update user (Super Admin)
   updateUserBySuperAdmin: async (id, userData) => {
-    const response = await axiosInstance.put(`/super-admin/update-users/${id}`, userData);
+    const response = await axiosInstance.put(
+      `/super-admin/update-users/${id}`,
+      userData
+    );
     return { data: response.data.data, message: response.data.message };
   },
 
@@ -34,19 +37,26 @@ export const userService = {
     if (!userData.password || userData.password.trim() === '') {
       delete userData.password;
     }
-    const response = await axiosInstance.post('/super-admin/create-users', userData);
+    const response = await axiosInstance.post(
+      '/super-admin/create-users',
+      userData
+    );
     return { data: response.data.data, message: response.data.message };
   },
 
   // Delete user (Super Admin)
   deleteUser: async (id) => {
-    const response = await axiosInstance.delete(`/super-admin/delete-users/${id}`);
+    const response = await axiosInstance.delete(
+      `/super-admin/delete-users/${id}`
+    );
     return { id, message: response.data.message };
   },
 
   // Get all users (Super Admin)
   getAllUsers: async (params = {}) => {
-    const response = await axiosInstance.get('/super-admin/get-users', { params });
+    const response = await axiosInstance.get('/super-admin/get-users', {
+      params,
+    });
     return response.data.data;
   },
 
@@ -99,8 +109,6 @@ export const userService = {
     );
     return { message: response.data.message };
   },
-
-
 
   // Data assignment
   assignData: async (entityType, entityIds, fromUserId, toUserId) => {

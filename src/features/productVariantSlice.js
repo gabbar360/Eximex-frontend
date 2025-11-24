@@ -137,7 +137,9 @@ const productVariantSlice = createSlice({
       })
       .addCase(deleteProductVariant.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.productVariants = state.productVariants.filter((variant) => variant.id !== payload.id);
+        state.productVariants = state.productVariants.filter(
+          (variant) => variant.id !== payload.id
+        );
         state.successMessage = payload.message;
       })
       .addCase(deleteProductVariant.rejected, (state, { payload }) => {
@@ -147,5 +149,9 @@ const productVariantSlice = createSlice({
   },
 });
 
-export const { setSelectedProductVariant, clearSelectedProductVariant, clearMessages } = productVariantSlice.actions;
+export const {
+  setSelectedProductVariant,
+  clearSelectedProductVariant,
+  clearMessages,
+} = productVariantSlice.actions;
 export default productVariantSlice.reducer;

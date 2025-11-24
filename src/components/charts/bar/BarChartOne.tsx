@@ -1,5 +1,13 @@
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 
 const data = [
   { month: 'Jan', sales: 168 },
@@ -27,26 +35,22 @@ export default function BarChartOne() {
           <BarChart data={data}>
             <defs>
               <linearGradient id="colorBar" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#465fff" stopOpacity={0.8}/>
-                <stop offset="95%" stopColor="#465fff" stopOpacity={0.3}/>
+                <stop offset="5%" stopColor="#465fff" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#465fff" stopOpacity={0.3} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis dataKey="month" stroke="#666" fontSize={12} />
             <YAxis stroke="#666" fontSize={12} />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: '#fff', 
+            <Tooltip
+              contentStyle={{
+                backgroundColor: '#fff',
                 border: '1px solid #e0e0e0',
                 borderRadius: '8px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-              }} 
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+              }}
             />
-            <Bar 
-              dataKey="sales" 
-              fill="url(#colorBar)" 
-              radius={[5, 5, 0, 0]}
-            />
+            <Bar dataKey="sales" fill="url(#colorBar)" radius={[5, 5, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

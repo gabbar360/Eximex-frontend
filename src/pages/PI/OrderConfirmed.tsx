@@ -10,7 +10,8 @@ import {
 const OrderConfirmed: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { piNumber, companyName, totalAmount, paymentReceived } = location.state || {};
+  const { piNumber, companyName, totalAmount, paymentReceived } =
+    location.state || {};
 
   const formattedAmount = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -27,13 +28,18 @@ const OrderConfirmed: React.FC = () => {
               onClick={() => navigate('/proforma-invoices')}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
-              <FontAwesomeIcon icon={faArrowLeft} className="w-5 h-5 text-gray-600" />
+              <FontAwesomeIcon
+                icon={faArrowLeft}
+                className="w-5 h-5 text-gray-600"
+              />
             </button>
             <div>
               <h1 className="text-xl font-semibold text-gray-900">
                 Order Confirmation
               </h1>
-              <p className="text-sm text-gray-500">Order has been successfully confirmed</p>
+              <p className="text-sm text-gray-500">
+                Order has been successfully confirmed
+              </p>
             </div>
           </div>
         </div>
@@ -61,7 +67,9 @@ const OrderConfirmed: React.FC = () => {
 
           {/* Order Details */}
           <div className="bg-gray-50 rounded-lg p-6 mb-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Details</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Order Details
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex justify-between items-center py-2">
                 <span className="text-gray-600">PI Number:</span>
@@ -85,7 +93,9 @@ const OrderConfirmed: React.FC = () => {
                 <span className="text-gray-600">Status:</span>
                 <span className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium">
                   <FontAwesomeIcon icon={faCheck} className="w-3 h-3" />
-                  {paymentReceived ? 'Payment Confirmed' : 'Order Processing Started'}
+                  {paymentReceived
+                    ? 'Payment Confirmed'
+                    : 'Order Processing Started'}
                 </span>
               </div>
             </div>
@@ -93,19 +103,32 @@ const OrderConfirmed: React.FC = () => {
 
           {/* Next Steps */}
           <div className="bg-blue-50 rounded-lg p-6 mb-8">
-            <h3 className="text-lg font-semibold text-blue-900 mb-3">What's Next?</h3>
+            <h3 className="text-lg font-semibold text-blue-900 mb-3">
+              What's Next?
+            </h3>
             <ul className="space-y-2 text-blue-800">
               <li className="flex items-start gap-2">
-                <FontAwesomeIcon icon={faCheck} className="w-4 h-4 mt-0.5 text-blue-600" />
+                <FontAwesomeIcon
+                  icon={faCheck}
+                  className="w-4 h-4 mt-0.5 text-blue-600"
+                />
                 <span>Your order is now in the processing queue</span>
               </li>
               <li className="flex items-start gap-2">
-                <FontAwesomeIcon icon={faCheck} className="w-4 h-4 mt-0.5 text-blue-600" />
+                <FontAwesomeIcon
+                  icon={faCheck}
+                  className="w-4 h-4 mt-0.5 text-blue-600"
+                />
                 <span>You will receive email updates on the order status</span>
               </li>
               <li className="flex items-start gap-2">
-                <FontAwesomeIcon icon={faCheck} className="w-4 h-4 mt-0.5 text-blue-600" />
-                <span>Production and shipping will begin as per the agreed timeline</span>
+                <FontAwesomeIcon
+                  icon={faCheck}
+                  className="w-4 h-4 mt-0.5 text-blue-600"
+                />
+                <span>
+                  Production and shipping will begin as per the agreed timeline
+                </span>
               </li>
             </ul>
           </div>

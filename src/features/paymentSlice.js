@@ -137,7 +137,9 @@ const paymentSlice = createSlice({
       })
       .addCase(deletePayment.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.payments = state.payments.filter((payment) => payment.id !== payload.id);
+        state.payments = state.payments.filter(
+          (payment) => payment.id !== payload.id
+        );
         state.successMessage = payload.message;
       })
       .addCase(deletePayment.rejected, (state, { payload }) => {
@@ -147,5 +149,6 @@ const paymentSlice = createSlice({
   },
 });
 
-export const { setSelectedPayment, clearSelectedPayment, clearMessages } = paymentSlice.actions;
+export const { setSelectedPayment, clearSelectedPayment, clearMessages } =
+  paymentSlice.actions;
 export default paymentSlice.reducer;

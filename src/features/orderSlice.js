@@ -142,8 +142,10 @@ const orderSlice = createSlice({
       })
       .addCase(fetchOrders.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.orders = payload?.data?.orders || payload?.orders || payload?.data || [];
-        state.pagination = payload?.data?.pagination || payload?.pagination || state.pagination;
+        state.orders =
+          payload?.data?.orders || payload?.orders || payload?.data || [];
+        state.pagination =
+          payload?.data?.pagination || payload?.pagination || state.pagination;
       })
       .addCase(fetchOrders.rejected, (state, { payload }) => {
         state.loading = false;
@@ -248,6 +250,10 @@ const orderSlice = createSlice({
   },
 });
 
-export const { setSelectedOrder, clearSelectedOrder, clearMessages, setPagination } =
-  orderSlice.actions;
+export const {
+  setSelectedOrder,
+  clearSelectedOrder,
+  clearMessages,
+  setPagination,
+} = orderSlice.actions;
 export default orderSlice.reducer;

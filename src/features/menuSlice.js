@@ -181,7 +181,7 @@ const menuSlice = createSlice({
       .addCase(addSubmenu.fulfilled, (state, { payload }) => {
         state.loading = false;
         const submenuData = payload?.data || payload;
-        const menu = state.menus.find(m => m.id === submenuData.menuId);
+        const menu = state.menus.find((m) => m.id === submenuData.menuId);
         if (menu) {
           if (!menu.submenus) menu.submenus = [];
           menu.submenus.push(submenuData);
@@ -199,9 +199,9 @@ const menuSlice = createSlice({
       .addCase(updateSubmenu.fulfilled, (state, { payload }) => {
         state.loading = false;
         const submenuData = payload?.data || payload;
-        const menu = state.menus.find(m => m.id === submenuData.menuId);
+        const menu = state.menus.find((m) => m.id === submenuData.menuId);
         if (menu && menu.submenus) {
-          menu.submenus = menu.submenus.map(s => 
+          menu.submenus = menu.submenus.map((s) =>
             s.id === submenuData.id ? submenuData : s
           );
         }
@@ -217,9 +217,9 @@ const menuSlice = createSlice({
       })
       .addCase(deleteSubmenu.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.menus.forEach(menu => {
+        state.menus.forEach((menu) => {
           if (menu.submenus) {
-            menu.submenus = menu.submenus.filter(s => s.id !== payload.id);
+            menu.submenus = menu.submenus.filter((s) => s.id !== payload.id);
           }
         });
       })
@@ -230,5 +230,6 @@ const menuSlice = createSlice({
   },
 });
 
-export const { setSelectedMenu, clearSelectedMenu, clearError } = menuSlice.actions;
+export const { setSelectedMenu, clearSelectedMenu, clearError } =
+  menuSlice.actions;
 export default menuSlice.reducer;

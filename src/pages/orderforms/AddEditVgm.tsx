@@ -20,7 +20,7 @@ interface VgmFormData {
   verifierPosition: string;
   verificationDate: string;
   weighingLocation: string;
-  containerType: string;  
+  containerType: string;
   hazardousUnNo: string;
   imdgClass: string;
   remarks: string;
@@ -56,9 +56,9 @@ const AddEditVgm: React.FC = () => {
 
   const handleOrderSelect = (orderId: number, orderData: any) => {
     setSelectedOrder(orderData);
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      piInvoiceId: orderData.piInvoiceId || orderData.id
+      piInvoiceId: orderData.piInvoiceId || orderData.id,
     }));
   };
 
@@ -73,7 +73,7 @@ const AddEditVgm: React.FC = () => {
       setLoading(false);
       return;
     }
-    
+
     try {
       setLoading(true);
       const data = await dispatch(fetchVgmById(id)).unwrap();
@@ -155,7 +155,11 @@ const AddEditVgm: React.FC = () => {
     }
 
     if (formData.method === 'METHOD_2') {
-      if (!formData.cargoWeight || !formData.packagingWeight || !formData.containerTareWeight) {
+      if (
+        !formData.cargoWeight ||
+        !formData.packagingWeight ||
+        !formData.containerTareWeight
+      ) {
         toast.error('All weight fields are required for Method 2');
         return;
       }
@@ -163,7 +167,9 @@ const AddEditVgm: React.FC = () => {
 
     if (formData.containerType === 'HAZARDOUS') {
       if (!formData.hazardousUnNo || !formData.imdgClass) {
-        toast.error('UN Number and IMDG Class are required for hazardous containers');
+        toast.error(
+          'UN Number and IMDG Class are required for hazardous containers'
+        );
         return;
       }
     }
@@ -261,7 +267,8 @@ const AddEditVgm: React.FC = () => {
             {selectedOrder && (
               <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
                 <p className="text-sm text-slate-700">
-                  Selected: <strong>{selectedOrder.orderNumber}</strong> - {selectedOrder.piNumber} ({selectedOrder.buyerName})
+                  Selected: <strong>{selectedOrder.orderNumber}</strong> -{' '}
+                  {selectedOrder.piNumber} ({selectedOrder.buyerName})
                 </p>
               </div>
             )}
@@ -276,7 +283,9 @@ const AddEditVgm: React.FC = () => {
                   type="number"
                   step="0.01"
                   value={formData.verifiedGrossMass}
-                  onChange={(e) => handleInputChange('verifiedGrossMass', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange('verifiedGrossMass', e.target.value)
+                  }
                   placeholder="e.g., 25000.50"
                   required
                   disabled={formData.method === 'METHOD_2'}
@@ -293,8 +302,12 @@ const AddEditVgm: React.FC = () => {
                   onChange={(e) => handleInputChange('method', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
                 >
-                  <option value="METHOD_1">Method 1 - Weigh packed container</option>
-                  <option value="METHOD_2">Method 2 - Weigh contents + tare weight</option>
+                  <option value="METHOD_1">
+                    Method 1 - Weigh packed container
+                  </option>
+                  <option value="METHOD_2">
+                    Method 2 - Weigh contents + tare weight
+                  </option>
                 </select>
               </div>
             </div>
@@ -310,7 +323,9 @@ const AddEditVgm: React.FC = () => {
                     type="number"
                     step="0.01"
                     value={formData.cargoWeight}
-                    onChange={(e) => handleInputChange('cargoWeight', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange('cargoWeight', e.target.value)
+                    }
                     required={formData.method === 'METHOD_2'}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
                   />
@@ -323,7 +338,9 @@ const AddEditVgm: React.FC = () => {
                     type="number"
                     step="0.01"
                     value={formData.packagingWeight}
-                    onChange={(e) => handleInputChange('packagingWeight', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange('packagingWeight', e.target.value)
+                    }
                     required={formData.method === 'METHOD_2'}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
                   />
@@ -336,7 +353,9 @@ const AddEditVgm: React.FC = () => {
                     type="number"
                     step="0.01"
                     value={formData.containerTareWeight}
-                    onChange={(e) => handleInputChange('containerTareWeight', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange('containerTareWeight', e.target.value)
+                    }
                     required={formData.method === 'METHOD_2'}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
                   />
@@ -353,7 +372,9 @@ const AddEditVgm: React.FC = () => {
                 <input
                   type="text"
                   value={formData.verifiedBy}
-                  onChange={(e) => handleInputChange('verifiedBy', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange('verifiedBy', e.target.value)
+                  }
                   placeholder="Name of authorized person"
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
@@ -366,7 +387,9 @@ const AddEditVgm: React.FC = () => {
                 <input
                   type="text"
                   value={formData.verifierPosition}
-                  onChange={(e) => handleInputChange('verifierPosition', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange('verifierPosition', e.target.value)
+                  }
                   placeholder="e.g., Export Manager"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
                 />
@@ -380,7 +403,9 @@ const AddEditVgm: React.FC = () => {
                 </label>
                 <DatePicker
                   value={formData.verificationDate}
-                  onChange={(value) => handleInputChange('verificationDate', value)}
+                  onChange={(value) =>
+                    handleInputChange('verificationDate', value)
+                  }
                   placeholder="Select verification date"
                   required
                   className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
@@ -393,7 +418,9 @@ const AddEditVgm: React.FC = () => {
                 <input
                   type="text"
                   value={formData.weighingLocation}
-                  onChange={(e) => handleInputChange('weighingLocation', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange('weighingLocation', e.target.value)
+                  }
                   placeholder="e.g., Factory Premises"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
                 />
@@ -408,7 +435,9 @@ const AddEditVgm: React.FC = () => {
                 </label>
                 <select
                   value={formData.containerType}
-                  onChange={(e) => handleInputChange('containerType', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange('containerType', e.target.value)
+                  }
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
                 >
                   <option value="NORMAL">Normal</option>
@@ -424,7 +453,9 @@ const AddEditVgm: React.FC = () => {
                 <input
                   type="text"
                   value={formData.hazardousUnNo}
-                  onChange={(e) => handleInputChange('hazardousUnNo', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange('hazardousUnNo', e.target.value)
+                  }
                   placeholder="e.g., UN1234"
                   disabled={formData.containerType !== 'HAZARDOUS'}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 disabled:bg-gray-100 transition-all duration-300"
@@ -437,7 +468,9 @@ const AddEditVgm: React.FC = () => {
                 <input
                   type="text"
                   value={formData.imdgClass}
-                  onChange={(e) => handleInputChange('imdgClass', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange('imdgClass', e.target.value)
+                  }
                   placeholder="e.g., Class 3"
                   disabled={formData.containerType !== 'HAZARDOUS'}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 disabled:bg-gray-100 transition-all duration-300"

@@ -8,7 +8,14 @@ import CompanyDetailsCard from '../components/UserProfile/CompanyDetailsCard';
 import PageMeta from '../components/common/PageMeta';
 import { fetchCurrentUser, updateUser } from '../features/userSlice';
 import { updateCompany } from '../features/companySlice';
-import { HiUser, HiShieldCheck, HiBuildingOffice2, HiChartBar, HiCog6Tooth, HiBell } from 'react-icons/hi2';
+import {
+  HiUser,
+  HiShieldCheck,
+  HiBuildingOffice2,
+  HiChartBar,
+  HiCog6Tooth,
+  HiBell,
+} from 'react-icons/hi2';
 import { Image } from 'antd';
 import { EyeOutlined } from '@ant-design/icons';
 
@@ -58,13 +65,15 @@ export default function UserProfiles() {
     if (!userData) return;
     try {
       console.log('Updating user with data:', updatedData);
-      const result = await dispatch(updateUser({ id: userData.id, userData: updatedData })).unwrap();
+      const result = await dispatch(
+        updateUser({ id: userData.id, userData: updatedData })
+      ).unwrap();
       console.log('Update result:', result);
-      
+
       // Update local state immediately
-      setUserData(prev => ({ ...prev, ...updatedData }));
+      setUserData((prev) => ({ ...prev, ...updatedData }));
       setEditingProfile(false);
-      
+
       // Then refresh from server
       await fetchUserData();
     } catch (error) {
@@ -91,7 +100,9 @@ export default function UserProfiles() {
         }
       });
 
-      const result = await dispatch(updateCompany({ id: userData.company.id, companyData: formData })).unwrap();
+      const result = await dispatch(
+        updateCompany({ id: userData.company.id, companyData: formData })
+      ).unwrap();
       console.log('Update result:', result);
 
       // Refresh user data to get updated company info
@@ -133,7 +144,7 @@ export default function UserProfiles() {
         title="Profile Settings | Eximex - Professional Export Management"
         description="Manage your profile settings and company information in Eximex"
       />
-      
+
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto p-6">
           {/* Header */}
@@ -164,29 +175,41 @@ export default function UserProfiles() {
                             src={userData.profilePicture}
                             alt={userData.name || 'User'}
                             className="w-full h-full object-cover"
-                            onLoad={() => console.log('Profile image loaded successfully:', userData.profilePicture)}
+                            onLoad={() =>
+                              console.log(
+                                'Profile image loaded successfully:',
+                                userData.profilePicture
+                              )
+                            }
                             onError={(e) => {
-                              console.log('Profile image failed to load:', userData.profilePicture);
+                              console.log(
+                                'Profile image failed to load:',
+                                userData.profilePicture
+                              );
                               console.log('Error details:', e);
                             }}
                           />
                         ) : (
                           <HiUser className="text-4xl text-slate-400" />
-                        )}                      </div>
-
+                        )}{' '}
+                      </div>
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="pt-20 pb-8 px-8">
                   <div className="flex items-center justify-between mb-6">
                     <div>
-                      <h2 className="text-3xl font-bold text-slate-800 mb-2">{userData?.name || 'Loading...'}</h2>
+                      <h2 className="text-3xl font-bold text-slate-800 mb-2">
+                        {userData?.name || 'Loading...'}
+                      </h2>
                       <p className="text-lg text-slate-600">
-                        {typeof userData?.role === 'object' && userData.role ? userData.role.displayName : userData?.role || 'N/A'}
+                        {typeof userData?.role === 'object' && userData.role
+                          ? userData.role.displayName
+                          : userData?.role || 'N/A'}
                       </p>
                     </div>
-                    
+
                     <button
                       onClick={() => setEditingProfile(!editingProfile)}
                       className="px-6 py-3 bg-slate-700 hover:bg-slate-800 text-white rounded-xl font-semibold shadow-lg transition-all duration-300 transform hover:scale-105"
@@ -194,11 +217,20 @@ export default function UserProfiles() {
                       {editingProfile ? 'Cancel Edit' : 'Edit Profile'}
                     </button>
                   </div>
-                  
+
                   {editingProfile ? (
-                    <UserInfoCard userData={userData} onUpdate={handleUpdateUser} isEditing={true} onCancel={() => setEditingProfile(false)} />
+                    <UserInfoCard
+                      userData={userData}
+                      onUpdate={handleUpdateUser}
+                      isEditing={true}
+                      onCancel={() => setEditingProfile(false)}
+                    />
                   ) : (
-                    <UserInfoCard userData={userData} onUpdate={handleUpdateUser} isEditing={false} />
+                    <UserInfoCard
+                      userData={userData}
+                      onUpdate={handleUpdateUser}
+                      isEditing={false}
+                    />
                   )}
                 </div>
               </div>
@@ -216,7 +248,9 @@ export default function UserProfiles() {
                             className="w-full h-full object-contain"
                             preview={{
                               mask: (
-                                <EyeOutlined style={{ fontSize: '20px', color: 'white' }} />
+                                <EyeOutlined
+                                  style={{ fontSize: '20px', color: 'white' }}
+                                />
                               ),
                             }}
                           />
@@ -225,11 +259,15 @@ export default function UserProfiles() {
                         )}
                       </div>
                       <div>
-                        <h3 className="text-2xl font-bold text-slate-800">Company Information</h3>
-                        <p className="text-slate-600">Manage your business details and settings</p>
+                        <h3 className="text-2xl font-bold text-slate-800">
+                          Company Information
+                        </h3>
+                        <p className="text-slate-600">
+                          Manage your business details and settings
+                        </p>
                       </div>
                     </div>
-                    
+
                     <button
                       onClick={() => setEditingCompany(!editingCompany)}
                       className="px-6 py-3 bg-slate-700 hover:bg-slate-800 text-white rounded-xl font-semibold shadow-lg transition-all duration-300 transform hover:scale-105"
@@ -237,7 +275,7 @@ export default function UserProfiles() {
                       {editingCompany ? 'Cancel Edit' : 'Edit Company'}
                     </button>
                   </div>
-                  
+
                   {editingCompany ? (
                     <CompanyDetailsCard
                       companyData={userData.company}
@@ -255,8 +293,6 @@ export default function UserProfiles() {
                 </div>
               )}
             </div>
-
-
           </div>
         </div>
       </div>

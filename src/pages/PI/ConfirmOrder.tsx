@@ -8,11 +8,11 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
-import { 
+import {
   getPiInvoiceById,
   updatePiStatus,
   updatePiAmount,
-  updatePiInvoice
+  updatePiInvoice,
 } from '../../features/piSlice';
 
 const ConfirmOrder: React.FC = () => {
@@ -45,29 +45,33 @@ const ConfirmOrder: React.FC = () => {
   const handleConfirmOrder = async () => {
     try {
       setSubmitting(true);
-      
+
       if (paymentReceived && paymentAmount) {
         const payment = parseFloat(paymentAmount);
         const currentTotal = piData.totalAmount || piData.total || 0;
         const updatedTotalAmount = currentTotal - payment;
 
         try {
-          await dispatch(updatePiAmount({
-            id,
-            amountData: {
-              totalAmount: updatedTotalAmount,
-              advanceAmount: payment,
-            }
-          })).unwrap();
-        } catch (backendError) {
-          try {
-            await dispatch(updatePiInvoice({
+          await dispatch(
+            updatePiAmount({
               id,
-              piData: {
+              amountData: {
                 totalAmount: updatedTotalAmount,
                 advanceAmount: payment,
-              }
-            })).unwrap();
+              },
+            })
+          ).unwrap();
+        } catch (backendError) {
+          try {
+            await dispatch(
+              updatePiInvoice({
+                id,
+                piData: {
+                  totalAmount: updatedTotalAmount,
+                  advanceAmount: payment,
+                },
+              })
+            ).unwrap();
           } catch (fallbackError) {
             toast.error('Failed to update amount in backend');
           }
@@ -79,17 +83,16 @@ const ConfirmOrder: React.FC = () => {
       }
 
       await dispatch(updatePiStatus({ id, status: 'confirmed' })).unwrap();
-      
+
       // Navigate to success page
       navigate(`/proforma-invoices/${id}/confirmed`, {
         state: {
           piNumber: piData.piNumber,
           companyName: piData.party?.companyName,
           totalAmount: piData.totalAmount || piData.total || 0,
-          paymentReceived
-        }
+          paymentReceived,
+        },
       });
-
     } catch (error: any) {
       console.error('Error confirming order:', error);
       const errorMessage =
@@ -133,13 +136,18 @@ const ConfirmOrder: React.FC = () => {
               onClick={() => navigate(-1)}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
-              <FontAwesomeIcon icon={faArrowLeft} className="w-5 h-5 text-gray-600" />
+              <FontAwesomeIcon
+                icon={faArrowLeft}
+                className="w-5 h-5 text-gray-600"
+              />
             </button>
             <div>
               <h1 className="text-xl font-semibold text-gray-900">
                 Confirm Order - {piData.piNumber || 'PI Invoice'}
               </h1>
-              <p className="text-sm text-gray-500">Review and confirm the order details</p>
+              <p className="text-sm text-gray-500">
+                Review and confirm the order details
+              </p>
             </div>
           </div>
         </div>
@@ -160,9 +168,7 @@ const ConfirmOrder: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-500 mb-1">
                   PI Number
                 </label>
-                <p className="text-gray-900 font-medium">
-                  {piData.piNumber}
-                </p>
+                <p className="text-gray-900 font-medium">{piData.piNumber}</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-500 mb-1">
@@ -181,7 +187,7 @@ const ConfirmOrder: React.FC = () => {
                 </p>
               </div>
             </div>
-            
+
             {/* Payment Options */}
             <div className="mb-8">
               <label className="block text-sm font-medium text-gray-700 mb-4">
@@ -196,7 +202,9 @@ const ConfirmOrder: React.FC = () => {
                     onChange={() => setPaymentReceived(true)}
                     className="w-4 h-4 text-blue-600 mr-3"
                   />
-                  <span className="text-gray-900 font-medium">Payment Received</span>
+                  <span className="text-gray-900 font-medium">
+                    Payment Received
+                  </span>
                 </label>
                 <label className="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
                   <input
@@ -226,7 +234,7 @@ const ConfirmOrder: React.FC = () => {
                 </div>
               )}
             </div>
-            
+
             {/* Action Buttons */}
             <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
               <button
@@ -245,7 +253,11 @@ const ConfirmOrder: React.FC = () => {
                 className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <FontAwesomeIcon icon={faCheck} className="w-4 h-4 mr-2" />
-                {submitting ? 'Processing...' : (paymentReceived === true ? 'Confirm Payment' : 'Confirm Order')}
+                {submitting
+                  ? 'Processing...'
+                  : paymentReceived === true
+                    ? 'Confirm Payment'
+                    : 'Confirm Order'}
               </button>
             </div>
           </div>

@@ -1,7 +1,12 @@
 import React from 'react';
 import { Field } from 'formik';
 import { toast } from 'react-toastify';
-import { HiCube, HiTag, HiDocumentText, HiCurrencyDollar } from 'react-icons/hi2';
+import {
+  HiCube,
+  HiTag,
+  HiDocumentText,
+  HiCurrencyDollar,
+} from 'react-icons/hi2';
 
 interface BasicProductInfoProps {
   values: any;
@@ -87,12 +92,11 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
             }
           >
             <option value="">
-              {categoriesLoading 
-                ? 'Loading categories...' 
-                : (!categories || categories.length === 0)
+              {categoriesLoading
+                ? 'Loading categories...'
+                : !categories || categories.length === 0
                   ? 'No categories available - Create one first'
-                  : 'Select Category'
-              }
+                  : 'Select Category'}
             </option>
             {!categoriesLoading &&
               categories &&
@@ -127,11 +131,12 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
             disabled={!values.categoryId}
           >
             <option value="">Select Subcategory</option>
-            {Array.isArray(subcategories) && subcategories.map((sub) => (
-              <option key={sub.id} value={sub.id}>
-                {sub.name}
-              </option>
-            ))}
+            {Array.isArray(subcategories) &&
+              subcategories.map((sub) => (
+                <option key={sub.id} value={sub.id}>
+                  {sub.name}
+                </option>
+              ))}
           </select>
         </div>
       </div>
@@ -180,7 +185,9 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
             className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
           />
           {touched.description && errors.description && (
-            <div className="text-sm text-red-500 mt-1">{errors.description}</div>
+            <div className="text-sm text-red-500 mt-1">
+              {errors.description}
+            </div>
           )}
         </div>
 

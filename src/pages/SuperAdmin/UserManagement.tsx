@@ -1,15 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { fetchUsers, createUser, updateUser, deleteUser } from '../../features/userManagementSlice';
+import {
+  fetchUsers,
+  createUser,
+  updateUser,
+  deleteUser,
+} from '../../features/userManagementSlice';
 import { getAllRoles } from '../../features/roleSlice';
-import { HiPlus, HiPencil, HiTrash, HiEye, HiArrowLeft, HiCheckCircle } from 'react-icons/hi';
+import {
+  HiPlus,
+  HiPencil,
+  HiTrash,
+  HiEye,
+  HiArrowLeft,
+  HiCheckCircle,
+} from 'react-icons/hi';
 
 const UserManagement: React.FC = () => {
   const dispatch = useDispatch();
-  const { users, loading, error } = useSelector((state: any) => state.userManagement);
+  const { users, loading, error } = useSelector(
+    (state: any) => state.userManagement
+  );
   const { roles } = useSelector((state: any) => state.role);
-  
+
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -19,7 +33,7 @@ const UserManagement: React.FC = () => {
     lastName: '',
     email: '',
     roleId: '',
-    isActive: true
+    isActive: true,
   });
 
   useEffect(() => {
@@ -29,10 +43,13 @@ const UserManagement: React.FC = () => {
 
   useEffect(() => {
     if (users) {
-      const filtered = users.filter((user: any) =>
-        user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.role?.displayName?.toLowerCase().includes(searchTerm.toLowerCase())
+      const filtered = users.filter(
+        (user: any) =>
+          user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.role?.displayName
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase())
       );
       setFilteredUsers(filtered);
     }
@@ -45,11 +62,13 @@ const UserManagement: React.FC = () => {
         name: `${formData.firstName} ${formData.lastName}`.trim(),
         email: formData.email,
         roleId: parseInt(formData.roleId),
-        status: formData.isActive ? 'ACTIVE' : 'INACTIVE'
+        status: formData.isActive ? 'ACTIVE' : 'INACTIVE',
       };
 
       if (editingUser) {
-        const result = await dispatch(updateUser({ id: editingUser.id, userData })).unwrap();
+        const result = await dispatch(
+          updateUser({ id: editingUser.id, userData })
+        ).unwrap();
         toast.success(result.message || 'User updated successfully');
       } else {
         const result = await dispatch(createUser(userData)).unwrap();
@@ -62,7 +81,9 @@ const UserManagement: React.FC = () => {
   };
 
   const handleDelete = async (id: number, userName: string) => {
-    if (window.confirm(`Are you sure you want to delete the user "${userName}"?`)) {
+    if (
+      window.confirm(`Are you sure you want to delete the user "${userName}"?`)
+    ) {
       try {
         const result = await dispatch(deleteUser(id)).unwrap();
         toast.success(result.message || 'User deleted successfully');
@@ -78,7 +99,7 @@ const UserManagement: React.FC = () => {
       lastName: '',
       email: '',
       roleId: '',
-      isActive: true
+      isActive: true,
     });
     setEditingUser(null);
     setShowForm(false);
@@ -91,7 +112,7 @@ const UserManagement: React.FC = () => {
       lastName: user.name?.split(' ').slice(1).join(' ') || '',
       email: user.email,
       roleId: user.roleId?.toString() || '',
-      isActive: user.status === 'ACTIVE'
+      isActive: user.status === 'ACTIVE',
     });
     setShowForm(true);
   };
@@ -148,7 +169,9 @@ const UserManagement: React.FC = () => {
                   <input
                     type="text"
                     value={formData.firstName}
-                    onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, firstName: e.target.value })
+                    }
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                     placeholder="Enter first name"
                     required
@@ -162,7 +185,9 @@ const UserManagement: React.FC = () => {
                   <input
                     type="text"
                     value={formData.lastName}
-                    onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, lastName: e.target.value })
+                    }
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                     placeholder="Enter last name"
                     required
@@ -177,7 +202,9 @@ const UserManagement: React.FC = () => {
                 <input
                   type="email"
                   value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                   placeholder="Enter email address"
                   required
@@ -191,7 +218,9 @@ const UserManagement: React.FC = () => {
                   </label>
                   <select
                     value={formData.roleId}
-                    onChange={(e) => setFormData({...formData, roleId: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, roleId: e.target.value })
+                    }
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                     required
                   >
@@ -210,7 +239,12 @@ const UserManagement: React.FC = () => {
                   </label>
                   <select
                     value={formData.isActive?.toString() || 'true'}
-                    onChange={(e) => setFormData({...formData, isActive: e.target.value === 'true'})}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        isActive: e.target.value === 'true',
+                      })
+                    }
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                   >
                     <option value="true">Active</option>
@@ -296,9 +330,13 @@ const UserManagement: React.FC = () => {
               <div className="text-slate-400 mb-4">
                 <HiEye className="w-16 h-16 mx-auto" />
               </div>
-              <h3 className="text-lg font-medium text-slate-600 mb-2">No users found</h3>
+              <h3 className="text-lg font-medium text-slate-600 mb-2">
+                No users found
+              </h3>
               <p className="text-slate-500 mb-4">
-                {searchTerm ? 'No users match your search criteria.' : 'Get started by creating your first user.'}
+                {searchTerm
+                  ? 'No users match your search criteria.'
+                  : 'Get started by creating your first user.'}
               </p>
               {!searchTerm && (
                 <button
@@ -337,14 +375,19 @@ const UserManagement: React.FC = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredUsers.map((user: any) => (
-                    <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                    <tr
+                      key={user.id}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-slate-900">
                           {user.name}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-slate-600">{user.email}</div>
+                        <div className="text-sm text-slate-600">
+                          {user.email}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-slate-600">
@@ -352,11 +395,13 @@ const UserManagement: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          user.status === 'ACTIVE' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-red-100 text-red-800'
-                        }`}>
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            user.status === 'ACTIVE'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-red-100 text-red-800'
+                          }`}
+                        >
                           {user.status === 'ACTIVE' ? 'Active' : 'Inactive'}
                         </span>
                       </td>
@@ -399,8 +444,9 @@ const UserManagement: React.FC = () => {
                 Showing {filteredUsers.length} of {users.length} users
               </span>
               <span>
-                {users.filter((u: any) => u.status === 'ACTIVE').length} active users, {' '}
-                {users.filter((u: any) => u.status !== 'ACTIVE').length} inactive users
+                {users.filter((u: any) => u.status === 'ACTIVE').length} active
+                users, {users.filter((u: any) => u.status !== 'ACTIVE').length}{' '}
+                inactive users
               </span>
             </div>
           </div>
