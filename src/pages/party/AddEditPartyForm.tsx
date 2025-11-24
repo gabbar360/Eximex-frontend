@@ -1,41 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getPartyById, updateParty, createParty } from '../../features/partySlice';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { HiArrowLeft, HiCheckCircle, HiUser, HiBuildingOffice2, HiEnvelope, HiPhone, HiMapPin, HiGlobeAlt, HiTag, HiDocumentText } from 'react-icons/hi2';
+import { HiArrowLeft, HiCheckCircle, HiUser, HiBuildingOffice2, HiEnvelope, HiPhone, HiMapPin, HiGlobeAlt, HiTag, HiDocumentText, HiChevronDown, HiMagnifyingGlass } from 'react-icons/hi2';
+import { Country, State, City } from 'country-state-city';
 
 const fetchCurrencies = async () => {
   try {
     const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
     const data = await response.json();
     return Object.keys(data.rates).map((code) => ({ code, name: code }));
-  } catch (error) {
-    return [];
-  }
-};
-
-const fetchCountries = async () => {
-  try {
-    const response = await fetch('https://countriesnow.space/api/v0.1/countries');
-    const data = await response.json();
-    return data.data || [];
-  } catch (error) {
-    return [];
-  }
-};
-
-const fetchStates = async (countryName) => {
-  try {
-    const response = await fetch('https://countriesnow.space/api/v0.1/countries/states', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ country: countryName }),
-    });
-    const data = await response.json();
-    return data.data?.states || [];
   } catch (error) {
     return [];
   }
@@ -50,18 +27,93 @@ const AddEditPartyForm = () => {
   const [party, setParty] = useState({});
   const [loading, setLoading] = useState(isEditMode);
   const [submitting, setSubmitting] = useState(false);
-  const [countries, setCountries] = useState([]);
   const [currencies, setCurrencies] = useState([]);
-  const [availableStates, setAvailableStates] = useState([]);
+  const [locationData, setLocationData] = useState({ country: '', state: '', city: '' });
+  const [currencySearch, setCurrencySearch] = useState('');
+  const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
+  const currencyRef = useRef(null);
+  
+  // Country State City states
+  const [countries, setCountries] = useState([]);
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [selectedCountry, setSelectedCountry] = useState('');
+  const [selectedState, setSelectedState] = useState('');
+  const [selectedCity, setSelectedCity] = useState('');
+  const [countrySearch, setCountrySearch] = useState('');
+  const [stateSearch, setStateSearch] = useState('');
+  const [citySearch, setCitySearch] = useState('');
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
+  const [showStateDropdown, setShowStateDropdown] = useState(false);
+  const [showCityDropdown, setShowCityDropdown] = useState(false);
+  const [initialized, setInitialized] = useState(false);
+  const countryRef = useRef(null);
+  const stateRef = useRef(null);
+  const cityRef = useRef(null);
 
   useEffect(() => {
     const loadData = async () => {
-      const [countriesData, currenciesData] = await Promise.all([fetchCountries(), fetchCurrencies()]);
-      setCountries(countriesData);
+      const currenciesData = await fetchCurrencies();
       setCurrencies(currenciesData);
+      
+      // Load countries
+      const allCountries = Country.getAllCountries();
+      setCountries(allCountries);
     };
     loadData();
   }, []);
+  
+  // Initialize location with existing values (only for edit mode)
+  useEffect(() => {
+    if (countries.length > 0 && !initialized && isEditMode && (party.country || party.state || party.city)) {
+      const country = countries.find(c => c.name === party.country);
+      if (country) {
+        setSelectedCountry(country.isoCode);
+        const countryStates = State.getStatesOfCountry(country.isoCode);
+        setStates(countryStates);
+        
+        const state = countryStates.find(s => s.name === party.state);
+        if (state) {
+          setSelectedState(state.isoCode);
+          const stateCities = City.getCitiesOfState(country.isoCode, state.isoCode);
+          setCities(stateCities);
+          
+          if (party.city) {
+            setSelectedCity(party.city);
+          }
+        }
+      }
+    }
+    if (countries.length > 0 && !initialized) {
+      setInitialized(true);
+    }
+  }, [countries, party, initialized, isEditMode]);
+  
+  // Load states when country changes
+  useEffect(() => {
+    if (selectedCountry) {
+      const countryStates = State.getStatesOfCountry(selectedCountry);
+      setStates(countryStates);
+      if (!isEditMode || !party.state) {
+        setSelectedState('');
+        setCities([]);
+        setSelectedCity('');
+      }
+    }
+  }, [selectedCountry, isEditMode, party.state]);
+  
+  // Load cities when state changes
+  useEffect(() => {
+    if (selectedCountry && selectedState) {
+      const stateCities = City.getCitiesOfState(selectedCountry, selectedState);
+      setCities(stateCities);
+      if (!isEditMode || !party.city) {
+        setSelectedCity('');
+      }
+    }
+  }, [selectedCountry, selectedState, isEditMode, party.city]);
+
+
 
   useEffect(() => {
     if (isEditMode) {
@@ -82,6 +134,27 @@ const AddEditPartyForm = () => {
       fetchParty();
     }
   }, [id, isEditMode, navigate, dispatch]);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (currencyRef.current && !currencyRef.current.contains(event.target)) {
+        setShowCurrencyDropdown(false);
+      }
+      if (countryRef.current && !countryRef.current.contains(event.target)) {
+        setShowCountryDropdown(false);
+      }
+      if (stateRef.current && !stateRef.current.contains(event.target)) {
+        setShowStateDropdown(false);
+      }
+      if (cityRef.current && !cityRef.current.contains(event.target)) {
+        setShowCityDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleSubmit = async (values) => {
     setSubmitting(true);
@@ -122,15 +195,90 @@ const AddEditPartyForm = () => {
     email: party.email || '',
     phone: party.phone || '',
     address: party.address || '',
-    city: party.city || '',
-    state: party.state || '',
-    country: party.country || '',
+    city: selectedCity || party.city || '',
+    state: states.find(s => s.isoCode === selectedState)?.name || party.state || '',
+    country: countries.find(c => c.isoCode === selectedCountry)?.name || party.country || '',
     pincode: party.pincode || '',
     currency: party.currency || '',
     tags: party.tags || '',
     notes: party.notes || '',
     status: party.status !== undefined ? Boolean(party.status) : false,
   });
+  
+  // Custom Dropdown Component
+  const SearchableDropdown = ({ 
+    label, 
+    value, 
+    options, 
+    onSelect, 
+    searchValue, 
+    onSearchChange, 
+    isOpen, 
+    onToggle, 
+    placeholder, 
+    disabled = false,
+    dropdownRef 
+  }) => {
+    const selectedOption = options.find(opt => opt.value === value);
+    
+    return (
+      <div className="relative" ref={dropdownRef}>
+        <label className="block text-sm font-semibold text-slate-700 mb-2">{label}</label>
+        <div 
+          className={`w-full px-4 py-3 border border-gray-300 bg-white rounded-lg cursor-pointer flex items-center justify-between transition-all duration-300 shadow-sm ${
+            disabled 
+              ? 'bg-gray-100 cursor-not-allowed' 
+              : 'hover:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200 focus-within:border-slate-500'
+          }`}
+          onClick={() => !disabled && onToggle()}
+        >
+          <span className={`text-sm ${selectedOption ? 'text-slate-900' : 'text-slate-500'}`}>
+            {selectedOption ? selectedOption.label : placeholder}
+          </span>
+          <HiChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        </div>
+        
+        {isOpen && !disabled && (
+          <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl" style={{ top: '100%', marginTop: '4px' }}>
+            <div className="p-3 border-b border-gray-100">
+              <div className="relative">
+                <HiMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder={`Search ${label.toLowerCase()}...`}
+                  value={searchValue}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                  onClick={(e) => e.stopPropagation()}
+                  autoFocus
+                />
+              </div>
+            </div>
+            <div className="max-h-60 overflow-y-auto">
+              {options.length === 0 ? (
+                <div className="px-4 py-3 text-slate-500 text-sm text-center">No {label.toLowerCase()} found</div>
+              ) : (
+                options.map((option) => (
+                  <div
+                    key={option.value}
+                    className={`px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm transition-colors duration-150 ${
+                      option.value === value ? 'bg-slate-100 text-slate-900 font-medium' : 'text-slate-700'
+                    }`}
+                    onClick={() => {
+                      onSelect(option.value);
+                      onToggle();
+                    }}
+                  >
+                    {option.label}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -281,79 +429,93 @@ const AddEditPartyForm = () => {
                     )}
                   </div>
 
-                  {/* Country */}
-                  <div>
+                  {/* Location - Country, State, City */}
+                  <div className="md:col-span-2">
                     <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
                       <HiGlobeAlt className="w-4 h-4 mr-2 text-slate-600" />
-                      Country
+                      Location
                     </label>
-                    <select
-                      name="country"
-                      value={values.country}
-                      onChange={async (e) => {
-                        setFieldValue('country', e.target.value);
-                        setFieldValue('state', '');
-                        if (e.target.value) {
-                          const states = await fetchStates(e.target.value);
-                          setAvailableStates(states);
-                        }
-                      }}
-                      onBlur={handleBlur}
-                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
-                    >
-                      <option value="">Select Country</option>
-                      {countries.map((country) => (
-                        <option key={country.country} value={country.country}>
-                          {country.country}
-                        </option>
-                      ))}
-                    </select>
-                    {touched.country && errors.country && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* Country */}
+                      <SearchableDropdown
+                        label="Country"
+                        value={selectedCountry}
+                        options={countries.filter(country => 
+                          country.name.toLowerCase().includes(countrySearch.toLowerCase())
+                        ).map(country => ({
+                          value: country.isoCode,
+                          label: country.name
+                        }))}
+                        onSelect={(value) => {
+                          setSelectedCountry(value);
+                          setCountrySearch('');
+                          const countryName = countries.find(c => c.isoCode === value)?.name || '';
+                          setFieldValue('country', countryName);
+                        }}
+                        searchValue={countrySearch}
+                        onSearchChange={setCountrySearch}
+                        isOpen={showCountryDropdown}
+                        onToggle={() => setShowCountryDropdown(!showCountryDropdown)}
+                        placeholder="Select Country"
+                        dropdownRef={countryRef}
+                      />
+
+                      {/* State */}
+                      <SearchableDropdown
+                        label="State"
+                        value={selectedState}
+                        options={states.filter(state => 
+                          state.name.toLowerCase().includes(stateSearch.toLowerCase())
+                        ).map(state => ({
+                          value: state.isoCode,
+                          label: state.name
+                        }))}
+                        onSelect={(value) => {
+                          setSelectedState(value);
+                          setStateSearch('');
+                          const stateName = states.find(s => s.isoCode === value)?.name || '';
+                          setFieldValue('state', stateName);
+                        }}
+                        searchValue={stateSearch}
+                        onSearchChange={setStateSearch}
+                        isOpen={showStateDropdown}
+                        onToggle={() => setShowStateDropdown(!showStateDropdown)}
+                        placeholder="Select State"
+                        disabled={!selectedCountry}
+                        dropdownRef={stateRef}
+                      />
+
+                      {/* City */}
+                      <SearchableDropdown
+                        label="City"
+                        value={selectedCity}
+                        options={cities.filter(city => 
+                          city.name.toLowerCase().includes(citySearch.toLowerCase())
+                        ).map(city => ({
+                          value: city.name,
+                          label: city.name
+                        }))}
+                        onSelect={(value) => {
+                          setSelectedCity(value);
+                          setCitySearch('');
+                          setFieldValue('city', value);
+                        }}
+                        searchValue={citySearch}
+                        onSearchChange={setCitySearch}
+                        isOpen={showCityDropdown}
+                        onToggle={() => setShowCityDropdown(!showCityDropdown)}
+                        placeholder="Select City"
+                        disabled={!selectedState}
+                        dropdownRef={cityRef}
+                      />
+                    </div>
+                    {(touched.country && errors.country) && (
                       <div className="text-sm text-red-500 mt-1">{errors.country}</div>
                     )}
-                  </div>
-
-                  {/* State */}
-                  <div>
-                    <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-                      <HiMapPin className="w-4 h-4 mr-2 text-slate-600" />
-                      State
-                    </label>
-                    <select
-                      name="state"
-                      value={values.state}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
-                    >
-                      <option value="">Select State</option>
-                      {availableStates.map((state) => (
-                        <option key={state.name} value={state.name}>
-                          {state.name}
-                        </option>
-                      ))}
-                    </select>
-                    {touched.state && errors.state && (
+                    {(touched.state && errors.state) && (
                       <div className="text-sm text-red-500 mt-1">{errors.state}</div>
                     )}
-                  </div>
-
-                  {/* City */}
-                  <div>
-                    <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-                      <HiMapPin className="w-4 h-4 mr-2 text-slate-600" />
-                      City
-                    </label>
-                    <input
-                      name="city"
-                      type="text"
-                      placeholder="Enter city"
-                      value={values.city}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
-                    />
-                    {touched.city && errors.city && (
+                    {(touched.city && errors.city) && (
                       <div className="text-sm text-red-500 mt-1">{errors.city}</div>
                     )}
                   </div>
@@ -382,25 +544,64 @@ const AddEditPartyForm = () => {
                   </div>
 
                   {/* Currency */}
-                  <div>
-                    <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
+                  <div className="relative" ref={currencyRef}>
+                    <label className="flex items-center text-sm font-semibold text-slate-700 mb-2">
                       <HiGlobeAlt className="w-4 h-4 mr-2 text-slate-600" />
                       Currency
                     </label>
-                    <select
-                      name="currency"
-                      value={values.currency}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
+                    <div 
+                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg cursor-pointer flex items-center justify-between transition-all duration-300 shadow-sm hover:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200 focus-within:border-slate-500"
+                      onClick={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
                     >
-                      <option value="">Select Currency</option>
-                      {currencies.map((currency) => (
-                        <option key={currency.code} value={currency.code}>
-                          {currency.code}
-                        </option>
-                      ))}
-                    </select>
+                      <span className={`text-sm ${values.currency ? 'text-slate-900' : 'text-slate-500'}`}>
+                        {values.currency ? `${values.currency}` : 'Select Currency'}
+                      </span>
+                      <HiChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${showCurrencyDropdown ? 'rotate-180' : ''}`} />
+                    </div>
+                    
+                    {showCurrencyDropdown && (
+                      <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl" style={{ top: '100%', marginTop: '4px' }}>
+                        <div className="p-3 border-b border-gray-100">
+                          <div className="relative">
+                            <HiMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                            <input
+                              type="text"
+                              placeholder="Search currency..."
+                              value={currencySearch}
+                              onChange={(e) => setCurrencySearch(e.target.value)}
+                              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                              onClick={(e) => e.stopPropagation()}
+                              autoFocus
+                            />
+                          </div>
+                        </div>
+                        <div className="max-h-60 overflow-y-auto">
+                          {currencies.filter(currency => 
+                            currency.code.toLowerCase().includes(currencySearch.toLowerCase())
+                          ).length === 0 ? (
+                            <div className="px-4 py-3 text-slate-500 text-sm text-center">No currency found</div>
+                          ) : (
+                            currencies.filter(currency => 
+                              currency.code.toLowerCase().includes(currencySearch.toLowerCase())
+                            ).map((currency) => (
+                              <div
+                                key={currency.code}
+                                className={`px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm transition-colors duration-150 ${
+                                  currency.code === values.currency ? 'bg-slate-100 text-slate-900 font-medium' : 'text-slate-700'
+                                }`}
+                                onClick={() => {
+                                  setFieldValue('currency', currency.code);
+                                  setShowCurrencyDropdown(false);
+                                  setCurrencySearch('');
+                                }}
+                              >
+                                {currency.code}
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    )}
                     {touched.currency && errors.currency && (
                       <div className="text-sm text-red-500 mt-1">{errors.currency}</div>
                     )}
@@ -424,7 +625,7 @@ const AddEditPartyForm = () => {
                   </div>
 
                   {/* Address */}
-                  <div className="md:col-span-2">
+                  <div>
                     <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
                       <HiMapPin className="w-4 h-4 mr-2 text-slate-600" />
                       Address

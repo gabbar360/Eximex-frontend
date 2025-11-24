@@ -158,12 +158,9 @@ export default function CompanySetupForm() {
       if (error?.response?.data?.errors) {
         setFieldErrors(error.response.data.errors);
         toast.error('Please check the highlighted fields');
-      } else if (error?.response?.data?.message) {
-        toast.error(error.response.data.message);
-      } else if (error?.message) {
-        toast.error(error.message);
       } else {
-        toast.error('Failed to create company. Please try again.');
+        const errorMessage = error?.response?.data?.message || error?.message || 'Failed to create company. Please try again.';
+        toast.error(errorMessage);
       }
     }
   };

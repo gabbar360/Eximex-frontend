@@ -30,7 +30,10 @@ export const createCompany = async (formData) => {
     return { data: data.data, message: data.message };
   } catch (error) {
     console.error('Create company error:', error);
-    throw error.response?.data || error;
+    const backendMessage = error.response?.data?.message || error.message;
+    const enhancedError = new Error(backendMessage);
+    enhancedError.response = error.response;
+    throw enhancedError;
   }
 };
 
