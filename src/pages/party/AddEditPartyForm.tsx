@@ -63,9 +63,9 @@ const AddEditPartyForm = () => {
     loadData();
   }, []);
   
-  // Initialize location with existing values
+  // Initialize location with existing values (only for edit mode)
   useEffect(() => {
-    if (countries.length > 0 && !initialized && (party.country || party.state || party.city)) {
+    if (countries.length > 0 && !initialized && isEditMode && (party.country || party.state || party.city)) {
       const country = countries.find(c => c.name === party.country);
       if (country) {
         setSelectedCountry(country.isoCode);
@@ -83,33 +83,35 @@ const AddEditPartyForm = () => {
           }
         }
       }
+    }
+    if (countries.length > 0 && !initialized) {
       setInitialized(true);
     }
-  }, [countries, party, initialized]);
+  }, [countries, party, initialized, isEditMode]);
   
   // Load states when country changes
   useEffect(() => {
-    if (selectedCountry && initialized) {
+    if (selectedCountry) {
       const countryStates = State.getStatesOfCountry(selectedCountry);
       setStates(countryStates);
-      if (!party.state) {
+      if (!isEditMode || !party.state) {
         setSelectedState('');
         setCities([]);
         setSelectedCity('');
       }
     }
-  }, [selectedCountry, initialized, party.state]);
+  }, [selectedCountry, isEditMode, party.state]);
   
   // Load cities when state changes
   useEffect(() => {
-    if (selectedCountry && selectedState && initialized) {
+    if (selectedCountry && selectedState) {
       const stateCities = City.getCitiesOfState(selectedCountry, selectedState);
       setCities(stateCities);
-      if (!party.city) {
+      if (!isEditMode || !party.city) {
         setSelectedCity('');
       }
     }
-  }, [selectedCountry, selectedState, initialized, party.city]);
+  }, [selectedCountry, selectedState, isEditMode, party.city]);
 
 
 
