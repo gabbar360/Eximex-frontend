@@ -132,21 +132,17 @@ const UserPermissionManagement = () => {
         const [type, id] = key.split('_');
         const perms = permissions[key];
         
-        // Only include permissions that have at least one true value
-        const hasAnyPermission = Object.values(perms).some(value => value === true);
-        
-        if (hasAnyPermission) {
-          if (type === 'menu') {
-            menuPermissions.push({
-              menuId: parseInt(id),
-              ...perms
-            });
-          } else if (type === 'submenu') {
-            submenuPermissions.push({
-              submenuId: parseInt(id),
-              ...perms
-            });
-          }
+        // Include all permissions (both true and false) to ensure proper state management
+        if (type === 'menu') {
+          menuPermissions.push({
+            menuId: parseInt(id),
+            ...perms
+          });
+        } else if (type === 'submenu') {
+          submenuPermissions.push({
+            submenuId: parseInt(id),
+            ...perms
+          });
         }
       });
 
@@ -449,17 +445,26 @@ const UserPermissionManagement = () => {
                 <div className="space-y-4">
                   {menu.submenus && menu.submenus.length > 0 ? (
                     <div>
-                      <h4 className="font-medium text-slate-800 mb-3 flex items-center gap-2">
-                        <HiCog6Tooth className="w-4 h-4" />
-                        Submenu Permissions
-                      </h4>
-                      <div className="space-y-4">
-                        {menu.submenus.map(submenu => (
-                          <div key={submenu.id} className="pl-4 border-l-2 border-gray-200">
-                            <h5 className="text-sm font-medium text-slate-700 mb-3">↳ {submenu.name}</h5>
-                            {renderPermissionControls(submenu, 'submenu')}
-                          </div>
-                        ))}
+                      <div className="mb-4">
+                        <h4 className="font-medium text-slate-800 mb-3 flex items-center gap-2">
+                          <HiCog6Tooth className="w-4 h-4" />
+                          Main Menu Permissions
+                        </h4>
+                        {renderPermissionControls(menu, 'menu')}
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-slate-800 mb-3 flex items-center gap-2">
+                          <HiCog6Tooth className="w-4 h-4" />
+                          Submenu Permissions
+                        </h4>
+                        <div className="space-y-4">
+                          {menu.submenus.map(submenu => (
+                            <div key={submenu.id} className="pl-4 border-l-2 border-gray-200">
+                              <h5 className="text-sm font-medium text-slate-700 mb-3">↳ {submenu.name}</h5>
+                              {renderPermissionControls(submenu, 'submenu')}
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   ) : (
