@@ -65,7 +65,7 @@ const AddEditPartyForm = () => {
   
   // Initialize location with existing values (only for edit mode)
   useEffect(() => {
-    if (countries.length > 0 && !initialized && isEditMode && (party.country || party.state || party.city)) {
+    if (countries.length > 0 && !initialized && isEditMode && Object.keys(party).length > 0) {
       const country = countries.find(c => c.name === party.country);
       if (country) {
         setSelectedCountry(country.isoCode);
@@ -83,8 +83,8 @@ const AddEditPartyForm = () => {
           }
         }
       }
-    }
-    if (countries.length > 0 && !initialized) {
+      setInitialized(true);
+    } else if (countries.length > 0 && !isEditMode && !initialized) {
       setInitialized(true);
     }
   }, [countries, party, initialized, isEditMode]);
