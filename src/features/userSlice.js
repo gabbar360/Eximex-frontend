@@ -25,9 +25,17 @@ export const getAssignableData = createAsyncThunk(
 
 export const assignData = createAsyncThunk(
   'user/assignData',
-  async ({ entityType, itemIds, fromUserId, toUserId }, { rejectWithValue }) => {
+  async (
+    { entityType, itemIds, fromUserId, toUserId },
+    { rejectWithValue }
+  ) => {
     try {
-      return await userService.assignData(entityType, itemIds, fromUserId, toUserId);
+      return await userService.assignData(
+        entityType,
+        itemIds,
+        fromUserId,
+        toUserId
+      );
     } catch (err) {
       return rejectWithValue(err.message);
     }
@@ -82,7 +90,10 @@ export const deleteStaffAndReassign = createAsyncThunk(
   'user/deleteStaffAndReassign',
   async ({ staffId, reassignToUserId }, { rejectWithValue }) => {
     try {
-      return await userService.deleteStaffAndReassign(staffId, reassignToUserId);
+      return await userService.deleteStaffAndReassign(
+        staffId,
+        reassignToUserId
+      );
     } catch (err) {
       return rejectWithValue(err.message);
     }
@@ -99,8 +110,6 @@ export const getUserDataSummary = createAsyncThunk(
     }
   }
 );
-
-
 
 export const getCompanyDashboardStats = createAsyncThunk(
   'user/getCompanyDashboardStats',

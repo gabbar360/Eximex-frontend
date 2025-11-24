@@ -8,7 +8,11 @@ const ProtectedRoute = () => {
   const location = useLocation();
 
   if (isLoading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-screen">
+        Loading...
+      </div>
+    );
   }
 
   if (!isAuthenticated) {
@@ -16,10 +20,13 @@ const ProtectedRoute = () => {
   }
 
   // Check if user needs company setup (skip for SUPER_ADMIN and company-setup route)
-  if (user && 
-      user.role?.name !== 'SUPER_ADMIN' && 
-      (!user.company && !user.companyId) && 
-      location.pathname !== '/company-setup') {
+  if (
+    user &&
+    user.role?.name !== 'SUPER_ADMIN' &&
+    !user.company &&
+    !user.companyId &&
+    location.pathname !== '/company-setup'
+  ) {
     return <Navigate to="/company-setup" replace />;
   }
 

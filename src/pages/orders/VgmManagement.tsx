@@ -1,7 +1,15 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { HiPencil, HiTrash, HiPlus, HiMagnifyingGlass, HiDocumentText, HiCube, HiArrowDownTray } from 'react-icons/hi2';
+import {
+  HiPencil,
+  HiTrash,
+  HiPlus,
+  HiMagnifyingGlass,
+  HiDocumentText,
+  HiCube,
+  HiArrowDownTray,
+} from 'react-icons/hi2';
 import { Pagination } from 'antd';
 import { fetchOrders } from '../../features/orderSlice';
 import { downloadVgmPdf, deleteVgm } from '../../features/vgmSlice';
@@ -10,7 +18,9 @@ import { toast } from 'react-toastify';
 const VgmManagement: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { orders = [], loading = false } = useSelector((state: any) => state.order || {});
+  const { orders = [], loading = false } = useSelector(
+    (state: any) => state.order || {}
+  );
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -31,7 +41,7 @@ const VgmManagement: React.FC = () => {
 
   const handleConfirmDelete = async () => {
     if (!confirmDelete) return;
-    
+
     try {
       await dispatch(deleteVgm(confirmDelete)).unwrap();
       toast.success('VGM document deleted successfully');
@@ -52,29 +62,29 @@ const VgmManagement: React.FC = () => {
         toast.error('No VGM found for this order');
         return;
       }
-      
+
       const response = await dispatch(downloadVgmPdf(vgmId)).unwrap();
-      
+
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      
+
       const contentDisposition = response.headers['content-disposition'];
       let filename = `VGM-${order.orderNumber}.pdf`;
-      
+
       if (contentDisposition) {
         const filenameMatch = contentDisposition.match(/filename="(.+)"/);
         if (filenameMatch) {
           filename = filenameMatch[1];
         }
       }
-      
+
       link.setAttribute('download', filename);
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-      
+
       toast.success('VGM PDF downloaded successfully');
     } catch (error) {
       console.error('Error downloading VGM PDF:', error);
@@ -83,11 +93,14 @@ const VgmManagement: React.FC = () => {
   };
 
   const filteredOrders = orders.filter((order: any) => {
-    const hasVgm = order.piInvoice?.vgmDocuments && order.piInvoice.vgmDocuments.length > 0;
+    const hasVgm =
+      order.piInvoice?.vgmDocuments && order.piInvoice.vgmDocuments.length > 0;
     if (!hasVgm) return false;
     return (
       order.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.piInvoice?.party?.companyName?.toLowerCase().includes(searchTerm.toLowerCase())
+      order.piInvoice?.party?.companyName
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase())
     );
   });
 
@@ -122,7 +135,7 @@ const VgmManagement: React.FC = () => {
                   </h1>
                 </div>
               </div>
-              
+
               <div className="flex flex-col sm:flex-row gap-3">
                 <div className="relative">
                   <HiMagnifyingGlass className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -134,7 +147,7 @@ const VgmManagement: React.FC = () => {
                     onChange={(e) => handleSearch(e.target.value)}
                   />
                 </div>
-                
+
                 <button
                   onClick={() => navigate('/vgm/create')}
                   className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg flex-shrink-0"
@@ -152,8 +165,12 @@ const VgmManagement: React.FC = () => {
             <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-slate-600 flex items-center justify-center shadow-lg">
               <HiMagnifyingGlass className="w-8 h-8 text-white" />
             </div>
-            <h3 className="text-xl font-semibold text-slate-800 mb-2">No VGM documents found</h3>
-            <p className="text-slate-600 mb-6">Create your first VGM document to get started</p>
+            <h3 className="text-xl font-semibold text-slate-800 mb-2">
+              No VGM documents found
+            </h3>
+            <p className="text-slate-600 mb-6">
+              Create your first VGM document to get started
+            </p>
           </div>
         ) : (
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
@@ -197,47 +214,59 @@ const VgmManagement: React.FC = () => {
                   const vgmWeight = vgmDoc?.verifiedGrossMass || 0;
 
                   return (
-                    <div key={order.id} className="p-4 hover:bg-white/50 transition-all duration-300">
+                    <div
+                      key={order.id}
+                      className="p-4 hover:bg-white/50 transition-all duration-300"
+                    >
                       <div className="grid grid-cols-7 gap-3 items-center">
                         <div className="flex items-center gap-2">
                           <HiDocumentText className="w-4 h-4 text-slate-600 flex-shrink-0" />
-                          <span className="text-slate-800 font-medium truncate" title={order.orderNumber}>
+                          <span
+                            className="text-slate-800 font-medium truncate"
+                            title={order.orderNumber}
+                          >
                             #{order.orderNumber}
                           </span>
                         </div>
-                        
+
                         <div className="text-slate-700 text-sm">
                           {order.piInvoice?.party?.companyName || '-'}
                         </div>
-                        
+
                         <div className="text-slate-700 text-sm">
                           {vgmDoc?.verifiedBy || '-'}
                         </div>
-                        
+
                         <div className="text-slate-700 text-sm font-medium">
                           {vgmWeight > 0 ? `${vgmWeight}kg` : '-'}
                         </div>
-                        
+
                         <div className="text-slate-700 text-sm">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            vgmDoc?.method === 'METHOD_1' 
-                              ? 'bg-blue-100 text-blue-800' 
-                              : 'bg-green-100 text-green-800'
-                          }`}>
-                            {vgmDoc?.method === 'METHOD_1' ? 'Method 1' : 'Method 2'}
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              vgmDoc?.method === 'METHOD_1'
+                                ? 'bg-blue-100 text-blue-800'
+                                : 'bg-green-100 text-green-800'
+                            }`}
+                          >
+                            {vgmDoc?.method === 'METHOD_1'
+                              ? 'Method 1'
+                              : 'Method 2'}
                           </span>
                         </div>
-                        
+
                         <div className="text-slate-700 text-sm">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            hasVgm 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-yellow-100 text-yellow-800'
-                          }`}>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              hasVgm
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-yellow-100 text-yellow-800'
+                            }`}
+                          >
                             {hasVgm ? 'Complete' : 'Pending'}
                           </span>
                         </div>
-                        
+
                         <div className="flex items-center justify-end space-x-2">
                           <button
                             onClick={() => handlePDFDownload(order)}
@@ -272,9 +301,9 @@ const VgmManagement: React.FC = () => {
 
         {filteredOrders.length > 0 && (
           <div className="flex justify-center mt-6">
-            <Pagination 
-              current={currentPage} 
-              total={filteredOrders.length} 
+            <Pagination
+              current={currentPage}
+              total={filteredOrders.length}
               pageSize={pageSize}
               onChange={(page) => setCurrentPage(page)}
             />
@@ -289,8 +318,13 @@ const VgmManagement: React.FC = () => {
               <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-red-600 flex items-center justify-center shadow-lg">
                 <HiTrash className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-slate-800 mb-2">Delete VGM Document</h3>
-              <p className="text-slate-600">Are you sure you want to delete this VGM document? This action cannot be undone.</p>
+              <h3 className="text-xl font-bold text-slate-800 mb-2">
+                Delete VGM Document
+              </h3>
+              <p className="text-slate-600">
+                Are you sure you want to delete this VGM document? This action
+                cannot be undone.
+              </p>
             </div>
             <div className="flex items-center justify-center space-x-3">
               <button

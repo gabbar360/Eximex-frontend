@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faEnvelope, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
+import {
+  faArrowLeft,
+  faEnvelope,
+  faPaperPlane,
+} from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import { getPiInvoiceById } from '../../features/piSlice';
 
@@ -60,11 +64,17 @@ const EmailInvoice: React.FC = () => {
               onClick={() => navigate(-1)}
               className="p-2.5 hover:bg-gray-100 rounded-lg transition-all duration-200"
             >
-              <FontAwesomeIcon icon={faArrowLeft} className="w-5 h-5 text-gray-600" />
+              <FontAwesomeIcon
+                icon={faArrowLeft}
+                className="w-5 h-5 text-gray-600"
+              />
             </button>
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-                <FontAwesomeIcon icon={faEnvelope} className="w-6 h-6 text-white" />
+                <FontAwesomeIcon
+                  icon={faEnvelope}
+                  className="w-6 h-6 text-white"
+                />
               </div>
               <div>
                 <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
@@ -102,7 +112,9 @@ const EmailInvoice: React.FC = () => {
                     }).format(piData.totalAmount || 0)}
                   </p>
                   <p className="text-sm text-gray-600">
-                    {new Date(piData.invoiceDate || piData.date).toLocaleDateString()}
+                    {new Date(
+                      piData.invoiceDate || piData.date
+                    ).toLocaleDateString()}
                   </p>
                 </div>
               </div>

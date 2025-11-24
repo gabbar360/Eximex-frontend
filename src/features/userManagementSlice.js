@@ -139,7 +139,9 @@ const userManagementSlice = createSlice({
       })
       .addCase(deleteUser.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.users = state.users.filter((user) => user.id !== payload.deletedId);
+        state.users = state.users.filter(
+          (user) => user.id !== payload.deletedId
+        );
         state.successMessage = payload?.message;
       })
       .addCase(deleteUser.rejected, (state, { payload }) => {
@@ -149,5 +151,6 @@ const userManagementSlice = createSlice({
   },
 });
 
-export const { setSelectedUser, clearSelectedUser, clearMessages } = userManagementSlice.actions;
+export const { setSelectedUser, clearSelectedUser, clearMessages } =
+  userManagementSlice.actions;
 export default userManagementSlice.reducer;

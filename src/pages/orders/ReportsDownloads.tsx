@@ -1,6 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { HiMagnifyingGlass, HiDocumentText, HiCube, HiArrowDownTray } from 'react-icons/hi2';
+import {
+  HiMagnifyingGlass,
+  HiDocumentText,
+  HiCube,
+  HiArrowDownTray,
+} from 'react-icons/hi2';
 import { Pagination } from 'antd';
 import { fetchOrders } from '../../features/orderSlice';
 
@@ -9,7 +14,9 @@ import axiosInstance from '../../utils/axiosInstance';
 
 const ReportsDownloads: React.FC = () => {
   const dispatch = useDispatch();
-  const { orders = [], loading = false } = useSelector((state: any) => state.order || {});
+  const { orders = [], loading = false } = useSelector(
+    (state: any) => state.order || {}
+  );
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -26,19 +33,25 @@ const ReportsDownloads: React.FC = () => {
   const handleCommercialInvoiceDownload = async (order: any) => {
     try {
       toast.info('Preparing Commercial Invoice PDF...', { autoClose: 2000 });
-      const response = await axiosInstance.get(`/orders/${order.id}/download-invoice-pdf`, {
-        responseType: 'blob',
-      });
-      
+      const response = await axiosInstance.get(
+        `/orders/${order.id}/download-invoice-pdf`,
+        {
+          responseType: 'blob',
+        }
+      );
+
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `Commercial-Invoice-${order.orderNumber}.pdf`);
+      link.setAttribute(
+        'download',
+        `Commercial-Invoice-${order.orderNumber}.pdf`
+      );
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-      
+
       toast.success('Commercial Invoice downloaded successfully');
     } catch (error) {
       console.error('Error downloading Commercial Invoice:', error);
@@ -49,10 +62,13 @@ const ReportsDownloads: React.FC = () => {
   const handleBLDraftDownload = async (order: any) => {
     try {
       toast.info('Preparing BL Draft PDF...', { autoClose: 2000 });
-      const response = await axiosInstance.get(`/orders/${order.id}/bl-draft-pdf`, {
-        responseType: 'blob',
-      });
-      
+      const response = await axiosInstance.get(
+        `/orders/${order.id}/bl-draft-pdf`,
+        {
+          responseType: 'blob',
+        }
+      );
+
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -61,7 +77,7 @@ const ReportsDownloads: React.FC = () => {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-      
+
       toast.success('BL Draft downloaded successfully');
     } catch (error) {
       console.error('Error downloading BL Draft:', error);
@@ -69,12 +85,12 @@ const ReportsDownloads: React.FC = () => {
     }
   };
 
-
-
   const filteredOrders = orders.filter((order: any) => {
     return (
       order.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.piInvoice?.party?.companyName?.toLowerCase().includes(searchTerm.toLowerCase())
+      order.piInvoice?.party?.companyName
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase())
     );
   });
 
@@ -109,7 +125,7 @@ const ReportsDownloads: React.FC = () => {
                   </h1>
                 </div>
               </div>
-              
+
               <div className="flex flex-col sm:flex-row gap-3">
                 <div className="relative">
                   <HiMagnifyingGlass className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -131,8 +147,12 @@ const ReportsDownloads: React.FC = () => {
             <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-slate-600 flex items-center justify-center shadow-lg">
               <HiMagnifyingGlass className="w-8 h-8 text-white" />
             </div>
-            <h3 className="text-xl font-semibold text-slate-800 mb-2">No orders found</h3>
-            <p className="text-slate-600 mb-6">No orders available for download</p>
+            <h3 className="text-xl font-semibold text-slate-800 mb-2">
+              No orders found
+            </h3>
+            <p className="text-slate-600 mb-6">
+              No orders available for download
+            </p>
           </div>
         ) : (
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
@@ -163,35 +183,42 @@ const ReportsDownloads: React.FC = () => {
               </div>
               <div className="divide-y divide-white/20">
                 {paginatedOrders.map((order: any) => {
-
                   return (
-                    <div key={order.id} className="p-4 hover:bg-white/50 transition-all duration-300">
+                    <div
+                      key={order.id}
+                      className="p-4 hover:bg-white/50 transition-all duration-300"
+                    >
                       <div className="grid grid-cols-5 gap-3 items-center">
                         <div className="flex items-center gap-2">
                           <HiDocumentText className="w-4 h-4 text-slate-600 flex-shrink-0" />
-                          <span className="text-slate-800 font-medium truncate" title={order.orderNumber}>
+                          <span
+                            className="text-slate-800 font-medium truncate"
+                            title={order.orderNumber}
+                          >
                             #{order.orderNumber}
                           </span>
                         </div>
-                        
+
                         <div className="text-slate-700 text-sm">
                           {order.piInvoice?.party?.companyName || '-'}
                         </div>
-                        
+
                         <div className="text-slate-700 text-sm font-medium">
                           ${order.totalAmount?.toLocaleString() || '0'}
                         </div>
-                        
+
                         <div className="text-slate-700 text-sm">
                           <button
-                            onClick={() => handleCommercialInvoiceDownload(order)}
+                            onClick={() =>
+                              handleCommercialInvoiceDownload(order)
+                            }
                             className="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
                           >
                             <HiArrowDownTray className="w-3 h-3" />
                             Download
                           </button>
                         </div>
-                        
+
                         <div className="flex items-center justify-end">
                           <button
                             onClick={() => handleBLDraftDownload(order)}
@@ -212,9 +239,9 @@ const ReportsDownloads: React.FC = () => {
 
         {filteredOrders.length > 0 && (
           <div className="flex justify-center mt-6">
-            <Pagination 
-              current={currentPage} 
-              total={filteredOrders.length} 
+            <Pagination
+              current={currentPage}
+              total={filteredOrders.length}
               pageSize={pageSize}
               onChange={(page) => setCurrentPage(page)}
             />

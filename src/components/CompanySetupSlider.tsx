@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 
-
-
-const images = ["/silder_1.png", "/silder_2.png", "/silder_3.png", "/silder_4.png"];
+const images = [
+  '/silder_1.png',
+  '/silder_2.png',
+  '/silder_3.png',
+  '/silder_4.png',
+];
 
 export default function CompanySetupSlider() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -16,7 +19,7 @@ export default function CompanySetupSlider() {
 
   return (
     <div className="relative h-full overflow-hidden">
-      <img 
+      <img
         src={images[currentSlide]}
         alt={`Slide ${currentSlide + 1}`}
         className="w-full h-full object-cover transition-all duration-1000"
@@ -27,8 +30,8 @@ export default function CompanySetupSlider() {
             key={index}
             onClick={() => setCurrentSlide(index)}
             className={`transition-all duration-300 ${
-              index === currentSlide 
-                ? 'w-8 h-3 bg-white rounded-full' 
+              index === currentSlide
+                ? 'w-8 h-3 bg-white rounded-full'
                 : 'w-3 h-3 bg-white/60 rounded-full hover:bg-white/80'
             }`}
           />

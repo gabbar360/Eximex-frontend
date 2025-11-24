@@ -2,14 +2,26 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { getAllRoles, createRole, updateRole, deleteRole } from '../../features/roleSlice';
-import { HiPlus, HiPencil, HiTrash, HiEye, HiArrowLeft, HiCheckCircle } from 'react-icons/hi';
+import {
+  getAllRoles,
+  createRole,
+  updateRole,
+  deleteRole,
+} from '../../features/roleSlice';
+import {
+  HiPlus,
+  HiPencil,
+  HiTrash,
+  HiEye,
+  HiArrowLeft,
+  HiCheckCircle,
+} from 'react-icons/hi';
 
 const RoleManagement: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { roles, loading, error } = useSelector((state: any) => state.role);
-  
+
   const [showForm, setShowForm] = useState(false);
   const [editingRole, setEditingRole] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -17,7 +29,7 @@ const RoleManagement: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     displayName: '',
-    description: ''
+    description: '',
   });
 
   useEffect(() => {
@@ -26,10 +38,11 @@ const RoleManagement: React.FC = () => {
 
   useEffect(() => {
     if (roles) {
-      const filtered = roles.filter((role: any) =>
-        role.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        role.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        role.description?.toLowerCase().includes(searchTerm.toLowerCase())
+      const filtered = roles.filter(
+        (role: any) =>
+          role.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          role.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          role.description?.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredRoles(filtered);
     }
@@ -39,7 +52,9 @@ const RoleManagement: React.FC = () => {
     e.preventDefault();
     try {
       if (editingRole) {
-        const result = await dispatch(updateRole({ id: editingRole.id, roleData: formData })).unwrap();
+        const result = await dispatch(
+          updateRole({ id: editingRole.id, roleData: formData })
+        ).unwrap();
         toast.success(result.message || 'Role updated successfully');
       } else {
         const result = await dispatch(createRole(formData)).unwrap();
@@ -52,7 +67,9 @@ const RoleManagement: React.FC = () => {
   };
 
   const handleDelete = async (id: number, roleName: string) => {
-    if (window.confirm(`Are you sure you want to delete the role "${roleName}"?`)) {
+    if (
+      window.confirm(`Are you sure you want to delete the role "${roleName}"?`)
+    ) {
       try {
         const result = await dispatch(deleteRole(id)).unwrap();
         toast.success(result.message || 'Role deleted successfully');
@@ -66,7 +83,7 @@ const RoleManagement: React.FC = () => {
     setFormData({
       name: '',
       displayName: '',
-      description: ''
+      description: '',
     });
     setEditingRole(null);
     setShowForm(false);
@@ -77,7 +94,7 @@ const RoleManagement: React.FC = () => {
     setFormData({
       name: role.name,
       displayName: role.displayName,
-      description: role.description
+      description: role.description,
     });
     setShowForm(true);
   };
@@ -134,7 +151,9 @@ const RoleManagement: React.FC = () => {
                   <input
                     type="text"
                     value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                     placeholder="Enter role name"
                     required
@@ -148,7 +167,9 @@ const RoleManagement: React.FC = () => {
                   <input
                     type="text"
                     value={formData.displayName}
-                    onChange={(e) => setFormData({...formData, displayName: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, displayName: e.target.value })
+                    }
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                     placeholder="Enter display name"
                     required
@@ -162,14 +183,14 @@ const RoleManagement: React.FC = () => {
                 </label>
                 <textarea
                   value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                   placeholder="Enter role description"
                   rows={3}
                 />
               </div>
-
-
 
               {/* Submit Buttons */}
               <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
@@ -249,9 +270,13 @@ const RoleManagement: React.FC = () => {
               <div className="text-slate-400 mb-4">
                 <HiEye className="w-16 h-16 mx-auto" />
               </div>
-              <h3 className="text-lg font-medium text-slate-600 mb-2">No roles found</h3>
+              <h3 className="text-lg font-medium text-slate-600 mb-2">
+                No roles found
+              </h3>
               <p className="text-slate-500 mb-4">
-                {searchTerm ? 'No roles match your search criteria.' : 'Get started by creating your first role.'}
+                {searchTerm
+                  ? 'No roles match your search criteria.'
+                  : 'Get started by creating your first role.'}
               </p>
               {!searchTerm && (
                 <button
@@ -287,12 +312,19 @@ const RoleManagement: React.FC = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredRoles.map((role: any) => (
-                    <tr key={role.id} className="hover:bg-gray-50 transition-colors">
+                    <tr
+                      key={role.id}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-slate-900">{role.name}</div>
+                        <div className="text-sm font-medium text-slate-900">
+                          {role.name}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-slate-600">{role.displayName}</div>
+                        <div className="text-sm text-slate-600">
+                          {role.displayName}
+                        </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="text-sm text-slate-600 max-w-xs truncate">
@@ -300,11 +332,13 @@ const RoleManagement: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          role.isSystem 
-                            ? 'bg-blue-100 text-blue-800' 
-                            : 'bg-green-100 text-green-800'
-                        }`}>
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            role.isSystem
+                              ? 'bg-blue-100 text-blue-800'
+                              : 'bg-green-100 text-green-800'
+                          }`}
+                        >
                           {role.isSystem ? 'System' : 'Custom'}
                         </span>
                       </td>
@@ -344,7 +378,7 @@ const RoleManagement: React.FC = () => {
                 Showing {filteredRoles.length} of {roles.length} roles
               </span>
               <span>
-                {roles.filter((r: any) => r.isSystem).length} system roles, {' '}
+                {roles.filter((r: any) => r.isSystem).length} system roles,{' '}
                 {roles.filter((r: any) => !r.isSystem).length} custom roles
               </span>
             </div>

@@ -154,8 +154,6 @@ const Header: React.FC<HeaderProps> = ({ onClick, onToggle }) => {
             {/* <!-- Dark Mode Toggler --> */}
             <ThemeToggleButton />
             {/* <!-- Dark Mode Toggler --> */}
-            
-
           </div>
           {/* <!-- User Area --> */}
           <UserDropdown />

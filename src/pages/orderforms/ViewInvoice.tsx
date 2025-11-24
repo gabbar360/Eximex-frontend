@@ -14,7 +14,10 @@ import {
   faFileInvoice,
 } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
-import { fetchOrderById, downloadOrderInvoicePdf } from '../../features/orderSlice';
+import {
+  fetchOrderById,
+  downloadOrderInvoicePdf,
+} from '../../features/orderSlice';
 
 import PageMeta from '../../components/common/PageMeta';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
@@ -50,7 +53,7 @@ const ViewInvoice: React.FC = () => {
     try {
       setDownloading(true);
       toast.info('Preparing PDF download...', { autoClose: 2000 });
-      
+
       const result = await dispatch(downloadOrderInvoicePdf(id)).unwrap();
       toast.success(`Invoice PDF downloaded: ${result.filename}`);
     } catch (error) {

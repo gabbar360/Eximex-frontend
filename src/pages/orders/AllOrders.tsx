@@ -1,13 +1,32 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { HiEye, HiMagnifyingGlass, HiDocumentText, HiClock, HiCheckCircle, HiXCircle, HiDocument, HiCurrencyDollar, HiBuildingOffice2, HiCalendar, HiEllipsisVertical, HiTruck, HiClipboard, HiScale, HiPlus, HiTrash } from 'react-icons/hi2';
+import {
+  HiEye,
+  HiMagnifyingGlass,
+  HiDocumentText,
+  HiClock,
+  HiCheckCircle,
+  HiXCircle,
+  HiDocument,
+  HiCurrencyDollar,
+  HiBuildingOffice2,
+  HiCalendar,
+  HiEllipsisVertical,
+  HiTruck,
+  HiClipboard,
+  HiScale,
+  HiPlus,
+  HiTrash,
+} from 'react-icons/hi2';
 import { toast } from 'react-toastify';
 import { fetchOrders, deleteOrder } from '../../features/orderSlice';
 
 const AllOrders: React.FC = () => {
   const dispatch = useDispatch();
-  const { orders = [], loading = false } = useSelector((state: any) => state.order || {});
+  const { orders = [], loading = false } = useSelector(
+    (state: any) => state.order || {}
+  );
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -43,7 +62,7 @@ const AllOrders: React.FC = () => {
     if (openDropdown) {
       document.addEventListener('mousedown', handleClickOutside);
     }
-    
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -51,33 +70,73 @@ const AllOrders: React.FC = () => {
 
   const filteredOrders = orders.filter((order: any) => {
     if (!order) return false;
-    
-    const matchesSearch = !searchTerm || 
+
+    const matchesSearch =
+      !searchTerm ||
       order.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.piInvoice?.party?.companyName?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = filterStatus === 'all' || 
-      (order.orderStatus && order.orderStatus.toLowerCase() === filterStatus.toLowerCase());
-    
+      order.piInvoice?.party?.companyName
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase());
+
+    const matchesStatus =
+      filterStatus === 'all' ||
+      (order.orderStatus &&
+        order.orderStatus.toLowerCase() === filterStatus.toLowerCase());
+
     return matchesSearch && matchesStatus;
   });
 
   const getStatusConfig = (status: string) => {
     switch (status?.toLowerCase()) {
       case 'confirmed':
-        return { icon: HiCheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200' };
+        return {
+          icon: HiCheckCircle,
+          color: 'text-emerald-600',
+          bg: 'bg-emerald-50',
+          border: 'border-emerald-200',
+        };
       case 'pending':
-        return { icon: HiClock, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-200' };
+        return {
+          icon: HiClock,
+          color: 'text-amber-600',
+          bg: 'bg-amber-50',
+          border: 'border-amber-200',
+        };
       case 'processing':
-        return { icon: HiDocument, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' };
+        return {
+          icon: HiDocument,
+          color: 'text-blue-600',
+          bg: 'bg-blue-50',
+          border: 'border-blue-200',
+        };
       case 'shipped':
-        return { icon: HiTruck, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-200' };
+        return {
+          icon: HiTruck,
+          color: 'text-indigo-600',
+          bg: 'bg-indigo-50',
+          border: 'border-indigo-200',
+        };
       case 'delivered':
-        return { icon: HiCheckCircle, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200' };
+        return {
+          icon: HiCheckCircle,
+          color: 'text-green-600',
+          bg: 'bg-green-50',
+          border: 'border-green-200',
+        };
       case 'cancelled':
-        return { icon: HiXCircle, color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-200' };
+        return {
+          icon: HiXCircle,
+          color: 'text-red-600',
+          bg: 'bg-red-50',
+          border: 'border-red-200',
+        };
       default:
-        return { icon: HiDocument, color: 'text-gray-600', bg: 'bg-gray-50', border: 'border-gray-200' };
+        return {
+          icon: HiDocument,
+          color: 'text-gray-600',
+          bg: 'bg-gray-50',
+          border: 'border-gray-200',
+        };
     }
   };
 
@@ -98,7 +157,7 @@ const AllOrders: React.FC = () => {
                   </h1>
                 </div>
               </div>
-              
+
               <div className="flex flex-col sm:flex-row gap-3">
                 <div className="relative">
                   <HiMagnifyingGlass className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -110,7 +169,7 @@ const AllOrders: React.FC = () => {
                     onChange={(e) => handleSearch(e.target.value)}
                   />
                 </div>
-                
+
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
@@ -124,7 +183,7 @@ const AllOrders: React.FC = () => {
                   <option value="delivered">Delivered</option>
                   <option value="cancelled">Cancelled</option>
                 </select>
-                
+
                 <Link
                   to="/add-order"
                   className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg"
@@ -148,10 +207,12 @@ const AllOrders: React.FC = () => {
             <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-slate-600 flex items-center justify-center shadow-lg">
               <HiMagnifyingGlass className="w-8 h-8 text-white" />
             </div>
-            <h3 className="text-xl font-semibold text-slate-800 mb-2">No orders found</h3>
+            <h3 className="text-xl font-semibold text-slate-800 mb-2">
+              No orders found
+            </h3>
             <p className="text-slate-600 mb-6">
-              {searchTerm || filterStatus !== 'all' 
-                ? 'Try adjusting your search or filters.' 
+              {searchTerm || filterStatus !== 'all'
+                ? 'Try adjusting your search or filters.'
                 : 'No orders available at the moment.'}
             </p>
           </div>
@@ -161,7 +222,13 @@ const AllOrders: React.FC = () => {
             <div className="hidden lg:block">
               {/* Table Header */}
               <div className="bg-gray-50 border-b border-gray-200 p-4">
-                <div className="grid gap-2 text-sm font-semibold text-slate-700" style={{gridTemplateColumns: '1.5fr 1.2fr 1fr 1fr 1fr 1fr 1fr 0.8fr'}}>
+                <div
+                  className="grid gap-2 text-sm font-semibold text-slate-700"
+                  style={{
+                    gridTemplateColumns:
+                      '1.5fr 1.2fr 1fr 1fr 1fr 1fr 1fr 0.8fr',
+                  }}
+                >
                   <div className="flex items-center gap-2">
                     <HiDocumentText className="w-4 h-4 text-slate-600" />
                     <span>Order No.</span>
@@ -200,45 +267,66 @@ const AllOrders: React.FC = () => {
                 {filteredOrders.map((order) => {
                   const statusConfig = getStatusConfig(order.orderStatus);
                   const StatusIcon = statusConfig.icon;
-                  
+
                   return (
-                    <div key={order.id} className="p-4 hover:bg-white/50 transition-all duration-300">
-                      <div className="grid gap-2 items-center" style={{gridTemplateColumns: '1.5fr 1.2fr 1fr 1fr 1fr 1fr 1fr 0.8fr'}}>
+                    <div
+                      key={order.id}
+                      className="p-4 hover:bg-white/50 transition-all duration-300"
+                    >
+                      <div
+                        className="grid gap-2 items-center"
+                        style={{
+                          gridTemplateColumns:
+                            '1.5fr 1.2fr 1fr 1fr 1fr 1fr 1fr 0.8fr',
+                        }}
+                      >
                         {/* Order Number */}
                         <div className="flex items-center gap-2">
                           <HiDocumentText className="w-4 h-4 text-slate-600 flex-shrink-0" />
-                          <span className="text-slate-800 font-medium truncate" title={order.orderNumber}>
+                          <span
+                            className="text-slate-800 font-medium truncate"
+                            title={order.orderNumber}
+                          >
                             {order.orderNumber}
                           </span>
                         </div>
-                        
+
                         {/* Client */}
-                        <div className="text-slate-700 text-sm truncate" title={order.piInvoice?.party?.companyName}>
+                        <div
+                          className="text-slate-700 text-sm truncate"
+                          title={order.piInvoice?.party?.companyName}
+                        >
                           {order.piInvoice?.party?.companyName || '-'}
                         </div>
-                        
+
                         {/* Date */}
                         <div className="text-slate-700 text-sm">
-                          {new Date(order.createdAt).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
+                          {new Date(order.createdAt).toLocaleDateString(
+                            'en-US',
+                            {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                            }
+                          )}
                         </div>
-                        
+
                         {/* Status */}
                         <div>
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${statusConfig.bg} ${statusConfig.color} ${statusConfig.border}`}>
+                          <span
+                            className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${statusConfig.bg} ${statusConfig.color} ${statusConfig.border}`}
+                          >
                             <StatusIcon className="w-3 h-3 mr-1" />
-                            {order.orderStatus?.charAt(0).toUpperCase() + order.orderStatus?.slice(1)}
+                            {order.orderStatus?.charAt(0).toUpperCase() +
+                              order.orderStatus?.slice(1)}
                           </span>
                         </div>
-                        
+
                         {/* PI Number */}
                         <div className="text-slate-700 text-sm">
                           {order.piNumber || '-'}
                         </div>
-                        
+
                         {/* Amount */}
                         <div className="text-slate-700 text-sm font-medium">
                           {new Intl.NumberFormat('en-US', {
@@ -247,7 +335,7 @@ const AllOrders: React.FC = () => {
                             maximumFractionDigits: 0,
                           }).format(order.totalAmount || 0)}
                         </div>
-                        
+
                         {/* Advance Payment */}
                         <div className="text-slate-700 text-sm font-medium">
                           {new Intl.NumberFormat('en-US', {
@@ -256,7 +344,7 @@ const AllOrders: React.FC = () => {
                             maximumFractionDigits: 0,
                           }).format(order.piInvoice?.advanceAmount || 0)}
                         </div>
-                        
+
                         {/* Actions */}
                         <div className="flex items-center justify-end space-x-2">
                           {order.piInvoiceId && (
@@ -282,52 +370,74 @@ const AllOrders: React.FC = () => {
                 })}
               </div>
             </div>
-            
+
             {/* Mobile Card View */}
             <div className="lg:hidden divide-y divide-white/20">
               {filteredOrders.map((order) => {
                 const statusConfig = getStatusConfig(order.orderStatus);
                 const StatusIcon = statusConfig.icon;
-                
+
                 return (
                   <div key={order.id} className="p-4">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
                         <HiDocumentText className="w-5 h-5 text-slate-600 flex-shrink-0" />
-                        <h3 className="font-semibold text-slate-800">{order.orderNumber}</h3>
+                        <h3 className="font-semibold text-slate-800">
+                          {order.orderNumber}
+                        </h3>
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
-                        <span className="font-medium text-slate-500 text-xs">Client:</span>
-                        <div className="text-slate-700 truncate">{order.piInvoice?.party?.companyName || '-'}</div>
-                      </div>
-                      <div>
-                        <span className="font-medium text-slate-500 text-xs">Date:</span>
-                        <div className="text-slate-700">
-                          {new Date(order.createdAt).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
+                        <span className="font-medium text-slate-500 text-xs">
+                          Client:
+                        </span>
+                        <div className="text-slate-700 truncate">
+                          {order.piInvoice?.party?.companyName || '-'}
                         </div>
                       </div>
                       <div>
-                        <span className="font-medium text-slate-500 text-xs">Status:</span>
+                        <span className="font-medium text-slate-500 text-xs">
+                          Date:
+                        </span>
+                        <div className="text-slate-700">
+                          {new Date(order.createdAt).toLocaleDateString(
+                            'en-US',
+                            {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                            }
+                          )}
+                        </div>
+                      </div>
+                      <div>
+                        <span className="font-medium text-slate-500 text-xs">
+                          Status:
+                        </span>
                         <div>
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${statusConfig.bg} ${statusConfig.color} ${statusConfig.border}`}>
+                          <span
+                            className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${statusConfig.bg} ${statusConfig.color} ${statusConfig.border}`}
+                          >
                             <StatusIcon className="w-3 h-3 mr-1" />
-                            {order.orderStatus?.charAt(0).toUpperCase() + order.orderStatus?.slice(1)}
+                            {order.orderStatus?.charAt(0).toUpperCase() +
+                              order.orderStatus?.slice(1)}
                           </span>
                         </div>
                       </div>
                       <div>
-                        <span className="font-medium text-slate-500 text-xs">PI Number:</span>
-                        <div className="text-slate-700">{order.piNumber || '-'}</div>
+                        <span className="font-medium text-slate-500 text-xs">
+                          PI Number:
+                        </span>
+                        <div className="text-slate-700">
+                          {order.piNumber || '-'}
+                        </div>
                       </div>
                       <div className="col-span-2">
-                        <span className="font-medium text-slate-500 text-xs">Amount:</span>
+                        <span className="font-medium text-slate-500 text-xs">
+                          Amount:
+                        </span>
                         <div className="text-slate-700 font-medium">
                           {new Intl.NumberFormat('en-US', {
                             style: 'currency',
@@ -337,7 +447,9 @@ const AllOrders: React.FC = () => {
                         </div>
                       </div>
                       <div>
-                        <span className="font-medium text-slate-500 text-xs">Advance Payment:</span>
+                        <span className="font-medium text-slate-500 text-xs">
+                          Advance Payment:
+                        </span>
                         <div className="text-slate-700 font-medium">
                           {new Intl.NumberFormat('en-US', {
                             style: 'currency',
@@ -347,7 +459,7 @@ const AllOrders: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center justify-center pt-3 mt-3 border-t border-gray-200">
                       <div className="flex gap-2">
                         <Link
@@ -389,8 +501,13 @@ const AllOrders: React.FC = () => {
               <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-red-600 flex items-center justify-center shadow-lg">
                 <HiTrash className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-slate-800 mb-2">Delete Order</h3>
-              <p className="text-slate-600">Are you sure you want to delete this order? This action cannot be undone.</p>
+              <h3 className="text-xl font-bold text-slate-800 mb-2">
+                Delete Order
+              </h3>
+              <p className="text-slate-600">
+                Are you sure you want to delete this order? This action cannot
+                be undone.
+              </p>
             </div>
             <div className="flex items-center justify-center space-x-3">
               <button

@@ -1,5 +1,14 @@
 import React from 'react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts';
 
 const data = [
   { month: 'Jan', sales: 180, revenue: 40 },
@@ -27,24 +36,24 @@ export default function LineChartOne() {
           <AreaChart data={data}>
             <defs>
               <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#465FFF" stopOpacity={0.8}/>
-                <stop offset="95%" stopColor="#465FFF" stopOpacity={0.1}/>
+                <stop offset="5%" stopColor="#465FFF" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#465FFF" stopOpacity={0.1} />
               </linearGradient>
               <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#9CB9FF" stopOpacity={0.8}/>
-                <stop offset="95%" stopColor="#9CB9FF" stopOpacity={0.1}/>
+                <stop offset="5%" stopColor="#9CB9FF" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#9CB9FF" stopOpacity={0.1} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis dataKey="month" stroke="#666" fontSize={12} />
             <YAxis stroke="#666" fontSize={12} />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: '#fff', 
+            <Tooltip
+              contentStyle={{
+                backgroundColor: '#fff',
                 border: '1px solid #e0e0e0',
                 borderRadius: '8px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-              }} 
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+              }}
             />
             <Legend />
             <Area

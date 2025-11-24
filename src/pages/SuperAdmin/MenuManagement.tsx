@@ -1,9 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Button, Table, Modal, Form, Input, Switch, Space, Popconfirm, message } from 'antd';
+import {
+  Button,
+  Table,
+  Modal,
+  Form,
+  Input,
+  Switch,
+  Space,
+  Popconfirm,
+  message,
+} from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { toast } from 'react-toastify';
-import { HiPlus, HiPencil, HiTrash, HiListBullet, HiCog6Tooth, HiBars3 } from 'react-icons/hi2';
+import {
+  HiPlus,
+  HiPencil,
+  HiTrash,
+  HiListBullet,
+  HiCog6Tooth,
+  HiBars3,
+} from 'react-icons/hi2';
 import { MdMenu, MdMenuOpen, MdSettings } from 'react-icons/md';
 import {
   fetchMenus,
@@ -13,13 +30,13 @@ import {
   addSubmenu,
   updateSubmenu,
   deleteSubmenu,
-  clearError
+  clearError,
 } from '../../features/menuSlice';
 
 const MenuManagement = () => {
   const dispatch = useDispatch();
   const { menus, loading, error } = useSelector((state) => state.menu);
-  
+
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isSubmenuModal, setIsSubmenuModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
@@ -89,7 +106,9 @@ const MenuManagement = () => {
     try {
       if (isSubmenuModal) {
         if (editingItem) {
-          const response = await dispatch(updateSubmenu({ id: editingItem.id, submenu: values })).unwrap();
+          const response = await dispatch(
+            updateSubmenu({ id: editingItem.id, submenu: values })
+          ).unwrap();
           toast.success(response?.message || 'Submenu updated successfully');
         } else {
           const response = await dispatch(addSubmenu(values)).unwrap();
@@ -97,7 +116,9 @@ const MenuManagement = () => {
         }
       } else {
         if (editingItem) {
-          const response = await dispatch(updateMenu({ id: editingItem.id, menu: values })).unwrap();
+          const response = await dispatch(
+            updateMenu({ id: editingItem.id, menu: values })
+          ).unwrap();
           toast.success(response?.message || 'Menu updated successfully');
         } else {
           const response = await dispatch(addMenu(values)).unwrap();
@@ -135,7 +156,9 @@ const MenuManagement = () => {
       dataIndex: 'slug',
       key: 'slug',
       render: (text) => (
-        <span className="text-slate-600 text-sm font-mono bg-gray-100 px-2 py-1 rounded">{text}</span>
+        <span className="text-slate-600 text-sm font-mono bg-gray-100 px-2 py-1 rounded">
+          {text}
+        </span>
       ),
     },
     {
@@ -185,9 +208,9 @@ const MenuManagement = () => {
       dataIndex: 'isActive',
       key: 'isActive',
       render: (isActive) => (
-        <Switch 
-          checked={isActive} 
-          disabled 
+        <Switch
+          checked={isActive}
+          disabled
           className={isActive ? 'bg-brand-500' : ''}
         />
       ),
@@ -256,7 +279,9 @@ const MenuManagement = () => {
       dataIndex: 'slug',
       key: 'slug',
       render: (text) => (
-        <span className="text-slate-500 text-xs font-mono bg-gray-50 px-2 py-1 rounded">{text}</span>
+        <span className="text-slate-500 text-xs font-mono bg-gray-50 px-2 py-1 rounded">
+          {text}
+        </span>
       ),
     },
     {
@@ -292,9 +317,9 @@ const MenuManagement = () => {
       dataIndex: 'isActive',
       key: 'isActive',
       render: (isActive) => (
-        <Switch 
-          checked={isActive} 
-          disabled 
+        <Switch
+          checked={isActive}
+          disabled
           size="small"
           className={isActive ? 'bg-brand-500' : ''}
         />
@@ -371,7 +396,7 @@ const MenuManagement = () => {
                   </p>
                 </div>
               </div>
-              
+
               <button
                 onClick={handleAddMenu}
                 className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg transition-all duration-300"
@@ -388,14 +413,18 @@ const MenuManagement = () => {
           {loading ? (
             <div className="p-12 text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-slate-600 mx-auto mb-4"></div>
-              <p className="text-slate-600 dark:text-gray-400 font-medium">Loading menus...</p>
+              <p className="text-slate-600 dark:text-gray-400 font-medium">
+                Loading menus...
+              </p>
             </div>
           ) : menus.length === 0 ? (
             <div className="p-12 text-center">
               <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-r from-slate-600 to-slate-700 flex items-center justify-center shadow-lg">
                 <HiBars3 className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-slate-800 dark:text-white mb-2">No menus found</h3>
+              <h3 className="text-xl font-semibold text-slate-800 dark:text-white mb-2">
+                No menus found
+              </h3>
               <p className="text-slate-600 dark:text-gray-400 mb-6">
                 Add your first menu to get started
               </p>
@@ -417,15 +446,17 @@ const MenuManagement = () => {
                 pageSize: 10,
                 showSizeChanger: true,
                 showQuickJumper: true,
-                showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+                showTotal: (total, range) =>
+                  `${range[0]}-${range[1]} of ${total} items`,
               }}
               expandable={{
                 expandedRowRender,
-                rowExpandable: (record) => record.submenus && record.submenus.length > 0,
-                expandIcon: ({ expanded, onExpand, record }) => (
+                rowExpandable: (record) =>
+                  record.submenus && record.submenus.length > 0,
+                expandIcon: ({ expanded, onExpand, record }) =>
                   record.submenus && record.submenus.length > 0 ? (
                     <button
-                      onClick={e => onExpand(record, e)}
+                      onClick={(e) => onExpand(record, e)}
                       className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                     >
                       {expanded ? (
@@ -436,8 +467,7 @@ const MenuManagement = () => {
                     </button>
                   ) : (
                     <span className="w-6 h-6 inline-block" />
-                  )
-                ),
+                  ),
               }}
               className="menu-management-table"
             />
@@ -463,8 +493,8 @@ const MenuManagement = () => {
                     ? 'Edit Submenu'
                     : 'Add Submenu'
                   : editingItem
-                  ? 'Edit Menu'
-                  : 'Add Menu'}
+                    ? 'Edit Menu'
+                    : 'Add Menu'}
               </h3>
               <p className="text-sm text-slate-600 dark:text-gray-400">
                 {isSubmenuModal
@@ -472,8 +502,8 @@ const MenuManagement = () => {
                     ? 'Update submenu details'
                     : 'Create a new submenu'
                   : editingItem
-                  ? 'Update menu details'
-                  : 'Create a new menu'}
+                    ? 'Update menu details'
+                    : 'Create a new menu'}
               </p>
             </div>
           </div>
@@ -497,44 +527,60 @@ const MenuManagement = () => {
             {isSubmenuModal && (
               <Form.Item
                 name="menuId"
-                label={<span className="text-slate-700 dark:text-gray-300 font-medium">Menu ID</span>}
+                label={
+                  <span className="text-slate-700 dark:text-gray-300 font-medium">
+                    Menu ID
+                  </span>
+                }
                 rules={[{ required: true, message: 'Menu ID is required' }]}
               >
-                <Input 
-                  disabled 
+                <Input
+                  disabled
                   className="bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600"
                 />
               </Form.Item>
             )}
-            
+
             <Form.Item
               name="name"
-              label={<span className="text-slate-700 dark:text-gray-300 font-medium">Name</span>}
+              label={
+                <span className="text-slate-700 dark:text-gray-300 font-medium">
+                  Name
+                </span>
+              }
               rules={[{ required: true, message: 'Name is required' }]}
             >
-              <Input 
-                placeholder="Enter name" 
+              <Input
+                placeholder="Enter name"
                 className="border-gray-300 dark:border-gray-600 focus:border-brand-500 dark:focus:border-brand-400"
               />
             </Form.Item>
 
             <Form.Item
               name="slug"
-              label={<span className="text-slate-700 dark:text-gray-300 font-medium">Slug</span>}
+              label={
+                <span className="text-slate-700 dark:text-gray-300 font-medium">
+                  Slug
+                </span>
+              }
               rules={[{ required: true, message: 'Slug is required' }]}
             >
-              <Input 
-                placeholder="Enter slug" 
+              <Input
+                placeholder="Enter slug"
                 className="border-gray-300 dark:border-gray-600 focus:border-brand-500 dark:focus:border-brand-400"
               />
             </Form.Item>
 
             <Form.Item
               name="path"
-              label={<span className="text-slate-700 dark:text-gray-300 font-medium">Path</span>}
+              label={
+                <span className="text-slate-700 dark:text-gray-300 font-medium">
+                  Path
+                </span>
+              }
             >
-              <Input 
-                placeholder="Enter path" 
+              <Input
+                placeholder="Enter path"
                 className="border-gray-300 dark:border-gray-600 focus:border-brand-500 dark:focus:border-brand-400"
               />
             </Form.Item>
@@ -542,10 +588,14 @@ const MenuManagement = () => {
             {!isSubmenuModal && (
               <Form.Item
                 name="icon"
-                label={<span className="text-slate-700 dark:text-gray-300 font-medium">Icon</span>}
+                label={
+                  <span className="text-slate-700 dark:text-gray-300 font-medium">
+                    Icon
+                  </span>
+                }
               >
-                <Input 
-                  placeholder="Enter icon" 
+                <Input
+                  placeholder="Enter icon"
                   className="border-gray-300 dark:border-gray-600 focus:border-brand-500 dark:focus:border-brand-400"
                 />
               </Form.Item>
@@ -553,18 +603,26 @@ const MenuManagement = () => {
 
             <Form.Item
               name="sortOrder"
-              label={<span className="text-slate-700 dark:text-gray-300 font-medium">Sort Order</span>}
+              label={
+                <span className="text-slate-700 dark:text-gray-300 font-medium">
+                  Sort Order
+                </span>
+              }
             >
-              <Input 
-                type="number" 
-                placeholder="Enter sort order" 
+              <Input
+                type="number"
+                placeholder="Enter sort order"
                 className="border-gray-300 dark:border-gray-600 focus:border-brand-500 dark:focus:border-brand-400"
               />
             </Form.Item>
 
             <Form.Item
               name="isActive"
-              label={<span className="text-slate-700 dark:text-gray-300 font-medium">Active</span>}
+              label={
+                <span className="text-slate-700 dark:text-gray-300 font-medium">
+                  Active
+                </span>
+              }
               valuePropName="checked"
               initialValue={true}
             >

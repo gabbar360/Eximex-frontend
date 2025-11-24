@@ -169,7 +169,9 @@ const purchaseOrderSlice = createSlice({
       })
       .addCase(deletePurchaseOrder.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.purchaseOrders = state.purchaseOrders.filter((po) => po.id !== payload.id);
+        state.purchaseOrders = state.purchaseOrders.filter(
+          (po) => po.id !== payload.id
+        );
         state.successMessage = payload.message;
       })
       .addCase(deletePurchaseOrder.rejected, (state, { payload }) => {
@@ -179,6 +181,9 @@ const purchaseOrderSlice = createSlice({
   },
 });
 
-export const { setSelectedPurchaseOrder, clearSelectedPurchaseOrder, clearMessages } =
-  purchaseOrderSlice.actions;
+export const {
+  setSelectedPurchaseOrder,
+  clearSelectedPurchaseOrder,
+  clearMessages,
+} = purchaseOrderSlice.actions;
 export default purchaseOrderSlice.reducer;

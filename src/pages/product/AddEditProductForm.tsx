@@ -4,10 +4,16 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import { toast } from 'react-toastify';
-import { getAllCategories, getCategoryById } from '../../features/categorySlice';
-import { getProductById, updateProduct, addProduct } from '../../features/productSlice';
+import {
+  getAllCategories,
+  getCategoryById,
+} from '../../features/categorySlice';
+import {
+  getProductById,
+  updateProduct,
+  addProduct,
+} from '../../features/productSlice';
 import { HiArrowLeft, HiCheckCircle, HiCube } from 'react-icons/hi2';
-
 
 import BasicProductInfo from '../../components/product/BasicProductInfo';
 import PackagingDetails from '../../components/product/PackagingDetails';
@@ -157,9 +163,12 @@ const AddEditProductForm = () => {
     try {
       setCategoriesLoading(true);
       // Fetch all categories without pagination for dropdown
-      const response = await dispatch(getAllCategories({ limit: 1000 })).unwrap();
+      const response = await dispatch(
+        getAllCategories({ limit: 1000 })
+      ).unwrap();
       // Handle different response structures
-      const categoriesData = response?.data?.data || response?.data || response || [];
+      const categoriesData =
+        response?.data?.data || response?.data || response || [];
       console.log('Fetched categories:', categoriesData);
       setCategories(categoriesData);
     } catch (error) {
@@ -231,7 +240,11 @@ const AddEditProductForm = () => {
         (cat) => cat.id.toString() === categoryId.toString()
       );
 
-      if (selectedCategory && selectedCategory.subcategories && Array.isArray(selectedCategory.subcategories)) {
+      if (
+        selectedCategory &&
+        selectedCategory.subcategories &&
+        Array.isArray(selectedCategory.subcategories)
+      ) {
         setSubcategories(selectedCategory.subcategories);
       } else {
         setSubcategories([]);
@@ -414,7 +427,9 @@ const AddEditProductForm = () => {
           ? 'g'
           : 'kg';
       const defaultToUnit =
-        level.to.toLowerCase() === 'box' || level.to.toLowerCase() === 'carton' || level.to.toLowerCase() === 'pallet'
+        level.to.toLowerCase() === 'box' ||
+        level.to.toLowerCase() === 'carton' ||
+        level.to.toLowerCase() === 'pallet'
           ? 'kg'
           : 'g';
 
@@ -574,11 +589,17 @@ const AddEditProductForm = () => {
           acc[weightUnitField] = values[weightUnitField] || defaultFromUnit;
 
           // Add 'to' unit weight fields with proper unit conversion
-          const toWeight = values[toWeightField] ? parseFloat(values[toWeightField]) : null;
+          const toWeight = values[toWeightField]
+            ? parseFloat(values[toWeightField])
+            : null;
           const toWeightUnit = values[toWeightUnitField] || defaultToUnit;
-          
+
           // Convert weight to match the unit being sent
-          if (toWeight && values.unitWeightUnit && toWeightUnit !== values.unitWeightUnit) {
+          if (
+            toWeight &&
+            values.unitWeightUnit &&
+            toWeightUnit !== values.unitWeightUnit
+          ) {
             // Convert from display unit (unitWeightUnit) to target unit (toWeightUnit)
             const weightInKg = convertToKg(toWeight, values.unitWeightUnit);
             acc[toWeightField] = convertFromKg(weightInKg, toWeightUnit);
@@ -655,10 +676,12 @@ const AddEditProductForm = () => {
       console.log('Submitting product data:', productData);
 
       if (isEdit) {
-        const result = await dispatch(updateProduct({
-          id: product.id,
-          product: productData
-        })).unwrap();
+        const result = await dispatch(
+          updateProduct({
+            id: product.id,
+            product: productData,
+          })
+        ).unwrap();
         toast.success(result.message);
       } else {
         const result = await dispatch(addProduct(productData)).unwrap();
@@ -732,86 +755,85 @@ const AddEditProductForm = () => {
 
         {/* Form */}
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 lg:p-8">
+          <Formik
+            key={`formik-${isEdit ? product?.id || 'edit' : 'add'}`}
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            enableReinitialize={true}
+            onSubmit={handleSubmit}
+          >
+            {({ values, errors, touched, setFieldValue, isSubmitting }) => (
+              <Form className="space-y-6">
+                <BasicProductInfo
+                  values={values}
+                  errors={errors}
+                  touched={touched}
+                  setFieldValue={setFieldValue}
+                  categories={categories}
+                  subcategories={subcategories}
+                  categoriesLoading={categoriesLoading}
+                  selectedCategoryId={selectedCategoryId}
+                  setSelectedCategoryId={setSelectedCategoryId}
+                  loadSubcategories={loadSubcategories}
+                  fetchCategoryDetails={fetchCategoryDetails}
+                  setSubcategories={setSubcategories}
+                  setPackagingHierarchy={setPackagingHierarchy}
+                  setTrackVolume={setTrackVolume}
+                />
 
-        <Formik
-          key={`formik-${isEdit ? product?.id || 'edit' : 'add'}`}
-          initialValues={initialValues}
-          validationSchema={validationSchema}
-          enableReinitialize={true}
-          onSubmit={handleSubmit}
-        >
-          {({ values, errors, touched, setFieldValue, isSubmitting }) => (
-            <Form className="space-y-6">
-              <BasicProductInfo
-                values={values}
-                errors={errors}
-                touched={touched}
-                setFieldValue={setFieldValue}
-                categories={categories}
-                subcategories={subcategories}
-                categoriesLoading={categoriesLoading}
-                selectedCategoryId={selectedCategoryId}
-                setSelectedCategoryId={setSelectedCategoryId}
-                loadSubcategories={loadSubcategories}
-                fetchCategoryDetails={fetchCategoryDetails}
-                setSubcategories={setSubcategories}
-                setPackagingHierarchy={setPackagingHierarchy}
-                setTrackVolume={setTrackVolume}
-              />
+                <PackagingCalculations
+                  packagingHierarchy={packagingHierarchy}
+                  trackVolume={trackVolume}
+                  convertToKg={convertToKg}
+                  convertFromKg={convertFromKg}
+                />
 
-              <PackagingCalculations
-                packagingHierarchy={packagingHierarchy}
-                trackVolume={trackVolume}
-                convertToKg={convertToKg}
-                convertFromKg={convertFromKg}
-              />
+                <PackagingDetails
+                  values={values}
+                  setFieldValue={setFieldValue}
+                  packagingHierarchy={packagingHierarchy}
+                  trackVolume={trackVolume}
+                  loadingCategory={loadingCategory}
+                />
 
-              <PackagingDetails
-                values={values}
-                setFieldValue={setFieldValue}
-                packagingHierarchy={packagingHierarchy}
-                trackVolume={trackVolume}
-                loadingCategory={loadingCategory}
-              />
+                <PackagingPreview
+                  values={values}
+                  packagingHierarchy={packagingHierarchy}
+                  convertToKg={convertToKg}
+                  convertFromKg={convertFromKg}
+                  setFieldValue={setFieldValue}
+                />
 
-              <PackagingPreview
-                values={values}
-                packagingHierarchy={packagingHierarchy}
-                convertToKg={convertToKg}
-                convertFromKg={convertFromKg}
-                setFieldValue={setFieldValue}
-              />
-
-              {/* Submit Buttons */}
-              <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
-                <button
-                  type="button"
-                  onClick={() => navigate('/products')}
-                  className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50 transition-all duration-300"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading || isSubmitting}
-                  className="px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-xl disabled:opacity-50 shadow-lg"
-                >
-                  {loading || isSubmitting ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      {isEdit ? 'Updating...' : 'Creating...'}
-                    </div>
-                  ) : (
-                    <>
-                      <HiCheckCircle className="w-5 h-5 mr-2 inline" />
-                      {isEdit ? 'Update Product' : 'Create Product'}
-                    </>
-                  )}
-                </button>
-              </div>
-            </Form>
-          )}
-        </Formik>
+                {/* Submit Buttons */}
+                <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/products')}
+                    className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50 transition-all duration-300"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading || isSubmitting}
+                    className="px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-xl disabled:opacity-50 shadow-lg"
+                  >
+                    {loading || isSubmitting ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        {isEdit ? 'Updating...' : 'Creating...'}
+                      </div>
+                    ) : (
+                      <>
+                        <HiCheckCircle className="w-5 h-5 mr-2 inline" />
+                        {isEdit ? 'Update Product' : 'Create Product'}
+                      </>
+                    )}
+                  </button>
+                </div>
+              </Form>
+            )}
+          </Formik>
         </div>
       </div>
     </div>

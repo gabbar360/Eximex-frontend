@@ -148,7 +148,9 @@ const vgmSlice = createSlice({
       })
       .addCase(deleteVgm.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.vgmDocuments = state.vgmDocuments.filter((vgm) => vgm.id !== payload.id);
+        state.vgmDocuments = state.vgmDocuments.filter(
+          (vgm) => vgm.id !== payload.id
+        );
         state.successMessage = payload.message;
       })
       .addCase(deleteVgm.rejected, (state, { payload }) => {
@@ -158,5 +160,6 @@ const vgmSlice = createSlice({
   },
 });
 
-export const { setSelectedVgm, clearSelectedVgm, clearMessages } = vgmSlice.actions;
+export const { setSelectedVgm, clearSelectedVgm, clearMessages } =
+  vgmSlice.actions;
 export default vgmSlice.reducer;

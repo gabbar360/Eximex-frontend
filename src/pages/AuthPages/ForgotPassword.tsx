@@ -67,11 +67,13 @@ const ForgotPassword: React.FC = () => {
               </p>
               <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
                 <p className="text-xs sm:text-sm text-blue-800 dark:text-blue-300">
-                  📧 Check your email and click the reset link to set a new password.
+                  📧 Check your email and click the reset link to set a new
+                  password.
                 </p>
               </div>
               <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-4 sm:mb-6">
-                The link will expire in 10 minutes. Check your spam folder if you don't see it.
+                The link will expire in 10 minutes. Check your spam folder if
+                you don't see it.
               </p>
               <button
                 onClick={() => setOtpSent(false)}
@@ -96,19 +98,22 @@ const ForgotPassword: React.FC = () => {
         <div className="h-screen w-screen flex overflow-hidden">
           {/* Left Side - Image */}
           <div className="hidden lg:flex lg:w-[60%] relative overflow-hidden">
-            <div 
+            <div
               className="absolute inset-0 bg-gradient-to-br from-orange-600 via-red-600 to-pink-800"
               style={{
-                backgroundImage: 'url("https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2126&q=80")',
+                backgroundImage:
+                  'url("https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2126&q=80")',
                 backgroundSize: 'cover',
-                backgroundPosition: 'center'
+                backgroundPosition: 'center',
               }}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-orange-900/80 to-red-900/80"></div>
             </div>
             <div className="relative z-10 flex flex-col justify-center p-12 text-white">
               <h1 className="text-4xl font-bold mb-6">Reset Password</h1>
-              <p className="text-xl mb-8 opacity-90">Secure your account with a new password and get back to trading</p>
+              <p className="text-xl mb-8 opacity-90">
+                Secure your account with a new password and get back to trading
+              </p>
               <div className="space-y-4">
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-white rounded-full"></div>
@@ -125,21 +130,27 @@ const ForgotPassword: React.FC = () => {
               </div>
             </div>
           </div>
-          
+
           {/* Right Side - Form */}
           <div className="w-full lg:w-[40%] flex items-center justify-center p-2 sm:p-4 overflow-hidden">
             <div className="w-full max-w-sm">
               {/* Form Card */}
               <div className="auth-form-card bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl border border-white/20 overflow-hidden w-full">
                 {/* Header */}
-                <div className="bg-white p-2 sm:p-3 lg:p-4 border-b-2" style={{borderColor: '#86a0b2'}}>
+                <div
+                  className="bg-white p-2 sm:p-3 lg:p-4 border-b-2"
+                  style={{ borderColor: '#86a0b2' }}
+                >
                   <div className="text-center">
-                    <img 
-                      src="/logo1.png" 
-                      alt="Eximex" 
+                    <img
+                      src="/logo1.png"
+                      alt="Eximex"
                       className="h-12 sm:h-16 lg:h-20 mx-auto mb-2 sm:mb-3"
                     />
-                    <div className="mx-auto h-12 w-12 sm:h-16 sm:w-16 rounded-full flex items-center justify-center mb-3 sm:mb-4" style={{backgroundColor: '#86a0b2'}}>
+                    <div
+                      className="mx-auto h-12 w-12 sm:h-16 sm:w-16 rounded-full flex items-center justify-center mb-3 sm:mb-4"
+                      style={{ backgroundColor: '#86a0b2' }}
+                    >
                       <svg
                         className="h-6 w-6 sm:h-8 sm:w-8 text-white"
                         fill="none"
@@ -154,17 +165,25 @@ const ForgotPassword: React.FC = () => {
                         />
                       </svg>
                     </div>
-                    <h2 className="text-sm sm:text-lg lg:text-xl font-bold mb-1" style={{color: '#86a0b2'}}>Forgot Password?</h2>
+                    <h2
+                      className="text-sm sm:text-lg lg:text-xl font-bold mb-1"
+                      style={{ color: '#86a0b2' }}
+                    >
+                      Forgot Password?
+                    </h2>
                     <p className="text-gray-600 text-xs sm:text-sm">
-                      Enter your email address and we'll send you a secure reset link
+                      Enter your email address and we'll send you a secure reset
+                      link
                     </p>
                   </div>
                 </div>
 
                 {/* Form Content */}
                 <div className="p-2 sm:p-3 lg:p-4">
-
-                  <form onSubmit={handleSubmit} className="auth-form-fields space-y-4">
+                  <form
+                    onSubmit={handleSubmit}
+                    className="auth-form-fields space-y-4"
+                  >
                     <div className="auth-form-field form-field-spacing">
                       <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                         Business Email
@@ -198,7 +217,8 @@ const ForgotPassword: React.FC = () => {
                     <div className="text-center">
                       <Link
                         to="/signin"
-                        className="font-semibold text-xs sm:text-sm" style={{color: '#86a0b2'}}
+                        className="font-semibold text-xs sm:text-sm"
+                        style={{ color: '#86a0b2' }}
                       >
                         ← Back to Sign In
                       </Link>

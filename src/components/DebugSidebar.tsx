@@ -31,13 +31,15 @@ const DebugSidebar = () => {
   }, [currentUser]);
 
   if (currentUser?.role?.name === 'SUPER_ADMIN') {
-    return <div className="p-4 bg-green-100">Super Admin - No debug needed</div>;
+    return (
+      <div className="p-4 bg-green-100">Super Admin - No debug needed</div>
+    );
   }
 
   return (
     <div className="fixed top-0 right-0 w-80 h-screen bg-white border-l p-4 overflow-y-auto z-50">
       <h3 className="font-bold mb-4">Debug Sidebar Menu</h3>
-      
+
       <div className="mb-4">
         <h4 className="font-semibold">Current User:</h4>
         <pre className="text-xs bg-gray-100 p-2 rounded">
@@ -53,8 +55,8 @@ const DebugSidebar = () => {
       </div>
 
       <div className="mb-4">
-        <button 
-          onClick={testAPI} 
+        <button
+          onClick={testAPI}
           className="bg-blue-500 text-white px-4 py-2 rounded"
           disabled={loading}
         >
@@ -65,9 +67,7 @@ const DebugSidebar = () => {
       {error && (
         <div className="mb-4">
           <h4 className="font-semibold text-red-600">API Error:</h4>
-          <pre className="text-xs bg-red-100 p-2 rounded">
-            {error}
-          </pre>
+          <pre className="text-xs bg-red-100 p-2 rounded">{error}</pre>
         </div>
       )}
 

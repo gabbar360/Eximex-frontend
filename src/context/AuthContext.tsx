@@ -30,7 +30,6 @@ const getPermissions = (role: any) => {
     canManageStaff: ['ADMIN', 'SUPER_ADMIN'].includes(roleName),
     canViewAllData: ['ADMIN', 'SUPER_ADMIN'].includes(roleName),
     canReassignData: ['ADMIN', 'SUPER_ADMIN'].includes(roleName),
-
   };
 };
 
@@ -41,7 +40,6 @@ const AuthContext = createContext<{
     canManageStaff: boolean;
     canViewAllData: boolean;
     canReassignData: boolean;
-
   };
   login: (credentials: { email: string; password: string }) => Promise<void>;
   logout: () => void;
@@ -60,7 +58,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         canManageStaff: false,
         canViewAllData: false,
         canReassignData: false,
-
       };
 
   const login = async (credentials: { email: string; password: string }) => {
@@ -121,11 +118,7 @@ export const RoleGuard: React.FC<{
 // Permission-based component wrapper
 export const PermissionGuard: React.FC<{
   children: React.ReactNode;
-  permission:
-    | 'canManageStaff'
-    | 'canViewAllData'
-    | 'canReassignData'
-;
+  permission: 'canManageStaff' | 'canViewAllData' | 'canReassignData';
   fallback?: React.ReactNode;
 }> = ({ children, permission, fallback = null }) => {
   const { permissions } = useAuth();

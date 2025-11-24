@@ -29,7 +29,10 @@ export const createPackagingHierarchy = createAsyncThunk(
   'packaging/createPackagingHierarchy',
   async ({ categoryId, packagingLevels }, { rejectWithValue }) => {
     try {
-      return await packagingService.createPackagingHierarchy(categoryId, packagingLevels);
+      return await packagingService.createPackagingHierarchy(
+        categoryId,
+        packagingLevels
+      );
     } catch (err) {
       return rejectWithValue(err.message);
     }
@@ -121,5 +124,6 @@ const packagingSlice = createSlice({
   },
 });
 
-export const { setPackagingHierarchy, clearPackagingHierarchy, clearMessages } = packagingSlice.actions;
+export const { setPackagingHierarchy, clearPackagingHierarchy, clearMessages } =
+  packagingSlice.actions;
 export default packagingSlice.reducer;

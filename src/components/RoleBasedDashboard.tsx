@@ -15,6 +15,4 @@ const RoleBasedDashboard: React.FC = () => {
   return <ComprehensiveDashboard />;
 };
 
-
-
 export default RoleBasedDashboard;

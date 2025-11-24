@@ -76,13 +76,7 @@ const PackagingUnitDropdown: React.FC<{
         className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm shadow-sm text-left focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200 transition-all duration-300"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <span
-          className={
-            selectedOption
-              ? 'text-slate-800'
-              : 'text-slate-400'
-          }
-        >
+        <span className={selectedOption ? 'text-slate-800' : 'text-slate-400'}>
           {selectedOption
             ? `${selectedOption.name} (${selectedOption.abbreviation})`
             : placeholder}

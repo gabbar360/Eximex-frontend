@@ -11,47 +11,53 @@ const productService = {
         search: params.search || '',
         ...(params.categoryId && { categoryId: params.categoryId }),
         ...(params.subCategoryId && { subCategoryId: params.subCategoryId }),
-        ...(params.status !== undefined && { status: params.status })
+        ...(params.status !== undefined && { status: params.status }),
       };
-      
-      const { data } = await axiosInstance.get('/get-all/products', { params: queryParams });
+
+      const { data } = await axiosInstance.get('/get-all/products', {
+        params: queryParams,
+      });
       return data;
     } catch (error) {
-      console.error('Product service error:', error.response?.data || error.message);
-      
+      console.error(
+        'Product service error:',
+        error.response?.data || error.message
+      );
+
       if (params.page || params.limit) {
         try {
           const { data } = await axiosInstance.get('/get-all/products');
           const products = data.data || data;
-          
+
           let filteredProducts = products;
           if (params.search) {
             const searchTerm = params.search.toLowerCase();
-            filteredProducts = products.filter(product => 
-              product.name?.toLowerCase().includes(searchTerm) ||
-              product.sku?.toLowerCase().includes(searchTerm) ||
-              product.description?.toLowerCase().includes(searchTerm)
+            filteredProducts = products.filter(
+              (product) =>
+                product.name?.toLowerCase().includes(searchTerm) ||
+                product.sku?.toLowerCase().includes(searchTerm) ||
+                product.description?.toLowerCase().includes(searchTerm)
             );
           }
-          
+
           const page = parseInt(params.page) || 1;
           const limit = parseInt(params.limit) || 10;
           const start = (page - 1) * limit;
           const paginatedData = filteredProducts.slice(start, start + limit);
-          
+
           return {
             data: paginatedData,
             pagination: {
               page,
               limit,
-              total: filteredProducts.length
-            }
+              total: filteredProducts.length,
+            },
           };
         } catch (fallbackError) {
           throw handleAxiosError(fallbackError, 'product', 'fetch');
         }
       }
-      
+
       throw handleAxiosError(error, 'product', 'fetch');
     }
   },

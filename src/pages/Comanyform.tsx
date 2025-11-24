@@ -13,7 +13,10 @@ const OnboardingModal: React.FC = () => {
   }
 
   return (
-    <div className="h-screen overflow-hidden" style={{backgroundColor: '#86a0b2'}}>
+    <div
+      className="h-screen overflow-hidden"
+      style={{ backgroundColor: '#86a0b2' }}
+    >
       <div className="flex flex-col lg:flex-row h-full">
         {/* Left Side - Form */}
         <div className="w-full lg:w-[60%] flex flex-col p-2 lg:p-4 min-h-0">
@@ -25,7 +28,7 @@ const OnboardingModal: React.FC = () => {
               Let's set up your company profile
             </p>
           </div> */}
-          
+
           <div className="flex-1 min-h-0">
             <CompanySetupForm />
           </div>

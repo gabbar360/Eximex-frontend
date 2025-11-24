@@ -19,35 +19,38 @@ export const getAllPiInvoices = async (params = {}) => {
       limit: parseInt(params.limit) || 10,
       search: params.search || '',
       ...(params.includeProducts && { include: 'products' }),
-      ...(params.status && { status: params.status })
+      ...(params.status && { status: params.status }),
     };
-    
-    const { data } = await axiosInstance.get('/get-all/pi-invoices', { params: queryParams });
+
+    const { data } = await axiosInstance.get('/get-all/pi-invoices', {
+      params: queryParams,
+    });
     return data;
   } catch (error) {
     console.error('Error in getAllPiInvoices:', error);
-    
+
     // Fallback mechanism similar to product service
     if (params.page || params.limit) {
       try {
         const { data } = await axiosInstance.get('/get-all/pi-invoices');
         const piInvoices = data?.data?.piInvoices || data?.piInvoices || [];
-        
+
         let filteredPIs = piInvoices;
         if (params.search) {
           const searchTerm = params.search.toLowerCase();
-          filteredPIs = piInvoices.filter(pi => 
-            pi.piNumber?.toLowerCase().includes(searchTerm) ||
-            pi.partyName?.toLowerCase().includes(searchTerm) ||
-            pi.party?.companyName?.toLowerCase().includes(searchTerm)
+          filteredPIs = piInvoices.filter(
+            (pi) =>
+              pi.piNumber?.toLowerCase().includes(searchTerm) ||
+              pi.partyName?.toLowerCase().includes(searchTerm) ||
+              pi.party?.companyName?.toLowerCase().includes(searchTerm)
           );
         }
-        
+
         const page = parseInt(params.page) || 1;
         const limit = parseInt(params.limit) || 10;
         const start = (page - 1) * limit;
         const paginatedData = filteredPIs.slice(start, start + limit);
-        
+
         return {
           data: {
             piInvoices: paginatedData,
@@ -55,15 +58,15 @@ export const getAllPiInvoices = async (params = {}) => {
               page,
               limit,
               total: filteredPIs.length,
-              pages: Math.ceil(filteredPIs.length / limit)
-            }
-          }
+              pages: Math.ceil(filteredPIs.length / limit),
+            },
+          },
         };
       } catch (fallbackError) {
         throw fallbackError;
       }
     }
-    
+
     throw error;
   }
 };
@@ -164,7 +167,10 @@ export const updatePiStatus = async (id, status) => {
 
 export const updatePiAmount = async (id, amountData) => {
   try {
-    const response = await axiosInstance.put(`/${id}/update-amount`, amountData);
+    const response = await axiosInstance.put(
+      `/${id}/update-amount`,
+      amountData
+    );
     return response.data;
   } catch (error) {
     throw error;

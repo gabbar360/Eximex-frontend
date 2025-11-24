@@ -16,7 +16,10 @@ export const setUserPermissions = createAsyncThunk(
   'userPermission/setUserPermissions',
   async ({ userId, permissions }, { rejectWithValue }) => {
     try {
-      const response = await userPermissionService.setUserPermissions(userId, permissions);
+      const response = await userPermissionService.setUserPermissions(
+        userId,
+        permissions
+      );
       return response;
     } catch (err) {
       return rejectWithValue(err.message);
@@ -29,8 +32,8 @@ export const updateUserPermissions = createAsyncThunk(
   async ({ userId, permissions, submenuPermissions }, { rejectWithValue }) => {
     try {
       const response = await userPermissionService.updateUserPermissions(
-        userId, 
-        permissions, 
+        userId,
+        permissions,
         submenuPermissions
       );
       return response;
@@ -44,7 +47,10 @@ export const deleteUserPermissions = createAsyncThunk(
   'userPermission/deleteUserPermissions',
   async ({ userId, menuItemIds }, { rejectWithValue }) => {
     try {
-      const response = await userPermissionService.deleteUserPermissions(userId, menuItemIds);
+      const response = await userPermissionService.deleteUserPermissions(
+        userId,
+        menuItemIds
+      );
       return { userId, response };
     } catch (err) {
       return rejectWithValue(err.message);
@@ -69,7 +75,9 @@ export const fetchAllUsersWithPermissions = createAsyncThunk(
     try {
       return await userPermissionService.getAllUsersWithPermissions();
     } catch (err) {
-      return rejectWithValue(err.message || 'Failed to fetch users with permissions');
+      return rejectWithValue(
+        err.message || 'Failed to fetch users with permissions'
+      );
     }
   }
 );
@@ -199,5 +207,6 @@ const userPermissionSlice = createSlice({
   },
 });
 
-export const { clearUserPermissions, clearError, setSidebarMenu } = userPermissionSlice.actions;
+export const { clearUserPermissions, clearError, setSidebarMenu } =
+  userPermissionSlice.actions;
 export default userPermissionSlice.reducer;

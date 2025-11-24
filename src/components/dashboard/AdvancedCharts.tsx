@@ -69,33 +69,48 @@ const bubbleData = [
 
 const AnimatedMetric = ({ title, value, target, color }: any) => {
   const [animatedValue, setAnimatedValue] = useState(0);
-  
+
   useEffect(() => {
     const timer = setTimeout(() => setAnimatedValue(value), 500);
     return () => clearTimeout(timer);
   }, [value]);
-  
+
   return (
     <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{title}</h3>
+      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+        {title}
+      </h3>
       <div className="relative w-24 h-24 mx-auto mb-4">
         <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 100 100">
-          <circle cx="50" cy="50" r="40" stroke="#e5e7eb" strokeWidth="8" fill="none" />
-          <circle 
-            cx="50" cy="50" r="40" 
-            stroke={color} 
-            strokeWidth="8" 
+          <circle
+            cx="50"
+            cy="50"
+            r="40"
+            stroke="#e5e7eb"
+            strokeWidth="8"
+            fill="none"
+          />
+          <circle
+            cx="50"
+            cy="50"
+            r="40"
+            stroke={color}
+            strokeWidth="8"
             fill="none"
             strokeDasharray={`${(animatedValue / target) * 251.2} 251.2`}
             className="transition-all duration-1000 ease-out"
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-xl font-bold" style={{ color }}>{animatedValue}%</span>
+          <span className="text-xl font-bold" style={{ color }}>
+            {animatedValue}%
+          </span>
         </div>
       </div>
       <div className="text-center">
-        <span className="text-sm text-gray-600 dark:text-gray-400">Target: {target}%</span>
+        <span className="text-sm text-gray-600 dark:text-gray-400">
+          Target: {target}%
+        </span>
       </div>
     </div>
   );
@@ -103,16 +118,18 @@ const AnimatedMetric = ({ title, value, target, color }: any) => {
 
 const InteractiveCard = ({ title, children, height = 300 }: any) => {
   const [isHovered, setIsHovered] = useState(false);
-  
+
   return (
-    <div 
+    <div
       className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transition-all duration-300 border border-gray-200 dark:border-gray-700 ${
         isHovered ? 'shadow-2xl scale-105' : ''
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{title}</h3>
+      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+        {title}
+      </h3>
       <div style={{ height: `${height}px` }} className="w-full">
         {children}
       </div>
@@ -122,10 +139,10 @@ const InteractiveCard = ({ title, children, height = 300 }: any) => {
 
 export default function AdvancedCharts() {
   const [activeChart, setActiveChart] = useState('realtime');
-  
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-3 sm:p-4 lg:p-6">
-      <div className="max-w-7xl mx-auto">   
+      <div className="max-w-7xl mx-auto">
         {/* Interactive Chart Selector */}
         <div className="flex flex-wrap gap-2 mb-8">
           {['realtime', 'funnel', 'treemap', 'bubble'].map((chart) => (
@@ -142,12 +159,27 @@ export default function AdvancedCharts() {
             </button>
           ))}
         </div>
-        
+
         {/* Animated Performance Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <AnimatedMetric title="Sales Performance" value={87} target={100} color="#3b82f6" />
-          <AnimatedMetric title="Customer Satisfaction" value={94} target={100} color="#10b981" />
-          <AnimatedMetric title="Revenue Growth" value={76} target={100} color="#f59e0b" />
+          <AnimatedMetric
+            title="Sales Performance"
+            value={87}
+            target={100}
+            color="#3b82f6"
+          />
+          <AnimatedMetric
+            title="Customer Satisfaction"
+            value={94}
+            target={100}
+            color="#10b981"
+          />
+          <AnimatedMetric
+            title="Revenue Growth"
+            value={76}
+            target={100}
+            color="#f59e0b"
+          />
         </div>
 
         {/* Dynamic Chart Display */}
@@ -158,21 +190,35 @@ export default function AdvancedCharts() {
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={realtimeData}>
                     <defs>
-                      <linearGradient id="realtimeGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.1}/>
+                      <linearGradient
+                        id="realtimeGradient"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="5%"
+                          stopColor="#8b5cf6"
+                          stopOpacity={0.8}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor="#8b5cf6"
+                          stopOpacity={0.1}
+                        />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                     <XAxis dataKey="time" stroke="#9ca3af" />
                     <YAxis stroke="#9ca3af" />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: '#1f2937', 
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#1f2937',
                         border: 'none',
                         borderRadius: '12px',
-                        color: '#fff'
-                      }} 
+                        color: '#fff',
+                      }}
                     />
                     <Area
                       type="monotone"
@@ -185,28 +231,37 @@ export default function AdvancedCharts() {
                   </AreaChart>
                 </ResponsiveContainer>
               </InteractiveCard>
-              
+
               <InteractiveCard title="Revenue vs Conversion" height={350}>
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={realtimeData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                     <XAxis dataKey="time" stroke="#9ca3af" />
                     <YAxis yAxisId="left" stroke="#9ca3af" />
-                    <YAxis yAxisId="right" orientation="right" stroke="#9ca3af" />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: '#1f2937', 
+                    <YAxis
+                      yAxisId="right"
+                      orientation="right"
+                      stroke="#9ca3af"
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#1f2937',
                         border: 'none',
                         borderRadius: '12px',
-                        color: '#fff'
-                      }} 
+                        color: '#fff',
+                      }}
                     />
-                    <Bar yAxisId="left" dataKey="revenue" fill="#10b981" radius={[4, 4, 0, 0]} />
-                    <Line 
+                    <Bar
+                      yAxisId="left"
+                      dataKey="revenue"
+                      fill="#10b981"
+                      radius={[4, 4, 0, 0]}
+                    />
+                    <Line
                       yAxisId="right"
-                      type="monotone" 
-                      dataKey="conversion" 
-                      stroke="#f59e0b" 
+                      type="monotone"
+                      dataKey="conversion"
+                      stroke="#f59e0b"
                       strokeWidth={3}
                       dot={{ fill: '#f59e0b', strokeWidth: 2, r: 6 }}
                     />
@@ -215,35 +270,31 @@ export default function AdvancedCharts() {
               </InteractiveCard>
             </>
           )}
-          
+
           {activeChart === 'funnel' && (
             <>
               <InteractiveCard title="Sales Funnel Analysis" height={400}>
                 <ResponsiveContainer width="100%" height="100%">
                   <FunnelChart>
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: '#1f2937', 
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#1f2937',
                         border: 'none',
                         borderRadius: '12px',
-                        color: '#fff'
-                      }} 
+                        color: '#fff',
+                      }}
                     />
-                    <Funnel
-                      dataKey="value"
-                      data={funnelData}
-                      isAnimationActive
-                    >
+                    <Funnel dataKey="value" data={funnelData} isAnimationActive>
                       <LabelList position="center" fill="#fff" stroke="none" />
                     </Funnel>
                   </FunnelChart>
                 </ResponsiveContainer>
               </InteractiveCard>
-              
+
               <InteractiveCard title="Customer Journey Heatmap" height={400}>
                 <div className="grid grid-cols-3 gap-2 h-full">
                   {heatmapData.map((item, index) => (
-                    <div 
+                    <div
                       key={index}
                       className="rounded-lg flex items-center justify-center text-white font-bold transition-all duration-300 hover:scale-110"
                       style={{ backgroundColor: item.color }}
@@ -259,15 +310,18 @@ export default function AdvancedCharts() {
               </InteractiveCard>
             </>
           )}
-          
+
           {activeChart === 'treemap' && (
             <div className="xl:col-span-2">
-              <InteractiveCard title="Product Category Performance" height={400}>
+              <InteractiveCard
+                title="Product Category Performance"
+                height={400}
+              >
                 <ResponsiveContainer width="100%" height="100%">
                   <Treemap
                     data={treemapData}
                     dataKey="size"
-                    aspectRatio={4/3}
+                    aspectRatio={4 / 3}
                     stroke="#fff"
                     strokeWidth={2}
                   />
@@ -275,7 +329,7 @@ export default function AdvancedCharts() {
               </InteractiveCard>
             </div>
           )}
-          
+
           {activeChart === 'bubble' && (
             <div className="xl:col-span-2">
               <InteractiveCard title=" Market Segment Analysis" height={400}>
@@ -284,18 +338,18 @@ export default function AdvancedCharts() {
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                     <XAxis dataKey="x" name="Market Share" stroke="#9ca3af" />
                     <YAxis dataKey="y" name="Growth Rate" stroke="#9ca3af" />
-                    <Tooltip 
+                    <Tooltip
                       cursor={{ strokeDasharray: '3 3' }}
-                      contentStyle={{ 
-                        backgroundColor: '#1f2937', 
+                      contentStyle={{
+                        backgroundColor: '#1f2937',
                         border: 'none',
                         borderRadius: '12px',
-                        color: '#fff'
+                        color: '#fff',
                       }}
                     />
-                    <Scatter 
-                      name="Categories" 
-                      dataKey="z" 
+                    <Scatter
+                      name="Categories"
+                      dataKey="z"
                       fill="#8b5cf6"
                       fillOpacity={0.8}
                     />

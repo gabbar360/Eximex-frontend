@@ -172,7 +172,9 @@ const packingListSlice = createSlice({
       })
       .addCase(deletePackingList.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.packingLists = state.packingLists.filter((list) => list.id !== payload.id);
+        state.packingLists = state.packingLists.filter(
+          (list) => list.id !== payload.id
+        );
         state.successMessage = payload.message;
       })
       .addCase(deletePackingList.rejected, (state, { payload }) => {
@@ -193,5 +195,9 @@ const packingListSlice = createSlice({
   },
 });
 
-export const { setSelectedPackingList, clearSelectedPackingList, clearMessages } = packingListSlice.actions;
+export const {
+  setSelectedPackingList,
+  clearSelectedPackingList,
+  clearMessages,
+} = packingListSlice.actions;
 export default packingListSlice.reducer;

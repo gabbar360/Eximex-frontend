@@ -11,17 +11,23 @@ const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
 
-  const { isMobileOpen, toggleSidebar, toggleMobileSidebar, isExpanded, isHovered } = useSidebar();
+  const {
+    isMobileOpen,
+    toggleSidebar,
+    toggleMobileSidebar,
+    isExpanded,
+    isHovered,
+  } = useSidebar();
   const { theme } = useTheme();
 
   useEffect(() => {
     const handleResize = () => {
       setIsDesktop(window.innerWidth >= 1024);
     };
-    
+
     handleResize();
     window.addEventListener('resize', handleResize);
-    
+
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
@@ -57,11 +63,11 @@ const AppHeader: React.FC = () => {
   const sidebarWidth = isExpanded || isHovered ? '240px' : '70px';
 
   return (
-    <header 
+    <header
       className="fixed top-0 right-0 flex bg-white border-gray-200 z-[60] dark:border-gray-800 dark:bg-gray-900 lg:border-b shadow-sm transition-all duration-300"
       style={{
         left: isDesktop ? sidebarWidth : '0',
-        width: isDesktop ? `calc(100% - ${sidebarWidth})` : '100%'
+        width: isDesktop ? `calc(100% - ${sidebarWidth})` : '100%',
       }}
     >
       <div className="flex flex-col items-center justify-between grow lg:flex-row lg:px-6">
@@ -181,8 +187,6 @@ const AppHeader: React.FC = () => {
             {/* <!-- Dark Mode Toggler --> */}
             {/* <ThemeToggleButton /> */}
             {/* <!-- Dark Mode Toggler --> */}
-            
-
           </div>
           {/* <!-- User Area --> */}
           <UserDropdown />

@@ -90,9 +90,8 @@ const PackagingPreview: React.FC<PackagingPreviewProps> = ({
           Packaging Preview
         </h4>
       </div>
-      
-      <div className="p-6 bg-slate-50 rounded-lg border border-gray-200">
 
+      <div className="p-6 bg-slate-50 rounded-lg border border-gray-200">
         {/* Visual representation */}
         <div className="flex items-center mb-6 overflow-x-auto pb-2">
           {packagingHierarchy.map((level, index) => (
@@ -147,7 +146,7 @@ const PackagingPreview: React.FC<PackagingPreviewProps> = ({
                 <HiScale className="w-4 h-4 text-slate-600" />
                 Weight Calculations
               </h6>
-              
+
               {/* Weight per selected unit type */}
               <div className="flex items-center justify-between p-3 bg-white/70 backdrop-blur-sm rounded-xl border border-white/50 shadow-sm">
                 <span className="text-sm font-medium text-slate-700">
@@ -247,12 +246,13 @@ const PackagingPreview: React.FC<PackagingPreviewProps> = ({
               <HiCube className="w-4 h-4 text-slate-600" />
               Summary
             </h6>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {/* Total boxes */}
               <div className="flex items-center justify-between p-3 bg-white/70 backdrop-blur-sm rounded-xl border border-white/50 shadow-sm">
                 <span className="text-sm font-medium text-slate-700">
-                  Total {packagingHierarchy[packagingHierarchy.length - 1].to} count
+                  Total {packagingHierarchy[packagingHierarchy.length - 1].to}{' '}
+                  count
                 </span>
                 <span className="text-sm font-bold text-blue-600">
                   {values.totalBoxes || 0}
