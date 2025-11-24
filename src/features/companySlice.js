@@ -29,7 +29,7 @@ export const createCompany = createAsyncThunk(
     try {
       return await createCompanyService(companyData);
     } catch (err) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err);
     }
   }
 );

@@ -36,7 +36,8 @@ axiosInstance.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         if (!refreshToken) {
-          throw new Error('No refresh token available');
+          // Return original error instead of refresh token error
+          return Promise.reject(error);
         }
 
         // Create a new axios instance to avoid interceptor loop
@@ -62,7 +63,8 @@ axiosInstance.interceptors.response.use(
         console.error('Token refresh failed', refreshError);
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        return Promise.reject(refreshError);
+        // Return original error instead of refresh error
+        return Promise.reject(error);
       }
     }
     // Return original error to preserve response data
