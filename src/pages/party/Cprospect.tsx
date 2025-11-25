@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { fetchParties, deleteParty } from '../../features/partySlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -13,6 +13,10 @@ import {
 } from 'react-icons/hi2';
 import { toast } from 'react-toastify';
 import { Pagination } from 'antd';
+import { useDebounce } from '../../utils/useDebounce';
+
+
+
 
 const Cprospect = () => {
   const dispatch = useDispatch();
@@ -26,18 +30,16 @@ const Cprospect = () => {
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(6);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const [wasSearching, setWasSearching] = useState(false);
 
   useEffect(() => {
     // Only fetch when page or pageSize changes, not searchTerm (handled by debounced search)
-    if (!searchTerm) {
-      dispatch(
-        fetchParties({
-          page: currentPage,
-          limit: pageSize,
-          search: '',
-        })
-      );
-    }
+    dispatch(fetchParties({
+      page: currentPage,
+      limit: pageSize,
+      search: ''
+    }));
   }, [dispatch, currentPage, pageSize]);
 
   // Initial load
@@ -50,15 +52,10 @@ const Cprospect = () => {
       })
     );
   }, [dispatch]);
+  
 
-  // Cleanup debounce timer on unmount
-  useEffect(() => {
-    return () => {
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
-      }
-    };
-  }, []);
+
+
 
   const handleDeleteClick = (id) => {
     setConfirmDelete(id);
@@ -96,31 +93,28 @@ const Cprospect = () => {
   };
 
   // Debounced search function
-  const debounceTimer = React.useRef(null);
+  const { debouncedCallback: debouncedSearch } = useDebounce((value) => {
+    setWasSearching(true);
+    dispatch(fetchParties({
+      page: 1,
+      limit: pageSize,
+      search: value
+    }));
+  }, 500);
+  
+  const handleSearch = useCallback((value) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+    debouncedSearch(value);
+  }, [debouncedSearch, pageSize]);
 
-  const handleSearch = useCallback(
-    (value) => {
-      setSearchTerm(value);
-      setCurrentPage(1);
-
-      // Clear existing timer
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
-      }
-
-      // Set new timer for debounced search
-      debounceTimer.current = setTimeout(() => {
-        dispatch(
-          fetchParties({
-            page: 1,
-            limit: pageSize,
-            search: value,
-          })
-        );
-      }, 500);
-    },
-    [dispatch, pageSize]
-  );
+  // Restore focus after search results load
+  useEffect(() => {
+    if (wasSearching && !loading && searchInputRef.current) {
+      searchInputRef.current.focus();
+      setWasSearching(false);
+    }
+  }, [loading, wasSearching]);
 
   if (loading) {
     return (
@@ -190,6 +184,7 @@ const Cprospect = () => {
                 <div className="relative">
                   <HiMagnifyingGlass className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                   <input
+                    ref={searchInputRef}
                     type="text"
                     placeholder="Search prospects..."
                     className="pl-12 pr-4 py-3 w-full sm:w-72 rounded-lg border border-gray-300 bg-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-all duration-300 text-sm placeholder-gray-500 shadow-sm"

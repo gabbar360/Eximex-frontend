@@ -21,6 +21,7 @@ import {
 } from 'react-icons/hi2';
 import { toast } from 'react-toastify';
 import { fetchOrders, deleteOrder } from '../../features/orderSlice';
+import { useDebounce } from '../../utils/useDebounce';
 
 const AllOrders: React.FC = () => {
   const dispatch = useDispatch();
@@ -36,8 +37,16 @@ const AllOrders: React.FC = () => {
     dispatch(fetchOrders());
   }, [dispatch]);
 
+  const { debouncedCallback: debouncedSearch } = useDebounce((value: string) => {
+    // Only trigger search if there's actual search logic needed
+    // For now, just filtering is handled in filteredOrders
+    console.log('Searching for:', value);
+  }, 500);
+
   const handleSearch = useCallback((value: string) => {
     setSearchTerm(value);
+    // No need to call API for client-side filtering
+    // debouncedSearch(value);
   }, []);
 
   const handleDelete = async (id: string) => {

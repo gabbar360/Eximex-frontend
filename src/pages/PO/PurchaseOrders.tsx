@@ -142,8 +142,6 @@ const PurchaseOrders: React.FC = () => {
     return colors[type] || 'bg-gray-100 text-gray-800';
   };
 
-  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
-
   const handleSearch = useCallback((value: string) => {
     setSearchTerm(value);
   }, []);

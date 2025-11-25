@@ -14,6 +14,7 @@ import { Pagination } from 'antd';
 import { toast } from 'react-toastify';
 import { fetchOrders } from '../../features/orderSlice';
 import { deleteShipment } from '../../features/shipmentSlice';
+import { useDebounce } from '../../utils/useDebounce';
 
 const ShipmentManagement: React.FC = () => {
   const dispatch = useDispatch();
@@ -33,6 +34,7 @@ const ShipmentManagement: React.FC = () => {
   const handleSearch = useCallback((value: string) => {
     setSearchTerm(value);
     setCurrentPage(1);
+    // Client-side filtering, no API call needed
   }, []);
 
   const handleDeleteClick = (id: string) => {

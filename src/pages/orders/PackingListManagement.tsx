@@ -34,8 +34,6 @@ const PackingListManagement: React.FC = () => {
     dispatch(fetchOrders());
   }, [dispatch]);
 
-  const debounceTimer = React.useRef(null);
-
   const handleSearch = useCallback((value: string) => {
     setSearchTerm(value);
     setCurrentPage(1);

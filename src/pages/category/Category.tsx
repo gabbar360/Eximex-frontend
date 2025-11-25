@@ -26,6 +26,7 @@ import {
 } from 'react-icons/fa';
 import { BiCategory, BiPackage } from 'react-icons/bi';
 import { Pagination } from 'antd';
+import { useDebounce } from '../../utils/useDebounce';
 
 const CategoryRow: React.FC<{
   category: any;
@@ -175,15 +176,11 @@ const Category: React.FC = () => {
   const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
-    if (!searchTerm) {
-      dispatch(
-        fetchCategories({
-          page: currentPage,
-          limit: pageSize,
-          search: '',
-        }) as any
-      );
-    }
+    dispatch(fetchCategories({
+      page: currentPage,
+      limit: pageSize,
+      search: ''
+    }) as any);
   }, [dispatch, currentPage, pageSize]);
 
   useEffect(() => {
@@ -195,30 +192,20 @@ const Category: React.FC = () => {
       }) as any
     );
   }, [dispatch]);
+  
+  const { debouncedCallback: debouncedSearch } = useDebounce((value: string) => {
+    dispatch(fetchCategories({
+      page: 1,
+      limit: pageSize,
+      search: value
+    }) as any);
+  }, 500);
 
-  const debounceTimer = React.useRef(null);
-
-  const handleSearch = useCallback(
-    (value: string) => {
-      setSearchTerm(value);
-      setCurrentPage(1);
-
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
-      }
-
-      debounceTimer.current = setTimeout(() => {
-        dispatch(
-          fetchCategories({
-            page: 1,
-            limit: pageSize,
-            search: value,
-          }) as any
-        );
-      }, 500);
-    },
-    [dispatch, pageSize]
-  );
+  const handleSearch = useCallback((value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+    debouncedSearch(value);
+  }, [debouncedSearch, pageSize]);
 
   const handleDeleteClick = (id: string) => {
     setConfirmDelete(id);
@@ -255,13 +242,7 @@ const Category: React.FC = () => {
     );
   };
 
-  useEffect(() => {
-    return () => {
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
-      }
-    };
-  }, []);
+
 
   const filteredCategories =
     categories?.filter((category: any) => !category.parent_id) || [];
