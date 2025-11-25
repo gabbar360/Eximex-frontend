@@ -15,20 +15,19 @@ import {
   faCalculator,
   faEdit,
   faPrint,
-  faShare
+  faShare,
 } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 
 import { useDispatch } from 'react-redux';
-import { 
+import {
   getPiInvoiceById,
   updatePiStatus,
   updatePiInvoice,
   updatePiAmount,
-  downloadPiInvoicePdf
+  downloadPiInvoicePdf,
 } from '../../features/piSlice';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
-
 
 const PIDetails: React.FC = () => {
   const { id } = useParams();
@@ -42,7 +41,6 @@ const PIDetails: React.FC = () => {
   const [paymentAmount, setPaymentAmount] = useState<string>('');
   const [showConfirmationMessage, setShowConfirmationMessage] = useState(false);
   const [confirmationData, setConfirmationData] = useState<any>(null);
-
 
   useEffect(() => {
     const fetchPIDetails = async () => {
@@ -77,22 +75,26 @@ const PIDetails: React.FC = () => {
         setPiData(updatedData);
 
         try {
-          await dispatch(updatePiAmount({
-            id,
-            amountData: {
-              totalAmount: updatedTotalAmount,
-              advanceAmount: payment,
-            }
-          })).unwrap();
-        } catch (backendError) {
-          try {
-            await dispatch(updatePiInvoice({
+          await dispatch(
+            updatePiAmount({
               id,
-              piData: {
+              amountData: {
                 totalAmount: updatedTotalAmount,
                 advanceAmount: payment,
-              }
-            })).unwrap();
+              },
+            })
+          ).unwrap();
+        } catch (backendError) {
+          try {
+            await dispatch(
+              updatePiInvoice({
+                id,
+                piData: {
+                  totalAmount: updatedTotalAmount,
+                  advanceAmount: payment,
+                },
+              })
+            ).unwrap();
           } catch (fallbackError) {
             toast.error('Failed to update amount in backend');
           }
@@ -110,7 +112,7 @@ const PIDetails: React.FC = () => {
         piNumber: piData.piNumber,
         companyName: piData.party?.companyName,
         totalAmount: formattedAmount,
-        paymentReceived
+        paymentReceived,
       });
       setShowConfirmationMessage(true);
 
@@ -184,10 +186,16 @@ const PIDetails: React.FC = () => {
                 onClick={() => navigate(-1)}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-200"
               >
-                <FontAwesomeIcon icon={faArrowLeft} className="w-4 h-4 text-gray-600" />
+                <FontAwesomeIcon
+                  icon={faArrowLeft}
+                  className="w-4 h-4 text-gray-600"
+                />
               </button>
               <div className="p-3 rounded-lg bg-slate-700 shadow-lg">
-                <FontAwesomeIcon icon={faFileInvoiceDollar} className="w-6 h-6 text-white" />
+                <FontAwesomeIcon
+                  icon={faFileInvoiceDollar}
+                  className="w-6 h-6 text-white"
+                />
               </div>
               <div>
                 <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
@@ -195,13 +203,15 @@ const PIDetails: React.FC = () => {
                 </h1>
               </div>
             </div>
-            
+
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={async () => {
                   try {
                     setDownloadingPdf(true);
-                    toast.info('Preparing PDF download...', { autoClose: 2000 });
+                    toast.info('Preparing PDF download...', {
+                      autoClose: 2000,
+                    });
                     await dispatch(downloadPiInvoicePdf(id)).unwrap();
                     toast.success('PDF downloaded successfully');
                   } catch (error) {
@@ -218,7 +228,10 @@ const PIDetails: React.FC = () => {
                   <LoadingSpinner size="small" />
                 ) : (
                   <>
-                    <FontAwesomeIcon icon={faDownload} className="w-4 h-4 mr-2" />
+                    <FontAwesomeIcon
+                      icon={faDownload}
+                      className="w-4 h-4 mr-2"
+                    />
                     Download PDF
                   </>
                 )}
@@ -232,7 +245,10 @@ const PIDetails: React.FC = () => {
               </button>
               {piData.status === 'confirmed' ? (
                 <div className="px-4 py-3 text-sm font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg shadow-sm">
-                  <FontAwesomeIcon icon={faCheckCircle} className="w-4 h-4 mr-2" />
+                  <FontAwesomeIcon
+                    icon={faCheckCircle}
+                    className="w-4 h-4 mr-2"
+                  />
                   Confirmed
                 </div>
               ) : (
@@ -251,78 +267,102 @@ const PIDetails: React.FC = () => {
 
       {/* Main Content */}
       <div className="p-2 lg:p-4">
-
-
         {/* Company Information */}
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm mb-6 overflow-hidden">
           <div className="bg-gray-50 border-b border-gray-200 p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center">
-                <FontAwesomeIcon icon={faBuilding} className="w-5 h-5 text-white" />
+                <FontAwesomeIcon
+                  icon={faBuilding}
+                  className="w-5 h-5 text-white"
+                />
               </div>
-              <h2 className="text-lg font-bold text-gray-900">Company Information</h2>
+              <h2 className="text-lg font-bold text-gray-900">
+                Company Information
+              </h2>
             </div>
           </div>
           <div className="p-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Company Name</span>
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  Company Name
+                </span>
                 <span className="text-sm font-bold text-gray-900">
                   {piData.party?.companyName || piData.company?.name || 'N/A'}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Total Invoice Amount</span>
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  Total Invoice Amount
+                </span>
                 <span className="text-sm font-bold text-slate-700">
                   {formattedAmount}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Invoice Date</span>
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  Invoice Date
+                </span>
                 <span className="text-sm font-bold text-gray-900">
                   {formattedDate}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Currency</span>
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  Currency
+                </span>
                 <span className="text-sm font-bold text-gray-900">
                   {piData.currency || 'USD'}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Contact Person</span>
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  Contact Person
+                </span>
                 <span className="text-sm font-bold text-gray-900">
                   {piData.contactPerson || 'N/A'}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</span>
-                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${
-                  piData.status === 'pending'
-                    ? 'bg-amber-50 text-amber-700 border-amber-200'
-                    : piData.status === 'confirmed'
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                      : piData.status === 'draft'
-                        ? 'bg-slate-50 text-slate-700 border-slate-200'
-                        : 'bg-gray-50 text-gray-700 border-gray-200'
-                }`}>
-                  {piData.status?.charAt(0).toUpperCase() + piData.status?.slice(1)}
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  Status
+                </span>
+                <span
+                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${
+                    piData.status === 'pending'
+                      ? 'bg-amber-50 text-amber-700 border-amber-200'
+                      : piData.status === 'confirmed'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        : piData.status === 'draft'
+                          ? 'bg-slate-50 text-slate-700 border-slate-200'
+                          : 'bg-gray-50 text-gray-700 border-gray-200'
+                  }`}
+                >
+                  {piData.status?.charAt(0).toUpperCase() +
+                    piData.status?.slice(1)}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Email Address</span>
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  Email Address
+                </span>
                 <span className="text-sm font-bold text-slate-600 hover:text-slate-800 cursor-pointer">
                   {piData.email || 'N/A'}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Phone Number</span>
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  Phone Number
+                </span>
                 <span className="text-sm font-bold text-gray-900">
                   {piData.phone || 'N/A'}
                 </span>
               </div>
               <div className="flex items-start justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Business Address</span>
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  Business Address
+                </span>
                 <span className="text-sm font-bold text-gray-900 text-right max-w-xs">
                   {piData.address || 'N/A'}
                 </span>
@@ -338,27 +378,39 @@ const PIDetails: React.FC = () => {
             <div className="bg-gray-50 border-b border-gray-200 p-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center">
-                  <FontAwesomeIcon icon={faFileInvoiceDollar} className="w-5 h-5 text-white" />
+                  <FontAwesomeIcon
+                    icon={faFileInvoiceDollar}
+                    className="w-5 h-5 text-white"
+                  />
                 </div>
-                <h2 className="text-lg font-bold text-gray-900">Invoice Terms</h2>
+                <h2 className="text-lg font-bold text-gray-900">
+                  Invoice Terms
+                </h2>
               </div>
             </div>
             <div className="p-4">
               <div className="space-y-3">
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Payment Terms</span>
+                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Payment Terms
+                  </span>
                   <span className="text-sm font-bold text-gray-900">
                     {paymentTermNames[piData.paymentTerm] || piData.paymentTerm}
                   </span>
                 </div>
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Delivery Terms</span>
+                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Delivery Terms
+                  </span>
                   <span className="text-sm font-bold text-gray-900">
-                    {deliveryTermNames[piData.deliveryTerm] || piData.deliveryTerm}
+                    {deliveryTermNames[piData.deliveryTerm] ||
+                      piData.deliveryTerm}
                   </span>
                 </div>
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Currency</span>
+                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                    Currency
+                  </span>
                   <span className="text-sm font-bold text-slate-700">
                     {piData.currency || 'USD'}
                   </span>
@@ -372,7 +424,10 @@ const PIDetails: React.FC = () => {
             <div className="bg-gray-50 border-b border-gray-200 p-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center">
-                  <FontAwesomeIcon icon={faCalculator} className="w-5 h-5 text-white" />
+                  <FontAwesomeIcon
+                    icon={faCalculator}
+                    className="w-5 h-5 text-white"
+                  />
                 </div>
                 <h2 className="text-lg font-bold text-gray-900">Quick Stats</h2>
               </div>
@@ -380,19 +435,27 @@ const PIDetails: React.FC = () => {
             <div className="p-4">
               <div className="grid grid-cols-2 gap-3">
                 <div className="text-center p-3 bg-slate-50 rounded-lg">
-                  <div className="text-lg font-bold text-slate-700">{piData.products?.length || 0}</div>
+                  <div className="text-lg font-bold text-slate-700">
+                    {piData.products?.length || 0}
+                  </div>
                   <div className="text-xs text-gray-600 mt-1">Products</div>
                 </div>
                 <div className="text-center p-3 bg-gray-50 rounded-lg">
-                  <div className="text-lg font-bold text-gray-700">{piData.totalBoxes || 0}</div>
+                  <div className="text-lg font-bold text-gray-700">
+                    {piData.totalBoxes || 0}
+                  </div>
                   <div className="text-xs text-gray-600 mt-1">Total Boxes</div>
                 </div>
                 <div className="text-center p-3 bg-stone-50 rounded-lg">
-                  <div className="text-lg font-bold text-stone-700">{piData.totalWeight || 0}</div>
+                  <div className="text-lg font-bold text-stone-700">
+                    {piData.totalWeight || 0}
+                  </div>
                   <div className="text-xs text-gray-600 mt-1">Weight (kg)</div>
                 </div>
                 <div className="text-center p-3 bg-zinc-50 rounded-lg">
-                  <div className="text-lg font-bold text-zinc-700">{piData.requiredContainers || 1}</div>
+                  <div className="text-lg font-bold text-zinc-700">
+                    {piData.requiredContainers || 1}
+                  </div>
                   <div className="text-xs text-gray-600 mt-1">Containers</div>
                 </div>
               </div>
@@ -405,9 +468,14 @@ const PIDetails: React.FC = () => {
           <div className="bg-gray-50 border-b border-gray-200 p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center">
-                <FontAwesomeIcon icon={faShippingFast} className="w-5 h-5 text-white" />
+                <FontAwesomeIcon
+                  icon={faShippingFast}
+                  className="w-5 h-5 text-white"
+                />
               </div>
-              <h2 className="text-lg font-bold text-gray-900">Container & Shipping Details</h2>
+              <h2 className="text-lg font-bold text-gray-900">
+                Container & Shipping Details
+              </h2>
             </div>
           </div>
           <div className="p-4">
@@ -472,14 +540,20 @@ const PIDetails: React.FC = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center">
-                  <FontAwesomeIcon icon={faBoxes} className="w-5 h-5 text-white" />
+                  <FontAwesomeIcon
+                    icon={faBoxes}
+                    className="w-5 h-5 text-white"
+                  />
                 </div>
                 <h2 className="text-lg font-bold text-gray-900">
                   Products ({piData.products?.length || 0} items)
                 </h2>
               </div>
               <div className="text-sm text-gray-500">
-                Total Value: <span className="font-bold text-gray-900">{formattedAmount}</span>
+                Total Value:{' '}
+                <span className="font-bold text-gray-900">
+                  {formattedAmount}
+                </span>
               </div>
             </div>
           </div>
@@ -510,25 +584,33 @@ const PIDetails: React.FC = () => {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-white p-3 rounded-lg">
-                      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">HS Code</div>
+                      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                        HS Code
+                      </div>
                       <div className="text-sm font-medium text-gray-900">
                         {product.hsCode || product.category?.hsnCode || 'N/A'}
                       </div>
                     </div>
                     <div className="bg-white p-3 rounded-lg">
-                      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Quantity</div>
+                      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                        Quantity
+                      </div>
                       <div className="text-sm font-medium text-gray-900">
                         {product.quantity} {product.unit}
                       </div>
                     </div>
                     <div className="bg-white p-3 rounded-lg">
-                      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Rate</div>
+                      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                        Rate
+                      </div>
                       <div className="text-sm font-medium text-gray-900">
                         ${product.rate.toFixed(2)}
                       </div>
                     </div>
                     <div className="bg-white p-3 rounded-lg">
-                      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Item #{index + 1}</div>
+                      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                        Item #{index + 1}
+                      </div>
                       <div className="text-sm font-medium text-slate-700">
                         ${product.total.toFixed(2)}
                       </div>
@@ -537,7 +619,10 @@ const PIDetails: React.FC = () => {
                 </div>
               )) || (
                 <div className="bg-gray-50 rounded-xl p-8 text-center text-gray-500">
-                  <FontAwesomeIcon icon={faBoxes} className="w-12 h-12 text-gray-300 mb-3" />
+                  <FontAwesomeIcon
+                    icon={faBoxes}
+                    className="w-12 h-12 text-gray-300 mb-3"
+                  />
                   <p className="text-lg font-medium">No products found</p>
                 </div>
               )}
@@ -574,7 +659,9 @@ const PIDetails: React.FC = () => {
                       <td className="py-5 px-6">
                         <div className="flex items-start gap-3">
                           <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <span className="text-slate-600 font-bold text-sm">#{index + 1}</span>
+                            <span className="text-slate-600 font-bold text-sm">
+                              #{index + 1}
+                            </span>
                           </div>
                           <div>
                             <p className="font-bold text-gray-900 text-base mb-1">
@@ -617,14 +704,18 @@ const PIDetails: React.FC = () => {
                     </tr>
                   )) || (
                     <tr>
-                      <td
-                        colSpan={5}
-                        className="py-12 text-center"
-                      >
+                      <td colSpan={5} className="py-12 text-center">
                         <div className="flex flex-col items-center">
-                          <FontAwesomeIcon icon={faBoxes} className="w-16 h-16 text-gray-300 mb-4" />
-                          <p className="text-lg font-medium text-gray-500">No products found</p>
-                          <p className="text-sm text-gray-400">Add products to see them here</p>
+                          <FontAwesomeIcon
+                            icon={faBoxes}
+                            className="w-16 h-16 text-gray-300 mb-4"
+                          />
+                          <p className="text-lg font-medium text-gray-500">
+                            No products found
+                          </p>
+                          <p className="text-sm text-gray-400">
+                            Add products to see them here
+                          </p>
                         </div>
                       </td>
                     </tr>
@@ -640,9 +731,14 @@ const PIDetails: React.FC = () => {
           <div className="bg-gray-50 border-b border-gray-200 p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center">
-                <FontAwesomeIcon icon={faCalculator} className="w-5 h-5 text-white" />
+                <FontAwesomeIcon
+                  icon={faCalculator}
+                  className="w-5 h-5 text-white"
+                />
               </div>
-              <h2 className="text-lg font-bold text-gray-900">Financial Summary</h2>
+              <h2 className="text-lg font-bold text-gray-900">
+                Financial Summary
+              </h2>
             </div>
           </div>
           <div className="p-6">
@@ -650,19 +746,25 @@ const PIDetails: React.FC = () => {
               {/* Financial Details */}
               <div className="space-y-4">
                 <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                  <span className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Subtotal</span>
+                  <span className="text-sm font-semibold text-gray-600 uppercase tracking-wide">
+                    Subtotal
+                  </span>
                   <span className="text-lg font-bold text-gray-900">
                     ${piData.subtotal?.toFixed(2) || '0.00'}
                   </span>
                 </div>
                 <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                  <span className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Additional Charges</span>
+                  <span className="text-sm font-semibold text-gray-600 uppercase tracking-wide">
+                    Additional Charges
+                  </span>
                   <span className="text-lg font-bold text-gray-900">
                     ${piData.chargesTotal?.toFixed(2) || '0.00'}
                   </span>
                 </div>
                 <div className="flex justify-between items-center p-4 rounded-lg  bg-gray-50 text-gray-600">
-                  <span className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Advance Paid</span>
+                  <span className="text-sm font-semibold text-gray-600 uppercase tracking-wide">
+                    Advance Paid
+                  </span>
                   <span className="text-lg font-bold text-gray-900">
                     ${(piData.advanceAmount || 0).toFixed(2)}
                   </span>
@@ -672,19 +774,25 @@ const PIDetails: React.FC = () => {
               {/* Shipping Details */}
               <div className="space-y-4">
                 <div className="flex justify-between items-center p-4 bg-slate-50 rounded-lg border border-slate-200">
-                  <span className="text-sm font-semibold text-slate-600 uppercase tracking-wide">Total Weight</span>
+                  <span className="text-sm font-semibold text-slate-600 uppercase tracking-wide">
+                    Total Weight
+                  </span>
                   <span className="text-lg font-bold text-slate-700">
                     {piData.totalWeight || 0} kg
                   </span>
                 </div>
                 <div className="flex justify-between items-center p-4 bg-stone-50 rounded-lg border border-stone-200">
-                  <span className="text-sm font-semibold text-stone-600 uppercase tracking-wide">Total Volume</span>
+                  <span className="text-sm font-semibold text-stone-600 uppercase tracking-wide">
+                    Total Volume
+                  </span>
                   <span className="text-lg font-bold text-stone-700">
                     {piData.totalVolume || 0} CBM
                   </span>
                 </div>
                 <div className="flex justify-between items-center p-4 bg-zinc-50 rounded-lg border border-zinc-200">
-                  <span className="text-sm font-semibold text-zinc-600 uppercase tracking-wide">Total Boxes</span>
+                  <span className="text-sm font-semibold text-zinc-600 uppercase tracking-wide">
+                    Total Boxes
+                  </span>
                   <span className="text-lg font-bold text-zinc-700">
                     {piData.totalBoxes || 0}
                   </span>
@@ -718,7 +826,10 @@ const PIDetails: React.FC = () => {
                     Outstanding Balance
                   </span>
                   <span className="text-xl font-bold text-red-700">
-                    ${(currentTotalAmount - (piData.advanceAmount || 0)).toFixed(2)}
+                    $
+                    {(currentTotalAmount - (piData.advanceAmount || 0)).toFixed(
+                      2
+                    )}
                   </span>
                 </div>
               </div>
@@ -726,12 +837,6 @@ const PIDetails: React.FC = () => {
           </div>
         </div>
       </div>
-
-
-
-
-
-
     </div>
   );
 };

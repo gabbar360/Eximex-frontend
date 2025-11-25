@@ -54,3 +54,24 @@ export const updateCompany = async (id, formData) => {
     throw error.response?.data || error;
   }
 };
+
+export const uploadSignature = async (id, signatureFile) => {
+  try {
+    const formData = new FormData();
+    formData.append('signature', signatureFile);
+    
+    const { data } = await axiosInstance.put(
+      `/upload-signature/${id}`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return { data: data.data, message: data.message };
+  } catch (error) {
+    console.error('Upload signature error:', error);
+    throw error.response?.data || error;
+  }
+};

@@ -83,7 +83,7 @@ const roleSlice = createSlice({
         state.loading = false;
         state.error = payload;
       })
-      
+
       // Create role
       .addCase(createRole.pending, (state) => {
         state.loading = true;
@@ -98,7 +98,7 @@ const roleSlice = createSlice({
         state.loading = false;
         state.error = payload;
       })
-      
+
       // Update role
       .addCase(updateRole.pending, (state) => {
         state.loading = true;
@@ -107,7 +107,7 @@ const roleSlice = createSlice({
       .addCase(updateRole.fulfilled, (state, { payload }) => {
         state.loading = false;
         const roleData = payload?.data || payload;
-        const index = state.roles.findIndex(role => role.id === roleData.id);
+        const index = state.roles.findIndex((role) => role.id === roleData.id);
         if (index !== -1) {
           state.roles[index] = roleData;
         }
@@ -117,7 +117,7 @@ const roleSlice = createSlice({
         state.loading = false;
         state.error = payload;
       })
-      
+
       // Delete role
       .addCase(deleteRole.pending, (state) => {
         state.loading = true;
@@ -125,7 +125,9 @@ const roleSlice = createSlice({
       })
       .addCase(deleteRole.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.roles = state.roles.filter(role => role.id !== payload.deletedId);
+        state.roles = state.roles.filter(
+          (role) => role.id !== payload.deletedId
+        );
         state.successMessage = payload?.message;
       })
       .addCase(deleteRole.rejected, (state, { payload }) => {

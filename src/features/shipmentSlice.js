@@ -84,8 +84,8 @@ const initialState = {
     total: 0,
     page: 1,
     limit: 10,
-    totalPages: 0
-  }
+    totalPages: 0,
+  },
 };
 
 const shipmentSlice = createSlice({
@@ -100,7 +100,7 @@ const shipmentSlice = createSlice({
     },
     setCurrentShipment: (state, action) => {
       state.currentShipment = action.payload;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -144,7 +144,8 @@ const shipmentSlice = createSlice({
       })
       .addCase(getShipmentByOrderId.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload.message || 'Failed to fetch shipment by order';
+        state.error =
+          action.payload.message || 'Failed to fetch shipment by order';
       })
 
       // Update shipment
@@ -155,7 +156,9 @@ const shipmentSlice = createSlice({
       .addCase(updateShipment.fulfilled, (state, action) => {
         state.loading = false;
         const updatedShipment = action.payload.data;
-        const index = state.shipments.findIndex(s => s.id === updatedShipment.id);
+        const index = state.shipments.findIndex(
+          (s) => s.id === updatedShipment.id
+        );
         if (index !== -1) {
           state.shipments[index] = updatedShipment;
         }
@@ -188,7 +191,9 @@ const shipmentSlice = createSlice({
       })
       .addCase(deleteShipment.fulfilled, (state, action) => {
         state.loading = false;
-        state.shipments = state.shipments.filter(s => s.id !== action.payload.shipmentId);
+        state.shipments = state.shipments.filter(
+          (s) => s.id !== action.payload.shipmentId
+        );
         if (state.currentShipment?.id === action.payload.shipmentId) {
           state.currentShipment = null;
         }
@@ -197,8 +202,9 @@ const shipmentSlice = createSlice({
         state.loading = false;
         state.error = action.payload.message || 'Failed to delete shipment';
       });
-  }
+  },
 });
 
-export const { clearError, clearCurrentShipment, setCurrentShipment } = shipmentSlice.actions;
+export const { clearError, clearCurrentShipment, setCurrentShipment } =
+  shipmentSlice.actions;
 export default shipmentSlice.reducer;

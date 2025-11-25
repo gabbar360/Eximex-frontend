@@ -7,7 +7,20 @@ import {
   AttachMoney,
   Inventory,
 } from '@mui/icons-material';
-import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import {
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 
 // Sample data
 const salesData = [
@@ -27,7 +40,10 @@ const orderData = [
 ];
 
 const MobileMetricCard = ({ title, value, change, icon, color }: any) => (
-  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border-l-4" style={{ borderLeftColor: color }}>
+  <div
+    className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border-l-4"
+    style={{ borderLeftColor: color }}
+  >
     <div className="flex items-center justify-between">
       <div className="flex-1">
         <p className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
@@ -42,14 +58,19 @@ const MobileMetricCard = ({ title, value, change, icon, color }: any) => (
           ) : (
             <TrendingDown className="w-3 h-3 text-red-500 mr-1" />
           )}
-          <span className={`text-xs font-semibold ${
-            change > 0 ? 'text-green-600' : 'text-red-600'
-          }`}>
+          <span
+            className={`text-xs font-semibold ${
+              change > 0 ? 'text-green-600' : 'text-red-600'
+            }`}
+          >
             {Math.abs(change)}%
           </span>
         </div>
       </div>
-      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white ml-3`} style={{ backgroundColor: color }}>
+      <div
+        className={`w-10 h-10 rounded-full flex items-center justify-center text-white ml-3`}
+        style={{ backgroundColor: color }}
+      >
         {React.cloneElement(icon, { className: 'w-5 h-5' })}
       </div>
     </div>
@@ -121,20 +142,20 @@ export default function MobileOptimizedDashboard() {
               <AreaChart data={salesData}>
                 <defs>
                   <linearGradient id="mobileSales" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#1976d2" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#1976d2" stopOpacity={0.1}/>
+                    <stop offset="5%" stopColor="#1976d2" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#1976d2" stopOpacity={0.1} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="month" stroke="#666" fontSize={10} />
                 <YAxis stroke="#666" fontSize={10} />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#fff', 
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#fff',
                     border: '1px solid #e0e0e0',
                     borderRadius: '6px',
-                    fontSize: '12px'
-                  }} 
+                    fontSize: '12px',
+                  }}
                 />
                 <Area
                   type="monotone"
@@ -165,13 +186,13 @@ export default function MobileOptimizedDashboard() {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#fff', 
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#fff',
                     border: '1px solid #e0e0e0',
                     borderRadius: '6px',
-                    fontSize: '12px'
-                  }} 
+                    fontSize: '12px',
+                  }}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -195,22 +216,50 @@ export default function MobileOptimizedDashboard() {
             </h3>
             <div className="space-y-3">
               {[
-                { id: '#12345', customer: 'John Doe', amount: '$299.00', status: 'Completed' },
-                { id: '#12346', customer: 'Jane Smith', amount: '$199.50', status: 'Processing' },
-                { id: '#12347', customer: 'Bob Johnson', amount: '$449.99', status: 'Shipped' },
+                {
+                  id: '#12345',
+                  customer: 'John Doe',
+                  amount: '$299.00',
+                  status: 'Completed',
+                },
+                {
+                  id: '#12346',
+                  customer: 'Jane Smith',
+                  amount: '$199.50',
+                  status: 'Processing',
+                },
+                {
+                  id: '#12347',
+                  customer: 'Bob Johnson',
+                  amount: '$449.99',
+                  status: 'Shipped',
+                },
               ].map((order, index) => (
-                <div key={index} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded">
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded"
+                >
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{order.id}</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{order.customer}</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                      {order.id}
+                    </p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                      {order.customer}
+                    </p>
                   </div>
                   <div className="text-right ml-2">
-                    <p className="text-sm font-bold text-gray-900 dark:text-white">{order.amount}</p>
-                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                      order.status === 'Completed' ? 'bg-green-100 text-green-800' :
-                      order.status === 'Processing' ? 'bg-blue-100 text-blue-800' :
-                      'bg-purple-100 text-purple-800'
-                    }`}>
+                    <p className="text-sm font-bold text-gray-900 dark:text-white">
+                      {order.amount}
+                    </p>
+                    <span
+                      className={`text-xs px-2 py-1 rounded-full font-medium ${
+                        order.status === 'Completed'
+                          ? 'bg-green-100 text-green-800'
+                          : order.status === 'Processing'
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-purple-100 text-purple-800'
+                      }`}
+                    >
                       {order.status}
                     </span>
                   </div>

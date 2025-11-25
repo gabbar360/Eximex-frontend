@@ -1,7 +1,25 @@
 import { useDispatch, useSelector } from 'react-redux';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { HiEye, HiPencil, HiTrash, HiPlus, HiMagnifyingGlass, HiDocumentText, HiClock, HiCheckCircle, HiXCircle, HiDocument, HiCurrencyDollar, HiBuildingOffice2, HiCalendar, HiCreditCard, HiArrowDownTray, HiEnvelope, HiEllipsisVertical } from 'react-icons/hi2';
+import {
+  HiEye,
+  HiPencil,
+  HiTrash,
+  HiPlus,
+  HiMagnifyingGlass,
+  HiDocumentText,
+  HiClock,
+  HiCheckCircle,
+  HiXCircle,
+  HiDocument,
+  HiCurrencyDollar,
+  HiBuildingOffice2,
+  HiCalendar,
+  HiCreditCard,
+  HiArrowDownTray,
+  HiEnvelope,
+  HiEllipsisVertical,
+} from 'react-icons/hi2';
 import { toast } from 'react-toastify';
 import { Pagination } from 'antd';
 
@@ -40,13 +58,15 @@ const PerformaInvoice: React.FC = () => {
       search: ''
     }) as any);
   }, [dispatch, currentPage, pageSize]);
-  
+
   useEffect(() => {
-    dispatch(fetchPiInvoices({
-      page: 1,
-      limit: 10,
-      search: ''
-    }) as any);
+    dispatch(
+      fetchPiInvoices({
+        page: 1,
+        limit: 10,
+        search: '',
+      }) as any
+    );
   }, [dispatch]);
 
   const { debouncedCallback: debouncedSearch } = useDebounce((value: string) => {
@@ -75,7 +95,7 @@ const PerformaInvoice: React.FC = () => {
     if (openDropdown) {
       document.addEventListener('mousedown', handleClickOutside);
     }
-    
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -85,13 +105,15 @@ const PerformaInvoice: React.FC = () => {
     try {
       const result = await dispatch(deletePiInvoice(id)).unwrap();
       setConfirmDelete(null);
-      
-      dispatch(fetchPiInvoices({
-        page: currentPage,
-        limit: pageSize,
-        search: searchTerm
-      }) as any);
-      
+
+      dispatch(
+        fetchPiInvoices({
+          page: currentPage,
+          limit: pageSize,
+          search: searchTerm,
+        }) as any
+      );
+
       toast.success(result.message);
     } catch (error: any) {
       toast.error(error);
@@ -103,24 +125,44 @@ const PerformaInvoice: React.FC = () => {
   // Use piInvoices directly since filtering is now handled by backend
   const filteredPIs = piInvoices.filter((pi: any) => {
     if (!pi) return false;
-    
+
     const matchesStatus =
       filterStatus === 'all' ||
       (pi.status && pi.status.toLowerCase() === filterStatus.toLowerCase());
-    
+
     return matchesStatus;
   });
 
   const getStatusConfig = (status: string) => {
     switch (status?.toLowerCase()) {
       case 'confirmed':
-        return { icon: HiCheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200' };
+        return {
+          icon: HiCheckCircle,
+          color: 'text-emerald-600',
+          bg: 'bg-emerald-50',
+          border: 'border-emerald-200',
+        };
       case 'pending':
-        return { icon: HiClock, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-200' };
+        return {
+          icon: HiClock,
+          color: 'text-amber-600',
+          bg: 'bg-amber-50',
+          border: 'border-amber-200',
+        };
       case 'cancelled':
-        return { icon: HiXCircle, color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-200' };
+        return {
+          icon: HiXCircle,
+          color: 'text-red-600',
+          bg: 'bg-red-50',
+          border: 'border-red-200',
+        };
       default:
-        return { icon: HiDocument, color: 'text-gray-600', bg: 'bg-gray-50', border: 'border-gray-200' };
+        return {
+          icon: HiDocument,
+          color: 'text-gray-600',
+          bg: 'bg-gray-50',
+          border: 'border-gray-200',
+        };
     }
   };
 
@@ -141,7 +183,7 @@ const PerformaInvoice: React.FC = () => {
                   </h1>
                 </div>
               </div>
-              
+
               <div className="flex flex-col sm:flex-row gap-3">
                 <div className="relative">
                   <HiMagnifyingGlass className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -153,7 +195,7 @@ const PerformaInvoice: React.FC = () => {
                     onChange={(e) => handleSearch(e.target.value)}
                   />
                 </div>
-                
+
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
@@ -165,7 +207,7 @@ const PerformaInvoice: React.FC = () => {
                   <option value="confirmed">Confirmed</option>
                   <option value="cancelled">Cancelled</option>
                 </select>
-                
+
                 <Link
                   to="/add-pi"
                   className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg"
@@ -178,8 +220,6 @@ const PerformaInvoice: React.FC = () => {
           </div>
         </div>
 
-
-
         {/* Invoices Display */}
         {loading ? (
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-12 text-center">
@@ -191,10 +231,12 @@ const PerformaInvoice: React.FC = () => {
             <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-slate-600 flex items-center justify-center shadow-lg">
               <HiMagnifyingGlass className="w-8 h-8 text-white" />
             </div>
-            <h3 className="text-xl font-semibold text-slate-800 mb-2">No invoices found</h3>
+            <h3 className="text-xl font-semibold text-slate-800 mb-2">
+              No invoices found
+            </h3>
             <p className="text-slate-600 mb-6">
-              {searchTerm || filterStatus !== 'all' 
-                ? 'Try adjusting your search or filters.' 
+              {searchTerm || filterStatus !== 'all'
+                ? 'Try adjusting your search or filters.'
                 : 'Create your first invoice to get started.'}
             </p>
             {/* <Link
@@ -211,7 +253,13 @@ const PerformaInvoice: React.FC = () => {
             <div className="hidden lg:block">
               {/* Table Header */}
               <div className="bg-gray-50 border-b border-gray-200 p-4">
-                <div className="grid gap-2 text-sm font-semibold text-slate-700" style={{gridTemplateColumns: '1.5fr 1.2fr 1fr 1fr 0.8fr 1fr 1fr 0.8fr'}}>
+                <div
+                  className="grid gap-2 text-sm font-semibold text-slate-700"
+                  style={{
+                    gridTemplateColumns:
+                      '1.5fr 1.2fr 1fr 1fr 0.8fr 1fr 1fr 0.8fr',
+                  }}
+                >
                   <div className="flex items-center gap-2">
                     <HiDocumentText className="w-4 h-4 text-slate-600" />
                     <span>Invoice No.</span>
@@ -250,50 +298,73 @@ const PerformaInvoice: React.FC = () => {
                 {filteredPIs.map((pi) => {
                   const statusConfig = getStatusConfig(pi.status);
                   const StatusIcon = statusConfig.icon;
-                  
+
                   return (
-                    <div key={pi.id} className="p-4 hover:bg-white/50 transition-all duration-300">
-                      <div className="grid gap-2 items-center" style={{gridTemplateColumns: '1.5fr 1.2fr 1fr 1fr 0.8fr 1fr 1fr 0.8fr'}}>
+                    <div
+                      key={pi.id}
+                      className="p-4 hover:bg-white/50 transition-all duration-300"
+                    >
+                      <div
+                        className="grid gap-2 items-center"
+                        style={{
+                          gridTemplateColumns:
+                            '1.5fr 1.2fr 1fr 1fr 0.8fr 1fr 1fr 0.8fr',
+                        }}
+                      >
                         {/* Invoice Number */}
                         <div className="flex items-center gap-2">
                           <HiDocumentText className="w-4 h-4 text-slate-600 flex-shrink-0" />
-                          <span className="text-slate-800 font-medium truncate" title={pi.piNumber}>
+                          <span
+                            className="text-slate-800 font-medium truncate"
+                            title={pi.piNumber}
+                          >
                             {pi.piNumber}
                           </span>
                         </div>
-                        
+
                         {/* Client */}
-                        <div className="text-slate-700 text-sm truncate" title={pi.party?.companyName}>
+                        <div
+                          className="text-slate-700 text-sm truncate"
+                          title={pi.party?.companyName}
+                        >
                           {pi.party?.companyName || '-'}
                         </div>
-                        
+
                         {/* Date */}
                         <div className="text-slate-700 text-sm">
-                          {new Date(pi.invoiceDate).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
+                          {new Date(pi.invoiceDate).toLocaleDateString(
+                            'en-US',
+                            {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                            }
+                          )}
                         </div>
-                        
+
                         {/* Status */}
                         <div>
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${statusConfig.bg} ${statusConfig.color} ${statusConfig.border}`}>
+                          <span
+                            className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${statusConfig.bg} ${statusConfig.color} ${statusConfig.border}`}
+                          >
                             <StatusIcon className="w-3 h-3 mr-1" />
-                            {pi.status?.charAt(0).toUpperCase() + pi.status?.slice(1)}
+                            {pi.status?.charAt(0).toUpperCase() +
+                              pi.status?.slice(1)}
                           </span>
                         </div>
-                        
+
                         {/* Items */}
                         <div className="text-slate-700 text-sm">
                           {pi._count?.products || 0}
                         </div>
-                        
+
                         {/* Payment */}
                         <div className="text-slate-700 text-sm">
-                          {paymentTermNames[pi.paymentTerm] || pi.paymentTerm || '-'}
+                          {paymentTermNames[pi.paymentTerm] ||
+                            pi.paymentTerm ||
+                            '-'}
                         </div>
-                        
+
                         {/* Amount */}
                         <div className="text-slate-700 text-sm font-medium">
                           {new Intl.NumberFormat('en-US', {
@@ -302,7 +373,7 @@ const PerformaInvoice: React.FC = () => {
                             maximumFractionDigits: 0,
                           }).format(pi.totalAmount || 0)}
                         </div>
-                        
+
                         {/* Actions */}
                         <div className="flex items-center justify-end">
                           <div className="relative dropdown-container">
@@ -310,13 +381,15 @@ const PerformaInvoice: React.FC = () => {
                               data-dropdown-id={pi.id}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setOpenDropdown(openDropdown === pi.id ? null : pi.id);
+                                setOpenDropdown(
+                                  openDropdown === pi.id ? null : pi.id
+                                );
                               }}
                               className="p-2 rounded-lg text-slate-500 hover:bg-gray-100 transition-all duration-300"
                             >
                               <HiEllipsisVertical className="w-5 h-5" />
                             </button>
-                            
+
                             {openDropdown === pi.id && (
                               <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-[9999] backdrop-blur-sm">
                                 <Link
@@ -327,7 +400,9 @@ const PerformaInvoice: React.FC = () => {
                                   <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
                                     <HiEye className="w-4 h-4 text-slate-600" />
                                   </div>
-                                  <span className="font-medium">View/confirm order</span>
+                                  <span className="font-medium">
+                                    View/confirm order
+                                  </span>
                                 </Link>
                                 <Link
                                   to={`/edit-pi/${pi.id}`}
@@ -337,18 +412,29 @@ const PerformaInvoice: React.FC = () => {
                                   <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
                                     <HiPencil className="w-4 h-4 text-emerald-600" />
                                   </div>
-                                  <span className="font-medium">Edit Invoice</span>
+                                  <span className="font-medium">
+                                    Edit Invoice
+                                  </span>
                                 </Link>
                                 <button
                                   onClick={async () => {
                                     setOpenDropdown(null);
                                     try {
                                       setDownloadingPdf(pi.id);
-                                      toast.info('Preparing PDF download...', { autoClose: 2000 });
-                                      await dispatch(downloadPiInvoicePdf(pi.id)).unwrap();
-                                      toast.success('PDF downloaded successfully');
+                                      toast.info('Preparing PDF download...', {
+                                        autoClose: 2000,
+                                      });
+                                      await dispatch(
+                                        downloadPiInvoicePdf(pi.id)
+                                      ).unwrap();
+                                      toast.success(
+                                        'PDF downloaded successfully'
+                                      );
                                     } catch (error) {
-                                      console.error('Error downloading PDF:', error);
+                                      console.error(
+                                        'Error downloading PDF:',
+                                        error
+                                      );
                                       toast.error('Download failed');
                                     } finally {
                                       setDownloadingPdf(null);
@@ -364,19 +450,25 @@ const PerformaInvoice: React.FC = () => {
                                       <HiArrowDownTray className="w-4 h-4 text-blue-600" />
                                     )}
                                   </div>
-                                  <span className="font-medium">Download PDF</span>
+                                  <span className="font-medium">
+                                    Download PDF
+                                  </span>
                                 </button>
                                 <button
                                   onClick={() => {
                                     setOpenDropdown(null);
-                                    navigate(`/proforma-invoices/${pi.id}/email`);
+                                    navigate(
+                                      `/proforma-invoices/${pi.id}/email`
+                                    );
                                   }}
                                   className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-indigo-50 transition-all duration-200 w-full text-left border-b border-gray-50 last:border-b-0"
                                 >
                                   <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center">
                                     <HiEnvelope className="w-4 h-4 text-indigo-600" />
                                   </div>
-                                  <span className="font-medium">Send Email</span>
+                                  <span className="font-medium">
+                                    Send Email
+                                  </span>
                                 </button>
                                 <button
                                   onClick={() => {
@@ -388,7 +480,9 @@ const PerformaInvoice: React.FC = () => {
                                   <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center">
                                     <HiTrash className="w-4 h-4 text-red-600" />
                                   </div>
-                                  <span className="font-medium">Delete Invoice</span>
+                                  <span className="font-medium">
+                                    Delete Invoice
+                                  </span>
                                 </button>
                               </div>
                             )}
@@ -400,19 +494,21 @@ const PerformaInvoice: React.FC = () => {
                 })}
               </div>
             </div>
-            
+
             {/* Mobile Card View */}
             <div className="lg:hidden divide-y divide-white/20">
               {filteredPIs.map((pi) => {
                 const statusConfig = getStatusConfig(pi.status);
                 const StatusIcon = statusConfig.icon;
-                
+
                 return (
                   <div key={pi.id} className="p-4">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
                         <HiDocumentText className="w-5 h-5 text-slate-600 flex-shrink-0" />
-                        <h3 className="font-semibold text-slate-800">{pi.piNumber}</h3>
+                        <h3 className="font-semibold text-slate-800">
+                          {pi.piNumber}
+                        </h3>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Link
@@ -429,41 +525,67 @@ const PerformaInvoice: React.FC = () => {
                         </button>
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
-                        <span className="font-medium text-slate-500 text-xs">Client:</span>
-                        <div className="text-slate-700 truncate">{pi.party?.companyName || '-'}</div>
-                      </div>
-                      <div>
-                        <span className="font-medium text-slate-500 text-xs">Date:</span>
-                        <div className="text-slate-700">
-                          {new Date(pi.invoiceDate).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
+                        <span className="font-medium text-slate-500 text-xs">
+                          Client:
+                        </span>
+                        <div className="text-slate-700 truncate">
+                          {pi.party?.companyName || '-'}
                         </div>
                       </div>
                       <div>
-                        <span className="font-medium text-slate-500 text-xs">Status:</span>
+                        <span className="font-medium text-slate-500 text-xs">
+                          Date:
+                        </span>
+                        <div className="text-slate-700">
+                          {new Date(pi.invoiceDate).toLocaleDateString(
+                            'en-US',
+                            {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                            }
+                          )}
+                        </div>
+                      </div>
+                      <div>
+                        <span className="font-medium text-slate-500 text-xs">
+                          Status:
+                        </span>
                         <div>
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${statusConfig.bg} ${statusConfig.color} ${statusConfig.border}`}>
+                          <span
+                            className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${statusConfig.bg} ${statusConfig.color} ${statusConfig.border}`}
+                          >
                             <StatusIcon className="w-3 h-3 mr-1" />
-                            {pi.status?.charAt(0).toUpperCase() + pi.status?.slice(1)}
+                            {pi.status?.charAt(0).toUpperCase() +
+                              pi.status?.slice(1)}
                           </span>
                         </div>
                       </div>
                       <div>
-                        <span className="font-medium text-slate-500 text-xs">Items:</span>
-                        <div className="text-slate-700">{pi._count?.products || 0}</div>
+                        <span className="font-medium text-slate-500 text-xs">
+                          Items:
+                        </span>
+                        <div className="text-slate-700">
+                          {pi._count?.products || 0}
+                        </div>
                       </div>
                       <div>
-                        <span className="font-medium text-slate-500 text-xs">Payment:</span>
-                        <div className="text-slate-700">{paymentTermNames[pi.paymentTerm] || pi.paymentTerm || '-'}</div>
+                        <span className="font-medium text-slate-500 text-xs">
+                          Payment:
+                        </span>
+                        <div className="text-slate-700">
+                          {paymentTermNames[pi.paymentTerm] ||
+                            pi.paymentTerm ||
+                            '-'}
+                        </div>
                       </div>
                       <div>
-                        <span className="font-medium text-slate-500 text-xs">Amount:</span>
+                        <span className="font-medium text-slate-500 text-xs">
+                          Amount:
+                        </span>
                         <div className="text-slate-700 font-medium">
                           {new Intl.NumberFormat('en-US', {
                             style: 'currency',
@@ -473,19 +595,21 @@ const PerformaInvoice: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center justify-center pt-3 mt-3 border-t border-gray-200">
                       <div className="relative dropdown-container">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            setOpenDropdown(openDropdown === pi.id ? null : pi.id);
+                            setOpenDropdown(
+                              openDropdown === pi.id ? null : pi.id
+                            );
                           }}
                           className="p-2 rounded-lg text-slate-500 hover:bg-gray-100 transition-all duration-300"
                         >
                           <HiEllipsisVertical className="w-5 h-5" />
                         </button>
-                        
+
                         {openDropdown === pi.id && (
                           <div className="absolute right-0 bottom-full mb-2 w-52 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-[9999] backdrop-blur-sm">
                             <Link
@@ -513,11 +637,18 @@ const PerformaInvoice: React.FC = () => {
                                 setOpenDropdown(null);
                                 try {
                                   setDownloadingPdf(pi.id);
-                                  toast.info('Preparing PDF download...', { autoClose: 2000 });
-                                  await dispatch(downloadPiInvoicePdf(pi.id)).unwrap();
+                                  toast.info('Preparing PDF download...', {
+                                    autoClose: 2000,
+                                  });
+                                  await dispatch(
+                                    downloadPiInvoicePdf(pi.id)
+                                  ).unwrap();
                                   toast.success('PDF downloaded successfully');
                                 } catch (error) {
-                                  console.error('Error downloading PDF:', error);
+                                  console.error(
+                                    'Error downloading PDF:',
+                                    error
+                                  );
                                   toast.error('Download failed');
                                 } finally {
                                   setDownloadingPdf(null);
@@ -557,7 +688,9 @@ const PerformaInvoice: React.FC = () => {
                               <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center">
                                 <HiTrash className="w-4 h-4 text-red-600" />
                               </div>
-                              <span className="font-medium">Delete Invoice</span>
+                              <span className="font-medium">
+                                Delete Invoice
+                              </span>
                             </button>
                           </div>
                         )}
@@ -573,17 +706,19 @@ const PerformaInvoice: React.FC = () => {
         {/* Simple Pagination */}
         {pagination.total > 0 && (
           <div className="flex justify-center mt-6">
-            <Pagination 
-              current={currentPage} 
-              total={pagination.total} 
+            <Pagination
+              current={currentPage}
+              total={pagination.total}
               pageSize={pageSize}
               onChange={(page) => {
                 setCurrentPage(page);
-                dispatch(fetchPiInvoices({
-                  page: page,
-                  limit: pageSize,
-                  search: searchTerm
-                }) as any);
+                dispatch(
+                  fetchPiInvoices({
+                    page: page,
+                    limit: pageSize,
+                    search: searchTerm,
+                  }) as any
+                );
               }}
             />
           </div>
@@ -598,8 +733,13 @@ const PerformaInvoice: React.FC = () => {
               <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-red-600 flex items-center justify-center shadow-lg">
                 <HiTrash className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-slate-800 mb-2">Delete Invoice</h3>
-              <p className="text-slate-600">Are you sure you want to delete this invoice? This action cannot be undone.</p>
+              <h3 className="text-xl font-bold text-slate-800 mb-2">
+                Delete Invoice
+              </h3>
+              <p className="text-slate-600">
+                Are you sure you want to delete this invoice? This action cannot
+                be undone.
+              </p>
             </div>
             <div className="flex items-center justify-center space-x-3">
               <button

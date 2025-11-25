@@ -63,19 +63,20 @@ const packingListService = {
       throw error;
     }
   },
-    // Download packing list PDF
+  // Download packing list PDF
   downloadPDFPortPackingListPDF: async (id) => {
     try {
-      const response = await axiosInstance.get(`/packing-lists/port-delivery/${id}/pdf`, {
-        responseType: 'blob',
-      });
+      const response = await axiosInstance.get(
+        `/packing-lists/port-delivery/${id}/pdf`,
+        {
+          responseType: 'blob',
+        }
+      );
       return response;
     } catch (error) {
       throw error;
     }
   },
-
-  
 
   // ============ PACKAGING STEPS INTEGRATION ============
 

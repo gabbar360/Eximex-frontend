@@ -4,7 +4,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { HiCheckCircle, HiArrowLeft } from 'react-icons/hi';
 import { toast } from 'react-toastify';
 import { getOrderById } from '../../features/orderSlice';
-import { createShipment, updateShipment, getShipmentByOrderId } from '../../features/shipmentSlice';
+import {
+  createShipment,
+  updateShipment,
+  getShipmentByOrderId,
+} from '../../features/shipmentSlice';
 
 import PageBreadCrumb from '../../components/common/PageBreadCrumb';
 import InputField from '../../components/form/input/InputField';
@@ -27,7 +31,7 @@ const AddEditShipment = () => {
     vesselVoyageInfo: '',
     wayBillNumber: '',
     truckNumber: '',
-    blNumber: ''
+    blNumber: '',
   });
   const [isEdit, setIsEdit] = useState(false);
   const [shipmentId, setShipmentId] = useState(null);
@@ -50,17 +54,19 @@ const AddEditShipment = () => {
       setLoading(false);
       return;
     }
-    
+
     try {
       setLoading(true);
       const orderResponse = await dispatch(getOrderById(id)).unwrap();
       const order = orderResponse.data;
-      
+
       setOrderData(order);
-      
+
       // Try to fetch existing shipment
       try {
-        const shipmentResponse = await dispatch(getShipmentByOrderId(id)).unwrap();
+        const shipmentResponse = await dispatch(
+          getShipmentByOrderId(id)
+        ).unwrap();
         if (shipmentResponse.data) {
           const shipment = shipmentResponse.data;
           setIsEdit(true);
@@ -73,7 +79,7 @@ const AddEditShipment = () => {
             vesselVoyageInfo: shipment.vesselVoyageInfo || '',
             wayBillNumber: shipment.wayBillNumber || '',
             truckNumber: shipment.truckNumber || '',
-            blNumber: shipment.blNumber || ''
+            blNumber: shipment.blNumber || '',
           });
         }
       } catch (shipmentError) {
@@ -103,21 +109,27 @@ const AddEditShipment = () => {
 
       const submitData = {
         ...shipmentData,
-        bookingDate: shipmentData.bookingDate ? new Date(shipmentData.bookingDate) : null
+        bookingDate: shipmentData.bookingDate
+          ? new Date(shipmentData.bookingDate)
+          : null,
       };
 
       let result;
       if (isEdit) {
-        result = await dispatch(updateShipment({ shipmentId, shipmentData: submitData })).unwrap();
+        result = await dispatch(
+          updateShipment({ shipmentId, shipmentData: submitData })
+        ).unwrap();
       } else {
         const orderId = id || selectedOrder?.id;
         if (!orderId) {
           toast.error('Please select an order');
           return;
         }
-        result = await dispatch(createShipment({ ...submitData, orderId: parseInt(orderId) })).unwrap();
+        result = await dispatch(
+          createShipment({ ...submitData, orderId: parseInt(orderId) })
+        ).unwrap();
       }
-      
+
       toast.success(result.message);
 
       // Delay navigation to show toast
@@ -145,25 +157,25 @@ const AddEditShipment = () => {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-3">
-          <div className='bg-white rounded-lg border border-gray-200 shadow-sm p-3 lg:p-4"'> 
+          <div className='bg-white rounded-lg border border-gray-200 shadow-sm p-3 lg:p-4"'>
             <div className="flex items-center gap-4 mb-4">
-            <button
-              onClick={() => navigate('/orders/shipments')}
-              className="p-3 rounded-lg bg-white shadow-md hover:shadow-lg transition-all duration-300 text-slate-600 hover:text-slate-800"
-            >
-              <HiArrowLeft className="w-5 h-5" />
-            </button>
-            <div>
-              <h1 className="text-3xl font-bold text-slate-800">
-                {isEdit ? "Edit Shipment" : "Create Shipment"}
-              </h1>
-              {orderData && (
-                <p className="text-slate-600 mt-1">
-                  Order: {orderData.orderNumber} | PI: {orderData.piNumber}
-                </p>
-              )}
+              <button
+                onClick={() => navigate('/orders/shipments')}
+                className="p-3 rounded-lg bg-white shadow-md hover:shadow-lg transition-all duration-300 text-slate-600 hover:text-slate-800"
+              >
+                <HiArrowLeft className="w-5 h-5" />
+              </button>
+              <div>
+                <h1 className="text-3xl font-bold text-slate-800">
+                  {isEdit ? 'Edit Shipment' : 'Create Shipment'}
+                </h1>
+                {orderData && (
+                  <p className="text-slate-600 mt-1">
+                    Order: {orderData.orderNumber} | PI: {orderData.piNumber}
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
           </div>
         </div>
 
@@ -174,7 +186,9 @@ const AddEditShipment = () => {
               {/* Order Selection for new shipments */}
               {!isEdit && (
                 <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
-                  <h3 className="text-lg font-semibold text-slate-700 mb-4">Select Order</h3>
+                  <h3 className="text-lg font-semibold text-slate-700 mb-4">
+                    Select Order
+                  </h3>
                   <OrderSelector
                     selectedOrderId={selectedOrder?.id || null}
                     onOrderSelect={handleOrderSelect}
@@ -184,7 +198,11 @@ const AddEditShipment = () => {
                   {selectedOrder && (
                     <div className="mt-4 p-4 bg-slate-100 rounded-lg border border-slate-300">
                       <p className="text-sm text-slate-700">
-                        Selected: <strong className="text-slate-800">{selectedOrder.orderNumber}</strong> - {selectedOrder.piNumber} ({selectedOrder.buyerName})
+                        Selected:{' '}
+                        <strong className="text-slate-800">
+                          {selectedOrder.orderNumber}
+                        </strong>{' '}
+                        - {selectedOrder.piNumber} ({selectedOrder.buyerName})
                       </p>
                     </div>
                   )}
@@ -193,8 +211,10 @@ const AddEditShipment = () => {
 
               {/* Shipment Details */}
               <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-slate-700 border-b border-slate-200 pb-3">Shipment Details</h3>
-                
+                <h3 className="text-xl font-semibold text-slate-700 border-b border-slate-200 pb-3">
+                  Shipment Details
+                </h3>
+
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -217,7 +237,10 @@ const AddEditShipment = () => {
                     <DatePicker
                       value={shipmentData.bookingDate}
                       onChange={(value) =>
-                        setShipmentData((prev) => ({ ...prev, bookingDate: value }))
+                        setShipmentData((prev) => ({
+                          ...prev,
+                          bookingDate: value,
+                        }))
                       }
                       placeholder="Select booking date"
                       className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"

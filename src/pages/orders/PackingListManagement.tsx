@@ -1,16 +1,30 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { HiPencil, HiTrash, HiPlus, HiMagnifyingGlass, HiDocumentText, HiCube, HiArrowDownTray } from 'react-icons/hi2';
+import {
+  HiPencil,
+  HiTrash,
+  HiPlus,
+  HiMagnifyingGlass,
+  HiDocumentText,
+  HiCube,
+  HiArrowDownTray,
+} from 'react-icons/hi2';
 import { Pagination } from 'antd';
 import { fetchOrders } from '../../features/orderSlice';
-import { downloadPackingListPdf, downloadPackingListPortPdf, deletePackingList } from '../../features/packingListSlice';
+import {
+  downloadPackingListPdf,
+  downloadPackingListPortPdf,
+  deletePackingList,
+} from '../../features/packingListSlice';
 import { toast } from 'react-toastify';
 
 const PackingListManagement: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { orders = [], loading = false } = useSelector((state: any) => state.order || {});
+  const { orders = [], loading = false } = useSelector(
+    (state: any) => state.order || {}
+  );
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -31,7 +45,7 @@ const PackingListManagement: React.FC = () => {
 
   const handleConfirmDelete = async () => {
     if (!confirmDelete) return;
-    
+
     try {
       await dispatch(deletePackingList(confirmDelete)).unwrap();
       toast.success('Packing list deleted successfully');
@@ -47,37 +61,40 @@ const PackingListManagement: React.FC = () => {
   const handlePDFDownload = async (order: any) => {
     try {
       toast.info('Preparing PDF download...', { autoClose: 2000 });
-      
+
       // Get packing list ID from order
-      const packingListId = order.packingList?.id || order.piInvoice?.packingLists?.[0]?.id;
-      
+      const packingListId =
+        order.packingList?.id || order.piInvoice?.packingLists?.[0]?.id;
+
       if (!packingListId) {
         toast.error('No packing list found for this order');
         return;
       }
-      
-      const response = await dispatch(downloadPackingListPdf(packingListId)).unwrap();
-      
+
+      const response = await dispatch(
+        downloadPackingListPdf(packingListId)
+      ).unwrap();
+
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      
+
       const contentDisposition = response.headers['content-disposition'];
       let filename = `packing-list-${order.orderNumber}.pdf`;
-      
+
       if (contentDisposition) {
         const filenameMatch = contentDisposition.match(/filename="(.+)"/);
         if (filenameMatch) {
           filename = filenameMatch[1];
         }
       }
-      
+
       link.setAttribute('download', filename);
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-      
+
       toast.success('PDF downloaded successfully');
     } catch (error) {
       console.error('Error downloading PDF:', error);
@@ -88,17 +105,20 @@ const PackingListManagement: React.FC = () => {
   const handlePortDeliveryPDFDownload = async (order: any) => {
     try {
       toast.info('Preparing Port Delivery PDF...', { autoClose: 2000 });
-      
+
       // Get packing list ID from order
-      const packingListId = order.packingList?.id || order.piInvoice?.packingLists?.[0]?.id;
-      
+      const packingListId =
+        order.packingList?.id || order.piInvoice?.packingLists?.[0]?.id;
+
       if (!packingListId) {
         toast.error('No packing list found for this order');
         return;
       }
-      
-      const response = await dispatch(downloadPackingListPortPdf(packingListId)).unwrap();
-      
+
+      const response = await dispatch(
+        downloadPackingListPortPdf(packingListId)
+      ).unwrap();
+
       const blob = new Blob([response.data]);
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -108,7 +128,7 @@ const PackingListManagement: React.FC = () => {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-      
+
       toast.success('Port Delivery PDF downloaded successfully');
     } catch (error) {
       console.error('Error downloading Port Delivery PDF:', error);
@@ -119,17 +139,25 @@ const PackingListManagement: React.FC = () => {
   // Filter orders to show only those with packing lists and match search term
   const filteredOrders = orders.filter((order: any) => {
     // Check if order has packing list
-    const hasPackingList = 
-      (order.packingList && Object.keys(order.packingList).length > 0 && order.packingList.containers && order.packingList.containers.length > 0) ||
-      (order.piInvoice?.packingLists && order.piInvoice.packingLists.length > 0 && order.piInvoice.packingLists[0]?.notes?.containers && order.piInvoice.packingLists[0].notes.containers.length > 0);
-    
+    const hasPackingList =
+      (order.packingList &&
+        Object.keys(order.packingList).length > 0 &&
+        order.packingList.containers &&
+        order.packingList.containers.length > 0) ||
+      (order.piInvoice?.packingLists &&
+        order.piInvoice.packingLists.length > 0 &&
+        order.piInvoice.packingLists[0]?.notes?.containers &&
+        order.piInvoice.packingLists[0].notes.containers.length > 0);
+
     // Only show orders with packing lists
     if (!hasPackingList) return false;
-    
+
     // Apply search filter
     return (
       order.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.piInvoice?.party?.companyName?.toLowerCase().includes(searchTerm.toLowerCase())
+      order.piInvoice?.party?.companyName
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase())
     );
   });
 
@@ -166,7 +194,7 @@ const PackingListManagement: React.FC = () => {
                   </h1>
                 </div>
               </div>
-              
+
               <div className="flex flex-col sm:flex-row gap-3">
                 <div className="relative">
                   <HiMagnifyingGlass className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -178,7 +206,7 @@ const PackingListManagement: React.FC = () => {
                     onChange={(e) => handleSearch(e.target.value)}
                   />
                 </div>
-                
+
                 <button
                   onClick={() => navigate('/packing-list/create')}
                   className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg flex-shrink-0"
@@ -197,8 +225,12 @@ const PackingListManagement: React.FC = () => {
             <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-slate-600 flex items-center justify-center shadow-lg">
               <HiMagnifyingGlass className="w-8 h-8 text-white" />
             </div>
-            <h3 className="text-xl font-semibold text-slate-800 mb-2">No packing lists found</h3>
-            <p className="text-slate-600 mb-6">Create your first packing list to get started</p>
+            <h3 className="text-xl font-semibold text-slate-800 mb-2">
+              No packing lists found
+            </h3>
+            <p className="text-slate-600 mb-6">
+              Create your first packing list to get started
+            </p>
           </div>
         ) : (
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
@@ -239,60 +271,84 @@ const PackingListManagement: React.FC = () => {
               </div>
               <div className="divide-y divide-white/20">
                 {paginatedOrders.map((order: any) => {
-                  const hasPackingList = 
-                    (order.packingList && Object.keys(order.packingList).length > 0 && order.packingList.containers && order.packingList.containers.length > 0) ||
-                    (order.piInvoice?.packingLists && order.piInvoice.packingLists.length > 0 && order.piInvoice.packingLists[0]?.notes?.containers && order.piInvoice.packingLists[0].notes.containers.length > 0);
+                  const hasPackingList =
+                    (order.packingList &&
+                      Object.keys(order.packingList).length > 0 &&
+                      order.packingList.containers &&
+                      order.packingList.containers.length > 0) ||
+                    (order.piInvoice?.packingLists &&
+                      order.piInvoice.packingLists.length > 0 &&
+                      order.piInvoice.packingLists[0]?.notes?.containers &&
+                      order.piInvoice.packingLists[0].notes.containers.length >
+                        0);
 
-                  const containers = order.packingList?.containers?.length > 0 
-                    ? order.packingList.containers 
-                    : order.piInvoice?.packingLists?.[0]?.notes?.containers || [];
+                  const containers =
+                    order.packingList?.containers?.length > 0
+                      ? order.packingList.containers
+                      : order.piInvoice?.packingLists?.[0]?.notes?.containers ||
+                        [];
 
-                  const totalWeight = containers.reduce((sum: number, container: any) => 
-                    sum + (container.totalGrossWeight || container.grossWeight || 0), 0
+                  const totalWeight = containers.reduce(
+                    (sum: number, container: any) =>
+                      sum +
+                      (container.totalGrossWeight ||
+                        container.grossWeight ||
+                        0),
+                    0
                   );
 
                   return (
-                    <div key={order.id} className="p-4 hover:bg-white/50 transition-all duration-300">
+                    <div
+                      key={order.id}
+                      className="p-4 hover:bg-white/50 transition-all duration-300"
+                    >
                       <div className="grid grid-cols-7 gap-3 items-center">
                         {/* Order Number */}
                         <div className="flex items-center gap-2">
                           <HiDocumentText className="w-4 h-4 text-slate-600 flex-shrink-0" />
-                          <span className="text-slate-800 font-medium truncate" title={order.orderNumber}>
+                          <span
+                            className="text-slate-800 font-medium truncate"
+                            title={order.orderNumber}
+                          >
                             #{order.orderNumber}
                           </span>
                         </div>
-                        
+
                         {/* Company */}
                         <div className="text-slate-700 text-sm">
                           {order.piInvoice?.party?.companyName || '-'}
                         </div>
-                        
+
                         {/* Containers */}
                         <div className="text-slate-700 text-sm">
-                          {hasPackingList ? `${containers.length} containers` : 'No packing list'}
+                          {hasPackingList
+                            ? `${containers.length} containers`
+                            : 'No packing list'}
                         </div>
-                        
+
                         {/* Total Weight */}
                         <div className="text-slate-700 text-sm">
                           {totalWeight > 0 ? `${totalWeight}kg` : '-'}
                         </div>
-                        
+
                         {/* Total Amount */}
                         <div className="text-slate-700 text-sm font-medium">
                           ${order.totalAmount?.toLocaleString() || '0'}
                         </div>
-                        
+
                         {/* Status */}
                         <div className="text-slate-700 text-sm">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            hasPackingList 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-yellow-100 text-yellow-800'
-                          }`}>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              hasPackingList
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-yellow-100 text-yellow-800'
+                            }`}
+                          >
                             {hasPackingList ? 'Complete' : 'Pending'}
                           </span>
                         </div>
-                        
+
                         {/* Actions */}
                         <div className="flex items-center justify-end space-x-2">
                           <button
@@ -330,7 +386,7 @@ const PackingListManagement: React.FC = () => {
                 })}
               </div>
             </div>
-            
+
             {/* Tablet/Mobile Table View with Horizontal Scroll */}
             <div className="lg:hidden">
               <div className="overflow-x-auto">
@@ -370,60 +426,84 @@ const PackingListManagement: React.FC = () => {
                   </div>
                   <div className="divide-y divide-white/20">
                     {paginatedOrders.map((order: any) => {
-                      const hasPackingList = 
-                        (order.packingList && Object.keys(order.packingList).length > 0 && order.packingList.containers && order.packingList.containers.length > 0) ||
-                        (order.piInvoice?.packingLists && order.piInvoice.packingLists.length > 0 && order.piInvoice.packingLists[0]?.notes?.containers && order.piInvoice.packingLists[0].notes.containers.length > 0);
+                      const hasPackingList =
+                        (order.packingList &&
+                          Object.keys(order.packingList).length > 0 &&
+                          order.packingList.containers &&
+                          order.packingList.containers.length > 0) ||
+                        (order.piInvoice?.packingLists &&
+                          order.piInvoice.packingLists.length > 0 &&
+                          order.piInvoice.packingLists[0]?.notes?.containers &&
+                          order.piInvoice.packingLists[0].notes.containers
+                            .length > 0);
 
-                      const containers = order.packingList?.containers?.length > 0 
-                        ? order.packingList.containers 
-                        : order.piInvoice?.packingLists?.[0]?.notes?.containers || [];
+                      const containers =
+                        order.packingList?.containers?.length > 0
+                          ? order.packingList.containers
+                          : order.piInvoice?.packingLists?.[0]?.notes
+                              ?.containers || [];
 
-                      const totalWeight = containers.reduce((sum: number, container: any) => 
-                        sum + (container.totalGrossWeight || container.grossWeight || 0), 0
+                      const totalWeight = containers.reduce(
+                        (sum: number, container: any) =>
+                          sum +
+                          (container.totalGrossWeight ||
+                            container.grossWeight ||
+                            0),
+                        0
                       );
 
                       return (
-                        <div key={order.id} className="p-4 hover:bg-white/50 transition-all duration-300">
+                        <div
+                          key={order.id}
+                          className="p-4 hover:bg-white/50 transition-all duration-300"
+                        >
                           <div className="grid grid-cols-7 gap-3 items-center">
                             {/* Order Number */}
                             <div className="flex items-center gap-2">
                               <HiDocumentText className="w-4 h-4 text-slate-600 flex-shrink-0" />
-                              <span className="text-slate-800 font-medium truncate" title={order.orderNumber}>
+                              <span
+                                className="text-slate-800 font-medium truncate"
+                                title={order.orderNumber}
+                              >
                                 #{order.orderNumber}
                               </span>
                             </div>
-                            
+
                             {/* Company */}
                             <div className="text-slate-700 text-sm">
                               {order.piInvoice?.party?.companyName || '-'}
                             </div>
-                            
+
                             {/* Containers */}
                             <div className="text-slate-700 text-sm">
-                              {hasPackingList ? `${containers.length} containers` : 'No packing list'}
+                              {hasPackingList
+                                ? `${containers.length} containers`
+                                : 'No packing list'}
                             </div>
-                            
+
                             {/* Total Weight */}
                             <div className="text-slate-700 text-sm">
                               {totalWeight > 0 ? `${totalWeight}kg` : '-'}
                             </div>
-                            
+
                             {/* Total Amount */}
                             <div className="text-slate-700 text-sm font-medium">
                               ${order.totalAmount?.toLocaleString() || '0'}
                             </div>
-                            
+
                             {/* Status */}
                             <div className="text-slate-700 text-sm">
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                hasPackingList 
-                                  ? 'bg-green-100 text-green-800' 
-                                  : 'bg-yellow-100 text-yellow-800'
-                              }`}>
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  hasPackingList
+                                    ? 'bg-green-100 text-green-800'
+                                    : 'bg-yellow-100 text-yellow-800'
+                                }`}
+                              >
                                 {hasPackingList ? 'Complete' : 'Pending'}
                               </span>
                             </div>
-                            
+
                             {/* Actions */}
                             <div className="flex items-center justify-end space-x-2">
                               <button
@@ -434,7 +514,9 @@ const PackingListManagement: React.FC = () => {
                                 <HiArrowDownTray className="w-4 h-4" />
                               </button>
                               <button
-                                onClick={() => handlePortDeliveryPDFDownload(order)}
+                                onClick={() =>
+                                  handlePortDeliveryPDFDownload(order)
+                                }
                                 className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-purple-600 transition-all duration-300"
                                 title="Download Port Delivery PDF"
                               >
@@ -469,9 +551,9 @@ const PackingListManagement: React.FC = () => {
         {/* Pagination */}
         {filteredOrders.length > 0 && (
           <div className="flex justify-center mt-6">
-            <Pagination 
-              current={currentPage} 
-              total={filteredOrders.length} 
+            <Pagination
+              current={currentPage}
+              total={filteredOrders.length}
               pageSize={pageSize}
               onChange={(page) => setCurrentPage(page)}
             />
@@ -487,8 +569,13 @@ const PackingListManagement: React.FC = () => {
               <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-red-600 flex items-center justify-center shadow-lg">
                 <HiTrash className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-slate-800 mb-2">Delete Packing List</h3>
-              <p className="text-slate-600">Are you sure you want to delete this packing list? This action cannot be undone.</p>
+              <h3 className="text-xl font-bold text-slate-800 mb-2">
+                Delete Packing List
+              </h3>
+              <p className="text-slate-600">
+                Are you sure you want to delete this packing list? This action
+                cannot be undone.
+              </p>
             </div>
             <div className="flex items-center justify-center space-x-3">
               <button

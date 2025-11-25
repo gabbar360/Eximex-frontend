@@ -1,7 +1,15 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { HiEye, HiPencil, HiTrash, HiPlus, HiMagnifyingGlass, HiTruck, HiCube } from 'react-icons/hi2';
+import {
+  HiEye,
+  HiPencil,
+  HiTrash,
+  HiPlus,
+  HiMagnifyingGlass,
+  HiTruck,
+  HiCube,
+} from 'react-icons/hi2';
 import { Pagination } from 'antd';
 import { toast } from 'react-toastify';
 import { fetchOrders } from '../../features/orderSlice';
@@ -11,7 +19,9 @@ import { useDebounce } from '../../utils/useDebounce';
 const ShipmentManagement: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { orders = [], loading = false } = useSelector((state: any) => state.order || {});
+  const { orders = [], loading = false } = useSelector(
+    (state: any) => state.order || {}
+  );
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -33,7 +43,7 @@ const ShipmentManagement: React.FC = () => {
 
   const handleConfirmDelete = async () => {
     if (!confirmDelete) return;
-    
+
     try {
       await dispatch(deleteShipment(confirmDelete)).unwrap();
       toast.success('Shipment deleted successfully');
@@ -58,21 +68,23 @@ const ShipmentManagement: React.FC = () => {
   // Filter orders to show only those with shipment details and match search term
   const filteredOrders = orders.filter((order: any) => {
     // Check if order has shipment details
-    const hasShipmentDetails = order.shipment && (
-      order.shipment.bookingNumber ||
-      order.shipment.bookingDate ||
-      order.shipment.vesselVoyageInfo ||
-      order.shipment.wayBillNumber ||
-      order.shipment.truckNumber
-    );
-    
+    const hasShipmentDetails =
+      order.shipment &&
+      (order.shipment.bookingNumber ||
+        order.shipment.bookingDate ||
+        order.shipment.vesselVoyageInfo ||
+        order.shipment.wayBillNumber ||
+        order.shipment.truckNumber);
+
     // Only show orders with shipment details
     if (!hasShipmentDetails) return false;
-    
+
     // Apply search filter
     return (
       order.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.piInvoice?.party?.companyName?.toLowerCase().includes(searchTerm.toLowerCase())
+      order.piInvoice?.party?.companyName
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase())
     );
   });
 
@@ -109,7 +121,7 @@ const ShipmentManagement: React.FC = () => {
                   </h1>
                 </div>
               </div>
-              
+
               <div className="flex flex-col sm:flex-row gap-3">
                 <div className="relative">
                   <HiMagnifyingGlass className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -121,7 +133,7 @@ const ShipmentManagement: React.FC = () => {
                     onChange={(e) => handleSearch(e.target.value)}
                   />
                 </div>
-                
+
                 <button
                   onClick={() => navigate('/shipment/create')}
                   className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg flex-shrink-0"
@@ -140,8 +152,12 @@ const ShipmentManagement: React.FC = () => {
             <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-slate-600 flex items-center justify-center shadow-lg">
               <HiMagnifyingGlass className="w-8 h-8 text-white" />
             </div>
-            <h3 className="text-xl font-semibold text-slate-800 mb-2">No shipments found</h3>
-            <p className="text-slate-600 mb-6">Create your first shipment to get started</p>
+            <h3 className="text-xl font-semibold text-slate-800 mb-2">
+              No shipments found
+            </h3>
+            <p className="text-slate-600 mb-6">
+              Create your first shipment to get started
+            </p>
           </div>
         ) : (
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
@@ -182,56 +198,64 @@ const ShipmentManagement: React.FC = () => {
               </div>
               <div className="divide-y divide-white/20">
                 {paginatedOrders.map((order: any) => {
-                  const hasShipmentDetails = order.shipment && (
-                    order.shipment.bookingNumber ||
-                    order.shipment.bookingDate ||
-                    order.shipment.vesselVoyageInfo ||
-                    order.shipment.wayBillNumber ||
-                    order.shipment.truckNumber
-                  );
+                  const hasShipmentDetails =
+                    order.shipment &&
+                    (order.shipment.bookingNumber ||
+                      order.shipment.bookingDate ||
+                      order.shipment.vesselVoyageInfo ||
+                      order.shipment.wayBillNumber ||
+                      order.shipment.truckNumber);
 
                   return (
-                    <div key={order.id} className="p-4 hover:bg-white/50 transition-all duration-300">
+                    <div
+                      key={order.id}
+                      className="p-4 hover:bg-white/50 transition-all duration-300"
+                    >
                       <div className="grid grid-cols-7 gap-3 items-center">
                         {/* Order Number */}
                         <div className="flex items-center gap-2">
                           <HiTruck className="w-4 h-4 text-slate-600 flex-shrink-0" />
-                          <span className="text-slate-800 font-medium truncate" title={order.orderNumber}>
+                          <span
+                            className="text-slate-800 font-medium truncate"
+                            title={order.orderNumber}
+                          >
                             #{order.orderNumber}
                           </span>
                         </div>
-                        
+
                         {/* Company */}
                         <div className="text-slate-700 text-sm">
                           {order.piInvoice?.party?.companyName || '-'}
                         </div>
-                        
+
                         {/* Booking Number */}
                         <div className="text-slate-700 text-sm">
                           {order.shipment?.bookingNumber || 'Not set'}
                         </div>
-                        
+
                         {/* Vessel Info */}
                         <div className="text-slate-700 text-sm">
                           {order.shipment?.vesselVoyageInfo || 'Not set'}
                         </div>
-                        
+
                         {/* Booking Date */}
                         <div className="text-slate-700 text-sm">
                           {formatDate(order.shipment?.bookingDate)}
                         </div>
-                        
+
                         {/* Status */}
                         <div className="text-slate-700 text-sm">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            hasShipmentDetails 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-yellow-100 text-yellow-800'
-                          }`}>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              hasShipmentDetails
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-yellow-100 text-yellow-800'
+                            }`}
+                          >
                             {hasShipmentDetails ? 'Complete' : 'Pending'}
                           </span>
                         </div>
-                        
+
                         {/* Actions */}
                         <div className="flex items-center justify-end space-x-2">
                           <Link
@@ -262,7 +286,7 @@ const ShipmentManagement: React.FC = () => {
                 })}
               </div>
             </div>
-            
+
             {/* Mobile Table View */}
             <div className="lg:hidden">
               <div className="overflow-x-auto">
@@ -301,20 +325,26 @@ const ShipmentManagement: React.FC = () => {
                   </div>
                   <div className="divide-y divide-white/20">
                     {paginatedOrders.map((order: any) => {
-                      const hasShipmentDetails = order.shipment && (
-                        order.shipment.bookingNumber ||
-                        order.shipment.bookingDate ||
-                        order.shipment.vesselVoyageInfo ||
-                        order.shipment.wayBillNumber ||
-                        order.shipment.truckNumber
-                      );
+                      const hasShipmentDetails =
+                        order.shipment &&
+                        (order.shipment.bookingNumber ||
+                          order.shipment.bookingDate ||
+                          order.shipment.vesselVoyageInfo ||
+                          order.shipment.wayBillNumber ||
+                          order.shipment.truckNumber);
 
                       return (
-                        <div key={order.id} className="p-4 hover:bg-white/50 transition-all duration-300">
+                        <div
+                          key={order.id}
+                          className="p-4 hover:bg-white/50 transition-all duration-300"
+                        >
                           <div className="grid grid-cols-7 gap-3 items-center">
                             <div className="flex items-center gap-2">
                               <HiTruck className="w-4 h-4 text-slate-600 flex-shrink-0" />
-                              <span className="text-slate-800 font-medium truncate" title={order.orderNumber}>
+                              <span
+                                className="text-slate-800 font-medium truncate"
+                                title={order.orderNumber}
+                              >
                                 #{order.orderNumber}
                               </span>
                             </div>
@@ -331,11 +361,13 @@ const ShipmentManagement: React.FC = () => {
                               {formatDate(order.shipment?.bookingDate)}
                             </div>
                             <div className="text-slate-700 text-sm">
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                hasShipmentDetails 
-                                  ? 'bg-green-100 text-green-800' 
-                                  : 'bg-yellow-100 text-yellow-800'
-                              }`}>
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  hasShipmentDetails
+                                    ? 'bg-green-100 text-green-800'
+                                    : 'bg-yellow-100 text-yellow-800'
+                                }`}
+                              >
                                 {hasShipmentDetails ? 'Complete' : 'Pending'}
                               </span>
                             </div>
@@ -376,9 +408,9 @@ const ShipmentManagement: React.FC = () => {
         {/* Pagination */}
         {filteredOrders.length > 0 && (
           <div className="flex justify-center mt-6">
-            <Pagination 
-              current={currentPage} 
-              total={filteredOrders.length} 
+            <Pagination
+              current={currentPage}
+              total={filteredOrders.length}
               pageSize={pageSize}
               onChange={(page) => setCurrentPage(page)}
             />
@@ -394,8 +426,13 @@ const ShipmentManagement: React.FC = () => {
               <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-red-600 flex items-center justify-center shadow-lg">
                 <HiTrash className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-slate-800 mb-2">Delete Shipment</h3>
-              <p className="text-slate-600">Are you sure you want to delete this shipment? This action cannot be undone.</p>
+              <h3 className="text-xl font-bold text-slate-800 mb-2">
+                Delete Shipment
+              </h3>
+              <p className="text-slate-600">
+                Are you sure you want to delete this shipment? This action
+                cannot be undone.
+              </p>
             </div>
             <div className="flex items-center justify-center space-x-3">
               <button

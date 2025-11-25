@@ -10,10 +10,12 @@ export const getAllParties = async (params = {}) => {
         limit: parseInt(params.limit) || 10,
         search: params.search || '',
         ...(params.role && { role: params.role }),
-        ...(params.status !== undefined && { status: params.status })
+        ...(params.status !== undefined && { status: params.status }),
       };
-      
-      const { data } = await axiosInstance.get('/get-all/parties', { params: queryParams });
+
+      const { data } = await axiosInstance.get('/get-all/parties', {
+        params: queryParams,
+      });
       return data;
     } else {
       // Fallback to simple request without pagination
@@ -23,49 +25,53 @@ export const getAllParties = async (params = {}) => {
         pagination: {
           page: 1,
           limit: (data.data || data).length,
-          total: (data.data || data).length
-        }
+          total: (data.data || data).length,
+        },
       };
     }
   } catch (error) {
-    console.error('Party service error:', error.response?.data || error.message);
-    
+    console.error(
+      'Party service error:',
+      error.response?.data || error.message
+    );
+
     // If pagination request fails, try without pagination
     if (params.page || params.limit) {
       try {
         const { data } = await axiosInstance.get('/get-all/parties');
         const parties = data.data || data;
-        
+
         // Apply client-side filtering if search term exists
         let filteredParties = parties;
         if (params.search) {
           const searchTerm = params.search.toLowerCase();
-          filteredParties = parties.filter(party => 
-            party.companyName?.toLowerCase().includes(searchTerm) ||
-            party.contactPerson?.toLowerCase().includes(searchTerm) ||
-            party.email?.toLowerCase().includes(searchTerm)
+          filteredParties = parties.filter(
+            (party) =>
+              party.companyName?.toLowerCase().includes(searchTerm) ||
+              party.contactPerson?.toLowerCase().includes(searchTerm) ||
+              party.email?.toLowerCase().includes(searchTerm)
           );
         }
-        
+
         // Apply client-side pagination
         const page = parseInt(params.page) || 1;
         const limit = parseInt(params.limit) || 10;
         const start = (page - 1) * limit;
         const paginatedData = filteredParties.slice(start, start + limit);
-        
+
         return {
           data: paginatedData,
           pagination: {
             page,
             limit,
-            total: filteredParties.length
-          }
+            total: filteredParties.length,
+          },
         };
       } catch (fallbackError) {
         throw handleAxiosError(fallbackError, 'party', 'fetch');
       }
     }
-    
+
     throw handleAxiosError(error, 'party', 'fetch');
   }
 };

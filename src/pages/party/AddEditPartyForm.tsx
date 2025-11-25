@@ -1,16 +1,35 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getPartyById, updateParty, createParty } from '../../features/partySlice';
+import {
+  getPartyById,
+  updateParty,
+  createParty,
+} from '../../features/partySlice';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { HiArrowLeft, HiCheckCircle, HiUser, HiBuildingOffice2, HiEnvelope, HiPhone, HiMapPin, HiGlobeAlt, HiTag, HiDocumentText, HiChevronDown, HiMagnifyingGlass } from 'react-icons/hi2';
+import {
+  HiArrowLeft,
+  HiCheckCircle,
+  HiUser,
+  HiBuildingOffice2,
+  HiEnvelope,
+  HiPhone,
+  HiMapPin,
+  HiGlobeAlt,
+  HiTag,
+  HiDocumentText,
+  HiChevronDown,
+  HiMagnifyingGlass,
+} from 'react-icons/hi2';
 import { Country, State, City } from 'country-state-city';
 
 const fetchCurrencies = async () => {
   try {
-    const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+    const response = await fetch(
+      'https://api.exchangerate-api.com/v4/latest/USD'
+    );
     const data = await response.json();
     return Object.keys(data.rates).map((code) => ({ code, name: code }));
   } catch (error) {
@@ -28,11 +47,15 @@ const AddEditPartyForm = () => {
   const [loading, setLoading] = useState(isEditMode);
   const [submitting, setSubmitting] = useState(false);
   const [currencies, setCurrencies] = useState([]);
-  const [locationData, setLocationData] = useState({ country: '', state: '', city: '' });
+  const [locationData, setLocationData] = useState({
+    country: '',
+    state: '',
+    city: '',
+  });
   const [currencySearch, setCurrencySearch] = useState('');
   const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
   const currencyRef = useRef(null);
-  
+
   // Country State City states
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
@@ -55,29 +78,37 @@ const AddEditPartyForm = () => {
     const loadData = async () => {
       const currenciesData = await fetchCurrencies();
       setCurrencies(currenciesData);
-      
+
       // Load countries
       const allCountries = Country.getAllCountries();
       setCountries(allCountries);
     };
     loadData();
   }, []);
-  
+
   // Initialize location with existing values (only for edit mode)
   useEffect(() => {
-    if (countries.length > 0 && !initialized && isEditMode && Object.keys(party).length > 0) {
-      const country = countries.find(c => c.name === party.country);
+    if (
+      countries.length > 0 &&
+      !initialized &&
+      isEditMode &&
+      Object.keys(party).length > 0
+    ) {
+      const country = countries.find((c) => c.name === party.country);
       if (country) {
         setSelectedCountry(country.isoCode);
         const countryStates = State.getStatesOfCountry(country.isoCode);
         setStates(countryStates);
-        
-        const state = countryStates.find(s => s.name === party.state);
+
+        const state = countryStates.find((s) => s.name === party.state);
         if (state) {
           setSelectedState(state.isoCode);
-          const stateCities = City.getCitiesOfState(country.isoCode, state.isoCode);
+          const stateCities = City.getCitiesOfState(
+            country.isoCode,
+            state.isoCode
+          );
           setCities(stateCities);
-          
+
           if (party.city) {
             setSelectedCity(party.city);
           }
@@ -88,7 +119,7 @@ const AddEditPartyForm = () => {
       setInitialized(true);
     }
   }, [countries, party, initialized, isEditMode]);
-  
+
   // Load states when country changes
   useEffect(() => {
     if (selectedCountry) {
@@ -101,7 +132,7 @@ const AddEditPartyForm = () => {
       }
     }
   }, [selectedCountry, isEditMode, party.state]);
-  
+
   // Load cities when state changes
   useEffect(() => {
     if (selectedCountry && selectedState) {
@@ -112,8 +143,6 @@ const AddEditPartyForm = () => {
       }
     }
   }, [selectedCountry, selectedState, isEditMode, party.city]);
-
-
 
   useEffect(() => {
     if (isEditMode) {
@@ -161,7 +190,9 @@ const AddEditPartyForm = () => {
     try {
       let response;
       if (isEditMode) {
-        response = await dispatch(updateParty({ id: Number(id), party: values })).unwrap();
+        response = await dispatch(
+          updateParty({ id: Number(id), party: values })
+        ).unwrap();
       } else {
         response = await dispatch(createParty(values)).unwrap();
       }
@@ -196,50 +227,65 @@ const AddEditPartyForm = () => {
     phone: party.phone || '',
     address: party.address || '',
     city: selectedCity || party.city || '',
-    state: states.find(s => s.isoCode === selectedState)?.name || party.state || '',
-    country: countries.find(c => c.isoCode === selectedCountry)?.name || party.country || '',
+    state:
+      states.find((s) => s.isoCode === selectedState)?.name ||
+      party.state ||
+      '',
+    country:
+      countries.find((c) => c.isoCode === selectedCountry)?.name ||
+      party.country ||
+      '',
     pincode: party.pincode || '',
     currency: party.currency || '',
     tags: party.tags || '',
     notes: party.notes || '',
     status: party.status !== undefined ? Boolean(party.status) : false,
   });
-  
+
   // Custom Dropdown Component
-  const SearchableDropdown = ({ 
-    label, 
-    value, 
-    options, 
-    onSelect, 
-    searchValue, 
-    onSearchChange, 
-    isOpen, 
-    onToggle, 
-    placeholder, 
+  const SearchableDropdown = ({
+    label,
+    value,
+    options,
+    onSelect,
+    searchValue,
+    onSearchChange,
+    isOpen,
+    onToggle,
+    placeholder,
     disabled = false,
-    dropdownRef 
+    dropdownRef,
   }) => {
-    const selectedOption = options.find(opt => opt.value === value);
-    
+    const selectedOption = options.find((opt) => opt.value === value);
+
     return (
       <div className="relative" ref={dropdownRef}>
-        <label className="block text-sm font-semibold text-slate-700 mb-2">{label}</label>
-        <div 
+        <label className="block text-sm font-semibold text-slate-700 mb-2">
+          {label}
+        </label>
+        <div
           className={`w-full px-4 py-3 border border-gray-300 bg-white rounded-lg cursor-pointer flex items-center justify-between transition-all duration-300 shadow-sm ${
-            disabled 
-              ? 'bg-gray-100 cursor-not-allowed' 
+            disabled
+              ? 'bg-gray-100 cursor-not-allowed'
               : 'hover:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200 focus-within:border-slate-500'
           }`}
           onClick={() => !disabled && onToggle()}
         >
-          <span className={`text-sm ${selectedOption ? 'text-slate-900' : 'text-slate-500'}`}>
+          <span
+            className={`text-sm ${selectedOption ? 'text-slate-900' : 'text-slate-500'}`}
+          >
             {selectedOption ? selectedOption.label : placeholder}
           </span>
-          <HiChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+          <HiChevronDown
+            className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          />
         </div>
-        
+
         {isOpen && !disabled && (
-          <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl" style={{ top: '100%', marginTop: '4px' }}>
+          <div
+            className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl"
+            style={{ top: '100%', marginTop: '4px' }}
+          >
             <div className="p-3 border-b border-gray-100">
               <div className="relative">
                 <HiMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
@@ -256,13 +302,17 @@ const AddEditPartyForm = () => {
             </div>
             <div className="max-h-60 overflow-y-auto">
               {options.length === 0 ? (
-                <div className="px-4 py-3 text-slate-500 text-sm text-center">No {label.toLowerCase()} found</div>
+                <div className="px-4 py-3 text-slate-500 text-sm text-center">
+                  No {label.toLowerCase()} found
+                </div>
               ) : (
                 options.map((option) => (
                   <div
                     key={option.value}
                     className={`px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm transition-colors duration-150 ${
-                      option.value === value ? 'bg-slate-100 text-slate-900 font-medium' : 'text-slate-700'
+                      option.value === value
+                        ? 'bg-slate-100 text-slate-900 font-medium'
+                        : 'text-slate-700'
                     }`}
                     onClick={() => {
                       onSelect(option.value);
@@ -312,7 +362,9 @@ const AddEditPartyForm = () => {
             validationSchema={Yup.object({
               companyName: Yup.string().required('Company name is required'),
               role: Yup.string().required('Role is required'),
-              email: Yup.string().email('Invalid email').required('Email is required'),
+              email: Yup.string()
+                .email('Invalid email')
+                .required('Email is required'),
               phone: Yup.string().required('Phone number is required'),
               address: Yup.string().required('Address is required'),
               city: Yup.string().required('City is required'),
@@ -323,7 +375,15 @@ const AddEditPartyForm = () => {
             })}
             onSubmit={handleSubmit}
           >
-            {({ handleSubmit, handleChange, handleBlur, values, touched, errors, setFieldValue }) => (
+            {({
+              handleSubmit,
+              handleChange,
+              handleBlur,
+              values,
+              touched,
+              errors,
+              setFieldValue,
+            }) => (
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Company Name */}
@@ -342,7 +402,9 @@ const AddEditPartyForm = () => {
                       className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     />
                     {touched.companyName && errors.companyName && (
-                      <div className="text-sm text-red-500 mt-1">{errors.companyName}</div>
+                      <div className="text-sm text-red-500 mt-1">
+                        {errors.companyName}
+                      </div>
                     )}
                   </div>
 
@@ -379,7 +441,9 @@ const AddEditPartyForm = () => {
                       className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     />
                     {touched.email && errors.email && (
-                      <div className="text-sm text-red-500 mt-1">{errors.email}</div>
+                      <div className="text-sm text-red-500 mt-1">
+                        {errors.email}
+                      </div>
                     )}
                   </div>
 
@@ -395,14 +459,19 @@ const AddEditPartyForm = () => {
                       placeholder="Enter phone number"
                       value={values.phone}
                       onChange={(e) => {
-                        const phoneValue = e.target.value.replace(/[^0-9+]/g, '');
+                        const phoneValue = e.target.value.replace(
+                          /[^0-9+]/g,
+                          ''
+                        );
                         setFieldValue('phone', phoneValue);
                       }}
                       onBlur={handleBlur}
                       className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     />
                     {touched.phone && errors.phone && (
-                      <div className="text-sm text-red-500 mt-1">{errors.phone}</div>
+                      <div className="text-sm text-red-500 mt-1">
+                        {errors.phone}
+                      </div>
                     )}
                   </div>
 
@@ -425,7 +494,9 @@ const AddEditPartyForm = () => {
                       <option value="Vendor">Vendor</option>
                     </select>
                     {touched.role && errors.role && (
-                      <div className="text-sm text-red-500 mt-1">{errors.role}</div>
+                      <div className="text-sm text-red-500 mt-1">
+                        {errors.role}
+                      </div>
                     )}
                   </div>
 
@@ -440,22 +511,30 @@ const AddEditPartyForm = () => {
                       <SearchableDropdown
                         label="Country"
                         value={selectedCountry}
-                        options={countries.filter(country => 
-                          country.name.toLowerCase().includes(countrySearch.toLowerCase())
-                        ).map(country => ({
-                          value: country.isoCode,
-                          label: country.name
-                        }))}
+                        options={countries
+                          .filter((country) =>
+                            country.name
+                              .toLowerCase()
+                              .includes(countrySearch.toLowerCase())
+                          )
+                          .map((country) => ({
+                            value: country.isoCode,
+                            label: country.name,
+                          }))}
                         onSelect={(value) => {
                           setSelectedCountry(value);
                           setCountrySearch('');
-                          const countryName = countries.find(c => c.isoCode === value)?.name || '';
+                          const countryName =
+                            countries.find((c) => c.isoCode === value)?.name ||
+                            '';
                           setFieldValue('country', countryName);
                         }}
                         searchValue={countrySearch}
                         onSearchChange={setCountrySearch}
                         isOpen={showCountryDropdown}
-                        onToggle={() => setShowCountryDropdown(!showCountryDropdown)}
+                        onToggle={() =>
+                          setShowCountryDropdown(!showCountryDropdown)
+                        }
                         placeholder="Select Country"
                         dropdownRef={countryRef}
                       />
@@ -464,22 +543,29 @@ const AddEditPartyForm = () => {
                       <SearchableDropdown
                         label="State"
                         value={selectedState}
-                        options={states.filter(state => 
-                          state.name.toLowerCase().includes(stateSearch.toLowerCase())
-                        ).map(state => ({
-                          value: state.isoCode,
-                          label: state.name
-                        }))}
+                        options={states
+                          .filter((state) =>
+                            state.name
+                              .toLowerCase()
+                              .includes(stateSearch.toLowerCase())
+                          )
+                          .map((state) => ({
+                            value: state.isoCode,
+                            label: state.name,
+                          }))}
                         onSelect={(value) => {
                           setSelectedState(value);
                           setStateSearch('');
-                          const stateName = states.find(s => s.isoCode === value)?.name || '';
+                          const stateName =
+                            states.find((s) => s.isoCode === value)?.name || '';
                           setFieldValue('state', stateName);
                         }}
                         searchValue={stateSearch}
                         onSearchChange={setStateSearch}
                         isOpen={showStateDropdown}
-                        onToggle={() => setShowStateDropdown(!showStateDropdown)}
+                        onToggle={() =>
+                          setShowStateDropdown(!showStateDropdown)
+                        }
                         placeholder="Select State"
                         disabled={!selectedCountry}
                         dropdownRef={stateRef}
@@ -489,12 +575,16 @@ const AddEditPartyForm = () => {
                       <SearchableDropdown
                         label="City"
                         value={selectedCity}
-                        options={cities.filter(city => 
-                          city.name.toLowerCase().includes(citySearch.toLowerCase())
-                        ).map(city => ({
-                          value: city.name,
-                          label: city.name
-                        }))}
+                        options={cities
+                          .filter((city) =>
+                            city.name
+                              .toLowerCase()
+                              .includes(citySearch.toLowerCase())
+                          )
+                          .map((city) => ({
+                            value: city.name,
+                            label: city.name,
+                          }))}
                         onSelect={(value) => {
                           setSelectedCity(value);
                           setCitySearch('');
@@ -509,14 +599,20 @@ const AddEditPartyForm = () => {
                         dropdownRef={cityRef}
                       />
                     </div>
-                    {(touched.country && errors.country) && (
-                      <div className="text-sm text-red-500 mt-1">{errors.country}</div>
+                    {touched.country && errors.country && (
+                      <div className="text-sm text-red-500 mt-1">
+                        {errors.country}
+                      </div>
                     )}
-                    {(touched.state && errors.state) && (
-                      <div className="text-sm text-red-500 mt-1">{errors.state}</div>
+                    {touched.state && errors.state && (
+                      <div className="text-sm text-red-500 mt-1">
+                        {errors.state}
+                      </div>
                     )}
-                    {(touched.city && errors.city) && (
-                      <div className="text-sm text-red-500 mt-1">{errors.city}</div>
+                    {touched.city && errors.city && (
+                      <div className="text-sm text-red-500 mt-1">
+                        {errors.city}
+                      </div>
                     )}
                   </div>
 
@@ -532,14 +628,19 @@ const AddEditPartyForm = () => {
                       placeholder="Enter pincode"
                       value={values.pincode}
                       onChange={(e) => {
-                        const validValue = e.target.value.replace(/[^a-zA-Z0-9\s-]/g, '');
+                        const validValue = e.target.value.replace(
+                          /[^a-zA-Z0-9\s-]/g,
+                          ''
+                        );
                         setFieldValue('pincode', validValue);
                       }}
                       onBlur={handleBlur}
                       className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     />
                     {touched.pincode && errors.pincode && (
-                      <div className="text-sm text-red-500 mt-1">{errors.pincode}</div>
+                      <div className="text-sm text-red-500 mt-1">
+                        {errors.pincode}
+                      </div>
                     )}
                   </div>
 
@@ -549,18 +650,29 @@ const AddEditPartyForm = () => {
                       <HiGlobeAlt className="w-4 h-4 mr-2 text-slate-600" />
                       Currency
                     </label>
-                    <div 
+                    <div
                       className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg cursor-pointer flex items-center justify-between transition-all duration-300 shadow-sm hover:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200 focus-within:border-slate-500"
-                      onClick={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
+                      onClick={() =>
+                        setShowCurrencyDropdown(!showCurrencyDropdown)
+                      }
                     >
-                      <span className={`text-sm ${values.currency ? 'text-slate-900' : 'text-slate-500'}`}>
-                        {values.currency ? `${values.currency}` : 'Select Currency'}
+                      <span
+                        className={`text-sm ${values.currency ? 'text-slate-900' : 'text-slate-500'}`}
+                      >
+                        {values.currency
+                          ? `${values.currency}`
+                          : 'Select Currency'}
                       </span>
-                      <HiChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${showCurrencyDropdown ? 'rotate-180' : ''}`} />
+                      <HiChevronDown
+                        className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${showCurrencyDropdown ? 'rotate-180' : ''}`}
+                      />
                     </div>
-                    
+
                     {showCurrencyDropdown && (
-                      <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl" style={{ top: '100%', marginTop: '4px' }}>
+                      <div
+                        className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl"
+                        style={{ top: '100%', marginTop: '4px' }}
+                      >
                         <div className="p-3 border-b border-gray-100">
                           <div className="relative">
                             <HiMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
@@ -568,7 +680,9 @@ const AddEditPartyForm = () => {
                               type="text"
                               placeholder="Search currency..."
                               value={currencySearch}
-                              onChange={(e) => setCurrencySearch(e.target.value)}
+                              onChange={(e) =>
+                                setCurrencySearch(e.target.value)
+                              }
                               className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
                               onClick={(e) => e.stopPropagation()}
                               autoFocus
@@ -576,34 +690,46 @@ const AddEditPartyForm = () => {
                           </div>
                         </div>
                         <div className="max-h-60 overflow-y-auto">
-                          {currencies.filter(currency => 
-                            currency.code.toLowerCase().includes(currencySearch.toLowerCase())
+                          {currencies.filter((currency) =>
+                            currency.code
+                              .toLowerCase()
+                              .includes(currencySearch.toLowerCase())
                           ).length === 0 ? (
-                            <div className="px-4 py-3 text-slate-500 text-sm text-center">No currency found</div>
+                            <div className="px-4 py-3 text-slate-500 text-sm text-center">
+                              No currency found
+                            </div>
                           ) : (
-                            currencies.filter(currency => 
-                              currency.code.toLowerCase().includes(currencySearch.toLowerCase())
-                            ).map((currency) => (
-                              <div
-                                key={currency.code}
-                                className={`px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm transition-colors duration-150 ${
-                                  currency.code === values.currency ? 'bg-slate-100 text-slate-900 font-medium' : 'text-slate-700'
-                                }`}
-                                onClick={() => {
-                                  setFieldValue('currency', currency.code);
-                                  setShowCurrencyDropdown(false);
-                                  setCurrencySearch('');
-                                }}
-                              >
-                                {currency.code}
-                              </div>
-                            ))
+                            currencies
+                              .filter((currency) =>
+                                currency.code
+                                  .toLowerCase()
+                                  .includes(currencySearch.toLowerCase())
+                              )
+                              .map((currency) => (
+                                <div
+                                  key={currency.code}
+                                  className={`px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm transition-colors duration-150 ${
+                                    currency.code === values.currency
+                                      ? 'bg-slate-100 text-slate-900 font-medium'
+                                      : 'text-slate-700'
+                                  }`}
+                                  onClick={() => {
+                                    setFieldValue('currency', currency.code);
+                                    setShowCurrencyDropdown(false);
+                                    setCurrencySearch('');
+                                  }}
+                                >
+                                  {currency.code}
+                                </div>
+                              ))
                           )}
                         </div>
                       </div>
                     )}
                     {touched.currency && errors.currency && (
-                      <div className="text-sm text-red-500 mt-1">{errors.currency}</div>
+                      <div className="text-sm text-red-500 mt-1">
+                        {errors.currency}
+                      </div>
                     )}
                   </div>
 
@@ -640,7 +766,9 @@ const AddEditPartyForm = () => {
                       className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     />
                     {touched.address && errors.address && (
-                      <div className="text-sm text-red-500 mt-1">{errors.address}</div>
+                      <div className="text-sm text-red-500 mt-1">
+                        {errors.address}
+                      </div>
                     )}
                   </div>
 
@@ -667,10 +795,14 @@ const AddEditPartyForm = () => {
                       <input
                         type="checkbox"
                         checked={values.status}
-                        onChange={(e) => setFieldValue('status', e.target.checked)}
+                        onChange={(e) =>
+                          setFieldValue('status', e.target.checked)
+                        }
                         className="w-5 h-5 rounded border-2 border-gray-300 text-slate-600 focus:ring-slate-200"
                       />
-                      <span className="text-sm font-semibold text-slate-700">Active Status</span>
+                      <span className="text-sm font-semibold text-slate-700">
+                        Active Status
+                      </span>
                     </label>
                   </div>
                 </div>

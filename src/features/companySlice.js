@@ -1,5 +1,10 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { getCompanies, getCompanyById, createCompany as createCompanyService, updateCompany as updateCompanyService } from '../service/company';
+import {
+  getCompanies,
+  getCompanyById,
+  createCompany as createCompanyService,
+  updateCompany as updateCompanyService,
+} from '../service/company';
 
 export const fetchCompanies = createAsyncThunk(
   'company/fetchCompanies',
@@ -47,8 +52,6 @@ export const updateCompany = createAsyncThunk(
 
 export const getAllCompanies = fetchCompanies;
 export const getCompanyDetails = fetchCompanyById;
-
-
 
 const companySlice = createSlice({
   name: 'company',
@@ -124,8 +127,7 @@ const companySlice = createSlice({
       .addCase(updateCompany.rejected, (state, { payload }) => {
         state.loading = false;
         state.error = payload;
-      })
-
+      });
   },
 });
 

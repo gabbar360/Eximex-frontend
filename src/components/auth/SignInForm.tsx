@@ -16,17 +16,17 @@ export default function SignInForm() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
- const handleLogin = async () => {
+  const handleLogin = async () => {
     setIsSubmitting(true);
     try {
       const data = await dispatch(loginUser({ email, password })).unwrap();
       toast.success(data.message);
-      
+
       // Set user data in Redux store
       if (data.data?.user) {
         dispatch(setUser(data.data.user));
       }
-      
+
       // Check if user has company details
       const user = data.data?.user;
       if (user && (!user.company || !user.companyId)) {
@@ -47,19 +47,22 @@ export default function SignInForm() {
     <div className="h-screen w-screen flex overflow-hidden">
       {/* Left Side - Image */}
       <div className="hidden lg:flex lg:w-[60%] relative overflow-hidden">
-        <div 
+        <div
           className="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-800"
           style={{
-            backgroundImage: 'url("https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80")',
+            backgroundImage:
+              'url("https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80")',
             backgroundSize: 'cover',
-            backgroundPosition: 'center'
+            backgroundPosition: 'center',
           }}
         >
           <div className="absolute inset-0 bg-gradient-to-br from-blue-900/80 to-purple-900/80"></div>
         </div>
         <div className="relative z-10 flex flex-col justify-center p-12 text-white">
           <h1 className="text-4xl font-bold mb-6">Welcome to Eximex</h1>
-          <p className="text-xl mb-8 opacity-90">Your global trading platform for seamless import-export operations</p>
+          <p className="text-xl mb-8 opacity-90">
+            Your global trading platform for seamless import-export operations
+          </p>
           <div className="space-y-4">
             <div className="flex items-center space-x-3">
               <div className="w-2 h-2 bg-white rounded-full"></div>
@@ -76,28 +79,35 @@ export default function SignInForm() {
           </div>
         </div>
       </div>
-      
+
       {/* Right Side - Form */}
       <div className="w-full lg:w-[40%] flex items-center justify-center p-2 sm:p-4 overflow-hidden">
         <div className="w-full max-w-sm">
           {/* Form Card */}
           <div className="auth-form-card bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl border border-white/20 overflow-hidden w-full">
             {/* Header */}
-            <div className="bg-white p-2 sm:p-3 lg:p-4 border-b-2" style={{borderColor: '#86a0b2'}}>
+            <div
+              className="bg-white p-2 sm:p-3 lg:p-4 border-b-2"
+              style={{ borderColor: '#86a0b2' }}
+            >
               <div className="text-center">
-                <img 
-                  src="/logo1.png" 
-                  alt="Eximex" 
+                <img
+                  src="/logo1.png"
+                  alt="Eximex"
                   className="h-12 sm:h-16 lg:h-20 mx-auto mb-2 sm:mb-3"
                 />
-                <h2 className="text-sm sm:text-lg lg:text-xl font-bold mb-1" style={{color: '#86a0b2'}}>Welcome Back</h2>
+                <h2
+                  className="text-sm sm:text-lg lg:text-xl font-bold mb-1"
+                  style={{ color: '#86a0b2' }}
+                >
+                  Welcome Back
+                </h2>
                 {/* <p className="text-gray-600 text-xs sm:text-sm">Sign in to your trading account</p> */}
               </div>
             </div>
 
             {/* Form Content */}
             <div className="p-2 sm:p-3 lg:p-4">
-
               {/* Google Sign-In */}
               <button
                 onClick={() => dispatch(googleLogin())}
@@ -153,7 +163,11 @@ export default function SignInForm() {
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10 p-1"
                     >
-                      {showPassword ? <HiEye className="w-4 h-4 sm:w-5 sm:h-5" /> : <HiEyeOff className="w-4 h-4 sm:w-5 sm:h-5" />}
+                      {showPassword ? (
+                        <HiEye className="w-4 h-4 sm:w-5 sm:h-5" />
+                      ) : (
+                        <HiEyeOff className="w-4 h-4 sm:w-5 sm:h-5" />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -163,7 +177,8 @@ export default function SignInForm() {
               <div className="flex justify-end mt-2 mb-3 sm:mt-3 sm:mb-4">
                 <Link
                   to="/forgot-password"
-                  className="text-xs sm:text-sm font-semibold" style={{color: '#86a0b2'}}
+                  className="text-xs sm:text-sm font-semibold"
+                  style={{ color: '#86a0b2' }}
                 >
                   Forgot Password?
                 </Link>
@@ -191,7 +206,8 @@ export default function SignInForm() {
                   New to Eximex?{' '}
                   <Link
                     to="/signup"
-                    className="font-semibold" style={{color: '#86a0b2'}}
+                    className="font-semibold"
+                    style={{ color: '#86a0b2' }}
                   >
                     Create Business Account
                   </Link>

@@ -903,21 +903,21 @@ span.flatpickr-weekday,
     align-items: center;
     justify-content: center;
   }
-  
+
   .auth-form-card {
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
   }
-  
+
   .auth-form-fields {
     gap: 1rem !important;
   }
-  
+
   .auth-form-field {
     margin-bottom: 1rem !important;
   }
-  
+
   .auth-error-message {
     min-height: 1rem;
     margin-top: 0.25rem;
@@ -929,12 +929,12 @@ span.flatpickr-weekday,
   .auth-form-container {
     padding: 0.5rem !important;
   }
-  
+
   .auth-form-input {
     padding: 0.625rem !important;
     font-size: 0.875rem !important;
   }
-  
+
   .auth-form-button {
     padding: 0.625rem !important;
     font-size: 0.875rem !important;

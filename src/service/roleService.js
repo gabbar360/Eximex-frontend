@@ -23,7 +23,7 @@ const roleService = {
   deleteRole: async (id) => {
     const response = await axiosInstance.delete(`/delete-roles/${id}`);
     return response.data;
-  }
+  },
 };
 
 export default roleService;

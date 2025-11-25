@@ -16,7 +16,7 @@ const userPermissionService = {
   setUserPermissions: async (userId, permissions) => {
     try {
       const response = await axiosInstance.post(`/user-permissions/${userId}`, {
-        permissions
+        permissions,
       });
       return response.data;
     } catch (error) {
@@ -29,7 +29,7 @@ const userPermissionService = {
     try {
       const response = await axiosInstance.put(`/user-permissions/${userId}`, {
         permissions,
-        submenuPermissions
+        submenuPermissions,
       });
       return response.data;
     } catch (error) {
@@ -40,9 +40,12 @@ const userPermissionService = {
   // Delete user permissions
   deleteUserPermissions: async (userId, menuItemIds = null) => {
     try {
-      const response = await axiosInstance.delete(`/user-permissions/${userId}`, {
-        data: { menuItemIds }
-      });
+      const response = await axiosInstance.delete(
+        `/user-permissions/${userId}`,
+        {
+          data: { menuItemIds },
+        }
+      );
       return response.data;
     } catch (error) {
       throw handleAxiosError(error, 'user permission', 'delete');
@@ -52,7 +55,9 @@ const userPermissionService = {
   // Get user with permissions
   getUserWithPermissions: async (userId) => {
     try {
-      const { data } = await axiosInstance.get(`/user-with-permissions/${userId}`);
+      const { data } = await axiosInstance.get(
+        `/user-with-permissions/${userId}`
+      );
       return data;
     } catch (error) {
       throw handleAxiosError(error, 'user permission', 'fetch');

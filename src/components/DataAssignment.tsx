@@ -1,6 +1,10 @@
 import { useDispatch, useSelector } from 'react-redux';
 import React, { useState, useEffect } from 'react';
-import { getCompanyStaff, getAssignableData, assignData } from '../features/userSlice';
+import {
+  getCompanyStaff,
+  getAssignableData,
+  assignData,
+} from '../features/userSlice';
 import { toast } from 'react-toastify';
 
 interface AssignableData {
@@ -64,10 +68,12 @@ const DataAssignment: React.FC<{
     if (!selectedFromUser) return;
 
     try {
-      const data = await dispatch(getAssignableData({
-        userId: selectedFromUser,
-        entityType
-      })).unwrap();
+      const data = await dispatch(
+        getAssignableData({
+          userId: selectedFromUser,
+          entityType,
+        })
+      ).unwrap();
       setAssignableData(data.data || []);
       setSelectedItems([]);
     } catch (error) {
@@ -83,12 +89,14 @@ const DataAssignment: React.FC<{
 
     setLoading(true);
     try {
-      const result = await dispatch(assignData({
-        entityType,
-        itemIds: selectedItems,
-        fromUserId: selectedFromUser,
-        toUserId: selectedToUser
-      })).unwrap();
+      const result = await dispatch(
+        assignData({
+          entityType,
+          itemIds: selectedItems,
+          fromUserId: selectedFromUser,
+          toUserId: selectedToUser,
+        })
+      ).unwrap();
 
       toast.success(result.message);
       fetchAssignableData();

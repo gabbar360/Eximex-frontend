@@ -137,17 +137,29 @@ function AppContent() {
           />
           <Route path="/edit-pi/:id" element={<AddEditPerformaInvoiceForm />} />
           <Route path="/pi-details/:id" element={<PIDetails />} />
-          <Route path="/proforma-invoices/:id/email" element={<EmailInvoice />} />
-          <Route path="/proforma-invoices/:id/confirm" element={<ConfirmOrder />} />
-          <Route path="/proforma-invoices/:id/confirmed" element={<OrderConfirmed />} />
+          <Route
+            path="/proforma-invoices/:id/email"
+            element={<EmailInvoice />}
+          />
+          <Route
+            path="/proforma-invoices/:id/confirm"
+            element={<ConfirmOrder />}
+          />
+          <Route
+            path="/proforma-invoices/:id/confirmed"
+            element={<OrderConfirmed />}
+          />
 
           {/* Order Management Routes */}
           <Route path="/orders" element={<AllOrders />} />
           <Route path="/orders/shipments" element={<ShipmentManagement />} />
-          <Route path="/orders/packing-lists" element={<PackingListManagement />} />
+          <Route
+            path="/orders/packing-lists"
+            element={<PackingListManagement />}
+          />
           <Route path="/orders/vgm" element={<VgmManagement />} />
           <Route path="/orders/reports" element={<ReportsDownloads />} />
-          
+
           {/* Individual Order Operations */}
           <Route path="/add-order" element={<AddOrder />} />
           <Route path="/edit-order/:id" element={<EditOrder />} />
@@ -170,14 +182,13 @@ function AppContent() {
             element={<AddEditPurchaseOrderForm />}
           />
 
-
-       
           <Route path="/super-admin/roles" element={<RoleManagement />} />
           <Route path="/super-admin/users" element={<UserManagement />} />
           <Route path="/super-admin/menus" element={<MenuManagement />} />
-          <Route path="/super-admin/permissions" element={<UserPermissionManagement />} />
-
-      
+          <Route
+            path="/super-admin/permissions"
+            element={<UserPermissionManagement />}
+          />
 
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/blank" element={<Blank />} />
@@ -232,7 +243,7 @@ export default function App() {
             const res = await dispatch(getCurrentUser()).unwrap();
             if (res?.data) {
               dispatch(setUser(res.data));
-              
+
               // Fetch sidebar menu for regular users
               if (res.data.role?.name !== 'SUPER_ADMIN') {
                 console.log('🔄 Fetching sidebar menu after user login');
@@ -254,8 +265,6 @@ export default function App() {
     };
     loadBasicDetails();
   }, [dispatch]);
-
-
 
   if (loading) {
     return <div className="text-center py-10">Loading...</div>;

@@ -220,11 +220,13 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
               </div>
               <div className="mt-3 p-3 bg-slate-50 rounded-lg border border-gray-200">
                 <div className="text-sm font-medium text-slate-800">
-                  Volume: {(
+                  Volume:{' '}
+                  {(
                     (values.packagingLength || 0) *
                     (values.packagingWidth || 0) *
                     (values.packagingHeight || 0)
-                  ).toFixed(3)} m³
+                  ).toFixed(3)}{' '}
+                  m³
                 </div>
               </div>
               <Field
@@ -267,7 +269,9 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
               </label>
               <div className="grid grid-cols-3 gap-3">
                 <div className="flex items-center">
-                  <span className="mr-2 text-sm font-medium text-slate-600">L</span>
+                  <span className="mr-2 text-sm font-medium text-slate-600">
+                    L
+                  </span>
                   <Field
                     type="number"
                     name="volumeLength"
@@ -281,7 +285,9 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
                   />
                 </div>
                 <div className="flex items-center">
-                  <span className="mr-2 text-sm font-medium text-slate-600">W</span>
+                  <span className="mr-2 text-sm font-medium text-slate-600">
+                    W
+                  </span>
                   <Field
                     type="number"
                     name="volumeWidth"
@@ -295,7 +301,9 @@ const PackagingDetails: React.FC<PackagingDetailsProps> = ({
                   />
                 </div>
                 <div className="flex items-center">
-                  <span className="mr-2 text-sm font-medium text-slate-600">H</span>
+                  <span className="mr-2 text-sm font-medium text-slate-600">
+                    H
+                  </span>
                   <Field
                     type="number"
                     name="volumeHeight"

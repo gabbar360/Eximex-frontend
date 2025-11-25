@@ -20,8 +20,8 @@ interface OrderSelectorProps {
 const OrderSelector: React.FC<OrderSelectorProps> = ({
   selectedOrderId,
   onOrderSelect,
-  placeholder = "Select Order",
-  filterType
+  placeholder = 'Select Order',
+  filterType,
 }) => {
   const dispatch = useDispatch();
   const [orders, setOrders] = useState<Order[]>([]);
@@ -35,34 +35,49 @@ const OrderSelector: React.FC<OrderSelectorProps> = ({
     try {
       setLoading(true);
       const response = await dispatch(fetchOrders()).unwrap();
-      let ordersList = response?.data?.orders || response?.orders || response?.data || response || [];
-      
+      let ordersList =
+        response?.data?.orders ||
+        response?.orders ||
+        response?.data ||
+        response ||
+        [];
+
       if (Array.isArray(ordersList) && filterType) {
-        ordersList = ordersList.filter(order => {
+        ordersList = ordersList.filter((order) => {
           switch (filterType) {
             case 'vgm':
-              return !order.piInvoice?.vgmDocuments || order.piInvoice.vgmDocuments.length === 0;
+              return (
+                !order.piInvoice?.vgmDocuments ||
+                order.piInvoice.vgmDocuments.length === 0
+              );
             case 'shipment':
               // Show orders that don't have any shipment details
-              return !order.shipment || (
-                !order.shipment.bookingNumber &&
-                !order.shipment.bookingDate &&
-                !order.shipment.vesselVoyageInfo &&
-                !order.shipment.wayBillNumber &&
-                !order.shipment.truckNumber
+              return (
+                !order.shipment ||
+                (!order.shipment.bookingNumber &&
+                  !order.shipment.bookingDate &&
+                  !order.shipment.vesselVoyageInfo &&
+                  !order.shipment.wayBillNumber &&
+                  !order.shipment.truckNumber)
               );
             case 'packingList':
               // Show orders that don't have packing lists created
-              const hasPackingList = 
-                (order.packingList && Object.keys(order.packingList).length > 0 && order.packingList.containers && order.packingList.containers.length > 0) ||
-                (order.piInvoice?.packingLists && order.piInvoice.packingLists.length > 0 && order.piInvoice.packingLists[0]?.notes?.containers && order.piInvoice.packingLists[0].notes.containers.length > 0);
+              const hasPackingList =
+                (order.packingList &&
+                  Object.keys(order.packingList).length > 0 &&
+                  order.packingList.containers &&
+                  order.packingList.containers.length > 0) ||
+                (order.piInvoice?.packingLists &&
+                  order.piInvoice.packingLists.length > 0 &&
+                  order.piInvoice.packingLists[0]?.notes?.containers &&
+                  order.piInvoice.packingLists[0].notes.containers.length > 0);
               return !hasPackingList;
             default:
               return true;
           }
         });
       }
-      
+
       setOrders(Array.isArray(ordersList) ? ordersList : []);
     } catch (error) {
       console.error('Error fetching orders:', error);
@@ -74,7 +89,7 @@ const OrderSelector: React.FC<OrderSelectorProps> = ({
 
   const handleOrderChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const orderId = parseInt(e.target.value);
-    const selectedOrder = orders.find(order => order.id === orderId);
+    const selectedOrder = orders.find((order) => order.id === orderId);
     if (selectedOrder) {
       onOrderSelect(orderId, selectedOrder);
     }
@@ -92,11 +107,12 @@ const OrderSelector: React.FC<OrderSelectorProps> = ({
         required
       >
         <option value="">{loading ? 'Loading...' : placeholder}</option>
-        {Array.isArray(orders) && orders.map((order) => (
-          <option key={order.id} value={order.id}>
-            {order.orderNumber} - {order.piNumber} ({order.buyerName})
-          </option>
-        ))}
+        {Array.isArray(orders) &&
+          orders.map((order) => (
+            <option key={order.id} value={order.id}>
+              {order.orderNumber} - {order.piNumber} ({order.buyerName})
+            </option>
+          ))}
       </select>
     </div>
   );
