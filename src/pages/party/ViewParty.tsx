@@ -180,6 +180,18 @@ const ViewParty = () => {
                 </p>
               </div>
 
+              {party.gstNumber && (
+                <div>
+                  <label className="flex items-center text-xs sm:text-sm font-semibold text-slate-600 mb-2">
+                    <HiDocumentText className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-slate-600" />
+                    GST Number
+                  </label>
+                  <p className="text-sm sm:text-base text-slate-800 font-medium bg-gray-50 rounded-lg p-2 sm:p-3">
+                    {party.gstNumber}
+                  </p>
+                </div>
+              )}
+
               {party.currency && (
                 <div>
                   <label className="flex items-center text-xs sm:text-sm font-semibold text-slate-600 mb-2">
