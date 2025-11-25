@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -6,6 +6,7 @@ import { fetchProducts, deleteProduct } from '../../features/productSlice';
 import { getAllCategories } from '../../features/categorySlice';
 import { HiEye, HiPencil, HiTrash, HiPlus, HiMagnifyingGlass, HiCube, HiTag, HiFunnel } from 'react-icons/hi2';
 import { Pagination } from 'antd';
+import { useDebounce } from '../../utils/useDebounce';
 
 const Product: React.FC = () => {
   const dispatch = useDispatch();
@@ -18,6 +19,8 @@ const Product: React.FC = () => {
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedSubCategory, setSelectedSubCategory] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const [wasSearching, setWasSearching] = useState(false);
 
   const { categories } = useSelector((state: any) => state.category);
 
@@ -25,35 +28,46 @@ const Product: React.FC = () => {
     dispatch(fetchProducts({
       page: currentPage,
       limit: pageSize,
-      search: searchTerm,
+      search: '',
       categoryId: selectedCategory || undefined,
       subCategoryId: selectedSubCategory || undefined
     }) as any);
     dispatch(getAllCategories() as any);
-  }, [dispatch, currentPage, pageSize, searchTerm, selectedCategory, selectedSubCategory]);
+  }, [dispatch, currentPage, pageSize, selectedCategory, selectedSubCategory]);
   
-  const debounceTimer = React.useRef(null);
-
-
+  // Initial load
+  useEffect(() => {
+    dispatch(fetchProducts({
+      page: 1,
+      limit: 10,
+      search: ''
+    }) as any);
+  }, [dispatch]);
+  
+  const { debouncedCallback: debouncedSearch } = useDebounce((value: string) => {
+    setWasSearching(true);
+    dispatch(fetchProducts({
+      page: 1,
+      limit: pageSize,
+      search: value,
+      categoryId: selectedCategory || undefined,
+      subCategoryId: selectedSubCategory || undefined
+    }) as any);
+  }, 500);
 
   const handleSearch = useCallback((value: string) => {
     setSearchTerm(value);
     setCurrentPage(1);
-    
-    if (debounceTimer.current) {
-      clearTimeout(debounceTimer.current);
+    debouncedSearch(value);
+  }, [debouncedSearch, pageSize, selectedCategory, selectedSubCategory]);
+
+  // Restore focus after search results load
+  useEffect(() => {
+    if (wasSearching && !loading && searchInputRef.current) {
+      searchInputRef.current.focus();
+      setWasSearching(false);
     }
-    
-    debounceTimer.current = setTimeout(() => {
-      dispatch(fetchProducts({
-        page: 1,
-        limit: pageSize,
-        search: value,
-        categoryId: selectedCategory || undefined,
-        subCategoryId: selectedSubCategory || undefined
-      }) as any);
-    }, 500);
-  }, [dispatch, pageSize, selectedCategory, selectedSubCategory]);
+  }, [loading, wasSearching]);
 
   const handleDeleteClick = (id: string) => {
     setConfirmDelete(id);
@@ -82,13 +96,7 @@ const Product: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    return () => {
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
-      }
-    };
-  }, []);
+
 
   const availableSubCategories = useMemo(() => {
     if (!selectedCategory || !categories) return [];
@@ -165,6 +173,7 @@ const Product: React.FC = () => {
                   <div className="relative">
                     <HiMagnifyingGlass className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                     <input
+                      ref={searchInputRef}
                       type="text"
                       placeholder="Search products..."
                       className="pl-12 pr-4 py-3 w-full sm:w-64 rounded-lg border border-gray-300 bg-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-all duration-300 text-sm placeholder-gray-500 shadow-sm"

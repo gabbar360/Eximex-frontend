@@ -11,6 +11,7 @@ import {
   downloadPiInvoicePdf,
 } from '../../features/piSlice';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import { useDebounce } from '../../utils/useDebounce';
 
 
 const paymentTermNames: Record<string, string> = {
@@ -32,17 +33,12 @@ const PerformaInvoice: React.FC = () => {
   const [downloadingPdf, setDownloadingPdf] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
-
-
   useEffect(() => {
-    if (!searchTerm) {
-      dispatch(fetchPiInvoices({
-        page: currentPage,
-        limit: pageSize,
-        search: ''
-      }) as any);
-    }
+    dispatch(fetchPiInvoices({
+      page: currentPage,
+      limit: pageSize,
+      search: ''
+    }) as any);
   }, [dispatch, currentPage, pageSize]);
   
   useEffect(() => {
@@ -53,24 +49,19 @@ const PerformaInvoice: React.FC = () => {
     }) as any);
   }, [dispatch]);
 
-
+  const { debouncedCallback: debouncedSearch } = useDebounce((value: string) => {
+    dispatch(fetchPiInvoices({
+      page: 1,
+      limit: pageSize,
+      search: value
+    }) as any);
+  }, 500);
 
   const handleSearch = useCallback((value: string) => {
     setSearchTerm(value);
     setCurrentPage(1);
-    
-    if (debounceTimer.current) {
-      clearTimeout(debounceTimer.current);
-    }
-    
-    debounceTimer.current = setTimeout(() => {
-      dispatch(fetchPiInvoices({
-        page: 1,
-        limit: pageSize,
-        search: value
-      }) as any);
-    }, 500);
-  }, [dispatch, pageSize]);
+    debouncedSearch(value);
+  }, [debouncedSearch, pageSize]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -107,13 +98,7 @@ const PerformaInvoice: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    return () => {
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
-      }
-    };
-  }, []);
+
 
   // Use piInvoices directly since filtering is now handled by backend
   const filteredPIs = piInvoices.filter((pi: any) => {
