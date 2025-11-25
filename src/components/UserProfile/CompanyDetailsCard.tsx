@@ -7,11 +7,13 @@ import Label from '../form/Label';
 import { toast } from 'react-toastify';
 import { Image } from 'antd';
 import { EyeOutlined } from '@ant-design/icons';
+import SignatureUpload from '../SignatureUpload';
 
 interface CompanyData {
   id: number;
   name: string;
   logo?: string;
+  signature?: string;
   address?: string;
   phoneNo?: string;
   email?: string;
@@ -60,6 +62,7 @@ export default function CompanyDetailsCard({
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logoError, setLogoError] = useState(false);
+  const [signaturePreview, setSignaturePreview] = useState<string | null>(null);
 
   useEffect(() => {
     if (companyData) {
@@ -78,6 +81,7 @@ export default function CompanyDetailsCard({
         swiftCode: companyData.swiftCode || '',
       });
       setLogoPreview(companyData.logo || null);
+      setSignaturePreview(companyData.signature || null);
       setLogoError(false); // Reset error state when data changes
     }
   }, [companyData]);
@@ -94,12 +98,15 @@ export default function CompanyDetailsCard({
     }
   };
 
+
+
   const handleSave = async () => {
     try {
       const updateData = { ...formData };
       if (logoFile) {
         updateData.logo = logoFile;
       }
+
       const result = await onUpdate(updateData);
       toast.success(result?.message || 'Company updated successfully');
       onCancel?.();
@@ -158,6 +165,20 @@ export default function CompanyDetailsCard({
                 Upload a new logo (max 1MB)
               </p>
             </div>
+          </div>
+        </div>
+
+        {/* Company Signature */}
+        <div>
+          <Label htmlFor="signature">Company Signature</Label>
+          <div className="mt-2">
+            <SignatureUpload
+              companyId={companyData?.id || 0}
+              currentSignature={companyData?.signature}
+              onUploadSuccess={(signatureUrl) => {
+                setSignaturePreview(signatureUrl);
+              }}
+            />
           </div>
         </div>
 
