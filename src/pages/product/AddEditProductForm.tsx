@@ -384,8 +384,10 @@ const AddEditProductForm = () => {
       totalBoxes: product?.totalBoxes || 1,
       grossWeightPerBox: product?.grossWeightPerBox || '',
       grossWeightUnit: product?.grossWeightUnit || 'kg',
-      packagingMaterialWeight: product?.packagingMaterialWeight || '',
-      packagingMaterialWeightUnit: product?.packagingMaterialWeightUnit || 'g',
+      packagingMaterialWeight: product?.packagingMaterialWeight ?? 
+        product?.packagingHierarchyData?.dynamicFields?.packagingMaterialWeight ?? '',
+      packagingMaterialWeightUnit: product?.packagingMaterialWeightUnit ?? 
+        product?.packagingHierarchyData?.dynamicFields?.packagingMaterialWeightUnit ?? 'g',
       // Weight input fields - populate from existing data
       unitWeight: product?.unitWeight || '',
       unitWeightUnit: product?.unitWeightUnit || 'kg',
@@ -479,11 +481,15 @@ const AddEditProductForm = () => {
       }
     }
 
-    // Add packaging dimension fields
-    baseValues.packagingLength = product?.packagingLength || '';
-    baseValues.packagingWidth = product?.packagingWidth || '';
-    baseValues.packagingHeight = product?.packagingHeight || '';
-    baseValues.packagingVolume = product?.packagingVolume || '';
+    // Add packaging dimension fields with fallback to dynamicFields
+    baseValues.packagingLength = product?.packagingLength ?? 
+      product?.packagingHierarchyData?.dynamicFields?.packagingLength ?? '';
+    baseValues.packagingWidth = product?.packagingWidth ?? 
+      product?.packagingHierarchyData?.dynamicFields?.packagingWidth ?? '';
+    baseValues.packagingHeight = product?.packagingHeight ?? 
+      product?.packagingHierarchyData?.dynamicFields?.packagingHeight ?? '';
+    baseValues.packagingVolume = product?.packagingVolume ?? 
+      product?.packagingHierarchyData?.dynamicFields?.packagingVolume ?? '';
 
     // Add volume fields if needed
     if (trackVolume) {

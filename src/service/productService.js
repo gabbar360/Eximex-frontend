@@ -117,6 +117,32 @@ const productService = {
       throw handleAxiosError(error, 'product', 'fetch');
     }
   },
+
+  // Bulk upload products
+  bulkUpload: async (formData) => {
+    try {
+      const response = await axiosInstance.post('/bulk-upload/products', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Download template
+  downloadTemplate: async () => {
+    try {
+      const response = await axiosInstance.get('/download/template', {
+        responseType: 'blob',
+      });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 
 export default productService;
