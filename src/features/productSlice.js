@@ -62,6 +62,28 @@ export const getProductById = createAsyncThunk(
   }
 );
 
+export const bulkUploadProducts = createAsyncThunk(
+  'product/bulkUploadProducts',
+  async (formData, { rejectWithValue }) => {
+    try {
+      return await productService.bulkUpload(formData);
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || err.message);
+    }
+  }
+);
+
+export const downloadTemplate = createAsyncThunk(
+  'product/downloadTemplate',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await productService.downloadTemplate();
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || err.message);
+    }
+  }
+);
+
 const productSlice = createSlice({
   name: 'product',
   initialState: {
@@ -74,6 +96,11 @@ const productSlice = createSlice({
       pageSize: 10,
       total: 0,
     },
+    bulkUpload: {
+      loading: false,
+      result: null,
+      error: null,
+    },
   },
   reducers: {
     setSelectedProduct(state, { payload }) {
@@ -81,6 +108,10 @@ const productSlice = createSlice({
     },
     clearSelectedProduct(state) {
       state.selectedProduct = null;
+    },
+    clearBulkUploadResult(state) {
+      state.bulkUpload.result = null;
+      state.bulkUpload.error = null;
     },
   },
   extraReducers: (builder) => {
@@ -142,10 +173,22 @@ const productSlice = createSlice({
       .addCase(deleteProduct.rejected, (state, { payload }) => {
         state.loading = false;
         state.error = payload;
+      })
+      .addCase(bulkUploadProducts.pending, (state) => {
+        state.bulkUpload.loading = true;
+        state.bulkUpload.error = null;
+      })
+      .addCase(bulkUploadProducts.fulfilled, (state, { payload }) => {
+        state.bulkUpload.loading = false;
+        state.bulkUpload.result = payload?.data || payload;
+      })
+      .addCase(bulkUploadProducts.rejected, (state, { payload }) => {
+        state.bulkUpload.loading = false;
+        state.bulkUpload.error = payload;
       });
   },
 });
 
-export const { setSelectedProduct, clearSelectedProduct } =
+export const { setSelectedProduct, clearSelectedProduct, clearBulkUploadResult } =
   productSlice.actions;
 export default productSlice.reducer;

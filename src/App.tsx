@@ -47,6 +47,7 @@ import Category from '../src/pages/category/Category';
 import AddEditCategoryForm from '../src/pages/category/AddEditCategoryForm';
 import Product from '../src/pages/product/Product';
 import AddEditProductForm from '../src/pages/product/AddEditProductForm';
+import BulkUploadProducts from '../src/pages/product/BulkUploadProducts';
 import PerformaInvoice from '../src/pages/PI/PerformaInvoice';
 import AddEditPerformaInvoiceForm from '../src/pages/PI/AddEditPerformaInvoiceForm';
 import PIHistory from './pages/PI/PIHistory';
@@ -129,6 +130,7 @@ function AppContent() {
           <Route path="/products" element={<Product />} />
           <Route path="/add-product" element={<AddEditProductForm />} />
           <Route path="/edit-product/:id" element={<AddEditProductForm />} />
+          <Route path="/bulk-upload-products" element={<BulkUploadProducts />} />
           <Route path="/proforma-invoices" element={<PerformaInvoice />} />
           <Route path="/add-pi" element={<AddEditPerformaInvoiceForm />} />
           <Route

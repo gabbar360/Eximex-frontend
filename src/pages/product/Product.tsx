@@ -245,13 +245,22 @@ const Product: React.FC = () => {
                   )}
                 </div>
 
-                <Link
-                  to="/add-product"
-                  className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg flex-shrink-0"
-                >
-                  <HiPlus className="w-5 h-5 mr-2" />
-                  Add Product
-                </Link>
+                <div className="flex gap-3">
+                  <Link
+                    to="/bulk-upload-products"
+                    className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 shadow-lg flex-shrink-0"
+                  >
+                    <HiCube className="w-5 h-5 mr-2" />
+                    Bulk Upload
+                  </Link>
+                  <Link
+                    to="/add-product"
+                    className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg flex-shrink-0"
+                  >
+                    <HiPlus className="w-5 h-5 mr-2" />
+                    Add Product
+                  </Link>
+                </div>
               </div>
             </div>
           </div>

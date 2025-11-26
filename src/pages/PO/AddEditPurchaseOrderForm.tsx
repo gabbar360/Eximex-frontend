@@ -13,6 +13,7 @@ import {
 } from '../../features/purchaseOrderSlice';
 import { fetchProducts } from '../../features/productSlice';
 import { getAllParties } from '../../features/partySlice';
+import { fetchCategories } from '../../features/categorySlice';
 
 import DatePicker from '../../components/form/DatePicker';
 import SearchableDropdown from '../../components/SearchableDropdown';
@@ -22,6 +23,7 @@ interface PoItem {
   productId?: number;
   itemDescription: string;
   hsnSac?: string;
+  unit?: string;
   quantity: number;
   rate: number;
   amount?: number;
@@ -65,8 +67,8 @@ const AddEditPurchaseOrderForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState<PoItem[]>([]);
   const [currency, setCurrency] = useState('INR');
-  const [cgstRate, setCgstRate] = useState(6);
-  const [sgstRate, setSgstRate] = useState(6);
+  const [cgstRate, setCgstRate] = useState(0);
+  const [sgstRate, setSgstRate] = useState(0);
   const [totals, setTotals] = useState({
     subTotal: 0,
     cgst: 0,
@@ -84,6 +86,19 @@ const AddEditPurchaseOrderForm: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
 
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
+
+  // Product addition form state
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedSubcategory, setSelectedSubcategory] = useState('');
+  const [selectedProduct, setSelectedProduct] = useState('');
+  const [selectedUnit, setSelectedUnit] = useState('');
+  const [quantityMethod, setQuantityMethod] = useState('By Quantity');
+  const [newItemQuantity, setNewItemQuantity] = useState('');
+  const [newItemRate, setNewItemRate] = useState('');
+  const [editingItemKey, setEditingItemKey] = useState<string | null>(null);
+
+  // Redux state for categories
+  const { categories } = useSelector((state: any) => state.category);
 
   const validationSchema = Yup.object().shape({
     poDate: Yup.date().required('PO date is required'),
@@ -107,9 +122,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
     supplierGstNumber: formData?.vendorGstin || '',
     notes: formData?.notes || '',
     termsConditions: formData?.termsConditions || '',
-    signatureCompany: formData?.signatureCompany || '',
-    signatureTitle: formData?.signatureTitle || '',
-    authorizedBy: formData?.authorizedBy || '',
+    deliverToAddress: formData?.deliverToAddress || '',
   });
 
   // Load vendor and product data
@@ -117,9 +130,12 @@ const AddEditPurchaseOrderForm: React.FC = () => {
     const loadData = async () => {
       setLoading(true);
       try {
-        // Fetch products with better data extraction
+        // Fetch categories and products
+        console.log('Fetching categories...');
+        await dispatch(fetchCategories()).unwrap();
+        
         console.log('Fetching products...');
-        const productsResponse = await dispatch(fetchProducts()).unwrap();
+        const productsResponse = await dispatch(fetchProducts({ limit: 1000 })).unwrap();
         console.log('Products response:', productsResponse);
 
         // Handle different response structures
@@ -170,10 +186,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
           setCgstRate(poData.cgstRate || 6);
           setSgstRate(poData.sgstRate || 6);
 
-          if (poData.vendorId) {
-            const vendor = suppliers.find((v) => v.id === poData.vendorId);
-            setSelectedVendor(vendor || null);
-          }
+          // Vendor selection will be handled by the separate useEffect
         }
       } catch (error: any) {
         console.error('Error loading PO data:', error);
@@ -184,10 +197,6 @@ const AddEditPurchaseOrderForm: React.FC = () => {
     };
 
     loadData();
-
-    if (!isEdit) {
-      addNewItem();
-    }
   }, [id, isEdit, dispatch]);
 
   // Update suppliers when parties data changes
@@ -209,6 +218,16 @@ const AddEditPurchaseOrderForm: React.FC = () => {
     }
   }, [parties]);
 
+  // Set selected vendor when both formData and suppliers are available
+  useEffect(() => {
+    if (isEdit && formData && suppliers.length > 0 && formData.vendorId) {
+      const vendor = suppliers.find((v) => v.id === formData.vendorId);
+      if (vendor) {
+        setSelectedVendor(vendor);
+      }
+    }
+  }, [isEdit, formData, suppliers]);
+
   useEffect(() => {
     calculateTotals();
   }, [items]);
@@ -221,6 +240,64 @@ const AddEditPurchaseOrderForm: React.FC = () => {
       rate: 0,
     };
     setItems([...items, newItem]);
+  };
+
+  const addProductToItems = () => {
+    if (!selectedCategory || !selectedProduct || !selectedUnit || !newItemQuantity || !newItemRate) {
+      toast.error('Please fill all required fields');
+      return;
+    }
+
+    const product = products.find(p => p.id.toString() === selectedProduct);
+    if (!product) {
+      toast.error('Selected product not found');
+      return;
+    }
+
+    if (editingItemKey) {
+      // Update existing item
+      const updatedItems = items.map(item => {
+        if (item.key === editingItemKey) {
+          return {
+            ...item,
+            productId: product.id,
+            itemDescription: product.name || product.productName || `Product ${product.id}`,
+            hsnSac: product.hsnCode || product.category?.hsnCode || '',
+            unit: selectedUnit,
+            quantity: Number(newItemQuantity),
+            rate: Number(newItemRate),
+            amount: Number(newItemQuantity) * Number(newItemRate)
+          };
+        }
+        return item;
+      });
+      setItems(updatedItems);
+      setEditingItemKey(null);
+      toast.success('Product updated successfully');
+    } else {
+      // Add new item
+      const newItem: PoItem = {
+        key: Date.now().toString(),
+        productId: product.id,
+        itemDescription: product.name || product.productName || `Product ${product.id}`,
+        hsnSac: product.hsnCode || product.category?.hsnCode || '',
+        unit: selectedUnit,
+        quantity: Number(newItemQuantity),
+        rate: Number(newItemRate),
+        amount: Number(newItemQuantity) * Number(newItemRate)
+      };
+      setItems([...items, newItem]);
+      toast.success('Product added successfully');
+    }
+    
+    // Reset form
+    setSelectedCategory('');
+    setSelectedSubcategory('');
+    setSelectedProduct('');
+    setSelectedUnit('');
+    setQuantityMethod('By Quantity');
+    setNewItemQuantity('');
+    setNewItemRate('');
   };
 
   const removeItem = (key: string) => {
@@ -326,15 +403,9 @@ const AddEditPurchaseOrderForm: React.FC = () => {
         vendorName: values.supplierName,
         vendorAddress: values.supplierAddress,
         vendorGstin: values.supplierGstNumber,
-        deliverToName: values.deliverToName,
         deliverToAddress: values.deliverToAddress,
-        deliverToGstin: values.deliverToGstin,
-        deliverToContact: values.deliverToContact,
         notes: values.notes,
         termsConditions: values.termsConditions,
-        signatureCompany: values.signatureCompany,
-        signatureTitle: values.signatureTitle,
-        authorizedBy: values.authorizedBy,
         currency,
         cgstRate,
         sgstRate,
@@ -532,11 +603,12 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                             type="number"
                             min={0}
                             max={50}
-                            value={cgstRate}
+                            step="0.01"
+                            value={cgstRate || ''}
                             onChange={(e) =>
-                              setCgstRate(Number(e.target.value))
+                              setCgstRate(Number(e.target.value) || 0)
                             }
-                            placeholder="0"
+                            placeholder="Enter CGST %"
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
                           />
                         </div>
@@ -548,11 +620,12 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                             type="number"
                             min={0}
                             max={50}
-                            value={sgstRate}
+                            step="0.01"
+                            value={sgstRate || ''}
                             onChange={(e) =>
-                              setSgstRate(Number(e.target.value))
+                              setSgstRate(Number(e.target.value) || 0)
                             }
-                            placeholder="0"
+                            placeholder="Enter SGST %"
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
                           />
                         </div>
@@ -628,208 +701,383 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Hidden Deliver To Fields - Auto-filled with company details */}
-                    <Field type="hidden" name="deliverToName" />
-                    <Field type="hidden" name="deliverToAddress" />
-                    <Field type="hidden" name="deliverToGstin" />
-                    <Field type="hidden" name="deliverToContact" />
-
-                    {/* Items Section */}
-                    <div className="rounded-lg border border-gray-200 bg-gray-50/50 p-4 dark:border-gray-700 dark:bg-gray-800/50">
-                      <div className="flex justify-between items-center mb-4">
-                        <h4 className="text-base font-medium text-gray-800 dark:text-gray-200">
-                          Purchase Order Items
-                        </h4>
-                        <button
-                          type="button"
-                          onClick={addNewItem}
-                          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                        >
-                          <svg
-                            className="h-4 w-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M12 4v16m8-8H4"
-                            />
-                          </svg>
-                          Add Item
-                        </button>
-                      </div>
-                      <div className="rounded-lg border border-gray-200 bg-white dark:border-gray-600 dark:bg-gray-700 overflow-x-auto">
-                        <table className="w-full text-sm">
-                          <thead className="bg-gray-50 dark:bg-gray-800">
-                            <tr>
-                              <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">
-                                #
-                              </th>
-                              <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">
-                                Item & Description
-                              </th>
-                              <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">
-                                HSN/SAC
-                              </th>
-                              <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">
-                                Qty
-                              </th>
-                              <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">
-                                Rate
-                              </th>
-                              <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">
-                                Amount
-                              </th>
-                              <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300"></th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-gray-200 dark:divide-gray-600">
-                            {items.map((item, index) => (
-                              <tr
-                                key={item.key}
-                                className="hover:bg-gray-50 dark:hover:bg-gray-800"
-                              >
-                                <td className="px-3 py-2 text-gray-900 dark:text-gray-100">
-                                  {index + 1}
-                                </td>
-                                <td className="px-3 py-2">
-                                  <div className="space-y-2">
-                                    <select
-                                      value={item.productId?.toString() || ''}
-                                      onChange={(e) =>
-                                        handleProductSelect(
-                                          item.key!,
-                                          e.target.value
-                                        )
-                                      }
-                                      className="w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                                    >
-                                      <option value="">
-                                        {products.length === 0
-                                          ? 'No products available'
-                                          : 'Select product'}
-                                      </option>
-                                      {products.map((product) => (
-                                        <option
-                                          key={product.id}
-                                          value={product.id.toString()}
-                                        >
-                                          {product.name}{' '}
-                                          {product.sku
-                                            ? `(${product.sku})`
-                                            : ''}
-                                        </option>
-                                      ))}
-                                    </select>
-                                    {products.length === 0 && (
-                                      <div className="text-xs text-red-500 mt-1">
-                                        No products found. Please add products
-                                        first.
-                                      </div>
-                                    )}
-                                    <textarea
-                                      value={item.itemDescription}
-                                      placeholder="Enter item description"
-                                      rows={2}
-                                      onChange={(e) =>
-                                        updateItem(
-                                          item.key!,
-                                          'itemDescription',
-                                          e.target.value
-                                        )
-                                      }
-                                      className="w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                                    />
-                                  </div>
-                                </td>
-                                <td className="px-3 py-2">
-                                  <input
-                                    type="text"
-                                    value={item.hsnSac}
-                                    placeholder="HSN/SAC"
-                                    onChange={(e) =>
-                                      updateItem(
-                                        item.key!,
-                                        'hsnSac',
-                                        e.target.value
-                                      )
-                                    }
-                                    className="w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                                  />
-                                </td>
-                                <td className="px-3 py-2">
-                                  <input
-                                    type="number"
-                                    value={item.quantity || ''}
-                                    min={0}
-                                    placeholder="Qty"
-                                    onChange={(e) =>
-                                      updateItem(
-                                        item.key!,
-                                        'quantity',
-                                        Number(e.target.value) || 0
-                                      )
-                                    }
-                                    className="w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                                  />
-                                </td>
-                                <td className="px-3 py-2">
-                                  <input
-                                    type="number"
-                                    value={item.rate || ''}
-                                    min={0}
-                                    step="0.01"
-                                    placeholder="Rate"
-                                    onChange={(e) =>
-                                      updateItem(
-                                        item.key!,
-                                        'rate',
-                                        Number(e.target.value) || 0
-                                      )
-                                    }
-                                    className="w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                                  />
-                                </td>
-                                <td className="px-3 py-2 font-medium text-gray-900 dark:text-gray-100">
-                                  {getCurrencySymbol()}
-                                  {(
-                                    (item.quantity || 0) * (item.rate || 0)
-                                  ).toFixed(2)}
-                                </td>
-                                <td className="px-3 py-2">
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      if (window.confirm('Remove item?')) {
-                                        removeItem(item.key!);
-                                      }
-                                    }}
-                                    className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20"
-                                  >
-                                    <svg
-                                      className="w-4 h-4"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      viewBox="0 0 24 24"
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                      />
-                                    </svg>
-                                  </button>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                    {/* Deliver To Section */}
+                    <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                      <h3 className="text-xl font-semibold text-slate-700 mb-6">
+                        Deliver To
+                      </h3>
+                      <div>
+                        <label className="mb-2 block text-sm font-medium text-gray-700">
+                          Delivery Address
+                        </label>
+                        <Field
+                          as="textarea"
+                          name="deliverToAddress"
+                          rows={4}
+                          placeholder="Enter complete delivery address."
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
+                        />
                       </div>
                     </div>
+
+                    {/* Product Addition Section */}
+                    <div className="bg-white rounded-lg border border-gray-200 p-6 dark:border-gray-700 dark:bg-gray-800">
+                      <h4 className="text-base font-medium text-gray-800 dark:text-gray-200 mb-4">
+                        Add Product
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Category <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
+                            value={selectedCategory}
+                            onChange={(e) => {
+                              setSelectedCategory(e.target.value);
+                              setSelectedSubcategory('');
+                              setSelectedProduct('');
+                              setSelectedUnit('');
+                            }}
+                          >
+                            <option value="">Select Category</option>
+                            {Array.isArray(categories) && categories.map((cat) => (
+                              <option key={cat.id} value={cat.id}>
+                                {cat.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Subcategory
+                          </label>
+                          <select
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
+                            value={selectedSubcategory}
+                            onChange={(e) => {
+                              setSelectedSubcategory(e.target.value);
+                              setSelectedProduct('');
+                              setSelectedUnit('');
+                            }}
+                            disabled={!selectedCategory}
+                          >
+                            <option value="">Select Subcategory</option>
+                            {selectedCategory && (() => {
+                              const category = categories.find(c => c.id.toString() === selectedCategory);
+                              return category?.subcategories?.map((subcat) => (
+                                <option key={subcat.id} value={subcat.id}>
+                                  {subcat.name}
+                                </option>
+                              ));
+                            })()}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Product <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
+                            value={selectedProduct}
+                            onChange={(e) => {
+                              setSelectedProduct(e.target.value);
+                              setSelectedUnit('');
+                              
+                              if (e.target.value) {
+                                const product = products.find(p => p.id.toString() === e.target.value);
+                                if (product && (product.rate || product.price || product.unitPrice)) {
+                                  setNewItemRate((product.rate || product.price || product.unitPrice).toString());
+                                }
+                              }
+                            }}
+                            disabled={!selectedCategory}
+                          >
+                            <option value="">Choose product</option>
+                            {(() => {
+                              const filteredProducts = products.filter(product => {
+                                const categoryMatch = !selectedCategory || 
+                                  product.categoryId?.toString() === selectedCategory ||
+                                  product.category?.id?.toString() === selectedCategory;
+                                const subcategoryMatch = !selectedSubcategory || 
+                                  product.subcategoryId?.toString() === selectedSubcategory ||
+                                  product.subCategory?.id?.toString() === selectedSubcategory;
+                                return categoryMatch && subcategoryMatch;
+                              });
+                              
+                              return filteredProducts.map((product) => (
+                                <option key={product.id} value={product.id}>
+                                  {product.name || product.productName || `Product ${product.id}`}
+                                </option>
+                              ));
+                            })()}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Unit <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
+                            value={selectedUnit}
+                            onChange={(e) => setSelectedUnit(e.target.value)}
+                            disabled={!selectedCategory}
+                          >
+                            <option value="">Choose unit</option>
+                            {(() => {
+                              const category = categories.find(c => c.id.toString() === selectedCategory);
+                              const packagingHierarchy = category?.packagingHierarchy || [];
+                              const availableUnits = [];
+
+                              if (packagingHierarchy.length > 0) {
+                                packagingHierarchy.forEach((level, levelIdx) => {
+                                  availableUnits.push(
+                                    <option key={`from-${levelIdx}`} value={level.from}>
+                                      {level.from}
+                                    </option>
+                                  );
+                                });
+
+                                const lastLevel = packagingHierarchy[packagingHierarchy.length - 1];
+                                if (lastLevel?.to) {
+                                  availableUnits.push(
+                                    <option key={`to-final`} value={lastLevel.to}>
+                                      {lastLevel.to}
+                                    </option>
+                                  );
+                                }
+                              } else {
+                                const subcategory = category?.subcategories?.find(
+                                  s => s.id.toString() === selectedSubcategory
+                                );
+
+                                const unitSet = new Set();
+                                if (category?.primary_unit) unitSet.add(category.primary_unit);
+                                if (category?.secondary_unit) unitSet.add(category.secondary_unit);
+                                if (subcategory?.primary_unit) unitSet.add(subcategory.primary_unit);
+                                if (subcategory?.secondary_unit) unitSet.add(subcategory.secondary_unit);
+
+                                if (unitSet.size === 0) {
+                                  ['pcs', 'box', 'kg', 'pieces', 'cartons'].forEach(unit => unitSet.add(unit));
+                                }
+
+                                Array.from(unitSet).forEach(unit => {
+                                  availableUnits.push(
+                                    <option key={unit} value={unit}>
+                                      {unit.charAt(0).toUpperCase() + unit.slice(1)}
+                                    </option>
+                                  );
+                                });
+                              }
+
+                              return availableUnits;
+                            })()}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Quantity Input Method
+                          </label>
+                          <div className="flex gap-4 pt-2">
+                            <label className="flex items-center">
+                              <input
+                                type="radio"
+                                value="By Quantity"
+                                checked={quantityMethod === 'By Quantity'}
+                                onChange={(e) => setQuantityMethod(e.target.value)}
+                                className="mr-2 text-blue-600"
+                              />
+                              By Quantity
+                            </label>
+                            <label className="flex items-center">
+                              <input
+                                type="radio"
+                                value="By Weight (KG)"
+                                checked={quantityMethod === 'By Weight (KG)'}
+                                onChange={(e) => setQuantityMethod(e.target.value)}
+                                className="mr-2 text-blue-600"
+                              />
+                              By Weight (KG)
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Quantity <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="number"
+                            value={newItemQuantity}
+                            min={0}
+                            step="0.01"
+                            placeholder="Enter quantity"
+                            onChange={(e) => setNewItemQuantity(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Rate per Unit <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="number"
+                            value={newItemRate}
+                            min={0}
+                            step="0.01"
+                            placeholder="Enter rate per unit"
+                            onChange={(e) => setNewItemRate(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3">
+                        <button
+                          type="button"
+                          onClick={addProductToItems}
+                          className="px-6 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 inline-flex items-center gap-2"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          </svg>
+                          {editingItemKey ? 'Update Product' : 'Add Product'}
+                        </button>
+                        {editingItemKey && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingItemKey(null);
+                              setSelectedCategory('');
+                              setSelectedSubcategory('');
+                              setSelectedProduct('');
+                              setSelectedUnit('');
+                              setNewItemQuantity('');
+                              setNewItemRate('');
+                            }}
+                            className="px-6 py-2 bg-gray-500 text-white font-medium rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 inline-flex items-center gap-2"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Cancel Edit
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Items Table */}
+                    {items.length > 0 && (
+                      <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+                        <h4 className="text-base font-medium text-gray-800 dark:text-gray-200 mb-4">
+                          Added Items
+                        </h4>
+                        
+                        <div className="overflow-x-auto">
+                          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead className="bg-gray-50 dark:bg-gray-700">
+                              <tr>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                  #
+                                </th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                  Item Description
+                                </th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                  HSN/SAC
+                                </th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                  Unit
+                                </th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                  Quantity
+                                </th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                  Rate
+                                </th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                  Amount
+                                </th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                  Actions
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                              {items.map((item, index) => (
+                                <tr key={item.key} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                  <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">
+                                    {index + 1}
+                                  </td>
+                                  <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
+                                    {item.itemDescription}
+                                  </td>
+                                  <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
+                                    {item.hsnSac || ''}
+                                  </td>
+                                  <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
+                                    {item.unit || 'pcs'}
+                                  </td>
+                                  <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
+                                    {item.quantity || 0}
+                                  </td>
+                                  <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
+                                    {item.rate || 0}
+                                  </td>
+                                  <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">
+                                    {getCurrencySymbol()}{((item.quantity || 0) * (item.rate || 0)).toFixed(2)}
+                                  </td>
+                                  <td className="px-4 py-3 text-sm">
+                                    <div className="flex gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const product = products.find(p => p.id === item.productId);
+                                          if (product) {
+                                            setEditingItemKey(item.key!);
+                                            setSelectedCategory(product.categoryId?.toString() || '');
+                                            setSelectedSubcategory(product.subcategoryId?.toString() || '');
+                                            setSelectedProduct(product.id.toString());
+                                            setSelectedUnit(item.unit || 'pcs');
+                                            setNewItemQuantity(item.quantity.toString());
+                                            setNewItemRate(item.rate.toString());
+                                          }
+                                        }}
+                                        className="text-blue-600 hover:text-blue-800 focus:outline-none dark:text-blue-400 dark:hover:text-blue-300"
+                                        title="Edit item"
+                                      >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => removeItem(item.key!)}
+                                        className="text-red-600 hover:text-red-800 focus:outline-none dark:text-red-400 dark:hover:text-red-300"
+                                        title="Delete item"
+                                      >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Order Summary */}
                     <div className="rounded-lg border border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 dark:border-gray-700 dark:from-gray-800 dark:to-gray-700">
@@ -909,47 +1157,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Authorization Section */}
-                    <div className="rounded-lg border border-gray-200 bg-gray-50/50 p-4 dark:border-gray-700 dark:bg-gray-800/50">
-                      <h4 className="text-base font-medium text-gray-800 dark:text-gray-200 mb-4">
-                        Authorization
-                      </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                          <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            For Company
-                          </label>
-                          <Field
-                            type="text"
-                            name="signatureCompany"
-                            placeholder="For Company"
-                            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                          />
-                        </div>
-                        <div>
-                          <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Title
-                          </label>
-                          <Field
-                            type="text"
-                            name="signatureTitle"
-                            placeholder="Title"
-                            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                          />
-                        </div>
-                        <div>
-                          <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Authorized By
-                          </label>
-                          <Field
-                            type="text"
-                            name="authorizedBy"
-                            placeholder="Authorized By"
-                            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                          />
-                        </div>
-                      </div>
-                    </div>
+
 
                     {/* Submit Buttons */}
                     <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
