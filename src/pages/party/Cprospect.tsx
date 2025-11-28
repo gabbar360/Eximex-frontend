@@ -29,7 +29,7 @@ const Cprospect = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(6);
+  const [pageSize, setPageSize] = useState(10);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [wasSearching, setWasSearching] = useState(false);
 
@@ -47,7 +47,7 @@ const Cprospect = () => {
     dispatch(
       fetchParties({
         page: 1,
-        limit: 6,
+        limit: 10,
         search: '',
       })
     );
@@ -205,133 +205,87 @@ const Cprospect = () => {
           </div>
         </div>
 
-        {/* Cards Grid */}
-        {(!parties || parties.length === 0) && !loading ? (
-          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-12 text-center">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-r from-slate-600 to-slate-700 flex items-center justify-center shadow-lg">
-              <HiMagnifyingGlass className="w-8 h-8 text-white" />
+        {/* Table View */}
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+          {(!parties || parties.length === 0) && !loading ? (
+            <div className="p-12 text-center">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-r from-slate-600 to-slate-700 flex items-center justify-center shadow-lg">
+                <HiMagnifyingGlass className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold text-slate-800 mb-2">
+                No prospects found
+              </h3>
+              <p className="text-slate-600 mb-6">
+                Add your first prospect to get started
+              </p>
             </div>
-            <h3 className="text-xl font-semibold text-slate-800 mb-2">
-              No prospects found
-            </h3>
-            <p className="text-slate-600 mb-6">
-              Add your first prospect to get started
-            </p>
-            {/* <Link
-              to="/add-party"
-              className="inline-flex items-center px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg"
-            >
-              <HiPlus className="w-5 h-5 mr-2" />
-              Add First Prospect
-            </Link> */}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 lg:gap-6">
-            {parties &&
-              parties.map((party) => (
-                <div
-                  key={party.id}
-                  className="group bg-white rounded-lg border border-gray-200 shadow-sm p-6 transition-all duration-300 hover:shadow-lg hover:border-gray-300"
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="p-2 rounded-lg bg-slate-700 shadow-md flex-shrink-0">
-                        <HiBuildingOffice2 className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3
-                          className="text-lg font-bold text-slate-800 mb-1 truncate group-hover:text-slate-600 transition-colors"
-                          title={party.companyName}
-                        >
-                          {party.companyName}
-                        </h3>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3 mb-2">
-                    <div className="flex items-center text-sm">
-                      <span className="font-medium text-slate-500 w-16 text-xs">
-                        Role:
-                      </span>
-                      <span className="text-slate-800 font-semibold text-sm">
-                        {party.role}
-                      </span>
-                    </div>
-                    <div className="flex items-center text-sm">
-                      <span className="font-medium text-slate-500 w-16 text-xs">
-                        Contact:
-                      </span>
-                      <span className="text-slate-700 truncate text-sm">
-                        {party.contactPerson}
-                      </span>
-                    </div>
-                    <div className="flex items-center text-sm">
-                      <span className="font-medium text-slate-500 w-16 text-xs">
-                        Email:
-                      </span>
-                      <span className="text-slate-700 truncate text-sm">
-                        {party.email}
-                      </span>
-                    </div>
-                    <div className="flex items-center text-sm">
-                      <span className="font-medium text-slate-500 w-16 text-xs">
-                        Phone:
-                      </span>
-                      <span className="text-slate-700 text-sm">
-                        {party.phone}
-                      </span>
-                    </div>
-                    <div className="flex items-center text-sm">
-                      <span className="font-medium text-slate-500 w-16 text-xs">
-                        Location:
-                      </span>
-                      <span className="text-slate-700 truncate text-sm">
-                        {[party.city, party.state, party.country]
-                          .filter(Boolean)
-                          .join(', ')}
-                      </span>
-                    </div>
-                    <div className="flex items-center text-sm">
-                      <span className="font-medium text-slate-500 w-16 text-xs">
-                        Status:
-                      </span>
-                      <span
-                        className={`text-xs font-semibold px-3 py-1 rounded-full shadow-sm ${
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Company</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Contact Person</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Phone</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Role</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {parties && parties.map((party) => (
+                    <tr key={party.id} className="hover:bg-gray-50 transition-colors duration-200">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="p-2 rounded-lg bg-slate-700 shadow-md flex-shrink-0 mr-3">
+                            <HiBuildingOffice2 className="w-4 h-4 text-white" />
+                          </div>
+                          <div className="text-sm font-semibold text-slate-800">{party.companyName}</div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700">{party.contactPerson}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700">{party.email}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700">{party.phone}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-800">{party.role}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                           party.status
-                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                            : 'bg-red-100 text-red-800 border border-red-200'
-                        }`}
-                      >
-                        {party.status ? 'Active' : 'Inactive'}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-center space-x-2 pt-2 border-t border-gray-200">
-                    <Link
-                      to={`/view-party/${party.id}`}
-                      className="p-2.5 rounded-lg text-slate-500 hover:text-white hover:bg-slate-600 transition-all duration-300 hover:shadow-lg"
-                    >
-                      <HiEye className="w-4 h-4" />
-                    </Link>
-                    <Link
-                      to={`/edit-party/${party.id}`}
-                      className="p-2.5 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-600 hover:shadow-lg"
-                    >
-                      <HiPencil className="w-4 h-4" />
-                    </Link>
-                    <button
-                      onClick={() => handleDeleteClick(party.id)}
-                      className="p-2.5 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300 hover:shadow-lg"
-                    >
-                      <HiTrash className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-          </div>
-        )}
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {party.status ? 'Active' : 'Inactive'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <div className="flex items-center justify-center space-x-2">
+                          <Link
+                            to={`/view-party/${party.id}`}
+                            className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-slate-600 transition-all duration-300"
+                          >
+                            <HiEye className="w-4 h-4" />
+                          </Link>
+                          <Link
+                            to={`/edit-party/${party.id}`}
+                            className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-600 transition-all duration-300"
+                          >
+                            <HiPencil className="w-4 h-4" />
+                          </Link>
+                          <button
+                            onClick={() => handleDeleteClick(party.id)}
+                            className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
+                          >
+                            <HiTrash className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
 
         {/* Simple Pagination */}
         {pagination && pagination.total > 0 && (

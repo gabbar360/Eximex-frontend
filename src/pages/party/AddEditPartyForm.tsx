@@ -70,9 +70,23 @@ const AddEditPartyForm = () => {
   const [showStateDropdown, setShowStateDropdown] = useState(false);
   const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [formInitialized, setFormInitialized] = useState(false);
   const countryRef = useRef(null);
   const stateRef = useRef(null);
   const cityRef = useRef(null);
+  
+  // Title dropdown states
+  const [showTitleDropdown, setShowTitleDropdown] = useState(false);
+  const titleRef = useRef(null);
+  
+  const titleOptions = [
+    { value: '', label: 'No Title' },
+    { value: 'Mr', label: 'Mr' },
+    { value: 'Mrs', label: 'Mrs' },
+    { value: 'Ms', label: 'Ms' },
+    { value: 'Dr', label: 'Dr' },
+    { value: 'Prof', label: 'Prof' }
+  ];
 
   useEffect(() => {
     const loadData = async () => {
@@ -119,6 +133,15 @@ const AddEditPartyForm = () => {
       setInitialized(true);
     }
   }, [countries, party, initialized, isEditMode]);
+
+  // Set form as initialized after party data is loaded in edit mode
+  useEffect(() => {
+    if (isEditMode && Object.keys(party).length > 0 && !formInitialized) {
+      setFormInitialized(true);
+    } else if (!isEditMode && !formInitialized) {
+      setFormInitialized(true);
+    }
+  }, [party, isEditMode, formInitialized]);
 
   // Load states when country changes
   useEffect(() => {
@@ -179,6 +202,9 @@ const AddEditPartyForm = () => {
       if (cityRef.current && !cityRef.current.contains(event.target)) {
         setShowCityDropdown(false);
       }
+      if (titleRef.current && !titleRef.current.contains(event.target)) {
+        setShowTitleDropdown(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -186,6 +212,7 @@ const AddEditPartyForm = () => {
   }, []);
 
   const handleSubmit = async (values) => {
+    console.log('Form submission payload:', values);
     setSubmitting(true);
     try {
       let response;
@@ -222,6 +249,7 @@ const AddEditPartyForm = () => {
   const getInitialValues = () => ({
     companyName: party.companyName || '',
     role: party.role || party.partyType || '',
+    contactPersonTitle: party.contactPersonTitle || '',
     contactPerson: party.contactPerson || '',
     email: party.email || '',
     phone: party.phone || '',
@@ -238,7 +266,6 @@ const AddEditPartyForm = () => {
     pincode: party.pincode || '',
     currency: party.currency || '',
     gstNumber: party.gstNumber || '',
-    tags: party.tags || '',
     notes: party.notes || '',
     status: party.status !== undefined ? Boolean(party.status) : false,
   });
@@ -358,20 +385,21 @@ const AddEditPartyForm = () => {
         {/* Form */}
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 lg:p-8">
           <Formik
-            enableReinitialize={true}
+            enableReinitialize={isEditMode && !formInitialized}
             initialValues={getInitialValues()}
             validationSchema={Yup.object({
               companyName: Yup.string().required('Company name is required'),
               role: Yup.string().required('Role is required'),
+              contactPersonTitle: Yup.string(),
               email: Yup.string()
                 .email('Invalid email')
                 .required('Email is required'),
               phone: Yup.string().required('Phone number is required'),
               address: Yup.string().required('Address is required'),
-              city: Yup.string().required('City is required'),
-              state: Yup.string().required('State is required'),
+              // city: Yup.string().required('City is required'),
+              // state: Yup.string().required('State is required'),
               country: Yup.string().required('Country is required'),
-              pincode: Yup.string().required('Pincode is required'),
+              // pincode: Yup.string().required('Pincode is required'),
               currency: Yup.string().required('Currency is required'),
               gstNumber: Yup.string().required('GST Number is required'),
             })}
@@ -416,15 +444,53 @@ const AddEditPartyForm = () => {
                       <HiUser className="w-4 h-4 mr-2 text-slate-600" />
                       Contact Person
                     </label>
-                    <input
-                      name="contactPerson"
-                      type="text"
-                      placeholder="Enter contact person name"
-                      value={values.contactPerson}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
-                    />
+                    <div className="flex gap-3">
+                      {/* Title Dropdown */}
+                      <div className="relative w-24" ref={titleRef}>
+                        <div
+                          className="w-full px-3 py-3 border border-gray-300 bg-white rounded-lg cursor-pointer flex items-center justify-between transition-all duration-300 shadow-sm hover:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200 focus-within:border-slate-500"
+                          onClick={() => setShowTitleDropdown(!showTitleDropdown)}
+                        >
+                          <span className={`text-sm ${values.contactPersonTitle ? 'text-slate-900' : 'text-slate-500'}`}>
+                            {values.contactPersonTitle || 'Title'}
+                          </span>
+                          <HiChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${showTitleDropdown ? 'rotate-180' : ''}`} />
+                        </div>
+                        {showTitleDropdown && (
+                          <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl" style={{ top: '100%', marginTop: '4px' }}>
+                            <div className="max-h-60 overflow-y-auto">
+                              {titleOptions.map((option) => (
+                                <div
+                                  key={option.value}
+                                  className={`px-3 py-2 hover:bg-slate-50 cursor-pointer text-sm transition-colors duration-150 ${
+                                    option.value === values.contactPersonTitle
+                                      ? 'bg-slate-100 text-slate-900 font-medium'
+                                      : 'text-slate-700'
+                                  }`}
+                                  onClick={() => {
+                                    console.log('Setting contactPersonTitle to:', option.value);
+                                    setFieldValue('contactPersonTitle', option.value);
+                                    setShowTitleDropdown(false);
+                                  }}
+                                >
+                                  {option.label}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      {/* Name Input */}
+                      <input
+                        name="contactPerson"
+                        type="text"
+                        placeholder="Enter contact person name"
+                        value={values.contactPerson}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        className="flex-1 px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
+                      />
+                    </div>
                   </div>
 
                   {/* Email */}
@@ -506,7 +572,7 @@ const AddEditPartyForm = () => {
                   <div>
                     <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
                       <HiDocumentText className="w-4 h-4 mr-2 text-slate-600" />
-                      GST Number
+                      GST Number / VAT
                     </label>
                     <input
                       name="gstNumber"
@@ -757,23 +823,6 @@ const AddEditPartyForm = () => {
                     )}
                   </div>
 
-                  {/* Tags */}
-                  <div>
-                    <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-                      <HiTag className="w-4 h-4 mr-2 text-slate-600" />
-                      Tags
-                    </label>
-                    <input
-                      name="tags"
-                      type="text"
-                      placeholder="Enter tags (comma separated)"
-                      value={values.tags}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
-                    />
-                  </div>
-
                   {/* Address */}
                   <div>
                     <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
@@ -797,14 +846,14 @@ const AddEditPartyForm = () => {
                   </div>
 
                   {/* Notes */}
-                  <div className="md:col-span-2">
+                  <div>
                     <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
                       <HiDocumentText className="w-4 h-4 mr-2 text-slate-600" />
                       Notes
                     </label>
-                    <textarea
+                    <input
                       name="notes"
-                      rows={3}
+                      type="text"
                       placeholder="Additional notes..."
                       value={values.notes}
                       onChange={handleChange}

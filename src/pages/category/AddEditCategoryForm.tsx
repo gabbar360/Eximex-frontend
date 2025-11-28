@@ -532,7 +532,7 @@ const AddEditCategoryForm: React.FC = () => {
             validationSchema={Yup.object({
               name: Yup.string().required('Category name is required'),
               hsn_code: Yup.string().required('HSN code is required'),
-              desc: Yup.string().required('Description is required'),
+              // desc: Yup.string().required('Description is required'),
               primary_unit: Yup.string().required('Primary unit is required'),
               secondary_unit: Yup.string().required(
                 'Secondary unit is required'
