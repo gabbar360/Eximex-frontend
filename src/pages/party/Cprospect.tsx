@@ -225,7 +225,6 @@ const Cprospect = () => {
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Company</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Contact Person</th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email</th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Phone</th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Role</th>
@@ -244,7 +243,6 @@ const Cprospect = () => {
                           <div className="text-sm font-semibold text-slate-800">{party.companyName}</div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700">{party.contactPerson}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700">{party.email}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700">{party.phone}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-800">{party.role}</td>
@@ -311,7 +309,7 @@ const Cprospect = () => {
 
       {/* Delete Confirmation Modal */}
       {confirmDelete && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-60 p-4">
           <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-8 border border-gray-200">
             <div className="text-center mb-6">
               <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-red-600 flex items-center justify-center shadow-lg">

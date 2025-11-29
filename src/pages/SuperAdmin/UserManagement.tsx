@@ -29,6 +29,7 @@ const UserManagement: React.FC = () => {
   const [editingUser, setEditingUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredUsers, setFilteredUsers] = useState([]);
+  const [confirmDelete, setConfirmDelete] = useState(null);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -94,13 +95,16 @@ const UserManagement: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: number, userName: string) => {
-    if (
-      window.confirm(`Are you sure you want to delete the user "${userName}"?`)
-    ) {
+  const handleDeleteClick = (user: any) => {
+    setConfirmDelete(user);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (confirmDelete) {
       try {
-        const result = await dispatch(deleteUser(id)).unwrap();
+        const result = await dispatch(deleteUser(confirmDelete.id)).unwrap();
         toast.success(result.message || 'User deleted successfully');
+        setConfirmDelete(null);
       } catch (error) {
         toast.error(error || 'Delete failed');
       }
@@ -474,7 +478,7 @@ const UserManagement: React.FC = () => {
                           </button>
 
                           <button
-                            onClick={() => handleDelete(user.id, user.name)}
+                            onClick={() => handleDeleteClick(user)}
                             className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200"
                             title="Delete User"
                           >
@@ -505,9 +509,41 @@ const UserManagement: React.FC = () => {
             </div>
           </div>
         )}
-
-
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {confirmDelete && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-60 p-4">
+          <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-8 border border-gray-200">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-red-600 flex items-center justify-center shadow-lg">
+                <HiTrash className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 mb-2">
+                Delete User
+              </h3>
+              <p className="text-slate-600">
+                Are you sure you want to delete "{confirmDelete.name}"? This action
+                cannot be undone.
+              </p>
+            </div>
+            <div className="flex items-center justify-center space-x-3">
+              <button
+                onClick={() => setConfirmDelete(null)}
+                className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                className="px-6 py-3 rounded-lg bg-red-600 text-white hover:bg-red-700 shadow-lg"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
