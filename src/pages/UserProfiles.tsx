@@ -7,7 +7,6 @@ import UserAddressCard from '../components/UserProfile/UserAddressCard';
 import CompanyDetailsCard from '../components/UserProfile/CompanyDetailsCard';
 import PageMeta from '../components/common/PageMeta';
 import { fetchCurrentUser, updateUser } from '../features/userSlice';
-import { updateCompany } from '../features/companySlice';
 import {
   HiUser,
   HiShieldCheck,
@@ -45,7 +44,7 @@ export default function UserProfiles() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editingProfile, setEditingProfile] = useState(false);
-  const [editingCompany, setEditingCompany] = useState(false);
+
 
   const fetchUserData = async () => {
     try {
@@ -82,37 +81,7 @@ export default function UserProfiles() {
     }
   };
 
-  const handleUpdateCompany = async (updatedData: any) => {
-    if (!userData?.company) return;
-    try {
-      console.log('Updating company with data:', updatedData);
-      console.log('Company ID:', userData.company.id);
 
-      // Create FormData for the API call
-      const formData = new FormData();
-      Object.keys(updatedData).forEach((key) => {
-        if (updatedData[key] !== undefined && updatedData[key] !== null) {
-          if (key === 'logo' && updatedData[key] instanceof File) {
-            formData.append('logo', updatedData[key]);
-          } else if (key !== 'logo') {
-            formData.append(key, updatedData[key]);
-          }
-        }
-      });
-
-      const result = await dispatch(
-        updateCompany({ id: userData.company.id, companyData: formData })
-      ).unwrap();
-      console.log('Update result:', result);
-
-      // Refresh user data to get updated company info
-      await fetchUserData();
-      return result;
-    } catch (error) {
-      console.error('Error updating company:', error);
-      throw error;
-    }
-  };
 
   useEffect(() => {
     fetchUserData();
@@ -268,28 +237,10 @@ export default function UserProfiles() {
                       </div>
                     </div>
 
-                    <button
-                      onClick={() => setEditingCompany(!editingCompany)}
-                      className="px-6 py-3 bg-slate-700 hover:bg-slate-800 text-white rounded-xl font-semibold shadow-lg transition-all duration-300 transform hover:scale-105"
-                    >
-                      {editingCompany ? 'Cancel Edit' : 'Edit Company'}
-                    </button>
+
                   </div>
 
-                  {editingCompany ? (
-                    <CompanyDetailsCard
-                      companyData={userData.company}
-                      onUpdate={handleUpdateCompany}
-                      isEditing={true}
-                      onCancel={() => setEditingCompany(false)}
-                    />
-                  ) : (
-                    <CompanyDetailsCard
-                      companyData={userData.company}
-                      onUpdate={handleUpdateCompany}
-                      isEditing={false}
-                    />
-                  )}
+                  <CompanyDetailsCard companyData={userData.company} />
                 </div>
               )}
             </div>

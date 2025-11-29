@@ -41,6 +41,8 @@ const MenuManagement = () => {
   const [isSubmenuModal, setIsSubmenuModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [selectedMenuId, setSelectedMenuId] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null);
+  const [deleteType, setDeleteType] = useState('menu');
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -84,21 +86,30 @@ const MenuManagement = () => {
     form.setFieldsValue(submenu);
   };
 
-  const handleDeleteMenu = async (id) => {
-    try {
-      const response = await dispatch(deleteMenu(id)).unwrap();
-      toast.success(response?.message || 'Menu deleted successfully');
-    } catch (error) {
-      toast.error(error);
-    }
+  const handleDeleteMenuClick = (menu) => {
+    setConfirmDelete(menu);
+    setDeleteType('menu');
   };
 
-  const handleDeleteSubmenu = async (id) => {
-    try {
-      const response = await dispatch(deleteSubmenu(id)).unwrap();
-      toast.success(response?.message || 'Submenu deleted successfully');
-    } catch (error) {
-      toast.error(error);
+  const handleDeleteSubmenuClick = (submenu) => {
+    setConfirmDelete(submenu);
+    setDeleteType('submenu');
+  };
+
+  const handleConfirmDelete = async () => {
+    if (confirmDelete) {
+      try {
+        if (deleteType === 'menu') {
+          const response = await dispatch(deleteMenu(confirmDelete.id)).unwrap();
+          toast.success(response?.message || 'Menu deleted successfully');
+        } else {
+          const response = await dispatch(deleteSubmenu(confirmDelete.id)).unwrap();
+          toast.success(response?.message || 'Submenu deleted successfully');
+        }
+        setConfirmDelete(null);
+      } catch (error) {
+        toast.error(error);
+      }
     }
   };
 
@@ -238,20 +249,13 @@ const MenuManagement = () => {
           >
             <HiPencil className="w-4 h-4" />
           </button>
-          <Popconfirm
-            title="Are you sure you want to delete this menu?"
-            onConfirm={() => handleDeleteMenu(record.id)}
-            okText="Yes"
-            cancelText="No"
-            placement="topRight"
+          <button
+            onClick={() => handleDeleteMenuClick(record)}
+            className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
+            title="Delete Menu"
           >
-            <button
-              className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
-              title="Delete Menu"
-            >
-              <HiTrash className="w-4 h-4" />
-            </button>
-          </Popconfirm>
+            <HiTrash className="w-4 h-4" />
+          </button>
         </div>
       ),
     },
@@ -341,20 +345,13 @@ const MenuManagement = () => {
           >
             <HiPencil className="w-3 h-3" />
           </button>
-          <Popconfirm
-            title="Are you sure you want to delete this submenu?"
-            onConfirm={() => handleDeleteSubmenu(record.id)}
-            okText="Yes"
-            cancelText="No"
-            placement="topRight"
+          <button
+            onClick={() => handleDeleteSubmenuClick(record)}
+            className="p-1.5 rounded text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
+            title="Delete Submenu"
           >
-            <button
-              className="p-1.5 rounded text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
-              title="Delete Submenu"
-            >
-              <HiTrash className="w-3 h-3" />
-            </button>
-          </Popconfirm>
+            <HiTrash className="w-3 h-3" />
+          </button>
         </div>
       ),
     },
@@ -653,6 +650,40 @@ const MenuManagement = () => {
           </Form>
         </div>
       </Modal>
+
+      {/* Delete Confirmation Modal */}
+      {confirmDelete && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-60 p-4">
+          <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-8 border border-gray-200">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-red-600 flex items-center justify-center shadow-lg">
+                <HiTrash className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 mb-2">
+                Delete {deleteType === 'menu' ? 'Menu' : 'Submenu'}
+              </h3>
+              <p className="text-slate-600">
+                Are you sure you want to delete "{confirmDelete.name}"? This action
+                cannot be undone.
+              </p>
+            </div>
+            <div className="flex items-center justify-center space-x-3">
+              <button
+                onClick={() => setConfirmDelete(null)}
+                className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                className="px-6 py-3 rounded-lg bg-red-600 text-white hover:bg-red-700 shadow-lg"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
