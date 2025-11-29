@@ -7,6 +7,7 @@ import {
   faSignOutAlt,
   faCogs,
   faKey,
+  faBuilding,
 } from '@fortawesome/free-solid-svg-icons';
 import {
   MdDashboard,
@@ -103,14 +104,19 @@ const getNavItems = (userRole: string): NavItem[] => {
         path: '/dashboard',
       },
       {
-        icon: <FontAwesomeIcon icon={faUserShield} />,
-        name: 'Role Management',
-        path: '/super-admin/roles',
+        icon: <FontAwesomeIcon icon={faBuilding} />,
+        name: 'Company Management',
+        path: '/super-admin/companies',
       },
       {
         icon: <FontAwesomeIcon icon={faUsers} />,
         name: 'User Management',
         path: '/super-admin/users',
+      },
+      {
+        icon: <FontAwesomeIcon icon={faUserShield} />,
+        name: 'Role Management',
+        path: '/super-admin/roles',
       },
       {
         icon: <FontAwesomeIcon icon={faCogs} />,

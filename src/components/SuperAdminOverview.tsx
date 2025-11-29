@@ -46,55 +46,42 @@ const SuperAdminOverview: React.FC = () => {
 
   const quickActions = [
     {
-      title: 'Enhanced Dashboard',
-      description: 'Comprehensive system overview with real-time analytics',
-      icon: faChartLine,
-      path: '/super-admin/dashboard',
+      title: 'User Management',
+      description: 'Manage users and assign companies',
+      icon: faUsers,
+      path: '/super-admin/users',
       color: 'blue',
       features: [
-        'Real-time stats',
-        'Database overview',
-        'System analytics',
-        'Quick actions',
+        'Create users',
+        'Assign companies',
+        'Manage roles',
+        'User permissions',
       ],
     },
     {
-      title: 'Management Center',
-      description: 'Complete user and company management hub',
-      icon: faUserShield,
-      path: '/super-admin/management',
-      color: 'purple',
-      features: [
-        'User management',
-        'Company oversight',
-        'Role management',
-        'Access control',
-      ],
-    },
-    {
-      title: 'Database Management',
-      description: 'Direct database access and management tools',
-      icon: faDatabase,
-      path: '/super-admin/database/tables',
+      title: 'Company Management',
+      description: 'Create and manage companies',
+      icon: faBuilding,
+      path: '/super-admin/companies',
       color: 'green',
       features: [
-        'Table viewer',
-        'Data export',
-        'Query tools',
-        'Backup management',
+        'Create companies',
+        'View company stats',
+        'Manage settings',
+        'Monitor activity',
       ],
     },
     {
-      title: 'Security Center',
-      description: 'Security monitoring and access control',
-      icon: faShield,
-      path: '/super-admin/security/logs',
-      color: 'red',
+      title: 'Role Management',
+      description: 'Manage system roles and permissions',
+      icon: faUserShield,
+      path: '/super-admin/roles',
+      color: 'purple',
       features: [
-        'Security logs',
-        'Threat detection',
-        'Access monitoring',
-        'API management',
+        'Create roles',
+        'Set permissions',
+        'Role assignment',
+        'Access control',
       ],
     },
   ];
@@ -258,6 +245,18 @@ const SuperAdminOverview: React.FC = () => {
             </div>
           </div>
         </div> */}
+      </div>
+
+      {/* Quick Actions */}
+      <div className="mb-12">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+          Quick Actions
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+          {quickActions.map((action, index) => (
+            <ActionCard key={index} action={action} />
+          ))}
+        </div>
       </div>
 
       {/* Real Stats Overview */}
