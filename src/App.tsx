@@ -73,10 +73,11 @@ import RoleManagement from './pages/SuperAdmin/RoleManagement';
 import UserManagement from './pages/SuperAdmin/UserManagement';
 import MenuManagement from './pages/SuperAdmin/MenuManagement';
 import UserPermissionManagement from './pages/SuperAdmin/UserPermissionManagement';
+import CompanyManagement from './pages/SuperAdmin/CompanyManagement';
 import PurchaseOrders from './pages/PO/PurchaseOrders';
 import AddEditPurchaseOrderForm from './pages/PO/AddEditPurchaseOrderForm';
 
-import CompanySetup from './pages/Comanyform';
+
 
 function AppContent() {
   const location = useLocation();
@@ -115,7 +116,7 @@ function AppContent() {
       <Route element={<ProtectedRoute />}>
         {/* <Route path="/" element={<Navigate to="/admin/dashboard" replace />} /> */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/company-setup" element={<CompanySetup />} />
+
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<RoleBasedDashboard />} />
           {/* <Route path="/admin/dashboard" element={<Home />} /> */}
@@ -186,6 +187,7 @@ function AppContent() {
 
           <Route path="/super-admin/roles" element={<RoleManagement />} />
           <Route path="/super-admin/users" element={<UserManagement />} />
+          <Route path="/super-admin/companies" element={<CompanyManagement />} />
           <Route path="/super-admin/menus" element={<MenuManagement />} />
           <Route
             path="/super-admin/permissions"

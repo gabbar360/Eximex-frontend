@@ -16,6 +16,7 @@ import {
   HiArrowLeft,
   HiCheckCircle,
 } from 'react-icons/hi';
+import axiosInstance from '../../utils/axiosInstance';
 
 const UserManagement: React.FC = () => {
   const dispatch = useDispatch();
@@ -33,13 +34,25 @@ const UserManagement: React.FC = () => {
     lastName: '',
     email: '',
     roleId: '',
+    companyId: '',
     isActive: true,
   });
+  const [companies, setCompanies] = useState([]);
 
   useEffect(() => {
     dispatch(fetchUsers());
     dispatch(getAllRoles());
+    fetchCompanies();
   }, [dispatch]);
+
+  const fetchCompanies = async () => {
+    try {
+      const response = await axiosInstance.get('/super-admin/companies');
+      setCompanies(response.data.data);
+    } catch (error) {
+      console.error('Failed to fetch companies:', error);
+    }
+  };
 
   useEffect(() => {
     if (users) {
@@ -62,6 +75,7 @@ const UserManagement: React.FC = () => {
         name: `${formData.firstName} ${formData.lastName}`.trim(),
         email: formData.email,
         roleId: parseInt(formData.roleId),
+        companyId: formData.companyId ? parseInt(formData.companyId) : null,
         status: formData.isActive ? 'ACTIVE' : 'INACTIVE',
       };
 
@@ -99,6 +113,7 @@ const UserManagement: React.FC = () => {
       lastName: '',
       email: '',
       roleId: '',
+      companyId: '',
       isActive: true,
     });
     setEditingUser(null);
@@ -112,6 +127,7 @@ const UserManagement: React.FC = () => {
       lastName: user.name?.split(' ').slice(1).join(' ') || '',
       email: user.email,
       roleId: user.roleId?.toString() || '',
+      companyId: user.companyId?.toString() || '',
       isActive: user.status === 'ACTIVE',
     });
     setShowForm(true);
@@ -121,6 +137,8 @@ const UserManagement: React.FC = () => {
     resetForm();
     setShowForm(true);
   };
+
+
 
   if (loading && !users.length) {
     return (
@@ -231,6 +249,29 @@ const UserManagement: React.FC = () => {
                       </option>
                     ))}
                   </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Company
+                  </label>
+                  <select
+                    value={formData.companyId}
+                    onChange={(e) =>
+                      setFormData({ ...formData, companyId: e.target.value })
+                    }
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                  >
+                    <option value="">Select a company (optional)</option>
+                    {companies?.map((company: any) => (
+                      <option key={company.id} value={company.id}>
+                        {company.name}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Assign user to a company or leave blank for manual assignment later
+                  </p>
                 </div>
 
                 <div>
@@ -363,6 +404,9 @@ const UserManagement: React.FC = () => {
                       Role
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+                      Company
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
                       Status
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
@@ -395,6 +439,15 @@ const UserManagement: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-slate-600">
+                          {user.company?.name || (
+                            <span className="text-orange-600 font-medium">
+                              Not Assigned
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <span
                           className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                             user.status === 'ACTIVE'
@@ -419,6 +472,7 @@ const UserManagement: React.FC = () => {
                           >
                             <HiPencil className="w-4 h-4" />
                           </button>
+
                           <button
                             onClick={() => handleDelete(user.id, user.name)}
                             className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200"
@@ -451,6 +505,8 @@ const UserManagement: React.FC = () => {
             </div>
           </div>
         )}
+
+
       </div>
     </div>
   );

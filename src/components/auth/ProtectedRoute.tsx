@@ -19,16 +19,7 @@ const ProtectedRoute = () => {
     return <Navigate to="/signin" replace />;
   }
 
-  // Check if user needs company setup (skip for SUPER_ADMIN and company-setup route)
-  if (
-    user &&
-    user.role?.name !== 'SUPER_ADMIN' &&
-    !user.company &&
-    !user.companyId &&
-    location.pathname !== '/company-setup'
-  ) {
-    return <Navigate to="/company-setup" replace />;
-  }
+
 
   return <Outlet />;
 };
