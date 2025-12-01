@@ -208,65 +208,6 @@ export default function MobileOptimizedDashboard() {
               ))}
             </div>
           </MobileChartCard>
-
-          {/* Recent Activity - Mobile */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-            <h3 className="text-base font-bold text-gray-900 dark:text-white mb-3">
-              Recent Orders
-            </h3>
-            <div className="space-y-3">
-              {[
-                {
-                  id: '#12345',
-                  customer: 'John Doe',
-                  amount: '$299.00',
-                  status: 'Completed',
-                },
-                {
-                  id: '#12346',
-                  customer: 'Jane Smith',
-                  amount: '$199.50',
-                  status: 'Processing',
-                },
-                {
-                  id: '#12347',
-                  customer: 'Bob Johnson',
-                  amount: '$449.99',
-                  status: 'Shipped',
-                },
-              ].map((order, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded"
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                      {order.id}
-                    </p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
-                      {order.customer}
-                    </p>
-                  </div>
-                  <div className="text-right ml-2">
-                    <p className="text-sm font-bold text-gray-900 dark:text-white">
-                      {order.amount}
-                    </p>
-                    <span
-                      className={`text-xs px-2 py-1 rounded-full font-medium ${
-                        order.status === 'Completed'
-                          ? 'bg-green-100 text-green-800'
-                          : order.status === 'Processing'
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-purple-100 text-purple-800'
-                      }`}
-                    >
-                      {order.status}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     </div>

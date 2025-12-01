@@ -49,44 +49,8 @@ export default function SignUpForm() {
   };
 
   return (
-    <div className="h-screen w-screen flex overflow-hidden">
-      {/* Left Side - Image */}
-      <div className="hidden lg:flex lg:w-[60%] relative overflow-hidden">
-        <div
-          className="absolute inset-0 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-800"
-          style={{
-            backgroundImage:
-              'url("https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80")',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/80 to-teal-900/80"></div>
-        </div>
-        <div className="relative z-10 flex flex-col justify-center p-12 text-white">
-          <h1 className="text-4xl font-bold mb-6">Join Eximex Today</h1>
-          <p className="text-xl mb-8 opacity-90">
-            Start your journey in global trade with our comprehensive platform
-          </p>
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-2 h-2 bg-white rounded-full"></div>
-              <span>Free account setup</span>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="w-2 h-2 bg-white rounded-full"></div>
-              <span>Instant market access</span>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="w-2 h-2 bg-white rounded-full"></div>
-              <span>24/7 support</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Right Side - Form */}
-      <div className="w-full lg:w-[40%] flex items-center justify-center p-2 sm:p-4 overflow-hidden">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
         <div className="w-full max-w-sm">
           {/* Form Card */}
           <div className="auth-form-card bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl border border-white/20 overflow-hidden w-full">
@@ -96,11 +60,11 @@ export default function SignUpForm() {
               style={{ borderColor: '#86a0b2' }}
             >
               <div className="text-center">
-                <img
+                {/* <img
                   src="/logo1.png"
                   alt="Eximex"
                   className="h-10 sm:h-14 lg:h-16 mx-auto mb-1 sm:mb-2"
-                />
+                /> */}
                 <h2
                   className="text-xs sm:text-base lg:text-lg font-bold mb-1"
                   style={{ color: '#86a0b2' }}
@@ -118,7 +82,7 @@ export default function SignUpForm() {
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
               >
-                {({ isSubmitting, status }) => (
+                {({ isSubmitting, status, values }) => (
                   <Form className="auth-form-fields space-y-3">
                     <div className="auth-form-field">
                       <label className="block text-xs font-semibold text-gray-700 mb-1">
@@ -203,8 +167,8 @@ export default function SignUpForm() {
 
                     <button
                       type="submit"
-                      disabled={isSubmitting}
-                      className="auth-form-button w-full bg-gray-300 text-gray-900 font-bold py-2 rounded-lg hover:bg-gray-500 disabled:opacity-50 transition-all duration-200 disabled:cursor-not-allowed mb-3 text-sm mt-1"
+                      disabled={isSubmitting || !values.name || !values.email || !values.mobileNum || !values.password}
+                      className="auth-form-button w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold py-2 rounded-lg hover:shadow-lg disabled:opacity-50 transition-all duration-200 disabled:cursor-not-allowed mb-3 text-sm mt-1"
                     >
                       {isSubmitting ? (
                         <div className="flex items-center justify-center gap-2">
