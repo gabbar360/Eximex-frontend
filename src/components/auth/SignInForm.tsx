@@ -44,44 +44,8 @@ export default function SignInForm() {
   };
 
   return (
-    <div className="h-screen w-screen flex overflow-hidden">
-      {/* Left Side - Image */}
-      <div className="hidden lg:flex lg:w-[60%] relative overflow-hidden">
-        <div
-          className="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-800"
-          style={{
-            backgroundImage:
-              'url("https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80")',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/80 to-purple-900/80"></div>
-        </div>
-        <div className="relative z-10 flex flex-col justify-center p-12 text-white">
-          <h1 className="text-4xl font-bold mb-6">Welcome to Eximex</h1>
-          <p className="text-xl mb-8 opacity-90">
-            Your global trading platform for seamless import-export operations
-          </p>
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-2 h-2 bg-white rounded-full"></div>
-              <span>Real-time market insights</span>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="w-2 h-2 bg-white rounded-full"></div>
-              <span>Secure transactions</span>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="w-2 h-2 bg-white rounded-full"></div>
-              <span>Global network access</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Right Side - Form */}
-      <div className="w-full lg:w-[40%] flex items-center justify-center p-2 sm:p-4 overflow-hidden">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
         <div className="w-full max-w-sm">
           {/* Form Card */}
           <div className="auth-form-card bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl border border-white/20 overflow-hidden w-full">
@@ -91,34 +55,28 @@ export default function SignInForm() {
               style={{ borderColor: '#86a0b2' }}
             >
               <div className="text-center">
-                <img
-                  src="/logo1.png"
-                  alt="Eximex"
-                  className="h-12 sm:h-16 lg:h-20 mx-auto mb-2 sm:mb-3"
-                />
                 <h2
                   className="text-sm sm:text-lg lg:text-xl font-bold mb-1"
                   style={{ color: '#86a0b2' }}
                 >
-                  Welcome Back
+                  Sign In
                 </h2>
-                {/* <p className="text-gray-600 text-xs sm:text-sm">Sign in to your trading account</p> */}
               </div>
             </div>
 
             {/* Form Content */}
             <div className="p-2 sm:p-3 lg:p-4">
               {/* Google Sign-In */}
-              <button
+              {/* <button
                 onClick={() => dispatch(googleLogin())}
                 className="w-full flex items-center justify-center gap-2 px-3 py-2 sm:py-3 border-2 border-gray-200 rounded-lg text-xs sm:text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all duration-200 mb-3 group"
               >
                 <FcGoogle className="w-5 h-5 group-hover:scale-110 transition-transform" />
                 Continue with Google
-              </button>
+              </button> */}
 
               {/* Divider */}
-              <div className="relative mb-4">
+              {/* <div className="relative mb-4">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-200"></div>
                 </div>
@@ -127,7 +85,7 @@ export default function SignInForm() {
                     Or sign in with email
                   </span>
                 </div>
-              </div>
+              </div> */}
 
               {/* Form Fields */}
               <div className="auth-form-fields space-y-2 sm:space-y-3">
@@ -201,7 +159,7 @@ export default function SignInForm() {
               </button>
 
               {/* Sign Up Link */}
-              <div className="text-center">
+              {/* <div className="text-center">
                 <p className="text-gray-600 text-xs sm:text-sm">
                   New to Eximex?{' '}
                   <Link
@@ -212,7 +170,7 @@ export default function SignInForm() {
                     Create Business Account
                   </Link>
                 </p>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
