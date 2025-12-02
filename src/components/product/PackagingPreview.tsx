@@ -18,21 +18,34 @@ const PackagingPreview: React.FC<PackagingPreviewProps> = ({
 }) => {
   // Calculate and save weight values whenever relevant fields change
   useEffect(() => {
-    if (
-      packagingHierarchy.length === 0 ||
-      !values.unitWeight ||
-      !values.weightUnitType
-    )
-      return;
+    if (packagingHierarchy.length === 0) return;
+    
+    // Special handling for Square Meter - always calculate if data is available
+    const squareMeterLevel = packagingHierarchy.find(level => level.from === 'Square Meter');
+    
+    if (squareMeterLevel) {
+      const squareMeterPerBox = parseFloat(values['Square MeterPerBox']) || 0;
+      const unitWeight = parseFloat(values.unitWeight) || 0;
+      
+      if (squareMeterPerBox > 0 && unitWeight > 0) {
+        const weightPerSquareMeter = unitWeight / squareMeterPerBox;
+        const fieldName = `weightPer${squareMeterLevel.from.replace(' ', '')}`;
+        setFieldValue(fieldName, parseFloat(weightPerSquareMeter.toFixed(2)));
+      }
+    }
+    
+    if (!values.unitWeight || !values.weightUnitType) return;
 
     // Calculate weights for all packaging levels
     let currentWeight = parseFloat(values.unitWeight) || 0;
 
-    // Set base unit weight
-    if (packagingHierarchy[0]) {
+    // Set base unit weight (skip for Square Meter as it's calculated separately)
+    if (packagingHierarchy[0] && packagingHierarchy[0].from !== 'Square Meter') {
       const baseWeightField = `weightPer${packagingHierarchy[0].from}`;
       setFieldValue(baseWeightField, currentWeight);
     }
+
+
 
     // Calculate weights for each packaging level
     packagingHierarchy.forEach((level, index) => {
@@ -41,8 +54,20 @@ const PackagingPreview: React.FC<PackagingPreviewProps> = ({
       const weightField = `weightPer${level.to}`;
 
       if (quantity > 0) {
-        currentWeight = currentWeight * quantity;
-        setFieldValue(weightField, parseFloat(currentWeight.toFixed(2)));
+        // Special handling for Square Meter
+        if (level.from === 'Square Meter') {
+          const squareMeterPerBox = parseFloat(values['Square MeterPerBox']) || 0;
+          if (squareMeterPerBox > 0) {
+            const unitWeight = parseFloat(values.unitWeight) || 0;
+            const weightPerSquareMeter = unitWeight / squareMeterPerBox;
+            const fieldName = `weightPer${level.from.replace(' ', '')}`;
+            setFieldValue(fieldName, parseFloat(weightPerSquareMeter.toFixed(2)));
+            currentWeight = weightPerSquareMeter; // Update currentWeight for next level
+          }
+        } else {
+          currentWeight = currentWeight * quantity;
+          setFieldValue(weightField, parseFloat(currentWeight.toFixed(2)));
+        }
       }
     });
 
@@ -71,8 +96,10 @@ const PackagingPreview: React.FC<PackagingPreviewProps> = ({
     values.weightUnitType,
     values.packagingMaterialWeight,
     values.packagingMaterialWeightUnit,
+    values.unitWeightUnit,
+    values['Square MeterPerBox'],
     ...packagingHierarchy.map((level) => values[`${level.from}Per${level.to}`]),
-    packagingHierarchy,
+    packagingHierarchy.length,
     setFieldValue,
     convertToKg,
     convertFromKg,
@@ -161,17 +188,20 @@ const PackagingPreview: React.FC<PackagingPreviewProps> = ({
               {packagingHierarchy.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {/* Base unit weight */}
-                  {values[`weightPer${packagingHierarchy[0].from}`] && (
-                    <div className="flex items-center justify-between p-3 bg-white/70 backdrop-blur-sm rounded-xl border border-white/50 shadow-sm">
-                      <span className="text-sm text-slate-600">
-                        Weight per {packagingHierarchy[0].from}
-                      </span>
-                      <span className="text-sm font-medium text-slate-700">
-                        {values[`weightPer${packagingHierarchy[0].from}`]}{' '}
-                        {values.unitWeightUnit}
-                      </span>
-                    </div>
-                  )}
+                  {(() => {
+                    const baseFieldName = `weightPer${packagingHierarchy[0].from.replace(' ', '')}`;
+                    const baseValue = values[baseFieldName];
+                    return baseValue ? (
+                      <div className="flex items-center justify-between p-3 bg-white/70 backdrop-blur-sm rounded-xl border border-white/50 shadow-sm">
+                        <span className="text-sm text-slate-600">
+                          Weight per {packagingHierarchy[0].from}
+                        </span>
+                        <span className="text-sm font-medium text-slate-700">
+                          {baseValue} {values.unitWeightUnit}
+                        </span>
+                      </div>
+                    ) : null;
+                  })()}
 
                   {/* All packaging level weights */}
                   {packagingHierarchy.map((level, index) => {

@@ -15,7 +15,7 @@ const PackagingCalculations: React.FC<PackagingCalculationsProps> = React.memo(
     useEffect(() => {
       if (!packagingHierarchy.length) return;
 
-      const timeoutId = setTimeout(() => {
+      const performCalculations = () => {
         // Calculate total units based on packaging hierarchy
         let totalUnits = 1;
         const totalBoxes = parseInt(values.totalBoxes) || 1;
@@ -147,12 +147,13 @@ const PackagingCalculations: React.FC<PackagingCalculationsProps> = React.memo(
           // Calculate and store weight for each level
           let cumulativeMultiplier = 1;
 
-          // Store base unit weight
+          // Store base unit weight (handle Square Meter specially)
           const weightPerBaseUnit = convertFromKg(
             weightPerBaseUnitInKg,
             outputUnit
           );
-          setFieldValue(`weightPer${baseUnit}`, weightPerBaseUnit.toFixed(2));
+          const baseFieldName = baseUnit === 'Square Meter' ? 'weightPerSquareMeter' : `weightPer${baseUnit}`;
+          setFieldValue(baseFieldName, weightPerBaseUnit.toFixed(2));
 
           // Calculate weights for each packaging level
           packagingHierarchy.forEach((level, index) => {
@@ -166,10 +167,24 @@ const PackagingCalculations: React.FC<PackagingCalculationsProps> = React.memo(
               weightForThisLevelInKg,
               outputUnit
             );
-            setFieldValue(
-              `weightPer${level.to}`,
-              weightForThisLevel.toFixed(2)
-            );
+            
+            // Special handling for Square Meter weight calculation
+            if (level.from === 'Square Meter') {
+              const squareMeterPerBox = parseFloat(values['Square MeterPerBox']) || 0;
+              if (squareMeterPerBox > 0) {
+                // Use unit weight (which is box weight) for calculation
+                const boxWeightInKg = convertToKg(unitWeight, unitWeightUnit);
+                const weightPerSquareMeterInKg = boxWeightInKg / squareMeterPerBox;
+                const weightPerSquareMeter = convertFromKg(weightPerSquareMeterInKg, outputUnit);
+                const fieldName = `weightPer${level.from.replace(' ', '')}`;
+                setFieldValue(fieldName, weightPerSquareMeter.toFixed(2));
+              }
+            } else {
+              setFieldValue(
+                `weightPer${level.to}`,
+                weightForThisLevel.toFixed(2)
+              );
+            }
           });
         }
 
@@ -185,17 +200,34 @@ const PackagingCalculations: React.FC<PackagingCalculationsProps> = React.memo(
           const totalVolume = volumePerBox * totalBoxes;
           setFieldValue('totalVolume', totalVolume.toFixed(6));
         }
-      }, 0);
 
-      return () => clearTimeout(timeoutId);
+
+
+
+      };
+
+      performCalculations();
     }, [
-      values,
-      packagingHierarchy,
+      values.totalBoxes,
+      values.unitWeight,
+      values.unitWeightUnit,
+      values.weightUnitType,
+      values.packagingMaterialWeight,
+      values.packagingMaterialWeightUnit,
+      values.grossWeightPerBox,
+      values.grossWeightUnit,
+      values.volumeLength,
+      values.volumeWidth,
+      values.volumeHeight,
+      ...packagingHierarchy.map(level => values[`${level.from}Per${level.to}`]),
+      packagingHierarchy.length,
       trackVolume,
       setFieldValue,
       convertToKg,
       convertFromKg,
     ]);
+
+
 
     return null;
   }
