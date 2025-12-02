@@ -1,25 +1,47 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { HiPlus, HiOfficeBuilding, HiUsers, HiPencil, HiTrash } from 'react-icons/hi';
+import { HiMagnifyingGlass } from 'react-icons/hi2';
+import { Pagination } from 'antd';
 import axiosInstance from '../../utils/axiosInstance';
 import CompanySetupForm from '../../components/CompanySetupForm';
+import { useDebounce } from '../../utils/useDebounce';
 
 const CompanyManagement: React.FC = () => {
   const [companies, setCompanies] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingCompany, setEditingCompany] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [pagination, setPagination] = useState({ total: 0, page: 1, limit: 10, totalPages: 0 });
 
   useEffect(() => {
     fetchCompanies();
-  }, []);
+  }, [currentPage, pageSize]);
 
-  const fetchCompanies = async () => {
+  const { debouncedCallback: debouncedSearch } = useDebounce((value: string) => {
+    setCurrentPage(1);
+    fetchCompanies(1, pageSize, value);
+  }, 500);
+
+  const fetchCompanies = async (page = currentPage, limit = pageSize, search = searchTerm) => {
     try {
-      const response = await axiosInstance.get('/super-admin/companies');
-      setCompanies(response.data.data);
+      setLoading(true);
+      const response = await axiosInstance.get('/super-admin/companies', {
+        params: { page, limit, search }
+      });
+      setCompanies(response.data.data.data || response.data.data);
+      if (response.data.data.pagination) {
+        setPagination(response.data.data.pagination);
+      }
     } catch (error) {
       console.error('Failed to fetch companies:', error);
+      toast.error('Failed to fetch companies');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -28,6 +50,11 @@ const CompanyManagement: React.FC = () => {
     setShowForm(false);
     fetchCompanies();
   };
+
+  const handleSearch = useCallback((value: string) => {
+    setSearchTerm(value);
+    debouncedSearch(value);
+  }, [debouncedSearch]);
 
   const handleEdit = (company: any) => {
     setEditingCompany(company);
@@ -64,39 +91,66 @@ const CompanyManagement: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="p-4">
-        <div className="mb-4">
-          <div className="bg-white rounded-lg border shadow-sm p-4">
-            <div className="flex justify-between items-center">
-              <h1 className="text-2xl font-bold text-slate-800">Company Management</h1>
-              <button
-                onClick={() => setShowForm(true)}
-                className="flex items-center gap-2 px-4 py-3 bg-slate-700 text-white rounded-lg hover:bg-slate-800"
-              >
-                <HiPlus className="w-5 h-5" />
-                Create Company
-              </button>
+        <div className="mb-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 lg:p-4">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-lg bg-slate-700 shadow-lg">
+                  <HiOfficeBuilding className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
+                    Company Management
+                  </h1>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative">
+                  <HiMagnifyingGlass className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <input
+                    type="text"
+                    placeholder="Search companies..."
+                    className="pl-12 pr-4 py-3 w-full sm:w-72 rounded-lg border border-gray-300 bg-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-all duration-300 text-sm placeholder-gray-500 shadow-sm"
+                    value={searchTerm}
+                    onChange={(e) => handleSearch(e.target.value)}
+                  />
+                </div>
+
+                <button
+                  onClick={() => setShowForm(true)}
+                  className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg"
+                >
+                  <HiPlus className="w-5 h-5 mr-2" />
+                  Create Company
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
-          {companies.length === 0 ? (
-            <div className="p-8 text-center">
-              <HiOfficeBuilding className="w-16 h-16 mx-auto text-slate-400 mb-4" />
-              <h3 className="text-lg font-medium text-slate-600 mb-2">No companies found</h3>
-              <p className="text-slate-500 mb-4">Create your first company to get started.</p>
-              <button
-                onClick={() => setShowForm(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800"
-              >
-                <HiPlus className="w-4 h-4" />
-                Create First Company
-              </button>
+        {loading ? (
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-12 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-slate-600 mx-auto mb-4"></div>
+            <p className="text-slate-600 font-medium">Loading companies...</p>
+          </div>
+        ) : companies.length === 0 ? (
+          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-12 text-center">
+            <div className="w-10 h-10 mx-auto mb-6 rounded-2xl bg-slate-600 flex items-center justify-center shadow-lg">
+              <HiMagnifyingGlass className="w-4 h-4 text-white" />
             </div>
-          ) : (
+            <h3 className="text-xl font-semibold text-slate-800 mb-2">
+              No companies found
+            </h3>
+            <p className="text-slate-600 mb-6">
+              {searchTerm ? 'Try adjusting your search.' : 'Create your first company to get started.'}
+            </p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50 border-b">
+                <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase">
                       Company Name
@@ -135,7 +189,7 @@ const CompanyManagement: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center text-sm text-slate-600">
                           <HiUsers className="w-4 h-4 mr-1" />
-                          {company._count.users}
+                          {company._count?.users || 0}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -173,8 +227,23 @@ const CompanyManagement: React.FC = () => {
                 </tbody>
               </table>
             </div>
-          )}
-        </div>
+          </div>
+        )}
+
+        {/* Pagination */}
+        {pagination.total > 0 && (
+          <div className="flex justify-center mt-6">
+            <Pagination
+              current={currentPage}
+              total={pagination.total}
+              pageSize={pageSize}
+              onChange={(page) => {
+                setCurrentPage(page);
+                fetchCompanies(page, pageSize, searchTerm);
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {/* Delete Confirmation Modal */}

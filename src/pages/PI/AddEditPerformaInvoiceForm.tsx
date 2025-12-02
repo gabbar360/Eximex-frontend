@@ -40,6 +40,18 @@ import {
   getPiInvoiceById,
 } from '../../features/piSlice';
 
+// Import PI components
+import ProductRow from '../../components/PI/ProductRow';
+import ProductTable from '../../components/PI/ProductTable';
+import OtherChargesList from '../../components/PI/OtherChargesList';
+
+// Import utility functions
+import {
+  calculateTotalWeight,
+  calculateQuantityFromWeight,
+  calculateGrossWeight,
+} from '../../utils/weightCalculations';
+
 // --- Types ---
 type Company = {
   id: string;
@@ -383,9 +395,6 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>('');
   const [quantityByWeight, setQuantityByWeight] = useState<string>('');
-  const [quantityInputMode, setQuantityInputMode] = useState<
-    'quantity' | 'weight'
-  >('quantity');
   const [addedProducts, setAddedProducts] = useState<ProductData[]>([]);
   const [editingProductIndex, setEditingProductIndex] = useState<number | null>(
     null
@@ -710,241 +719,22 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
     return containerTypes.find((c) => c.type === containerType);
   };
 
-  const calculateQuantityFromWeight = (productId: string, weightKg: string) => {
-    const product = products.find(
-      (p) => p.id.toString() === productId.toString()
-    );
-    if (!product?.packingConfig || !weightKg) return '';
-
-    const weight = parseFloat(weightKg);
-    const boxes = weight / product.packingConfig.weightPerBox;
-    const totalUnits = boxes * product.packingConfig.unitsPerBox;
-    return totalUnits.toFixed(2);
+  // Wrapper functions to pass products array to utility functions
+  const calculateTotalWeightWrapper = (productId: string, quantity: string, unit: string) => {
+    return calculateTotalWeight(productId, quantity, unit, products);
   };
 
-  // Gross weight calculation - net weight + packaging material weight
-  const calculateGrossWeight = (productList: ProductData[]) => {
-    return productList.reduce((sum, product) => {
-      if (!product.productId) return sum;
-
-      // Get net weight
-      const netWeight =
-        product.totalWeight ||
-        calculateTotalWeight(
-          product.productId,
-          product.quantity.toString(),
-          product.unit
-        );
-
-      // Get product data for packaging weight
-      const prod = products.find(
-        (p) => p.id.toString() === product.productId.toString()
-      );
-
-      if (!prod) return sum + netWeight;
-
-      // Calculate packaging weight based on quantity and unit
-      let packagingWeight = 0;
-      const packagingData = prod.packagingHierarchyData?.dynamicFields;
-
-      // Get packaging material weight from product data
-      const packagingMaterialWeight = prod.packagingMaterialWeight || 0;
-      const packagingUnit = prod.packagingMaterialWeightUnit || 'g';
-
-      if (packagingMaterialWeight > 0) {
-        // Convert packaging weight to KG if needed
-        const packagingWeightKg =
-          packagingUnit === 'kg'
-            ? packagingMaterialWeight
-            : packagingMaterialWeight / 1000;
-
-        // Calculate how many boxes based on unit and quantity
-        let boxes = 0;
-
-        if (product.unit.toLowerCase() === 'box') {
-          boxes = product.quantity;
-        } else if (
-          product.unit.toLowerCase() === 'pcs' ||
-          product.unit.toLowerCase() === 'pieces'
-        ) {
-          const piecesPerPack =
-            packagingData?.PiecesPerPack ||
-            packagingData?.PiecesPerPackage ||
-            1;
-          const packPerBox =
-            packagingData?.PackPerBox || packagingData?.PackagePerBox || 1;
-          boxes = Math.ceil(product.quantity / (piecesPerPack * packPerBox));
-        } else if (
-          product.unit.toLowerCase() === 'pack' ||
-          product.unit.toLowerCase() === 'package'
-        ) {
-          const packPerBox =
-            packagingData?.PackPerBox || packagingData?.PackagePerBox || 1;
-          boxes = Math.ceil(product.quantity / packPerBox);
-        } else if (product.unit.toLowerCase() === 'pallet') {
-          const boxPerPallet =
-            packagingData?.BoxPerPallet || packagingData?.boxesPerPallet || 32;
-          boxes = product.quantity * boxPerPallet;
-        } else {
-          boxes = product.quantity;
-        }
-
-        // For tiles, if unit is pallet and packagingMaterialWeight is in kg,
-        // it might be per pallet, not per box
-        if (product.unit.toLowerCase() === 'pallet' && packagingUnit === 'kg') {
-          // Use packaging weight per pallet directly
-          packagingWeight = product.quantity * packagingWeightKg;
-        } else {
-          // Use packaging weight per box
-          packagingWeight = boxes * packagingWeightKg;
-        }
-      }
-
-      return sum + netWeight + packagingWeight;
-    }, 0);
+  const calculateQuantityFromWeightWrapper = (productId: string, weightKg: string) => {
+    return calculateQuantityFromWeight(productId, weightKg, products);
   };
 
-  const calculateTotalWeight = (
-    productId: string,
-    quantity: string,
-    unit: string
-  ) => {
-    const product = products.find(
-      (p) => p.id.toString() === productId.toString()
-    );
-    if (!quantity || !product) return 0;
-
-    const qty = parseFloat(quantity);
-    if (isNaN(qty) || qty <= 0) return 0;
-
-    // If unit is already kg, return quantity directly
-    if (unit === 'kg') {
-      return qty;
-    }
-
-    // Get packaging hierarchy data from product
-    const packagingData = product.packagingHierarchyData?.dynamicFields;
-
-    // Use the stored weight values from packagingHierarchyData - check units before converting
-    const weightPerPiecesUnit = packagingData?.weightPerPiecesUnit || 'g';
-    const weightPerPackageUnit = packagingData?.weightPerPackageUnit || 'g';
-    const weightPerBoxUnit = packagingData?.weightPerBoxUnit || 'kg';
-    const weightPerPalletUnit = packagingData?.weightPerPalletUnit || 'kg';
-
-    const weightPerPieces = packagingData?.weightPerPieces
-      ? weightPerPiecesUnit === 'kg'
-        ? packagingData.weightPerPieces
-        : packagingData.weightPerPieces / 1000
-      : 0;
-    const weightPerPackage = packagingData?.weightPerPackage
-      ? weightPerPackageUnit === 'kg'
-        ? packagingData.weightPerPackage
-        : packagingData.weightPerPackage / 1000
-      : 0;
-    const weightPerBox = packagingData?.weightPerBox
-      ? weightPerBoxUnit === 'kg'
-        ? packagingData.weightPerBox
-        : packagingData.weightPerBox / 1000
-      : 0;
-    const weightPerPallet = packagingData?.weightPerPallet
-      ? weightPerPalletUnit === 'kg'
-        ? packagingData.weightPerPallet
-        : packagingData.weightPerPallet / 1000
-      : 0;
-
-    // Get packaging conversion factors
-    const piecesPerPackage = packagingData?.PiecesPerPackage || 1;
-    const packagePerBox = packagingData?.PackagePerBox || 1;
-    const boxPerPallet =
-      packagingData?.BoxPerPallet || packagingData?.boxesPerPallet || 1;
-
-    // Calculate weight based on selected unit using stored values
-    switch (unit.toLowerCase()) {
-      case 'pcs':
-      case 'pieces':
-        if (weightPerPieces > 0) {
-          return qty * weightPerPieces;
-        }
-        break;
-
-      case 'package':
-      case 'pack':
-        if (weightPerPackage > 0) {
-          return qty * weightPerPackage;
-        }
-        // Fallback: calculate from pieces
-        if (weightPerPieces > 0 && piecesPerPackage > 0) {
-          return qty * weightPerPieces * piecesPerPackage;
-        }
-        break;
-
-      case 'box':
-        if (weightPerBox > 0) {
-          return qty * weightPerBox;
-        }
-        // Fallback: calculate from packages
-        if (weightPerPackage > 0 && packagePerBox > 0) {
-          return qty * weightPerPackage * packagePerBox;
-        }
-        // Fallback: calculate from pieces
-        if (weightPerPieces > 0 && piecesPerPackage > 0 && packagePerBox > 0) {
-          return qty * weightPerPieces * piecesPerPackage * packagePerBox;
-        }
-        break;
-
-      case 'pallet':
-        if (weightPerPallet > 0) {
-          return qty * weightPerPallet;
-        }
-        // Fallback: calculate from boxes
-        if (weightPerBox > 0 && boxPerPallet > 0) {
-          return qty * weightPerBox * boxPerPallet;
-        }
-        // Fallback: calculate from packages
-        if (weightPerPackage > 0 && packagePerBox > 0 && boxPerPallet > 0) {
-          return qty * weightPerPackage * packagePerBox * boxPerPallet;
-        }
-        // Fallback: calculate from pieces
-        if (
-          weightPerPieces > 0 &&
-          piecesPerPackage > 0 &&
-          packagePerBox > 0 &&
-          boxPerPallet > 0
-        ) {
-          return (
-            qty *
-            weightPerPieces *
-            piecesPerPackage *
-            packagePerBox *
-            boxPerPallet
-          );
-        }
-        break;
-
-      case 'kg':
-        return qty;
-
-      default:
-        // For any other unit, try to match with stored weights
-        if (weightPerPieces > 0) {
-          return qty * weightPerPieces;
-        }
-        break;
-    }
-
-    // Final fallback: use minimal default weights
-    const defaultWeights = {
-      pcs: 0.014, // 14g per piece in kg
-      pieces: 0.014,
-      package: 0.7, // 700g per package in kg
-      pack: 0.7,
-      box: 31.0, // 31kg per box for tiles
-      pallet: 992.0, // 992kg per pallet for tiles
-    };
-
-    const defaultWeight = defaultWeights[unit.toLowerCase()] || 0.014;
-    return qty * defaultWeight;
+  const calculateGrossWeightWrapper = (productList: any[]) => {
+    return calculateGrossWeight(productList, products);
   };
+
+
+
+
 
   // Enhanced calculation functions for packing hierarchy
   const calculatePackingBreakdown = (
@@ -1137,9 +927,9 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
       if (p.totalWeight && p.totalWeight > 0) {
         return sum + p.totalWeight;
       }
-      // Use the improved calculateTotalWeight function
+      // Use the improved calculateTotalWeight function with products array
       return (
-        sum + calculateTotalWeight(p.productId, p.quantity.toString(), p.unit)
+        sum + calculateTotalWeight(p.productId, p.quantity.toString(), p.unit, products)
       );
     }, 0);
 
@@ -1245,159 +1035,71 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
 
   // --- Product logic ---
   const addProductToTable = () => {
-    const currentProduct = productsAdded[0];
-    if (
-      !currentProduct ||
-      !currentProduct.productId ||
-      !currentProduct.rate ||
-      !currentProduct.unit
-    ) {
-      toast.error('Please fill all required fields');
-      return;
-    }
+    try {
+      const currentProduct = productsAdded[0];
+      
+      if (
+        !currentProduct ||
+        !currentProduct.productId ||
+        !currentProduct.rate ||
+        !currentProduct.unit
+      ) {
+        toast.error('Please fill all required fields: Category, Product, Unit, Quantity, and Rate');
+        return;
+      }
 
-    // Set default quantity to 1 if it's empty
-    if (!currentProduct.quantity) {
-      currentProduct.quantity = '1';
-    }
+      if (!currentProduct.quantity || currentProduct.quantity === '') {
+        currentProduct.quantity = '1';
+      }
 
-    // Find the selected product from the products array
-    console.log('Looking for product with ID:', currentProduct.productId);
-    console.log('Available products:', products);
-
-    // Get the selected product - ensure proper type comparison
-    let product = products.find(
-      (p) => p.id.toString() === currentProduct.productId.toString()
-    );
-
-    // If product not found, create a default one
-    if (!product) {
-      console.log('Product not found, creating default product');
-      // Try to find by numeric comparison as fallback
-      product = products.find(
-        (p) =>
-          parseInt(p.id.toString()) ===
-          parseInt(currentProduct.productId.toString())
+      const product = products.find(
+        (p) => p.id.toString() === currentProduct.productId.toString()
       );
 
-      if (!product) {
-        console.error('Product still not found after type conversion attempts');
-        // Create a fallback product from form data
-        const fallbackName = `Product ${currentProduct.productId}`;
-        product = {
-          id: currentProduct.productId || 'unknown',
-          name: fallbackName,
-          productName: fallbackName,
-          hsCode: 'N/A',
-          description: 'Custom product entry',
-          weightPerUnitKg: 1,
-          packingBoxWeightKg: 0.5,
-          units: [currentProduct.unit],
-          categoryId: currentProduct.categoryId || selectedCategory,
-          subcategoryId: currentProduct.subcategoryId || selectedSubcategory,
-        };
-        console.log('Created fallback product:', product);
+      const quantity = parseFloat(currentProduct.quantity);
+      const rate = parseFloat(currentProduct.rate);
+
+      let totalWeight = 0;
+      try {
+        totalWeight = calculateTotalWeight(
+          currentProduct.productId,
+          currentProduct.quantity,
+          currentProduct.unit,
+          products
+        );
+      } catch (error) {
+        totalWeight = quantity * 1;
       }
-    }
 
-    // Log the product we found or created
-    console.log('Selected product:', product);
+      const productName = product?.name || product?.productName || `Product ${currentProduct.productId}`;
+      
+      const productData: ProductData = {
+        productId: currentProduct.productId,
+        name: productName,
+        productName: productName,
+        hsCode: product?.hsCode || 'N/A',
+        description: product?.description || 'No description available',
+        quantity: quantity,
+        rate: rate,
+        unit: currentProduct.unit,
+        total: quantity * rate,
+        totalWeight: totalWeight,
+        categoryId: currentProduct.categoryId || selectedCategory,
+        subcategoryId: currentProduct.subcategoryId || selectedSubcategory,
+      };
 
-    // Find the category for this product
-    const category = categories.find(
-      (c) =>
-        c.id.toString() ===
-        (currentProduct.categoryId || selectedCategory || product.categoryId)
-    );
+      if (editingProductIndex !== null) {
+        const updated = [...addedProducts];
+        updated[editingProductIndex] = productData;
+        setAddedProducts(updated);
+        setEditingProductIndex(null);
+        toast.success('Product updated successfully!');
+      } else {
+        setAddedProducts(prev => [...prev, productData]);
+        toast.success('Product added successfully!');
+      }
 
-    const quantity = parseFloat(currentProduct.quantity);
-    const rate = parseFloat(currentProduct.rate);
-
-    // Calculate total weight using the improved function
-    const totalWeight = calculateTotalWeight(
-      currentProduct.productId,
-      currentProduct.quantity,
-      currentProduct.unit
-    );
-
-    // Create the product data with explicit name from the product object or form input
-    const productName =
-      product?.name ||
-      product?.productName ||
-      currentProduct.productId ||
-      'Unknown Product';
-    console.log('Using product name:', productName);
-
-    const productData: ProductData = {
-      productId: product?.id || currentProduct.productId,
-      name: productName, // Use the explicit product name
-      productName: productName, // Also set productName field for API
-      hsCode: product?.hsCode || product?.category?.hsnCode || 'N/A',
-      description: product?.description || 'No description available',
-      quantity,
-      rate,
-      unit: currentProduct.unit || 'pcs',
-      total: quantity * rate,
-      totalWeight,
-      categoryId:
-        currentProduct.categoryId || selectedCategory || product?.categoryId,
-      subcategoryId:
-        currentProduct.subcategoryId ||
-        selectedSubcategory ||
-        product?.subcategoryId,
-    };
-
-    // Log the product data being added
-    console.log('Adding product with data:', productData);
-    console.log('Category:', category?.name || 'N/A');
-    console.log('Product from Redux:', product);
-    console.log('Current product form data:', currentProduct);
-    console.log(
-      'Weight calculation - Unit:',
-      currentProduct.unit,
-      'Quantity:',
-      quantity,
-      'Total Weight:',
-      totalWeight
-    );
-
-    // Debug: Check if product has all required fields
-    console.log('Product validation:', {
-      hasId: !!product?.id,
-      hasName: !!(product?.name || product?.productName),
-      hasHsCode: !!(product?.hsCode || product?.category?.hsnCode),
-      hasDescription: !!product?.description,
-      productKeys: product ? Object.keys(product) : [],
-      finalProductData: {
-        productId: productData.productId,
-        name: productData.name,
-        hsCode: productData.hsCode,
-        unit: productData.unit,
-        quantity: productData.quantity,
-        rate: productData.rate,
-      },
-    });
-
-    // Show container info if multiple containers needed
-    const validation = validateContainerCapacity(
-      editingProductIndex !== null ? undefined : productData
-    );
-    if (validation.containers > 1) {
-      toast.info(validation.message);
-    }
-
-    if (editingProductIndex !== null) {
-      const updated = [...addedProducts];
-      updated[editingProductIndex] = productData;
-      setAddedProducts(updated);
-      setEditingProductIndex(null);
-    } else {
-      setAddedProducts((prev) => [...prev, productData]);
-    }
-
-    // Reset form
-    setProductsAdded([
-      {
+      setProductsAdded([{
         productId: '',
         quantity: '',
         rate: '',
@@ -1405,11 +1107,14 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         categoryId: '',
         subcategoryId: '',
         quantityByWeight: '',
-      },
-    ]);
-    setSelectedCategory('');
-    setSelectedSubcategory('');
-    setQuantityByWeight('');
+      }]);
+      setSelectedCategory('');
+      setSelectedSubcategory('');
+      setQuantityByWeight('');
+      
+    } catch (error) {
+      toast.error('Failed to add product. Please try again.');
+    }
   };
 
   const editProduct = (index: number) => {
@@ -1432,6 +1137,8 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
     // Set the selected category and subcategory to trigger unit dropdown update
     setSelectedCategory(categoryId);
     setSelectedSubcategory(subcategoryId);
+
+
 
     // Clear unit first to force dropdown refresh
     setProductsAdded([
@@ -1460,11 +1167,6 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         },
       ]);
     }, 10);
-
-    // Set quantity input mode based on whether we have weight data
-    if (weight > 0) {
-      setQuantityInputMode('weight');
-    }
   };
 
   const deleteProduct = (index: number) => {
@@ -1623,7 +1325,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         portOfLoading,
         portOfDischarge,
         finalDestination,
-        totalGrossWeight: calculateGrossWeight(formData.productsData),
+        totalGrossWeight: calculateGrossWeightWrapper(formData.productsData),
         status: 'draft',
         products: formData.productsData.map((product) => ({
           productId: product.productId ? parseInt(product.productId) : null,
@@ -1697,7 +1399,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         portOfLoading,
         portOfDischarge,
         finalDestination,
-        totalGrossWeight: calculateGrossWeight(formData.productsData),
+        totalGrossWeight: calculateGrossWeightWrapper(formData.productsData),
         status:
           isEditMode && originalPiStatus === 'confirmed'
             ? 'confirmed'
@@ -1792,842 +1494,9 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
     });
   };
 
-  // --- Product row component ---
-  const ProductRow: React.FC<{
-    idx: number;
-    data: ProductAdded;
-    onChange: (idx: number, field: keyof ProductAdded, value: string) => void;
-    onRemove: (idx: number) => void;
-  }> = ({ idx, data, onChange, onRemove }) => {
-    const prod = products.find(
-      (p) => p.id.toString() === data.productId.toString()
-    );
-    const currentCategoryId = data.categoryId || selectedCategory;
-    const currentSubcategoryId = data.subcategoryId || selectedSubcategory;
 
-    // Add refs to preserve focus
-    const quantityRef = useRef<HTMLInputElement>(null);
-    const rateRef = useRef<HTMLInputElement>(null);
-    const weightRef = useRef<HTMLInputElement>(null);
 
-    // Initialize refs with current values
-    useEffect(() => {
-      if (quantityRef.current) {
-        quantityRef.current.value = data.quantity || '';
-      }
-      if (rateRef.current) {
-        rateRef.current.value = data.rate || '';
-      }
-      if (weightRef.current) {
-        weightRef.current.value = data.quantityByWeight || '';
-      }
-    }, [data.productId]); // Only update when product changes
 
-    const selectedCategoryData = categories.find(
-      (c) => c.id.toString() === currentCategoryId
-    );
-    const filteredSubcategories = selectedCategoryData?.subcategories || [];
-
-    // Debug: Log product structure
-    if (products.length > 0) {
-      console.log('Sample product structure:', products[0]);
-    }
-
-    const filteredProducts = products.filter((p) => {
-      // Handle both possible field name variations
-      const productCategoryId = p.categoryId || p.category?.id;
-      const productSubCategoryId =
-        p.subCategoryId || p.subcategoryId || p.subCategory?.id;
-
-      const categoryMatch =
-        !currentCategoryId ||
-        String(productCategoryId) === String(currentCategoryId);
-      const subcategoryMatch =
-        !currentSubcategoryId ||
-        String(productSubCategoryId) === String(currentSubcategoryId);
-
-      console.log(
-        `Product ${p.name}: categoryId=${productCategoryId}, subCategoryId=${productSubCategoryId}, filtering by cat=${currentCategoryId}, subcat=${currentSubcategoryId}, matches: cat=${categoryMatch}, subcat=${subcategoryMatch}`
-      );
-
-      return categoryMatch && subcategoryMatch;
-    });
-
-    console.log('Filtered products count:', filteredProducts.length);
-    console.log('All products count:', products.length);
-    console.log('Current category ID:', currentCategoryId);
-    console.log('Current subcategory ID:', currentSubcategoryId);
-
-    const handleQuantityByWeightChange = useCallback(
-      (weight: string) => {
-        onChange(idx, 'quantityByWeight', weight);
-        if (data.productId && weight && !isNaN(parseFloat(weight))) {
-          const calculatedQty = calculateQuantityFromWeight(
-            data.productId,
-            weight
-          );
-          if (calculatedQty && quantityRef.current) {
-            quantityRef.current.value = calculatedQty;
-            onChange(idx, 'quantity', calculatedQty);
-          }
-        }
-      },
-      [onChange, idx, data.productId]
-    );
-
-    const getCalculationDetails = () => {
-      if (!data.quantityByWeight || !prod?.packingConfig) return null;
-      const weight = parseFloat(data.quantityByWeight);
-      const boxes = weight / prod.packingConfig.weightPerBox;
-      const totalUnits = boxes * prod.packingConfig.unitsPerBox;
-      return {
-        boxes: boxes.toFixed(2),
-        totalUnits: totalUnits.toFixed(2),
-        unitType: data.unit || prod.units[0],
-      };
-    };
-
-    const totalWeight =
-      data.productId && data.quantity && data.unit
-        ? calculateTotalWeight(data.productId, data.quantity, data.unit)
-        : 0;
-
-    return (
-      <div className="border border-gray-300 dark:border-gray-700 rounded-md p-4 space-y-4 relative bg-gray-50 dark:bg-gray-800">
-        <button
-          type="button"
-          className="absolute top-2 right-2 text-red-600 hover:text-red-800 focus:outline-none dark:text-red-400 dark:hover:text-red-300"
-          title="Remove product"
-          onClick={() => onRemove(idx)}
-        >
-          <FontAwesomeIcon icon={faTimes} />
-        </button>
-
-        {/* 1. Category Selection */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          <div>
-            <Label>Category *</Label>
-            <select
-              className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm py-2 px-3 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-              value={data.categoryId || ''}
-              onChange={(e) => {
-                const newCategoryId = e.target.value;
-                console.log(
-                  `Category changed to: ${newCategoryId} for item ${idx}`
-                );
-                onChange(idx, 'categoryId', newCategoryId);
-                onChange(idx, 'subcategoryId', '');
-                onChange(idx, 'productId', '');
-                onChange(idx, 'unit', '');
-                setSelectedCategory(newCategoryId);
-                setSelectedSubcategory('');
-
-                // Force re-render by updating the state again after a brief delay
-                setTimeout(() => {
-                  console.log(
-                    `Forcing units dropdown refresh for category ${newCategoryId}`
-                  );
-                  // This will trigger a re-render of the units dropdown
-                }, 10);
-              }}
-              required
-            >
-              <option value="">Select Category</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id.toString()}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <Label>Subcategory</Label>
-            <select
-              className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm py-2 px-3 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-              value={data.subcategoryId || ''}
-              onChange={(e) => {
-                onChange(idx, 'subcategoryId', e.target.value);
-                onChange(idx, 'productId', '');
-                onChange(idx, 'unit', '');
-                setSelectedSubcategory(e.target.value);
-              }}
-              disabled={!data.categoryId}
-            >
-              <option value="">Select Subcategory</option>
-              {filteredSubcategories.map((sub) => (
-                <option key={sub.id} value={sub.id.toString()}>
-                  {sub.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <Label>Product *</Label>
-            <select
-              className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm py-2 px-3 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-              value={data.productId}
-              onChange={(e) => {
-                const selectedProductId = e.target.value;
-                onChange(idx, 'productId', selectedProductId);
-                onChange(idx, 'unit', '');
-
-                // Auto-populate rate from product data
-                if (selectedProductId) {
-                  const selectedProduct = products.find(
-                    (p) => p.id.toString() === selectedProductId.toString()
-                  );
-                  if (selectedProduct) {
-                    const productRate =
-                      selectedProduct.rate ||
-                      selectedProduct.price ||
-                      selectedProduct.unitPrice ||
-                      selectedProduct.sellingPrice ||
-                      '';
-                    if (productRate) {
-                      onChange(idx, 'rate', productRate.toString());
-                    }
-                  }
-                }
-              }}
-              disabled={!data.categoryId}
-              required
-            >
-              <option value="">Choose product</option>
-              {filteredProducts.map((prod) => {
-                const displayName =
-                  prod.name ||
-                  prod.productName ||
-                  prod.title ||
-                  `Product ${prod.id}`;
-                return (
-                  <option key={prod.id} value={prod.id}>
-                    {displayName}
-                  </option>
-                );
-              })}
-              {/* If no products found, show option to add custom product */}
-              {filteredProducts.length === 0 && (
-                <option value="custom" disabled>
-                  No products found for this category
-                </option>
-              )}
-            </select>
-          </div>
-        </div>
-
-        {/* Product Description */}
-        {prod && (
-          <div className="mb-4 p-3 bg-slate-50 dark:bg-slate-900 rounded">
-            <div className="text-sm text-gray-700 dark:text-gray-300">
-              <strong>Product:</strong> {prod.name || prod.productName || 'N/A'}{' '}
-              | <strong>HS Code:</strong>{' '}
-              {prod.category?.hsnCode || prod.hsCode || 'N/A'} |{' '}
-              <strong>Description:</strong> {prod.description || 'N/A'}
-            </div>
-            {/* Dynamic Weight Information Display */}
-            <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
-                {(() => {
-                  const displayItems = [];
-
-                  // Get all unique units from packaging hierarchy and weights
-                  const allUnits = new Set();
-
-                  // From packagingPreview weights
-                  if (prod.packagingPreview?.weights) {
-                    Object.keys(prod.packagingPreview.weights).forEach(
-                      (key) => {
-                        if (!key.endsWith('Unit')) {
-                          allUnits.add(key);
-                        }
-                      }
-                    );
-                  }
-
-                  // From packagingPreview hierarchy
-                  if (prod.packagingPreview?.hierarchy) {
-                    prod.packagingPreview.hierarchy.forEach((level) => {
-                      allUnits.add(level.from);
-                      allUnits.add(level.to);
-                    });
-                  }
-
-                  // From packagingHierarchyData (fallback)
-                  if (prod.packagingHierarchyData?.dynamicFields) {
-                    const dynamicFields =
-                      prod.packagingHierarchyData.dynamicFields;
-                    Object.keys(dynamicFields).forEach((key) => {
-                      if (
-                        key.startsWith('weightPer') &&
-                        !key.endsWith('Unit')
-                      ) {
-                        const unit = key.replace('weightPer', '');
-                        allUnits.add(unit);
-                      }
-                    });
-                  }
-
-                  // Display weight for each unit
-                  Array.from(allUnits).forEach((unit) => {
-                    let weight = 'N/A';
-                    let weightUnit = 'g';
-
-                    // Try packagingPreview first
-                    if (prod.packagingPreview?.weights) {
-                      const weightValue = prod.packagingPreview.weights[unit];
-                      const unitValue =
-                        prod.packagingPreview.weights[unit + 'Unit'];
-                      if (weightValue) {
-                        weight = weightValue;
-                        weightUnit = unitValue || 'g';
-                      }
-                    }
-
-                    // Fallback to packagingHierarchyData
-                    if (
-                      weight === 'N/A' &&
-                      prod.packagingHierarchyData?.dynamicFields
-                    ) {
-                      const dynamicFields =
-                        prod.packagingHierarchyData.dynamicFields;
-                      const weightKey = `weightPer${unit}`;
-                      const unitKey = `${weightKey}Unit`;
-
-                      if (dynamicFields[weightKey]) {
-                        weight = dynamicFields[weightKey];
-                        weightUnit = dynamicFields[unitKey] || 'g';
-                      }
-                    }
-
-                    // Final fallback to unitWeight
-                    if (
-                      weight === 'N/A' &&
-                      prod.weightUnitType === unit &&
-                      prod.unitWeight
-                    ) {
-                      weight = prod.unitWeight;
-                      weightUnit = prod.unitWeightUnit || 'g';
-                    }
-
-                    if (weight !== 'N/A') {
-                      displayItems.push(
-                        <div key={`weight-${unit}`}>
-                          <span className="text-slate-700 dark:text-slate-400 font-medium">
-                            Weight per {unit}:
-                          </span>
-                          <br />
-                          <span className="font-bold text-green-600 dark:text-green-400">
-                            {weight} {weightUnit}
-                          </span>
-                        </div>
-                      );
-                    }
-                  });
-
-                  // Display hierarchy relationships
-                  if (prod.packagingPreview?.hierarchy) {
-                    prod.packagingPreview.hierarchy.forEach((level, index) => {
-                      displayItems.push(
-                        <div key={`hierarchy-${index}`}>
-                          <span className="text-slate-700 dark:text-slate-400 font-medium">
-                            {level.from}/{level.to}:
-                          </span>
-                          <br />
-                          <span className="font-bold text-indigo-600 dark:text-indigo-400">
-                            {level.quantity}
-                          </span>
-                        </div>
-                      );
-                    });
-                  } else if (prod.packagingHierarchyData?.dynamicFields) {
-                    // Fallback to packagingHierarchyData for hierarchy
-                    const dynamicFields =
-                      prod.packagingHierarchyData.dynamicFields;
-                    Object.keys(dynamicFields).forEach((key) => {
-                      if (key.includes('Per') && !key.startsWith('weight')) {
-                        const [from, to] = key.split('Per');
-                        displayItems.push(
-                          <div key={`hierarchy-${key}`}>
-                            <span className="text-slate-700 dark:text-slate-400 font-medium">
-                              {from}/{to}:
-                            </span>
-                            <br />
-                            <span className="font-bold text-indigo-600 dark:text-indigo-400">
-                              {dynamicFields[key]}
-                            </span>
-                          </div>
-                        );
-                      }
-                    });
-                  }
-
-                  return displayItems.length > 0 ? (
-                    displayItems
-                  ) : (
-                    <div className="col-span-5 text-center text-gray-500">
-                      No packaging information available
-                    </div>
-                  );
-                })()}
-              </div>
-            </div>
-          </div>
-        )}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <Label>Unit *</Label>
-            <select
-              key={`unit-dropdown-${data.categoryId}-${idx}`}
-              className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm py-2 px-3 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-              value={data.unit || ''}
-              onChange={(e) => {
-                console.log(
-                  `Unit changed to: ${e.target.value} for item ${idx}`
-                );
-                onChange(idx, 'unit', e.target.value);
-              }}
-              required
-            >
-              <option value="">Choose unit</option>
-              {(() => {
-                const category = categories.find(
-                  (c) => c.id.toString() === data.categoryId
-                );
-
-                // Get packaging hierarchy from category - same as PackagingDetails component
-                const packagingHierarchy = category?.packagingHierarchy || [];
-
-                console.log('Category data:', category);
-                console.log('Packaging hierarchy:', packagingHierarchy);
-
-                const availableUnits = [];
-
-                // Use packaging hierarchy like PackagingDetails component
-                if (packagingHierarchy.length > 0) {
-                  // Add all 'from' units from hierarchy
-                  packagingHierarchy.forEach((level, levelIdx) => {
-                    availableUnits.push(
-                      <option key={`from-${levelIdx}`} value={level.from}>
-                        {level.from}
-                      </option>
-                    );
-                  });
-
-                  // Add the final 'to' unit from the last level
-                  const lastLevel =
-                    packagingHierarchy[packagingHierarchy.length - 1];
-                  if (lastLevel?.to) {
-                    availableUnits.push(
-                      <option key={`to-final`} value={lastLevel.to}>
-                        {lastLevel.to}
-                      </option>
-                    );
-                  }
-                } else {
-                  // Fallback to category/subcategory units if no packaging hierarchy
-                  const subcategory = category?.subcategories?.find(
-                    (s) => s.id.toString() === data.subcategoryId
-                  );
-
-                  const unitSet = new Set();
-
-                  // Get units from category
-                  if (category?.primary_unit) {
-                    unitSet.add(category.primary_unit);
-                  }
-                  if (category?.secondary_unit) {
-                    unitSet.add(category.secondary_unit);
-                  }
-
-                  // Get units from subcategory
-                  if (subcategory?.primary_unit) {
-                    unitSet.add(subcategory.primary_unit);
-                  }
-                  if (subcategory?.secondary_unit) {
-                    unitSet.add(subcategory.secondary_unit);
-                  }
-
-                  // If still no units, use fallback
-                  if (unitSet.size === 0) {
-                    ['pcs', 'box', 'kg'].forEach((unit) => unitSet.add(unit));
-                  }
-
-                  Array.from(unitSet).forEach((unit) => {
-                    availableUnits.push(
-                      <option key={unit} value={unit}>
-                        {unit.charAt(0).toUpperCase() + unit.slice(1)}
-                      </option>
-                    );
-                  });
-                }
-
-                console.log(
-                  'Final available units count:',
-                  availableUnits.length
-                );
-
-                return availableUnits;
-              })()}
-            </select>
-            {/* Unit Weight Helper */}
-            {data.unit && data.productId && prod && (
-              <div className="text-xs mt-1 p-2 bg-gray-50 dark:bg-gray-800 rounded border">
-                <span className="text-gray-600 dark:text-gray-400">
-                  📊 Weight per {data.unit}:
-                </span>
-                <span className="font-mono font-bold text-gray-900 dark:text-gray-100 ml-1">
-                  {(() => {
-                    const weightPer1Unit = calculateTotalWeight(
-                      data.productId,
-                      '1',
-                      data.unit
-                    );
-                    return `${weightPer1Unit.toFixed(4)} KG`;
-                  })()}
-                </span>
-              </div>
-            )}
-          </div>
-          <div>
-            <Label>Quantity Input Method</Label>
-            <div className="flex gap-6 mt-2">
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  value="quantity"
-                  checked={quantityInputMode === 'quantity'}
-                  onChange={(e) =>
-                    setQuantityInputMode(e.target.value as 'quantity')
-                  }
-                  className="mr-2"
-                />
-                By Quantity
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  value="weight"
-                  checked={quantityInputMode === 'weight'}
-                  onChange={(e) =>
-                    setQuantityInputMode(e.target.value as 'weight')
-                  }
-                  className="mr-2"
-                />
-                By Weight (KG)
-              </label>
-            </div>
-          </div>
-        </div>
-
-        {/* 4. Quantity Input */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          {quantityInputMode === 'quantity' ? (
-            <div>
-              <Label>Quantity *</Label>
-              <input
-                ref={quantityRef}
-                type="number"
-                step="any"
-                defaultValue={data.quantity || ''}
-                onBlur={(e) => {
-                  onChange(idx, 'quantity', e.target.value);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    onChange(idx, 'quantity', e.currentTarget.value);
-                  }
-                }}
-                placeholder="Enter quantity"
-                required
-                className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm py-2 px-3 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-              />
-              {/* Real-time weight calculation display */}
-              {data.productId && data.quantity && data.unit && (
-                <div className="text-xs bg-slate-50 dark:bg-slate-900 p-2 rounded mt-2 border border-slate-200 dark:border-slate-700">
-                  <div className="text-slate-700 dark:text-slate-300">
-                    <strong>📊 Weight Calculation:</strong>
-                    <br />
-                    <span className="font-mono">
-                      {data.quantity} {data.unit} ={' '}
-                      <strong>{totalWeight.toFixed(3)} KG</strong>
-                    </span>
-                    <br />
-                    <span className="text-xs opacity-75">
-                      Rate:{' '}
-                      {totalWeight > 0
-                        ? (
-                            totalWeight / parseFloat(data.quantity || '1')
-                          ).toFixed(4)
-                        : '0'}{' '}
-                      KG per {data.unit}
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div>
-              <Label>Quantity by Weight (KG) *</Label>
-              <input
-                ref={weightRef}
-                type="number"
-                min={0}
-                step="any"
-                defaultValue={data.quantityByWeight || ''}
-                onBlur={(e) => {
-                  handleQuantityByWeightChange(e.target.value);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleQuantityByWeightChange(e.currentTarget.value);
-                  }
-                }}
-                placeholder="Enter weight in KG"
-                required
-                className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm py-2 px-3 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-              />
-              {data.quantityByWeight &&
-                data.productId &&
-                getCalculationDetails() && (
-                  <div className="text-xs bg-green-50 dark:bg-green-900 p-2 rounded mt-2">
-                    <div className="text-green-700 dark:text-green-300">
-                      <strong>Calculation:</strong>
-                      <br />
-                      Weight: {data.quantityByWeight} KG
-                      <br />
-                      Boxes: {getCalculationDetails()?.boxes}
-                      <br />
-                      Total {getCalculationDetails()?.unitType}:{' '}
-                      <strong>{getCalculationDetails()?.totalUnits}</strong>
-                    </div>
-                  </div>
-                )}
-            </div>
-          )}
-
-          {/* 5. Rate per Unit */}
-          <div>
-            <Label>Rate per Unit *</Label>
-            <input
-              ref={rateRef}
-              type="number"
-              min={0}
-              step="any"
-              defaultValue={data.rate || ''}
-              onBlur={(e) => {
-                onChange(idx, 'rate', e.target.value);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  onChange(idx, 'rate', e.currentTarget.value);
-                }
-              }}
-              placeholder="Enter rate per unit"
-              required
-              className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm py-2 px-3 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-            />
-          </div>
-        </div>
-
-        {/* Enhanced Packing Breakdown Display */}
-        {data.productId &&
-          data.quantity &&
-          data.unit &&
-          (() => {
-            const product = products.find(
-              (p) => p.id.toString() === data.productId.toString()
-            );
-            if (!product?.packingHierarchy) return null;
-
-            const breakdown = calculatePackingBreakdown(
-              data.productId,
-              parseFloat(data.quantity) || 0,
-              data.unit
-            );
-
-            return (
-              <div className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900 dark:to-green-900 rounded-lg border border-blue-200 dark:border-blue-700">
-                <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center">
-                  🔢 Packing Breakdown Calculation
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const targetWeight = prompt(
-                        'Enter target weight (KG) to calculate quantity:'
-                      );
-                      if (targetWeight && !isNaN(parseFloat(targetWeight))) {
-                        const calculatedQty = calculateQuantityByWeight(
-                          data.productId,
-                          parseFloat(targetWeight),
-                          data.unit
-                        );
-                        onChange(idx, 'quantity', calculatedQty.toFixed(2));
-                      }
-                    }}
-                    className="ml-2 px-2 py-1 text-xs bg-slate-700 text-white rounded hover:bg-slate-800 transition"
-                  >
-                    📊 Calculate by Weight
-                  </button>
-                </h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                  <div className="bg-white dark:bg-gray-800 p-2 rounded border">
-                    <div className="text-gray-600 dark:text-gray-400 text-xs">
-                      Input
-                    </div>
-                    <div className="font-bold text-gray-900 dark:text-gray-100">
-                      {breakdown.inputQuantity} {breakdown.inputUnit}
-                    </div>
-                  </div>
-                  <div className="bg-white dark:bg-gray-800 p-2 rounded border">
-                    <div className="text-gray-600 dark:text-gray-400 text-xs">
-                      Boxes
-                    </div>
-                    <div className="font-bold text-slate-700 dark:text-slate-400">
-                      {breakdown.calculatedBoxes}
-                    </div>
-                  </div>
-                  <div className="bg-white dark:bg-gray-800 p-2 rounded border">
-                    <div className="text-gray-600 dark:text-gray-400 text-xs">
-                      Pallets
-                    </div>
-                    <div className="font-bold text-green-600 dark:text-green-400">
-                      {breakdown.calculatedPallets}
-                    </div>
-                  </div>
-                  <div className="bg-white dark:bg-gray-800 p-2 rounded border">
-                    <div className="text-gray-600 dark:text-gray-400 text-xs">
-                      Weight
-                    </div>
-                    <div className="font-bold text-purple-600 dark:text-purple-400">
-                      {breakdown.totalWeight.toFixed(2)} KG
-                    </div>
-                  </div>
-                  <div className="bg-white dark:bg-gray-800 p-2 rounded border">
-                    <div className="text-gray-600 dark:text-gray-400 text-xs">
-                      Volume
-                    </div>
-                    <div className="font-bold text-orange-600 dark:text-orange-400">
-                      {breakdown.totalCBM.toFixed(3)} CBM
-                    </div>
-                  </div>
-                  <div className="bg-white dark:bg-gray-800 p-2 rounded border">
-                    <div className="text-gray-600 dark:text-gray-400 text-xs">
-                      Container Usage
-                    </div>
-                    <div
-                      className={`font-bold ${
-                        breakdown.containerCapacityUsed > 100
-                          ? 'text-red-600'
-                          : breakdown.containerCapacityUsed > 80
-                            ? 'text-yellow-600'
-                            : 'text-green-600'
-                      }`}
-                    >
-                      {breakdown.containerCapacityUsed.toFixed(1)}%
-                    </div>
-                  </div>
-                  <div className="bg-white dark:bg-gray-800 p-2 rounded border col-span-2">
-                    <div className="text-gray-600 dark:text-gray-400 text-xs">
-                      Calculation Logic
-                    </div>
-                    <div className="text-xs text-gray-700 dark:text-gray-300">
-                      {data.unit === 'pcs' &&
-                        `${breakdown.inputQuantity} pcs ÷ ${product.packingHierarchy.conversionRates.piecesPerBox} = ${breakdown.calculatedBoxes} boxes`}
-                      {data.unit === 'kg' &&
-                        `${breakdown.inputQuantity} kg ÷ ${product.packingHierarchy.weights.weightPerBox} kg/box = ${breakdown.calculatedBoxes} boxes`}
-                      {data.unit === 'box' &&
-                        `${breakdown.inputQuantity} boxes directly`}
-                      {data.unit === 'sqm' &&
-                        `${breakdown.inputQuantity} sqm ÷ ${product.packingHierarchy.conversionRates.piecesPerBox} = ${breakdown.calculatedBoxes} boxes`}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
-      </div>
-    );
-  };
-
-  // --- Other Charges List ---
-  function OtherChargesList({
-    value,
-    onChange,
-  }: {
-    value: any[];
-    onChange: (list: any[]) => void;
-  }) {
-    const handleAdd = () => {
-      const newList = [...value, { name: '', amount: '' }];
-      onChange(newList);
-    };
-
-    const handleRemove = (idx: number) => {
-      const newList = value.filter((_, i) => i !== idx);
-      onChange(newList);
-    };
-
-    const handleChange = (idx: number, field: string, val: string) => {
-      const newList = value.map((item, i) =>
-        i === idx ? { ...item, [field]: val } : item
-      );
-      onChange(newList);
-    };
-
-    return (
-      <div className="flex flex-col">
-        <Label>Other Charges</Label>
-        <div className="space-y-3 mb-2">
-          {value.map((item, idx) => (
-            <div key={`charge-${idx}`} className="flex space-x-2">
-              <input
-                type="text"
-                placeholder="Charge name"
-                defaultValue={item.name || ''}
-                onBlur={(e) => handleChange(idx, 'name', e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleChange(idx, 'name', e.currentTarget.value);
-                  }
-                }}
-                className="flex-1 block w-full rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm py-2 px-3 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-              />
-              <input
-                type="number"
-                min={0}
-                step="any"
-                placeholder="Amount"
-                defaultValue={item.amount || ''}
-                onBlur={(e) => handleChange(idx, 'amount', e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleChange(idx, 'amount', e.currentTarget.value);
-                  }
-                }}
-                className="w-40 block rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm py-2 px-3 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-              />
-              <button
-                type="button"
-                className="text-red-600 hover:text-red-800 focus:outline-none dark:text-red-400 dark:hover:text-red-300"
-                onClick={() => handleRemove(idx)}
-              >
-                <FontAwesomeIcon icon={faTimes} />
-              </button>
-            </div>
-          ))}
-        </div>
-        <button
-          type="button"
-          className="inline-flex items-center px-3 py-1 text-sm font-medium rounded-md text-brand-500 hover:text-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500"
-          onClick={handleAdd}
-        >
-          <FontAwesomeIcon icon={faPlus} className="mr-1" /> Add Other Charge
-        </button>
-      </div>
-    );
-  }
 
   if (loading) {
     return (
@@ -3342,15 +2211,22 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                         data={p}
                         onChange={updateProduct}
                         onRemove={removeProduct}
+                        categories={categories}
+                        products={products}
+                        selectedCategory={selectedCategory}
+                        selectedSubcategory={selectedSubcategory}
+                        setSelectedCategory={setSelectedCategory}
+                        setSelectedSubcategory={setSelectedSubcategory}
+                        calculateTotalWeight={calculateTotalWeightWrapper}
+                        calculateQuantityFromWeight={calculateQuantityFromWeightWrapper}
                       />
                     ))}
                   </div>
                   <div className="flex gap-4 mt-6">
                     <button
                       type="button"
-                      onClick={() => {
-                        console.log('Add Product button clicked');
-                        console.log('Current product data:', productsAdded[0]);
+                      onClick={(e) => {
+                        e.preventDefault();
                         addProductToTable();
                       }}
                       className="inline-flex items-center px-5 py-2 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
@@ -3398,239 +2274,19 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                   )}
 
                   {/* Added Products Table */}
-                  {addedProducts.length > 0 && (
-                    <div className="mt-8">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-                        Added Products ({addedProducts.length})
-                      </h3>
-                      <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                          <thead className="bg-gray-50 dark:bg-gray-800">
-                            <tr>
-                              <th className="px-3 py-2 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                Category
-                              </th>
-                              <th className="px-3 py-2 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                Product
-                              </th>
-                              <th className="px-3 py-2 text-right text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                Quantity
-                              </th>
-                              <th className="px-3 py-2 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                Unit
-                              </th>
-                              <th className="px-3 py-2 text-right text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                Weight (KG)
-                              </th>
-                              <th className="px-3 py-2 text-right text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                Rate
-                              </th>
-                              <th className="px-3 py-2 text-right text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                Total
-                              </th>
-                              <th className="px-3 py-2 text-center text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                Actions
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                            {addedProducts.map((product, index) => {
-                              // Find category by comparing as strings to handle different types
-                              const category = categories.find(
-                                (c) =>
-                                  c.id.toString() ===
-                                  product.categoryId?.toString()
-                              );
-
-                              // Debug the product data
-                              console.log(`Product ${index}:`, product);
-                              console.log(
-                                `- categoryId=${product.categoryId}, found category:`,
-                                category
-                              );
-                              console.log(
-                                `- name=${product.name}, productId=${product.productId}`
-                              );
-
-                              return (
-                                <tr
-                                  key={index}
-                                  className={
-                                    editingProductIndex === index
-                                      ? 'bg-yellow-50 dark:bg-yellow-900'
-                                      : ''
-                                  }
-                                >
-                                  <td className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100">
-                                    {category?.name ||
-                                      category?.categoryName ||
-                                      'sugarcane bagasse'}
-                                  </td>
-                                  <td className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100">
-                                    {(() => {
-                                      // Look up the product name using productId with proper type comparison
-                                      const foundProduct = products.find(
-                                        (p) =>
-                                          p.id.toString() ===
-                                          product.productId.toString()
-                                      );
-
-                                      // Try multiple name fields and fallback to productId if needed
-                                      return (
-                                        foundProduct?.name ||
-                                        foundProduct?.productName ||
-                                        product.name ||
-                                        product.productName ||
-                                        `Product ${product.productId}` ||
-                                        'Unknown Product'
-                                      );
-                                    })()}
-                                  </td>
-                                  <td className="px-3 py-2 text-sm text-right text-gray-900 dark:text-gray-100">
-                                    {product.quantity}
-                                  </td>
-                                  <td className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100">
-                                    {product.unit || 'N/A'}
-                                  </td>
-                                  <td className="px-3 py-2 text-sm text-right text-gray-900 dark:text-gray-100">
-                                    {(() => {
-                                      const weight =
-                                        product.totalWeight ||
-                                        calculateTotalWeight(
-                                          product.productId,
-                                          product.quantity.toString(),
-                                          product.unit
-                                        );
-                                      return weight > 0
-                                        ? weight.toFixed(2)
-                                        : 'N/A';
-                                    })()}
-                                  </td>
-                                  <td className="px-3 py-2 text-sm text-right text-gray-900 dark:text-gray-100">
-                                    {formatCurrency(
-                                      product.rate,
-                                      currency,
-                                      2,
-                                      4
-                                    )}
-                                  </td>
-                                  <td className="px-3 py-2 text-sm text-right font-semibold text-gray-900 dark:text-gray-100">
-                                    {formatCurrency(product.total)}
-                                  </td>
-                                  <td className="px-3 py-2 text-center">
-                                    <div className="flex justify-center gap-2">
-                                      <button
-                                        type="button"
-                                        onClick={() => editProduct(index)}
-                                        className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                                        title="Edit product"
-                                      >
-                                        Edit
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={() => deleteProduct(index)}
-                                        className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-                                        title="Delete product"
-                                      >
-                                        Delete
-                                      </button>
-                                    </div>
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                          <tfoot className="bg-gray-50 dark:bg-gray-800">
-                            <tr>
-                              <td
-                                colSpan={4}
-                                className="px-3 py-2 text-right font-semibold text-gray-900 dark:text-gray-100"
-                              >
-                                Net Weight:
-                              </td>
-                              <td className="px-3 py-2 text-right font-semibold text-gray-900 dark:text-gray-100">
-                                {getCurrentTotals().weight.toFixed(2)} KG
-                              </td>
-                              <td className="px-3 py-2"></td>
-                              <td className="px-3 py-2 text-right font-semibold text-gray-900 dark:text-gray-100">
-                                {formatCurrency(
-                                  addedProducts.reduce(
-                                    (sum, p) => sum + p.total,
-                                    0
-                                  ),
-                                  currency
-                                )}
-                              </td>
-                              <td className="px-3 py-2"></td>
-                            </tr>
-                            <tr>
-                              <td
-                                colSpan={4}
-                                className="px-3 py-2 text-right font-semibold text-gray-900 dark:text-gray-100"
-                              >
-                                Gross Weight:
-                              </td>
-                              <td className="px-3 py-2 text-right font-semibold text-blue-600 dark:text-blue-400">
-                                {calculateGrossWeight(addedProducts).toFixed(2)}{' '}
-                                KG
-                              </td>
-                              <td className="px-3 py-2"></td>
-                              <td className="px-3 py-2"></td>
-                              <td className="px-3 py-2"></td>
-                            </tr>
-                            {/* Container and CBM calculations commented out as requested
-                          {containerType && (
-                            <tr
-                              className={`${
-                                calculateRequiredContainers() > 1
-                                  ? 'bg-orange-100 dark:bg-orange-900'
-                                  : 'bg-green-100 dark:bg-green-900'
-                              }`}
-                            >
-                              <td
-                                colSpan={8}
-                                className="px-3 py-2 text-center text-sm"
-                              >
-                                <div className="flex justify-center gap-6 mb-2">
-                                  <span className="text-gray-600">
-                                    Weight:{' '}
-                                    {getCurrentTotals().weight.toFixed(0)} KG
-                                  </span>
-                                  <span className="text-gray-600">
-                                    Volume:{' '}
-                                    {getCurrentTotals().volume.toFixed(2)} CBM
-                                  </span>
-                                  <span
-                                    className={`font-bold ${
-                                      calculateRequiredContainers() > 1
-                                        ? 'text-orange-600'
-                                        : 'text-green-600'
-                                    }`}
-                                  >
-                                    Containers: {calculateRequiredContainers()}
-                                  </span>
-                                </div>
-                                <div className="text-xs text-gray-500">
-                                  Per Container Limit:{' '}
-                                  {getContainerLimits().weight} KG /{' '}
-                                  {getContainerLimits().volume} CBM
-                                </div>
-                                {calculateRequiredContainers() > 1 && (
-                                  <div className="text-orange-600 font-semibold mt-1">
-                                    Multiple containers required for this
-                                    shipment
-                                  </div>
-                                )}
-                              </td>
-                            </tr>
-                          )}
-                          */}
-                          </tfoot>
-                        </table>
-                      </div>
-                    </div>
-                  )}
+                  <ProductTable
+                    addedProducts={addedProducts}
+                    categories={categories}
+                    products={products}
+                    currency={currency}
+                    editingProductIndex={editingProductIndex}
+                    onEditProduct={editProduct}
+                    onDeleteProduct={deleteProduct}
+                    formatCurrency={formatCurrency}
+                    calculateTotalWeight={calculateTotalWeightWrapper}
+                    calculateGrossWeight={calculateGrossWeightWrapper}
+                    getCurrentTotals={getCurrentTotals}
+                  />
 
                   {/* PI Preview Popup */}
                   {showPIPreview && (
@@ -4048,7 +2704,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                                     .reduce((sum, prod) => {
                                       const weight =
                                         prod.totalWeight ||
-                                        calculateTotalWeight(
+                                        calculateTotalWeightWrapper(
                                           prod.productId,
                                           prod.quantity.toString(),
                                           prod.unit
@@ -4079,7 +2735,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                                   Gross Weight:
                                 </td>
                                 <td className="text-right px-3 py-3">
-                                  {calculateGrossWeight(addedProducts).toFixed(
+                                  {calculateGrossWeightWrapper(addedProducts).toFixed(
                                     2
                                   )}{' '}
                                   KG
