@@ -16,6 +16,7 @@ import {
 } from 'react-icons/hi2';
 import { Pagination } from 'antd';
 import { useDebounce } from '../../utils/useDebounce';
+import SEOHead from '../../components/common/SEOHead';
 
 const Product: React.FC = () => {
   const dispatch = useDispatch();
@@ -165,7 +166,13 @@ const Product: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
+      <SEOHead
+        title="Products - EximEx | Global Import Export Trading Platform"
+        description="Manage your product inventory on EximEx. Add, edit, and organize products for seamless import-export operations with comprehensive product management tools."
+        url="https://eximexperts.in/products"
+      />
+      <div className="min-h-screen bg-gray-50">
       <div className="p-2 lg:p-4">
         {/* Header */}
         <div className="mb-3">
@@ -565,7 +572,8 @@ const Product: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 };
 
