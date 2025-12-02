@@ -8,8 +8,10 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { HelmetProvider } from 'react-helmet-async';
 import AntdConfig from './components/form/AntdConfig';
 import { AuthProvider } from './context/AuthContext';
+import SEOHead from './components/common/SEOHead';
 
 import SignIn from './pages/AuthPages/SignIn';
 import SignUp from './pages/AuthPages/SignUp';
@@ -275,30 +277,33 @@ export default function App() {
   }
 
   return (
-    <AntdConfig>
-      <AuthProvider>
-        <Router>
-          <ScrollToTop />
-          <ToastContainer
-            position="top-right"
-            autoClose={5000}
-            hideProgressBar={false}
-            newestOnTop={true}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="light"
-            style={{ zIndex: 9999 }}
-            toastStyle={{
-              fontSize: '14px',
-              borderRadius: '8px',
-            }}
-          />
-          <AppContent />
-        </Router>
-      </AuthProvider>
-    </AntdConfig>
+    <HelmetProvider>
+      <AntdConfig>
+        <AuthProvider>
+          <Router>
+            <SEOHead />
+            <ScrollToTop />
+            <ToastContainer
+              position="top-right"
+              autoClose={5000}
+              hideProgressBar={false}
+              newestOnTop={true}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="light"
+              style={{ zIndex: 9999 }}
+              toastStyle={{
+                fontSize: '14px',
+                borderRadius: '8px',
+              }}
+            />
+            <AppContent />
+          </Router>
+        </AuthProvider>
+      </AntdConfig>
+    </HelmetProvider>
   );
 }
