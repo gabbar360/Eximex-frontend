@@ -14,7 +14,9 @@ import {
   HiChartBar,
   HiCog6Tooth,
   HiBell,
+  HiArrowLeft,
 } from 'react-icons/hi2';
+import { useNavigate } from 'react-router-dom';
 import { Image } from 'antd';
 import { EyeOutlined } from '@ant-design/icons';
 
@@ -40,6 +42,7 @@ interface UserData {
 
 export default function UserProfiles() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -115,30 +118,40 @@ export default function UserProfiles() {
       />
 
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto p-6">
+        <div className="p-2 lg:p-4">
           {/* Header */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-slate-700 rounded-full mb-6 shadow-xl">
-              <HiUser className="w-10 h-10 text-white" />
+          <div className="mb-3">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 lg:p-4">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => navigate('/dashboard')}
+                    className="p-3 rounded-lg bg-slate-700 text-white hover:bg-slate-800 transition-all duration-300 hover:shadow-lg"
+                  >
+                    <HiArrowLeft className="w-5 h-5" />
+                  </button>
+                  <div>
+                    <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
+                      Profile Dashboard
+                    </h1>
+                  </div>
+                </div>
+              </div>
             </div>
-            <h1 className="text-4xl font-bold text-slate-800 mb-4">
-              Profile Dashboard
-            </h1>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-              Manage your personal information and company details in one place
-            </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-8">
+          <div className="grid grid-cols-1 gap-4">
             {/* Profile Section */}
             <div>
               {/* Profile Card */}
-              <div className="bg-white rounded-3xl shadow-xl border border-gray-200 overflow-hidden mb-8">
+              <div className="bg-white rounded-3xl shadow-xl border border-gray-200 overflow-hidden mb-4">
                 <div className="relative">
-                  <div className="h-32 bg-slate-700"></div>
+                  <div className="h-16 bg-slate-700 flex items-center justify-center">
+                    <h2 className="text-white font-semibold text-lg">Manage Your Profile</h2>
+                  </div>
                   <div className="absolute -bottom-16 left-8">
                     <div className="relative">
-                      <div className="w-32 h-32 bg-white rounded-full border-4 border-white shadow-2xl flex items-center justify-center overflow-hidden">
+                      <div className="w-16 h-16 bg-white rounded-full border-4 border-white shadow-2xl flex items-center justify-center overflow-hidden">
                         {userData?.profilePicture ? (
                           <img
                             src={userData.profilePicture}

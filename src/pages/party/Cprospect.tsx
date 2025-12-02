@@ -209,8 +209,8 @@ const Cprospect = () => {
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
           {(!parties || parties.length === 0) && !loading ? (
             <div className="p-12 text-center">
-              <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-r from-slate-600 to-slate-700 flex items-center justify-center shadow-lg">
-                <HiMagnifyingGlass className="w-8 h-8 text-white" />
+              <div className="w-10 h-10 mx-auto mb-6 rounded-2xl bg-gradient-to-r from-slate-600 to-slate-700 flex items-center justify-center shadow-lg">
+                <HiMagnifyingGlass className="w-4 h-4 text-white" />
               </div>
               <h3 className="text-xl font-semibold text-slate-800 mb-2">
                 No prospects found
