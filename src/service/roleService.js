@@ -2,8 +2,8 @@ import axiosInstance from '../utils/axiosInstance';
 
 const roleService = {
   // Get all roles
-  getAllRoles: async () => {
-    const response = await axiosInstance.get('/getroles');
+  getAllRoles: async (params = {}) => {
+    const response = await axiosInstance.get('/getroles', { params });
     return response.data;
   },
 

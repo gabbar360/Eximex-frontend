@@ -1,17 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  Button,
   Table,
-  Modal,
-  Form,
-  Input,
   Switch,
-  Space,
-  Popconfirm,
-  message,
+  Pagination,
 } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { toast } from 'react-toastify';
 import {
   HiPlus,
@@ -20,6 +13,9 @@ import {
   HiListBullet,
   HiCog6Tooth,
   HiBars3,
+  HiMagnifyingGlass,
+  HiArrowLeft,
+  HiCheckCircle,
 } from 'react-icons/hi2';
 import { MdMenu, MdMenuOpen, MdSettings } from 'react-icons/md';
 import {
@@ -32,22 +28,62 @@ import {
   deleteSubmenu,
   clearError,
 } from '../../features/menuSlice';
+import axiosInstance from '../../utils/axiosInstance';
+import { useDebounce } from '../../utils/useDebounce';
 
 const MenuManagement = () => {
   const dispatch = useDispatch();
-  const { menus, loading, error } = useSelector((state) => state.menu);
+  const { menus, loading, error, pagination } = useSelector((state) => state.menu);
 
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [isSubmenuModal, setIsSubmenuModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [selectedMenuId, setSelectedMenuId] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [deleteType, setDeleteType] = useState('menu');
-  const [form] = Form.useForm();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [formData, setFormData] = useState({
+    name: '',
+    slug: '',
+    path: '',
+    icon: '',
+    sortOrder: '',
+    isActive: true,
+    menuId: '',
+  });
 
   useEffect(() => {
-    dispatch(fetchMenus());
+    dispatch(fetchMenus({
+      page: currentPage,
+      limit: pageSize,
+      search: ''
+    }));
+  }, [dispatch, currentPage, pageSize]);
+
+  // Initial load
+  useEffect(() => {
+    dispatch(fetchMenus({
+      page: 1,
+      limit: 10,
+      search: ''
+    }));
   }, [dispatch]);
+
+  const { debouncedCallback: debouncedSearch } = useDebounce((value: string) => {
+    dispatch(fetchMenus({
+      page: 1,
+      limit: pageSize,
+      search: value
+    }));
+  }, 500);
+
+  const handleSearch = useCallback((value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+    debouncedSearch(value);
+  }, [debouncedSearch]);
 
   useEffect(() => {
     if (error) {
@@ -57,33 +93,63 @@ const MenuManagement = () => {
   }, [error, dispatch]);
 
   const handleAddMenu = () => {
-    setEditingItem(null);
+    resetForm();
     setIsSubmenuModal(false);
-    setIsModalVisible(true);
-    form.resetFields();
+    setShowForm(true);
   };
 
   const handleEditMenu = (menu) => {
     setEditingItem(menu);
     setIsSubmenuModal(false);
-    setIsModalVisible(true);
-    form.setFieldsValue(menu);
+    setFormData({
+      name: menu.name || '',
+      slug: menu.slug || '',
+      path: menu.path || '',
+      icon: menu.icon || '',
+      sortOrder: menu.sortOrder || '',
+      isActive: menu.isActive !== undefined ? menu.isActive : true,
+      menuId: '',
+    });
+    setShowForm(true);
   };
 
   const handleAddSubmenu = (menuId) => {
+    resetForm();
     setSelectedMenuId(menuId);
-    setEditingItem(null);
     setIsSubmenuModal(true);
-    setIsModalVisible(true);
-    form.resetFields();
-    form.setFieldsValue({ menuId });
+    setFormData({ ...formData, menuId: menuId.toString() });
+    setShowForm(true);
   };
 
   const handleEditSubmenu = (submenu) => {
     setEditingItem(submenu);
     setIsSubmenuModal(true);
-    setIsModalVisible(true);
-    form.setFieldsValue(submenu);
+    setFormData({
+      name: submenu.name || '',
+      slug: submenu.slug || '',
+      path: submenu.path || '',
+      icon: '',
+      sortOrder: submenu.sortOrder || '',
+      isActive: submenu.isActive !== undefined ? submenu.isActive : true,
+      menuId: submenu.menuId?.toString() || '',
+    });
+    setShowForm(true);
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      slug: '',
+      path: '',
+      icon: '',
+      sortOrder: '',
+      isActive: true,
+      menuId: '',
+    });
+    setEditingItem(null);
+    setSelectedMenuId(null);
+    setIsSubmenuModal(false);
+    setShowForm(false);
   };
 
   const handleDeleteMenuClick = (menu) => {
@@ -107,37 +173,53 @@ const MenuManagement = () => {
           toast.success(response?.message || 'Submenu deleted successfully');
         }
         setConfirmDelete(null);
+        dispatch(fetchMenus({
+          page: currentPage,
+          limit: pageSize,
+          search: searchTerm
+        }));
       } catch (error) {
         toast.error(error);
       }
     }
   };
 
-  const handleSubmit = async (values) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
+      const submitData = {
+        ...formData,
+        sortOrder: formData.sortOrder ? parseInt(formData.sortOrder) : null,
+        menuId: formData.menuId ? parseInt(formData.menuId) : null,
+      };
+
       if (isSubmenuModal) {
         if (editingItem) {
           const response = await dispatch(
-            updateSubmenu({ id: editingItem.id, submenu: values })
+            updateSubmenu({ id: editingItem.id, submenu: submitData })
           ).unwrap();
           toast.success(response?.message || 'Submenu updated successfully');
         } else {
-          const response = await dispatch(addSubmenu(values)).unwrap();
+          const response = await dispatch(addSubmenu(submitData)).unwrap();
           toast.success(response?.message || 'Submenu created successfully');
         }
       } else {
         if (editingItem) {
           const response = await dispatch(
-            updateMenu({ id: editingItem.id, menu: values })
+            updateMenu({ id: editingItem.id, menu: submitData })
           ).unwrap();
           toast.success(response?.message || 'Menu updated successfully');
         } else {
-          const response = await dispatch(addMenu(values)).unwrap();
+          const response = await dispatch(addMenu(submitData)).unwrap();
           toast.success(response?.message || 'Menu created successfully');
         }
       }
-      setIsModalVisible(false);
-      form.resetFields();
+      resetForm();
+      dispatch(fetchMenus({
+        page: currentPage,
+        limit: pageSize,
+        search: searchTerm
+      }));
     } catch (error) {
       toast.error(error);
     }
@@ -237,21 +319,21 @@ const MenuManagement = () => {
         <div className="flex items-center justify-center space-x-2">
           <button
             onClick={() => handleAddSubmenu(record.id)}
-            className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-brand-500 transition-all duration-300 group"
+            className="p-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-lg transition-all duration-200"
             title="Add Submenu"
           >
             <HiPlus className="w-4 h-4" />
           </button>
           <button
             onClick={() => handleEditMenu(record)}
-            className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-600 transition-all duration-300"
+            className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-all duration-200"
             title="Edit Menu"
           >
             <HiPencil className="w-4 h-4" />
           </button>
           <button
             onClick={() => handleDeleteMenuClick(record)}
-            className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
+            className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200"
             title="Delete Menu"
           >
             <HiTrash className="w-4 h-4" />
@@ -340,14 +422,14 @@ const MenuManagement = () => {
         <div className="flex items-center justify-center space-x-2">
           <button
             onClick={() => handleEditSubmenu(record)}
-            className="p-1.5 rounded text-slate-500 hover:text-white hover:bg-emerald-600 transition-all duration-300"
+            className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-all duration-200"
             title="Edit Submenu"
           >
             <HiPencil className="w-3 h-3" />
           </button>
           <button
             onClick={() => handleDeleteSubmenuClick(record)}
-            className="p-1.5 rounded text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
+            className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-all duration-200"
             title="Delete Submenu"
           >
             <HiTrash className="w-3 h-3" />
@@ -373,8 +455,177 @@ const MenuManagement = () => {
     );
   };
 
+  if (showForm) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="p-2 lg:p-4">
+          {/* Header */}
+          <div className="mb-3">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 lg:p-4">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => setShowForm(false)}
+                    className="p-3 rounded-lg bg-slate-700 text-white hover:bg-slate-800 transition-all duration-300 hover:shadow-lg"
+                  >
+                    <HiArrowLeft className="w-5 h-5" />
+                  </button>
+                  <div>
+                    <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
+                      {isSubmenuModal
+                        ? editingItem
+                          ? 'Edit Submenu'
+                          : 'Add New Submenu'
+                        : editingItem
+                          ? 'Edit Menu'
+                          : 'Add New Menu'}
+                    </h1>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Form */}
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 lg:p-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {isSubmenuModal && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Menu ID *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.menuId}
+                    disabled
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100"
+                  />
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                    placeholder="Enter name"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Slug *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.slug}
+                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                    placeholder="Enter slug"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Path
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.path}
+                    onChange={(e) => setFormData({ ...formData, path: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                    placeholder="Enter path"
+                  />
+                </div>
+
+                {!isSubmenuModal && (
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Icon
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.icon}
+                      onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                      placeholder="Enter icon"
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Sort Order
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.sortOrder}
+                    onChange={(e) => setFormData({ ...formData, sortOrder: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                    placeholder="Enter sort order"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Status
+                </label>
+                <select
+                  value={formData.isActive?.toString() || 'true'}
+                  onChange={(e) => setFormData({ ...formData, isActive: e.target.value === 'true' })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                >
+                  <option value="true">Active</option>
+                  <option value="false">Inactive</option>
+                </select>
+              </div>
+
+              {/* Submit Buttons */}
+              <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50 transition-all duration-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-xl disabled:opacity-50 shadow-lg"
+                >
+                  {loading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      {editingItem ? 'Updating...' : 'Creating...'}
+                    </div>
+                  ) : (
+                    <>
+                      <HiCheckCircle className="w-5 h-5 mr-2 inline" />
+                      {editingItem ? 'Update' : 'Create'} {isSubmenuModal ? 'Submenu' : 'Menu'}
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50">
       <div className="p-2 lg:p-4">
         {/* Header */}
         <div className="mb-6">
@@ -388,19 +639,29 @@ const MenuManagement = () => {
                   <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 dark:text-white mb-1">
                     Menu Management
                   </h1>
-                  <p className="text-slate-600 dark:text-gray-400 text-sm">
-                    Manage your application menus and submenus
-                  </p>
                 </div>
               </div>
 
-              <button
-                onClick={handleAddMenu}
-                className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg transition-all duration-300"
-              >
-                <HiPlus className="w-5 h-5 mr-2" />
-                Add Menu
-              </button>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative">
+                  <HiMagnifyingGlass className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <input
+                    type="text"
+                    placeholder="Search menus..."
+                    className="pl-12 pr-4 py-3 w-full sm:w-72 rounded-lg border border-gray-300 bg-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-all duration-300 text-sm placeholder-gray-500 shadow-sm"
+                    value={searchTerm}
+                    onChange={(e) => handleSearch(e.target.value)}
+                  />
+                </div>
+
+                <button
+                  onClick={handleAddMenu}
+                  className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg transition-all duration-300"
+                >
+                  <HiPlus className="w-5 h-5 mr-2" />
+                  Add Menu
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -439,13 +700,7 @@ const MenuManagement = () => {
               dataSource={menus}
               loading={loading}
               rowKey="id"
-              pagination={{
-                pageSize: 10,
-                showSizeChanger: true,
-                showQuickJumper: true,
-                showTotal: (total, range) =>
-                  `${range[0]}-${range[1]} of ${total} items`,
-              }}
+              pagination={false}
               expandable={{
                 expandedRowRender,
                 rowExpandable: (record) =>
@@ -470,186 +725,28 @@ const MenuManagement = () => {
             />
           )}
         </div>
+
+        {/* Pagination */}
+        {pagination.total > 0 && (
+          <div className="flex justify-center mt-6">
+            <Pagination
+              current={currentPage}
+              total={pagination.total}
+              pageSize={pageSize}
+              onChange={(page) => {
+                setCurrentPage(page);
+                dispatch(fetchMenus({
+                  page: page,
+                  limit: pageSize,
+                  search: searchTerm
+                }));
+              }}
+            />
+          </div>
+        )}
       </div>
 
-      {/* Modal */}
-      <Modal
-        title={
-          <div className="flex items-center gap-3 pb-4 border-b border-gray-200 dark:border-gray-700">
-            <div className="p-2 rounded-lg bg-slate-700">
-              {isSubmenuModal ? (
-                <MdMenuOpen className="w-5 h-5 text-white" />
-              ) : (
-                <HiBars3 className="w-5 h-5 text-white" />
-              )}
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-slate-800 dark:text-white">
-                {isSubmenuModal
-                  ? editingItem
-                    ? 'Edit Submenu'
-                    : 'Add Submenu'
-                  : editingItem
-                    ? 'Edit Menu'
-                    : 'Add Menu'}
-              </h3>
-              <p className="text-sm text-slate-600 dark:text-gray-400">
-                {isSubmenuModal
-                  ? editingItem
-                    ? 'Update submenu details'
-                    : 'Create a new submenu'
-                  : editingItem
-                    ? 'Update menu details'
-                    : 'Create a new menu'}
-              </p>
-            </div>
-          </div>
-        }
-        open={isModalVisible}
-        onCancel={() => {
-          setIsModalVisible(false);
-          form.resetFields();
-        }}
-        footer={null}
-        width={600}
-        className="menu-modal"
-      >
-        <div className="pt-6">
-          <Form
-            form={form}
-            layout="vertical"
-            onFinish={handleSubmit}
-            className="space-y-4"
-          >
-            {isSubmenuModal && (
-              <Form.Item
-                name="menuId"
-                label={
-                  <span className="text-slate-700 dark:text-gray-300 font-medium">
-                    Menu ID
-                  </span>
-                }
-                rules={[{ required: true, message: 'Menu ID is required' }]}
-              >
-                <Input
-                  disabled
-                  className="bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600"
-                />
-              </Form.Item>
-            )}
 
-            <Form.Item
-              name="name"
-              label={
-                <span className="text-slate-700 dark:text-gray-300 font-medium">
-                  Name
-                </span>
-              }
-              rules={[{ required: true, message: 'Name is required' }]}
-            >
-              <Input
-                placeholder="Enter name"
-                className="border-gray-300 dark:border-gray-600 focus:border-brand-500 dark:focus:border-brand-400"
-              />
-            </Form.Item>
-
-            <Form.Item
-              name="slug"
-              label={
-                <span className="text-slate-700 dark:text-gray-300 font-medium">
-                  Slug
-                </span>
-              }
-              rules={[{ required: true, message: 'Slug is required' }]}
-            >
-              <Input
-                placeholder="Enter slug"
-                className="border-gray-300 dark:border-gray-600 focus:border-brand-500 dark:focus:border-brand-400"
-              />
-            </Form.Item>
-
-            <Form.Item
-              name="path"
-              label={
-                <span className="text-slate-700 dark:text-gray-300 font-medium">
-                  Path
-                </span>
-              }
-            >
-              <Input
-                placeholder="Enter path"
-                className="border-gray-300 dark:border-gray-600 focus:border-brand-500 dark:focus:border-brand-400"
-              />
-            </Form.Item>
-
-            {!isSubmenuModal && (
-              <Form.Item
-                name="icon"
-                label={
-                  <span className="text-slate-700 dark:text-gray-300 font-medium">
-                    Icon
-                  </span>
-                }
-              >
-                <Input
-                  placeholder="Enter icon"
-                  className="border-gray-300 dark:border-gray-600 focus:border-brand-500 dark:focus:border-brand-400"
-                />
-              </Form.Item>
-            )}
-
-            <Form.Item
-              name="sortOrder"
-              label={
-                <span className="text-slate-700 dark:text-gray-300 font-medium">
-                  Sort Order
-                </span>
-              }
-            >
-              <Input
-                type="number"
-                placeholder="Enter sort order"
-                className="border-gray-300 dark:border-gray-600 focus:border-brand-500 dark:focus:border-brand-400"
-              />
-            </Form.Item>
-
-            <Form.Item
-              name="isActive"
-              label={
-                <span className="text-slate-700 dark:text-gray-300 font-medium">
-                  Active
-                </span>
-              }
-              valuePropName="checked"
-              initialValue={true}
-            >
-              <Switch className="bg-gray-300 checked:bg-brand-500" />
-            </Form.Item>
-
-            <Form.Item className="mb-0 pt-6 border-t border-gray-200 dark:border-gray-700">
-              <div className="flex items-center justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={() => setIsModalVisible(false)}
-                  className="px-6 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 text-slate-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="px-6 py-2.5 rounded-lg bg-slate-700 hover:bg-slate-800 text-white font-medium shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                >
-                  {loading && (
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                  )}
-                  {editingItem ? 'Update' : 'Create'}
-                </button>
-              </div>
-            </Form.Item>
-          </Form>
-        </div>
-      </Modal>
 
       {/* Delete Confirmation Modal */}
       {confirmDelete && (

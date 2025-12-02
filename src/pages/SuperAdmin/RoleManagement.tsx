@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -15,17 +15,23 @@ import {
   HiEye,
   HiArrowLeft,
   HiCheckCircle,
+  HiUserGroup,
 } from 'react-icons/hi';
+import { HiMagnifyingGlass } from 'react-icons/hi2';
+import { Pagination } from 'antd';
+import axiosInstance from '../../utils/axiosInstance';
+import { useDebounce } from '../../utils/useDebounce';
 
 const RoleManagement: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { roles, loading, error } = useSelector((state: any) => state.role);
+  const { roles, loading, error, pagination } = useSelector((state: any) => state.role);
 
   const [showForm, setShowForm] = useState(false);
   const [editingRole, setEditingRole] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredRoles, setFilteredRoles] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -34,20 +40,37 @@ const RoleManagement: React.FC = () => {
   });
 
   useEffect(() => {
-    dispatch(getAllRoles());
+    dispatch(getAllRoles({
+      page: currentPage,
+      limit: pageSize,
+      search: ''
+    }));
+  }, [dispatch, currentPage, pageSize]);
+
+  // Initial load
+  useEffect(() => {
+    dispatch(getAllRoles({
+      page: 1,
+      limit: 10,
+      search: ''
+    }));
   }, [dispatch]);
 
-  useEffect(() => {
-    if (roles) {
-      const filtered = roles.filter(
-        (role: any) =>
-          role.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          role.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          role.description?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredRoles(filtered);
-    }
-  }, [roles, searchTerm]);
+  const { debouncedCallback: debouncedSearch } = useDebounce((value: string) => {
+    dispatch(getAllRoles({
+      page: 1,
+      limit: pageSize,
+      search: value
+    }));
+  }, 500);
+
+  const handleSearch = useCallback((value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+    debouncedSearch(value);
+  }, [debouncedSearch]);
+
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,6 +85,11 @@ const RoleManagement: React.FC = () => {
         toast.success(result.message || 'Role created successfully');
       }
       resetForm();
+      dispatch(getAllRoles({
+        page: currentPage,
+        limit: pageSize,
+        search: searchTerm
+      }));
     } catch (error) {
       toast.error(error || 'Operation failed');
     }
@@ -77,6 +105,11 @@ const RoleManagement: React.FC = () => {
         const result = await dispatch(deleteRole(confirmDelete.id)).unwrap();
         toast.success(result.message || 'Role deleted successfully');
         setConfirmDelete(null);
+        dispatch(getAllRoles({
+          page: currentPage,
+          limit: pageSize,
+          search: searchTerm
+        }));
       } catch (error) {
         toast.error(error || 'Delete failed');
       }
@@ -108,7 +141,7 @@ const RoleManagement: React.FC = () => {
     setShowForm(true);
   };
 
-  if (loading && !roles.length) {
+  if (loading && (!Array.isArray(roles) || !roles.length)) {
     return (
       <div className="min-h-screen flex justify-center items-center bg-gray-50">
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8 text-center">
@@ -237,105 +270,103 @@ const RoleManagement: React.FC = () => {
         <div className="mb-3">
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 lg:p-4">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-              <div>
-                <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
-                  Role Management
-                </h1>
-                {/* <p className="text-slate-600">Manage system roles and permissions</p> */}
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-lg bg-slate-700 shadow-lg">
+                  <HiUserGroup className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
+                    Role Management
+                  </h1>
+                </div>
               </div>
-              <button
-                onClick={handleAddNew}
-                className="flex items-center gap-2 px-4 py-3 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-all duration-300 hover:shadow-lg font-medium"
-              >
-                <HiPlus className="w-5 h-5" />
-                Add New Role
-              </button>
-            </div>
-          </div>
-        </div>
 
-        {/* Search */}
-        <div className="mb-4">
-          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
-            <input
-              type="text"
-              placeholder="Search roles by name, display name, or description..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-            />
-          </div>
-        </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative">
+                  <HiMagnifyingGlass className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <input
+                    type="text"
+                    placeholder="Search roles..."
+                    className="pl-12 pr-4 py-3 w-full sm:w-72 rounded-lg border border-gray-300 bg-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-all duration-300 text-sm placeholder-gray-500 shadow-sm"
+                    value={searchTerm}
+                    onChange={(e) => handleSearch(e.target.value)}
+                  />
+                </div>
 
-        {/* Roles Table */}
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-          {filteredRoles.length === 0 ? (
-            <div className="p-8 text-center">
-              <div className="text-slate-400 mb-4">
-                <HiEye className="w-16 h-16 mx-auto" />
-              </div>
-              <h3 className="text-lg font-medium text-slate-600 mb-2">
-                No roles found
-              </h3>
-              <p className="text-slate-500 mb-4">
-                {searchTerm
-                  ? 'No roles match your search criteria.'
-                  : 'Get started by creating your first role.'}
-              </p>
-              {!searchTerm && (
                 <button
                   onClick={handleAddNew}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-colors"
+                  className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg"
                 >
-                  <HiPlus className="w-4 h-4" />
-                  Add First Role
+                  <HiPlus className="w-5 h-5 mr-2" />
+                  Add Role
                 </button>
-              )}
+              </div>
             </div>
-          ) : (
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-12 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-slate-600 mx-auto mb-4"></div>
+            <p className="text-slate-600 font-medium">Loading roles...</p>
+          </div>
+        ) : roles.length === 0 ? (
+          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-12 text-center">
+            <div className="w-10 h-10 mx-auto mb-6 rounded-2xl bg-slate-600 flex items-center justify-center shadow-lg">
+              <HiMagnifyingGlass className="w-4 h-4 text-white" />
+            </div>
+            <h3 className="text-xl font-semibold text-slate-800 mb-2">
+              No roles found
+            </h3>
+            <p className="text-slate-600 mb-6">
+              {searchTerm ? 'Try adjusting your search.' : 'Create your first role to get started.'}
+            </p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+                    <th className="px-4 py-2 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
                       Role Name
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+                    <th className="px-4 py-2 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
                       Display Name
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+                    <th className="px-4 py-2 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
                       Description
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+                    <th className="px-4 py-2 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
                       Type
                     </th>
-                    <th className="px-6 py-4 text-right text-xs font-medium text-slate-600 uppercase tracking-wider">
+                    <th className="px-4 py-2 text-right text-xs font-medium text-slate-600 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredRoles.map((role: any) => (
+                  {roles.map((role: any) => (
                     <tr
                       key={role.id}
                       className="hover:bg-gray-50 transition-colors"
                     >
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-2 whitespace-nowrap">
                         <div className="text-sm font-medium text-slate-900">
                           {role.name}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-2 whitespace-nowrap">
                         <div className="text-sm text-slate-600">
                           {role.displayName}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-2">
                         <div className="text-sm text-slate-600 max-w-xs truncate">
                           {role.description || 'No description'}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-2 whitespace-nowrap">
                         <span
                           className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                             role.isSystem
@@ -346,7 +377,7 @@ const RoleManagement: React.FC = () => {
                           {role.isSystem ? 'System' : 'Custom'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <td className="px-4 py-2 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => handleEdit(role)}
@@ -371,21 +402,25 @@ const RoleManagement: React.FC = () => {
                 </tbody>
               </table>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* Summary */}
-        {filteredRoles.length > 0 && (
-          <div className="mt-4 bg-white rounded-lg border border-gray-200 shadow-sm p-4">
-            <div className="flex items-center justify-between text-sm text-slate-600">
-              <span>
-                Showing {filteredRoles.length} of {roles.length} roles
-              </span>
-              <span>
-                {roles.filter((r: any) => r.isSystem).length} system roles,{' '}
-                {roles.filter((r: any) => !r.isSystem).length} custom roles
-              </span>
-            </div>
+        {/* Simple Pagination */}
+        {pagination.total > 0 && (
+          <div className="flex justify-center mt-6">
+            <Pagination
+              current={currentPage}
+              total={pagination.total}
+              pageSize={pageSize}
+              onChange={(page) => {
+                setCurrentPage(page);
+                dispatch(getAllRoles({
+                  page: page,
+                  limit: pageSize,
+                  search: searchTerm
+                }));
+              }}
+            />
           </div>
         )}
       </div>

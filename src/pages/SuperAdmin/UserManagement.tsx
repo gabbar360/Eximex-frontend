@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import {
@@ -15,12 +15,16 @@ import {
   HiEye,
   HiArrowLeft,
   HiCheckCircle,
+  HiUsers,
 } from 'react-icons/hi';
+import { HiMagnifyingGlass } from 'react-icons/hi2';
+import { Pagination } from 'antd';
 import axiosInstance from '../../utils/axiosInstance';
+import { useDebounce } from '../../utils/useDebounce';
 
 const UserManagement: React.FC = () => {
   const dispatch = useDispatch();
-  const { users, loading, error } = useSelector(
+  const { users, loading, error, pagination } = useSelector(
     (state: any) => state.userManagement
   );
   const { roles } = useSelector((state: any) => state.role);
@@ -28,7 +32,8 @@ const UserManagement: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [formData, setFormData] = useState({
     firstName: '',
@@ -41,33 +46,46 @@ const UserManagement: React.FC = () => {
   const [companies, setCompanies] = useState([]);
 
   useEffect(() => {
-    dispatch(fetchUsers());
+    dispatch(fetchUsers({
+      page: currentPage,
+      limit: pageSize,
+      search: ''
+    }));
     dispatch(getAllRoles());
     fetchCompanies();
+  }, [dispatch, currentPage, pageSize]);
+
+  // Initial load
+  useEffect(() => {
+    dispatch(fetchUsers({
+      page: 1,
+      limit: 10,
+      search: ''
+    }));
   }, [dispatch]);
+
+  const { debouncedCallback: debouncedSearch } = useDebounce((value: string) => {
+    dispatch(fetchUsers({
+      page: 1,
+      limit: pageSize,
+      search: value
+    }));
+  }, 500);
 
   const fetchCompanies = async () => {
     try {
       const response = await axiosInstance.get('/super-admin/companies');
-      setCompanies(response.data.data);
+      setCompanies(response.data.data.data || response.data.data);
     } catch (error) {
       console.error('Failed to fetch companies:', error);
     }
   };
 
-  useEffect(() => {
-    if (users) {
-      const filtered = users.filter(
-        (user: any) =>
-          user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          user.role?.displayName
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase())
-      );
-      setFilteredUsers(filtered);
-    }
-  }, [users, searchTerm]);
+  const handleSearch = useCallback((value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+    debouncedSearch(value);
+  }, [debouncedSearch]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,6 +108,11 @@ const UserManagement: React.FC = () => {
         toast.success(result.message || 'User created successfully');
       }
       resetForm();
+      dispatch(fetchUsers({
+        page: currentPage,
+        limit: pageSize,
+        search: searchTerm
+      }));
     } catch (error) {
       toast.error(error || 'Operation failed');
     }
@@ -105,6 +128,11 @@ const UserManagement: React.FC = () => {
         const result = await dispatch(deleteUser(confirmDelete.id)).unwrap();
         toast.success(result.message || 'User deleted successfully');
         setConfirmDelete(null);
+        dispatch(fetchUsers({
+          page: currentPage,
+          limit: pageSize,
+          search: searchTerm
+        }));
       } catch (error) {
         toast.error(error || 'Delete failed');
       }
@@ -339,61 +367,60 @@ const UserManagement: React.FC = () => {
         <div className="mb-3">
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 lg:p-4">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-              <div>
-                <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
-                  User Management
-                </h1>
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-lg bg-slate-700 shadow-lg">
+                  <HiUsers className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
+                    User Management
+                  </h1>
+                </div>
               </div>
-              <button
-                onClick={handleAddNew}
-                className="flex items-center gap-2 px-4 py-3 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-all duration-300 hover:shadow-lg font-medium"
-              >
-                <HiPlus className="w-5 h-5" />
-                Add New User
-              </button>
-            </div>
-          </div>
-        </div>
 
-        {/* Search */}
-        <div className="mb-4">
-          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
-            <input
-              type="text"
-              placeholder="Search users by name, email, or role..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-            />
-          </div>
-        </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative">
+                  <HiMagnifyingGlass className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                  <input
+                    type="text"
+                    placeholder="Search users..."
+                    className="pl-12 pr-4 py-3 w-full sm:w-72 rounded-lg border border-gray-300 bg-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-all duration-300 text-sm placeholder-gray-500 shadow-sm"
+                    value={searchTerm}
+                    onChange={(e) => handleSearch(e.target.value)}
+                  />
+                </div>
 
-        {/* Users Table */}
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-          {filteredUsers.length === 0 ? (
-            <div className="p-8 text-center">
-              <div className="text-slate-400 mb-4">
-                <HiEye className="w-16 h-16 mx-auto" />
-              </div>
-              <h3 className="text-lg font-medium text-slate-600 mb-2">
-                No users found
-              </h3>
-              <p className="text-slate-500 mb-4">
-                {searchTerm
-                  ? 'No users match your search criteria.'
-                  : 'Get started by creating your first user.'}
-              </p>
-              {!searchTerm && (
                 <button
                   onClick={handleAddNew}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-colors"
+                  className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg"
                 >
-                  <HiPlus className="w-4 h-4" />
-                  Add First User
+                  <HiPlus className="w-5 h-5 mr-2" />
+                  Add User
                 </button>
-              )}
+              </div>
             </div>
-          ) : (
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-12 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-slate-600 mx-auto mb-4"></div>
+            <p className="text-slate-600 font-medium">Loading users...</p>
+          </div>
+        ) : users.length === 0 ? (
+          <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-12 text-center">
+            <div className="w-10 h-10 mx-auto mb-6 rounded-2xl bg-slate-600 flex items-center justify-center shadow-lg">
+              <HiMagnifyingGlass className="w-4 h-4 text-white" />
+            </div>
+            <h3 className="text-xl font-semibold text-slate-800 mb-2">
+              No users found
+            </h3>
+            <p className="text-slate-600 mb-6">
+              {searchTerm ? 'Try adjusting your search.' : 'Create your first user to get started.'}
+            </p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
@@ -413,16 +440,13 @@ const UserManagement: React.FC = () => {
                     <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
-                      Created At
-                    </th>
                     <th className="px-6 py-4 text-right text-xs font-medium text-slate-600 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredUsers.map((user: any) => (
+                  {users.map((user: any) => (
                     <tr
                       key={user.id}
                       className="hover:bg-gray-50 transition-colors"
@@ -462,11 +486,6 @@ const UserManagement: React.FC = () => {
                           {user.status === 'ACTIVE' ? 'Active' : 'Inactive'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-slate-600">
-                          {new Date(user.createdAt).toLocaleDateString()}
-                        </div>
-                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex items-center justify-end gap-2">
                           <button
@@ -491,22 +510,25 @@ const UserManagement: React.FC = () => {
                 </tbody>
               </table>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* Summary */}
-        {filteredUsers.length > 0 && (
-          <div className="mt-4 bg-white rounded-lg border border-gray-200 shadow-sm p-4">
-            <div className="flex items-center justify-between text-sm text-slate-600">
-              <span>
-                Showing {filteredUsers.length} of {users.length} users
-              </span>
-              <span>
-                {users.filter((u: any) => u.status === 'ACTIVE').length} active
-                users, {users.filter((u: any) => u.status !== 'ACTIVE').length}{' '}
-                inactive users
-              </span>
-            </div>
+        {/* Pagination */}
+        {pagination.total > 0 && (
+          <div className="flex justify-center mt-6">
+            <Pagination
+              current={currentPage}
+              total={pagination.total}
+              pageSize={pageSize}
+              onChange={(page) => {
+                setCurrentPage(page);
+                dispatch(fetchUsers({
+                  page: page,
+                  limit: pageSize,
+                  search: searchTerm
+                }));
+              }}
+            />
           </div>
         )}
       </div>

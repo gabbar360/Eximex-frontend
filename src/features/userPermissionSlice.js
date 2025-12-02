@@ -71,9 +71,9 @@ export const fetchUserWithPermissions = createAsyncThunk(
 
 export const fetchAllUsersWithPermissions = createAsyncThunk(
   'userPermission/fetchAllUsersWithPermissions',
-  async (_, { rejectWithValue }) => {
+  async (params = {}, { rejectWithValue }) => {
     try {
-      return await userPermissionService.getAllUsersWithPermissions();
+      return await userPermissionService.getAllUsersWithPermissions(params);
     } catch (err) {
       return rejectWithValue(
         err.message || 'Failed to fetch users with permissions'
@@ -102,6 +102,7 @@ const userPermissionSlice = createSlice({
     sidebarMenu: [],
     loading: false,
     error: null,
+    pagination: { total: 0, page: 1, limit: 10, totalPages: 0 },
   },
   reducers: {
     clearUserPermissions(state) {
@@ -185,7 +186,8 @@ const userPermissionSlice = createSlice({
       })
       .addCase(fetchAllUsersWithPermissions.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.allUsersPermissions = payload?.data || payload || [];
+        state.allUsersPermissions = payload.data?.data || payload.data || [];
+        state.pagination = payload.data?.pagination || { total: 0, page: 1, limit: 10, totalPages: 0 };
       })
       .addCase(fetchAllUsersWithPermissions.rejected, (state, { payload }) => {
         state.loading = false;

@@ -447,17 +447,19 @@ const AddEditPurchaseOrderForm: React.FC = () => {
         {/* Header */}
         <div className="mb-3">
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 lg:p-4">
-            <div className="flex items-center gap-4 mb-4">
-              <button
-                onClick={() => navigate('/purchase-orders')}
-                className="p-3 rounded-lg bg-white shadow-md hover:shadow-lg transition-all duration-300 text-slate-600 hover:text-slate-800"
-              >
-                <HiArrowLeft className="w-5 h-5" />
-              </button>
-              <div>
-                <h1 className="text-3xl font-bold text-slate-800">
-                  {isEdit ? 'Edit Purchase Order' : 'Create Purchase Order'}
-                </h1>
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => navigate('/purchase-orders')}
+                  className="p-3 rounded-lg bg-slate-700 text-white hover:bg-slate-800 transition-all duration-300 hover:shadow-lg"
+                >
+                  <HiArrowLeft className="w-5 h-5" />
+                </button>
+                <div>
+                  <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
+                    {isEdit ? 'Edit Purchase Order' : 'Create Purchase Order'}
+                  </h1>
+                </div>
               </div>
             </div>
           </div>

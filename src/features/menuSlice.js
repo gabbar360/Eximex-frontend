@@ -3,9 +3,9 @@ import menuService from '../service/menuService';
 
 export const fetchMenus = createAsyncThunk(
   'menu/fetchMenus',
-  async (_, { rejectWithValue }) => {
+  async (params = {}, { rejectWithValue }) => {
     try {
-      return await menuService.getAllMenus();
+      return await menuService.getAllMenus(params);
     } catch (err) {
       return rejectWithValue(err.message || 'Failed to fetch menus');
     }
@@ -102,6 +102,7 @@ const menuSlice = createSlice({
     loading: false,
     error: null,
     selectedMenu: null,
+    pagination: { total: 0, page: 1, limit: 10, totalPages: 0 },
   },
   reducers: {
     setSelectedMenu(state, { payload }) {
@@ -123,8 +124,8 @@ const menuSlice = createSlice({
       })
       .addCase(fetchMenus.fulfilled, (state, { payload }) => {
         state.loading = false;
-        const responseData = payload?.data || payload;
-        state.menus = responseData || [];
+        state.menus = payload.data?.data || payload.data || [];
+        state.pagination = payload.data?.pagination || { total: 0, page: 1, limit: 10, totalPages: 0 };
       })
       .addCase(fetchMenus.rejected, (state, { payload }) => {
         state.loading = false;
