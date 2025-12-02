@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Table,
   Switch,
   Button,
-  Modal,
   Select,
   message,
   Space,
   Card,
   Collapse,
+  Pagination,
 } from 'antd';
 import { EditOutlined, UserOutlined } from '@ant-design/icons';
 import { toast } from 'react-toastify';
@@ -19,6 +19,10 @@ import {
   HiCog6Tooth,
   HiPencil,
   HiUserGroup,
+  HiMagnifyingGlass,
+  HiTrash,
+  HiArrowLeft,
+  HiCheckCircle,
 } from 'react-icons/hi2';
 import { MdSecurity, MdAdminPanelSettings } from 'react-icons/md';
 import {
@@ -27,27 +31,61 @@ import {
   updateUserPermissions,
   clearError,
 } from '../../features/userPermissionSlice';
+import { deleteUser } from '../../features/userManagementSlice';
 import { fetchMenus } from '../../features/menuSlice';
+import axiosInstance from '../../utils/axiosInstance';
+import { useDebounce } from '../../utils/useDebounce';
 
 const { Option } = Select;
 const { Panel } = Collapse;
 
 const UserPermissionManagement = () => {
   const dispatch = useDispatch();
-  const { allUsersPermissions, userPermissions, loading, error } = useSelector(
+  const { allUsersPermissions, userPermissions, loading, error, pagination } = useSelector(
     (state) => state.userPermission
   );
   const { menus } = useSelector((state) => state.menu);
 
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [permissions, setPermissions] = useState({});
   const [initialPermissions, setInitialPermissions] = useState({});
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
   useEffect(() => {
-    dispatch(fetchAllUsersWithPermissions());
+    dispatch(fetchAllUsersWithPermissions({
+      page: currentPage,
+      limit: pageSize,
+      search: ''
+    }));
     dispatch(fetchMenus());
+  }, [dispatch, currentPage, pageSize]);
+
+  // Initial load
+  useEffect(() => {
+    dispatch(fetchAllUsersWithPermissions({
+      page: 1,
+      limit: 10,
+      search: ''
+    }));
   }, [dispatch]);
+
+  const { debouncedCallback: debouncedSearch } = useDebounce((value: string) => {
+    dispatch(fetchAllUsersWithPermissions({
+      page: 1,
+      limit: pageSize,
+      search: value
+    }));
+  }, 500);
+
+  const handleSearch = useCallback((value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+    debouncedSearch(value);
+  }, [debouncedSearch]);
 
   useEffect(() => {
     if (error) {
@@ -58,7 +96,7 @@ const UserPermissionManagement = () => {
 
   const handleEditPermissions = async (user) => {
     setSelectedUser(user);
-    setIsModalVisible(true);
+    setShowForm(true);
 
     try {
       const response = await dispatch(fetchUserPermissions(user.id)).unwrap();
@@ -171,117 +209,47 @@ const UserPermissionManagement = () => {
       ).unwrap();
 
       toast.success(response?.message || 'Permissions updated successfully');
-      setIsModalVisible(false);
+      setShowForm(false);
       setPermissions({});
       setInitialPermissions({});
       setSelectedUser(null);
-      dispatch(fetchAllUsersWithPermissions());
+      dispatch(fetchAllUsersWithPermissions({
+        page: currentPage,
+        limit: pageSize,
+        search: searchTerm
+      }));
     } catch (error) {
       toast.error(error?.message || 'Failed to update permissions');
     }
   };
 
-  const columns = [
-    {
-      title: (
-        <div className="flex items-center gap-2 text-slate-700 font-semibold">
-          <HiUser className="w-4 h-4" />
-          <span>User</span>
-        </div>
-      ),
-      key: 'user',
-      render: (_, record) => (
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
-            <HiUser className="w-5 h-5 text-slate-600" />
-          </div>
-          <div>
-            <div className="font-medium text-slate-800">{record.name}</div>
-            <div className="text-slate-500 text-sm">{record.email}</div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: (
-        <div className="flex items-center gap-2 text-slate-700 font-semibold">
-          <MdAdminPanelSettings className="w-4 h-4" />
-          <span>Role</span>
-        </div>
-      ),
-      dataIndex: ['role', 'displayName'],
-      key: 'role',
-      render: (role) => (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
-          {role || 'No Role'}
-        </span>
-      ),
-    },
-    {
-      title: (
-        <div className="flex items-center gap-2 text-slate-700 font-semibold">
-          <HiShieldCheck className="w-4 h-4" />
-          <span>Permissions Count</span>
-        </div>
-      ),
-      key: 'permissionsCount',
-      render: (_, record) => {
-        const activePermissions =
-          record.permissions?.filter(
-            (p) => p.canView || p.canCreate || p.canUpdate || p.canDelete
-          ) || [];
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-100 text-brand-800">
-            {activePermissions.length}
-          </span>
-        );
-      },
-    },
-    {
-      title: (
-        <div className="flex items-center gap-2 text-slate-700 font-semibold">
-          <HiCog6Tooth className="w-4 h-4" />
-          <span>Assigned Menus</span>
-        </div>
-      ),
-      key: 'assignedMenus',
-      render: (_, record) => {
-        const menuNames =
-          record.permissions
-            ?.filter(
-              (p) =>
-                (p.canView || p.canCreate || p.canUpdate || p.canDelete) &&
-                p.menuName
-            )
-            ?.map((p) => p.menuName)
-            ?.filter((name, index, arr) => arr.indexOf(name) === index) || [];
-        return (
-          <div className="text-slate-600 text-sm">
-            {menuNames.length > 0 ? menuNames.join(', ') : 'No menus assigned'}
-          </div>
-        );
-      },
-    },
-    {
-      title: (
-        <div className="flex items-center justify-center gap-2 text-slate-700 font-semibold">
-          <span>Actions</span>
-        </div>
-      ),
-      key: 'actions',
-      render: (_, record) => (
-        <div className="flex justify-center">
-          <button
-            onClick={() => handleEditPermissions(record)}
-            className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-brand-500 transition-all duration-300"
-            title="Edit Permissions"
-          >
-            <HiPencil className="w-4 h-4" />
-          </button>
-        </div>
-      ),
-    },
-  ];
+  const handleDeleteClick = (user) => {
+    setConfirmDelete(user);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (confirmDelete) {
+      try {
+        const result = await dispatch(deleteUser(confirmDelete.id)).unwrap();
+        toast.success(result.message || 'User deleted successfully');
+        setConfirmDelete(null);
+        dispatch(fetchAllUsersWithPermissions({
+          page: currentPage,
+          limit: pageSize,
+          search: searchTerm
+        }));
+      } catch (error) {
+        toast.error(error?.message || 'Delete failed');
+      }
+    }
+  };
+
+  const resetForm = () => {
+    setPermissions({});
+    setInitialPermissions({});
+    setSelectedUser(null);
+    setShowForm(false);
+  };
 
   const renderPermissionControls = (item, keyPrefix) => {
     const key = `${keyPrefix}_${item.id}`;
@@ -344,23 +312,262 @@ const UserPermissionManagement = () => {
     );
   };
 
+  if (showForm) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="p-2 lg:p-4">
+          {/* Header */}
+          <div className="mb-3">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 lg:p-4">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => setShowForm(false)}
+                    className="p-3 rounded-lg bg-slate-700 text-white hover:bg-slate-800 transition-all duration-300 hover:shadow-lg"
+                  >
+                    <HiArrowLeft className="w-5 h-5" />
+                  </button>
+                  <div>
+                    <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
+                      Edit Permissions - {selectedUser?.name}
+                    </h1>
+                    <p className="text-sm text-slate-600">
+                      Configure user access permissions for menus and submenus
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Form */}
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 lg:p-8">
+            <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-start gap-3">
+                <HiShieldCheck className="w-5 h-5 text-blue-600 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-blue-800 mb-1">
+                    Permission Guidelines
+                  </p>
+                  <p className="text-sm text-blue-700">
+                    Only menus with at least one permission enabled will be saved.
+                    Configure permissions carefully to ensure proper access control.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="max-h-96 overflow-y-auto">
+              <Collapse className="permission-collapse">
+                {menus.map((menu) => (
+                  <Panel
+                    header={
+                      <div className="flex items-center gap-3">
+                        <HiCog6Tooth className="w-4 h-4 text-slate-600" />
+                        <span className="font-medium text-slate-800">
+                          {menu.name}
+                        </span>
+                      </div>
+                    }
+                    key={menu.id}
+                    className="mb-2"
+                  >
+                    <div className="space-y-4">
+                      {menu.submenus && menu.submenus.length > 0 ? (
+                        <div>
+                          <div className="mb-4">
+                            <h4 className="font-medium text-slate-800 mb-3 flex items-center gap-2">
+                              <HiCog6Tooth className="w-4 h-4" />
+                              Main Menu Permissions
+                            </h4>
+                            {renderPermissionControls(menu, 'menu')}
+                          </div>
+                          <div>
+                            <h4 className="font-medium text-slate-800 mb-3 flex items-center gap-2">
+                              <HiCog6Tooth className="w-4 h-4" />
+                              Submenu Permissions
+                            </h4>
+                            <div className="space-y-4">
+                              {menu.submenus.map((submenu) => (
+                                <div
+                                  key={submenu.id}
+                                  className="pl-4 border-l-2 border-gray-200"
+                                >
+                                  <h5 className="text-sm font-medium text-slate-700 mb-3">
+                                    ↳ {submenu.name}
+                                  </h5>
+                                  {renderPermissionControls(submenu, 'submenu')}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          <h4 className="font-medium mb-2">Menu Permissions</h4>
+                          {renderPermissionControls(menu, 'menu')}
+                        </div>
+                      )}
+                    </div>
+                  </Panel>
+                ))}
+              </Collapse>
+            </div>
+
+            {/* Submit Buttons */}
+            <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200 mt-6">
+              <button
+                type="button"
+                onClick={resetForm}
+                className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50 transition-all duration-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSavePermissions}
+                disabled={loading}
+                className="px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-xl disabled:opacity-50 shadow-lg flex items-center gap-2"
+              >
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Saving...
+                  </div>
+                ) : (
+                  <>
+                    <HiCheckCircle className="w-5 h-5" />
+                    Save Permissions
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const columns = [
+    {
+      title: (
+        <div className="flex items-center gap-2 text-slate-700 font-semibold">
+          <HiUser className="w-4 h-4" />
+          <span>Username</span>
+        </div>
+      ),
+      key: 'username',
+      render: (_, record) => (
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
+            <HiUser className="w-5 h-5 text-slate-600" />
+          </div>
+          <div className="font-medium text-slate-800">{record.name}</div>
+        </div>
+      ),
+    },
+    {
+      title: (
+        <div className="flex items-center gap-2 text-slate-700 font-semibold">
+          <span>Email</span>
+        </div>
+      ),
+      dataIndex: 'email',
+      key: 'email',
+      render: (email) => (
+        <div className="text-sm text-slate-600">{email}</div>
+      ),
+    },
+    {
+      title: (
+        <div className="flex items-center gap-2 text-slate-700 font-semibold">
+          <MdAdminPanelSettings className="w-4 h-4" />
+          <span>Role</span>
+        </div>
+      ),
+      dataIndex: ['role', 'displayName'],
+      key: 'role',
+      render: (role) => (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
+          {role || 'No Role'}
+        </span>
+      ),
+    },
+    {
+      title: (
+        <div className="flex items-center gap-2 text-slate-700 font-semibold">
+          <HiShieldCheck className="w-4 h-4" />
+          <span>Permissions Count</span>
+        </div>
+      ),
+      key: 'permissionsCount',
+      render: (_, record) => {
+        const activePermissions =
+          record.permissions?.filter(
+            (p) => p.canView || p.canCreate || p.canUpdate || p.canDelete
+          ) || [];
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-100 text-brand-800">
+            {activePermissions.length}
+          </span>
+        );
+      },
+    },
+
+    {
+      title: (
+        <div className="flex items-center justify-center gap-2 text-slate-700 font-semibold">
+          <span>Actions</span>
+        </div>
+      ),
+      key: 'actions',
+      render: (_, record) => (
+        <div className="flex justify-center gap-2">
+          <button
+            onClick={() => handleEditPermissions(record)}
+            className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-all duration-200"
+            title="Edit Permissions"
+          >
+            <HiPencil className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => handleDeleteClick(record)}
+            className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200"
+            title="Delete User"
+          >
+            <HiTrash className="w-4 h-4" />
+          </button>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="p-2 lg:p-4">
         {/* Header */}
         <div className="mb-6">
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-4 lg:p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-lg bg-slate-700 shadow-lg">
-                <HiShieldCheck className="w-6 h-6 text-white" />
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-lg bg-slate-700 shadow-lg">
+                  <HiShieldCheck className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 dark:text-white mb-1">
+                    User Permission Management
+                  </h1>
+                </div>
               </div>
-              <div>
-                <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 dark:text-white mb-1">
-                  User Permission Management
-                </h1>
-                <p className="text-slate-600 dark:text-gray-400 text-sm">
-                  Manage user permissions and access control
-                </p>
+
+              <div className="relative">
+                <HiMagnifyingGlass className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Search users..."
+                  className="pl-12 pr-4 py-3 w-full sm:w-72 rounded-lg border border-gray-300 bg-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-all duration-300 text-sm placeholder-gray-500 shadow-sm"
+                  value={searchTerm}
+                  onChange={(e) => handleSearch(e.target.value)}
+                />
               </div>
             </div>
           </div>
@@ -393,144 +600,66 @@ const UserPermissionManagement = () => {
               dataSource={allUsersPermissions}
               loading={loading}
               rowKey="id"
-              pagination={{
-                pageSize: 10,
-                showSizeChanger: true,
-                showQuickJumper: true,
-                showTotal: (total, range) =>
-                  `${range[0]}-${range[1]} of ${total} items`,
-              }}
+              pagination={false}
               className="permission-management-table"
             />
           )}
         </div>
+
+        {/* Pagination */}
+        {pagination.total > 0 && (
+          <div className="flex justify-center mt-6">
+            <Pagination
+              current={currentPage}
+              total={pagination.total}
+              pageSize={pageSize}
+              onChange={(page) => {
+                setCurrentPage(page);
+                dispatch(fetchAllUsersWithPermissions({
+                  page: page,
+                  limit: pageSize,
+                  search: searchTerm
+                }));
+              }}
+            />
+          </div>
+        )}
       </div>
 
-      {/* Permission Modal */}
-      <Modal
-        title={
-          <div className="flex items-center gap-3 pb-4 border-b border-gray-200 dark:border-gray-700">
-            <div className="p-2 rounded-lg bg-slate-700">
-              <MdSecurity className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-slate-800 dark:text-white">
-                Edit Permissions - {selectedUser?.name}
+
+
+      {/* Delete Confirmation Modal */}
+      {confirmDelete && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-60 p-4">
+          <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-8 border border-gray-200">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-red-600 flex items-center justify-center shadow-lg">
+                <HiTrash className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 mb-2">
+                Delete User
               </h3>
-              <p className="text-sm text-slate-600 dark:text-gray-400">
-                Configure user access permissions for menus and submenus
+              <p className="text-slate-600">
+                Are you sure you want to delete "{confirmDelete.name}"?
               </p>
             </div>
-          </div>
-        }
-        open={isModalVisible}
-        onCancel={() => {
-          setIsModalVisible(false);
-          setPermissions({});
-          setInitialPermissions({});
-          setSelectedUser(null);
-        }}
-        width={900}
-        footer={
-          <div className="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <button
-              onClick={() => {
-                setIsModalVisible(false);
-                setPermissions({});
-                setInitialPermissions({});
-                setSelectedUser(null);
-              }}
-              className="px-6 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 text-slate-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSavePermissions}
-              disabled={loading}
-              className="px-6 py-2.5 rounded-lg bg-slate-700 hover:bg-slate-800 text-white font-medium shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              {loading && (
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-              )}
-              Save Permissions
-            </button>
-          </div>
-        }
-        className="permission-modal"
-      >
-        <div className="max-h-96 overflow-y-auto">
-          <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-            <div className="flex items-start gap-3">
-              <HiShieldCheck className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
-              <div>
-                <p className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-1">
-                  Permission Guidelines
-                </p>
-                <p className="text-sm text-blue-700 dark:text-blue-300">
-                  Only menus with at least one permission enabled will be saved.
-                  Configure permissions carefully to ensure proper access
-                  control.
-                </p>
-              </div>
+            <div className="flex items-center justify-center space-x-3">
+              <button
+                onClick={() => setConfirmDelete(null)}
+                className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                className="px-6 py-3 rounded-lg bg-red-600 text-white hover:bg-red-700 shadow-lg"
+              >
+                Delete
+              </button>
             </div>
           </div>
-
-          <Collapse className="permission-collapse">
-            {menus.map((menu) => (
-              <Panel
-                header={
-                  <div className="flex items-center gap-3">
-                    <HiCog6Tooth className="w-4 h-4 text-slate-600" />
-                    <span className="font-medium text-slate-800">
-                      {menu.name}
-                    </span>
-                  </div>
-                }
-                key={menu.id}
-                className="mb-2"
-              >
-                <div className="space-y-4">
-                  {menu.submenus && menu.submenus.length > 0 ? (
-                    <div>
-                      <div className="mb-4">
-                        <h4 className="font-medium text-slate-800 mb-3 flex items-center gap-2">
-                          <HiCog6Tooth className="w-4 h-4" />
-                          Main Menu Permissions
-                        </h4>
-                        {renderPermissionControls(menu, 'menu')}
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-slate-800 mb-3 flex items-center gap-2">
-                          <HiCog6Tooth className="w-4 h-4" />
-                          Submenu Permissions
-                        </h4>
-                        <div className="space-y-4">
-                          {menu.submenus.map((submenu) => (
-                            <div
-                              key={submenu.id}
-                              className="pl-4 border-l-2 border-gray-200"
-                            >
-                              <h5 className="text-sm font-medium text-slate-700 mb-3">
-                                ↳ {submenu.name}
-                              </h5>
-                              {renderPermissionControls(submenu, 'submenu')}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      <h4 className="font-medium mb-2">Menu Permissions</h4>
-                      {renderPermissionControls(menu, 'menu')}
-                    </div>
-                  )}
-                </div>
-              </Panel>
-            ))}
-          </Collapse>
         </div>
-      </Modal>
+      )}
     </div>
   );
 };

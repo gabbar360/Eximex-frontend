@@ -57,7 +57,7 @@ export const userService = {
     const response = await axiosInstance.get('/super-admin/get-users', {
       params,
     });
-    return response.data.data;
+    return response.data;
   },
 
   // Get user stats

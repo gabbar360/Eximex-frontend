@@ -3,9 +3,9 @@ import { handleAxiosError } from '../utils/handleAxiosError';
 
 const menuService = {
   // Get all menus with submenus
-  getAllMenus: async () => {
+  getAllMenus: async (params = {}) => {
     try {
-      const { data } = await axiosInstance.get('/menus');
+      const { data } = await axiosInstance.get('/menus', { params });
       return data;
     } catch (error) {
       throw handleAxiosError(error, 'menu', 'fetch');
