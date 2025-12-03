@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router';
 import { toast } from 'react-toastify';
 import { fetchCategories, deleteCategory } from '../../features/categorySlice';
+import PageMeta from '../../components/common/PageMeta';
 import {
   HiEye,
   HiPencil,
@@ -248,7 +249,12 @@ const Category: React.FC = () => {
     categories?.filter((category: any) => !category.parent_id) || [];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
+      <PageMeta
+        title="Categories - EximEx | Product Category Management"
+        description="Organize and manage product categories for your import-export business. Create hierarchical category structures with HSN codes and units."
+      />
+      <div className="min-h-screen bg-gray-50">
       <div className="p-2 lg:p-4">
         {/* Header */}
         <div className="mb-3">
@@ -574,7 +580,8 @@ const Category: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 };
 

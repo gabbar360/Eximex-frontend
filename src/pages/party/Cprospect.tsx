@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { fetchParties, deleteParty } from '../../features/partySlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import PageMeta from '../../components/common/PageMeta';
 import {
   HiEye,
   HiPencil,
@@ -163,7 +164,12 @@ const Cprospect = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
+      <PageMeta
+        title="Customer Prospects - EximEx | Lead Management"
+        description="Manage your customer prospects and leads for import-export business. Track potential clients and business opportunities with EximEx CRM."
+      />
+      <div className="min-h-screen bg-gray-50">
       <div className="p-2 lg:p-4">
         {/* Header */}
         <div className="mb-3">
@@ -340,7 +346,8 @@ const Cprospect = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 };
 
