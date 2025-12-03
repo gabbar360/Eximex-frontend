@@ -29,7 +29,7 @@ const PackagingPreview: React.FC<PackagingPreviewProps> = ({
       
       if (squareMeterPerBox > 0 && unitWeight > 0) {
         const weightPerSquareMeter = unitWeight / squareMeterPerBox;
-        const fieldName = `weightPer${squareMeterLevel.from.replace(' ', '')}`;
+        const fieldName = `weightPer${squareMeterLevel.from}`; // Keep the space for backend compatibility
         setFieldValue(fieldName, parseFloat(weightPerSquareMeter.toFixed(2)));
       }
     }
@@ -60,12 +60,17 @@ const PackagingPreview: React.FC<PackagingPreviewProps> = ({
           if (squareMeterPerBox > 0) {
             const unitWeight = parseFloat(values.unitWeight) || 0;
             const weightPerSquareMeter = unitWeight / squareMeterPerBox;
-            const fieldName = `weightPer${level.from.replace(' ', '')}`;
+            const fieldName = `weightPer${level.from}`; // Keep the space for backend compatibility
             setFieldValue(fieldName, parseFloat(weightPerSquareMeter.toFixed(2)));
-            currentWeight = weightPerSquareMeter; // Update currentWeight for next level
           }
         } else {
-          currentWeight = currentWeight * quantity;
+          // For Box to Pallet: use the base unit weight (24 kg) * quantity (40)
+          if (level.from === 'Box' && level.to === 'Pallet') {
+            const baseUnitWeight = parseFloat(values.unitWeight) || 0;
+            currentWeight = baseUnitWeight * quantity;
+          } else {
+            currentWeight = currentWeight * quantity;
+          }
           setFieldValue(weightField, parseFloat(currentWeight.toFixed(2)));
         }
       }
@@ -189,7 +194,7 @@ const PackagingPreview: React.FC<PackagingPreviewProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {/* Base unit weight */}
                   {(() => {
-                    const baseFieldName = `weightPer${packagingHierarchy[0].from.replace(' ', '')}`;
+                    const baseFieldName = `weightPer${packagingHierarchy[0].from}`;
                     const baseValue = values[baseFieldName];
                     return baseValue ? (
                       <div className="flex items-center justify-between p-3 bg-white/70 backdrop-blur-sm rounded-xl border border-white/50 shadow-sm">
