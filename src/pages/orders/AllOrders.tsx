@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
+import PageMeta from '../../components/common/PageMeta';
 import {
   HiEye,
   HiMagnifyingGlass,
@@ -150,7 +151,12 @@ const AllOrders: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
+      <PageMeta
+        title="All Orders - EximEx | Order Management System"
+        description="View and manage all your import-export orders. Track order status, shipments, and delivery information with EximEx order management."
+      />
+      <div className="min-h-screen bg-gray-50">
       <div className="p-2 lg:p-4">
         {/* Header */}
         <div className="mb-3">
@@ -535,7 +541,8 @@ const AllOrders: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 };
 

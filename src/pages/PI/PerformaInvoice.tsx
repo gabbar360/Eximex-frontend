@@ -1,6 +1,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import PageMeta from '../../components/common/PageMeta';
 import {
   HiEye,
   HiPencil,
@@ -167,7 +168,12 @@ const PerformaInvoice: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
+      <PageMeta
+        title="Proforma Invoices - EximEx | Import Export Trading"
+        description="Create and manage proforma invoices for your international trade operations. Track orders, payments and export documentation with EximEx."
+      />
+      <div className="min-h-screen bg-gray-50">
       <div className="p-2 lg:p-4">
         {/* Header */}
         <div className="mb-3">
@@ -758,7 +764,8 @@ const PerformaInvoice: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 };
 

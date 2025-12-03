@@ -6,10 +6,7 @@ import PageMeta from '../../components/common/PageMeta';
 export default function Avatars() {
   return (
     <>
-      <PageMeta
-        title="Avatars - EximEx Dashboard"
-        description="Avatar components for EximEx trading platform dashboard."
-      />
+     
       <PageBreadcrumb pageTitle="Avatars" />
       <div className="space-y-5 sm:space-y-6">
         <ComponentCard title="Default Avatar">

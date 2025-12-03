@@ -1,6 +1,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import PageMeta from '../../components/common/PageMeta';
 import {
   HiEye,
   HiPencil,
@@ -188,7 +189,12 @@ const PurchaseOrders: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
+      <PageMeta
+        title="Purchase Orders - EximEx | Procurement Management"
+        description="Manage purchase orders for your import-export business. Create, track and process supplier orders with EximEx procurement system."
+      />
+      <div className="min-h-screen bg-gray-50">
       <div className="p-2 lg:p-4">
         {/* Header */}
         <div className="mb-3">
@@ -572,7 +578,8 @@ const PurchaseOrders: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 };
 

@@ -7,8 +7,8 @@ export default function BasicTables() {
   return (
     <>
       <PageMeta
-        title="Tables - EximEx Dashboard"
-        description="Data tables and listings for EximEx trading platform."
+        title="Basic Tables - EximEx | Data Management Interface"
+        description="Access and manage your import-export data with EximEx table interface for efficient business operations and data organization."
       />
       <PageBreadcrumb pageTitle="Basic Tables" />
       <div className="space-y-6">

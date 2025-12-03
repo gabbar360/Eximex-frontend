@@ -261,7 +261,13 @@ const ProductRow: React.FC<ProductRowProps> = ({
                 {prod.packagingHierarchyData?.dynamicFields && Object.entries(prod.packagingHierarchyData.dynamicFields)
                   .filter(([key, value]) => key.startsWith('weight') && value && key !== 'weightUnitType' && !key.endsWith('Unit'))
                   .map(([key, value]) => {
-                    const unitName = key.replace('weightPer', '').replace(/([A-Z])/g, ' $1').trim().toLowerCase();
+                    let unitName = key.replace('weightPer', '').replace(/([A-Z])/g, ' $1').trim().toLowerCase();
+                    
+                    // Special handling for square meter
+                    if (unitName === 'square meter') {
+                      unitName = 'square meter';
+                    }
+                    
                     const unitField = key + 'Unit';
                     const unit = prod.packagingHierarchyData.dynamicFields[unitField] || 'kg';
                     
@@ -371,6 +377,12 @@ const ProductRow: React.FC<ProductRowProps> = ({
                     '1',
                     data.unit
                   );
+                  
+                  // For square meter, show the exact weight from product data if available
+                  if (data.unit.toLowerCase() === 'square meter' && prod?.packagingHierarchyData?.dynamicFields?.weightPerSquareMeter) {
+                    return `${prod.packagingHierarchyData.dynamicFields.weightPerSquareMeter.toFixed(4)} KG`;
+                  }
+                  
                   return `${weightPer1Unit.toFixed(4)} KG`;
                 })()}
               </span>

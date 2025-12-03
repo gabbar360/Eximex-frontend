@@ -6,8 +6,8 @@ export default function SignUp() {
   return (
     <>
       <PageMeta
-        title="Sign Up - EximEx | Global Import Export Trading Platform"
-        description="Create your EximEx account - Join the comprehensive global trading platform for seamless import-export operations."
+        title="Sign Up - EximEx | Join Global Import Export Platform"
+        description="Create your EximEx account to access comprehensive import-export trading tools, manage international business operations, and connect with global markets."
       />
       <AuthLayout>
         <SignUpForm />

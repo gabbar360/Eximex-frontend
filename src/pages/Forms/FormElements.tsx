@@ -15,8 +15,8 @@ export default function FormElements() {
   return (
     <div>
       <PageMeta
-        title="Form Elements - EximEx Dashboard"
-        description="Form elements and components for EximEx trading platform dashboard."
+        title="Form Elements - EximEx | Import Export Management"
+        description="Manage form elements and input components for your import-export business operations on EximEx platform."
       />
       <PageBreadcrumb pageTitle="From Elements" />
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">

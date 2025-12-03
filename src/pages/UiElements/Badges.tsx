@@ -7,10 +7,7 @@ import ComponentCard from '../../components/common/ComponentCard';
 export default function Badges() {
   return (
     <div>
-      <PageMeta
-        title="Badges - EximEx Dashboard"
-        description="Badge components for EximEx trading platform dashboard."
-      />
+     
       <PageBreadcrumb pageTitle="Badges" />
       <div className="space-y-5 sm:space-y-6">
         <ComponentCard title="With Light Background">

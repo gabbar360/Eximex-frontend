@@ -8,10 +8,7 @@ import PageMeta from '../../components/common/PageMeta';
 export default function Images() {
   return (
     <>
-      <PageMeta
-        title="Images - EximEx Dashboard"
-        description="Image components for EximEx trading platform dashboard."
-      />
+     
       <PageBreadcrumb pageTitle="Images" />
       <div className="space-y-5 sm:space-y-6">
         <ComponentCard title="Responsive image">

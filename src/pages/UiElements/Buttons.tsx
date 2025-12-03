@@ -7,10 +7,7 @@ import { BoxIcon } from '../../icons';
 export default function Buttons() {
   return (
     <div>
-      <PageMeta
-        title="Buttons - EximEx Dashboard"
-        description="Button components for EximEx trading platform dashboard."
-      />
+  
       <PageBreadcrumb pageTitle="Buttons" />
       <div className="space-y-5 sm:space-y-6">
         {/* Primary Button */}

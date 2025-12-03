@@ -119,8 +119,8 @@ const Calendar: React.FC = () => {
   return (
     <>
       <PageMeta
-        title="Calendar - EximEx Dashboard"
-        description="Calendar and scheduling for EximEx trading platform."
+        title="Calendar - EximEx | Schedule Import Export Operations"
+        description="Manage your import-export schedule, track shipment dates, and organize business events with EximEx calendar management system."
       />
       <div className="rounded-2xl border  border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
         <div className="custom-calendar">

@@ -6,10 +6,7 @@ import PageMeta from '../../components/common/PageMeta';
 export default function Alerts() {
   return (
     <>
-      <PageMeta
-        title="Alerts - EximEx Dashboard"
-        description="Alert components for EximEx trading platform dashboard."
-      />
+     
       <PageBreadcrumb pageTitle="Alerts" />
       <div className="space-y-5 sm:space-y-6">
         <ComponentCard title="Success Alert">
