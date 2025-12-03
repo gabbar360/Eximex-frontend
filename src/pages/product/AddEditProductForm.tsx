@@ -652,9 +652,9 @@ const AddEditProductForm = () => {
       // Add all weight fields to dynamicFields
       packagingHierarchy.forEach((level) => {
         const quantityField = `${level.from}Per${level.to}`;
-        const weightField = `weightPer${level.from.charAt(0).toUpperCase() + level.from.slice(1)}`;
+        const weightField = `weightPer${level.from}`; // Keep original field name with spaces
         const weightUnitField = `${weightField}Unit`;
-        const toWeightField = `weightPer${level.to.charAt(0).toUpperCase() + level.to.slice(1)}`;
+        const toWeightField = `weightPer${level.to}`; // Keep original field name with spaces
         const toWeightUnitField = `${toWeightField}Unit`;
 
         if (values[quantityField])
