@@ -10,7 +10,7 @@ interface SEOHeadProps {
 
 const SEOHead: React.FC<SEOHeadProps> = ({
   title = 'EximEx - Global Import Export Trading Platform',
-  description = 'EximEx is your comprehensive global trading platform for seamless import-export operations. Get real-time market insights, secure transactions, and access to worldwide trading networks.',
+  description = 'EximEx - Your trusted partner for global import-export operations. Connect with verified suppliers, manage shipments, handle documentation, and grow your international trade business with our comprehensive platform.',
   keywords = 'import export, global trading, international trade, export platform, import platform, trade management, shipping, logistics',
   image = 'https://eximexperts.in/logo.png',
   url = 'https://eximexperts.in/',
