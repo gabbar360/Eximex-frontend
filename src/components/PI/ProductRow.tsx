@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback, useMemo } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import Label from '../form/Label';
@@ -113,10 +113,45 @@ const ProductRow: React.FC<ProductRowProps> = ({
     };
   };
 
-  const totalWeight =
-    data.productId && data.quantity && data.unit
+  const totalWeight = useMemo(() => {
+    return data.productId && data.quantity && data.unit
       ? calculateTotalWeight(data.productId, data.quantity, data.unit)
       : 0;
+  }, [data.productId, data.quantity, data.unit, calculateTotalWeight]);
+
+  const packagingCalculation = useMemo(() => {
+    if (!data.productId || !data.quantity || !data.unit || 
+        data.unit.toLowerCase() !== 'square meter' || 
+        !prod?.packagingHierarchyData?.dynamicFields) {
+      return null;
+    }
+
+    const quantity = parseFloat(data.quantity);
+    if (isNaN(quantity) || quantity <= 0) return null;
+    
+    const packagingData = prod.packagingHierarchyData.dynamicFields;
+    const sqmPerBox = packagingData['Square MeterPerBox'] || 0;
+    const boxesPerPallet = packagingData['BoxPerPallet'] || 0;
+    
+    if (!sqmPerBox || !boxesPerPallet) return null;
+    
+    const totalBoxes = Math.ceil(quantity / sqmPerBox);
+    const totalPallets = Math.ceil(totalBoxes / boxesPerPallet);
+    
+    return {
+      totalBoxes,
+      totalPallets,
+      sqmPerBox,
+      boxesPerPallet,
+      calculatedFor: quantity
+    };
+  }, [data.productId, data.quantity, data.unit, prod?.packagingHierarchyData?.dynamicFields]);
+
+  useEffect(() => {
+    if (packagingCalculation) {
+      onChange(idx, 'packagingCalculation', packagingCalculation);
+    }
+  }, [packagingCalculation, onChange, idx]);
 
   return (
     <div className="border border-gray-300 dark:border-gray-700 rounded-md p-4 space-y-4 relative bg-gray-50 dark:bg-gray-800">
@@ -439,6 +474,24 @@ const ProductRow: React.FC<ProductRowProps> = ({
                       : `0 KG per ${data.unit}`;
                   })()}
                 </span>
+              </div>
+            </div>
+          )}
+          
+          {/* Dynamic Tiles Box/Pallet Calculation */}
+          {packagingCalculation && (
+            <div className="text-xs bg-blue-50 dark:bg-blue-900 p-3 rounded mt-2 border border-blue-200 dark:border-blue-700">
+              <div className="text-blue-800 dark:text-blue-200">
+                <strong>🔢 Packaging Calculation:</strong>
+                <br />
+                <div className="space-y-1">
+                  <div className="font-mono font-bold">
+                    {packagingCalculation.calculatedFor} SQM = <span className="text-green-600 dark:text-green-400">{packagingCalculation.totalBoxes} BOXES</span> / <span className="text-purple-600 dark:text-purple-400">{packagingCalculation.totalPallets} PALLETS</span>
+                  </div>
+                  <div className="text-xs opacity-75">
+                    Calculation: {packagingCalculation.sqmPerBox.toFixed(2)} SQM/Box, {packagingCalculation.boxesPerPallet} Boxes/Pallet
+                  </div>
+                </div>
               </div>
             </div>
           )}
