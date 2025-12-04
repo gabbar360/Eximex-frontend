@@ -108,6 +108,13 @@ type ProductAdded = {
   categoryId?: string;
   subcategoryId?: string;
   quantityByWeight?: string;
+  packagingCalculation?: {
+    totalBoxes: number;
+    totalPallets: number;
+    sqmPerBox: number;
+    boxesPerPallet: number;
+    calculatedFor: number;
+  };
 };
 
 type ProductData = {
@@ -124,6 +131,13 @@ type ProductData = {
   convertedQuantity?: number;
   categoryId?: string;
   subcategoryId?: string;
+  packagingCalculation?: {
+    totalBoxes: number;
+    totalPallets: number;
+    sqmPerBox: number;
+    boxesPerPallet: number;
+    calculatedFor: number;
+  };
 };
 
 type Charges = {
@@ -1086,6 +1100,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         totalWeight: totalWeight,
         categoryId: currentProduct.categoryId || selectedCategory,
         subcategoryId: currentProduct.subcategoryId || selectedSubcategory,
+        packagingCalculation: currentProduct.packagingCalculation,
       };
 
       if (editingProductIndex !== null) {
@@ -1341,6 +1356,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
           rate: product.rate,
           total: product.total,
           totalWeight: product.totalWeight,
+          packagingCalculation: product.packagingCalculation,
         })),
       };
 
@@ -1420,6 +1436,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
           rate: product.rate,
           total: product.total,
           totalWeight: product.totalWeight,
+          packagingCalculation: product.packagingCalculation,
         })),
       };
 

@@ -44,28 +44,108 @@ export default function SignInForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="w-full max-w-sm">
-          {/* Form Card */}
-          <div className="auth-form-card bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl border border-white/20 overflow-hidden w-full">
-            {/* Header */}
-            <div
-              className="bg-white p-2 sm:p-3 lg:p-4 border-b-2"
-              style={{ borderColor: '#86a0b2' }}
-            >
-              <div className="text-center">
-                <h2
-                  className="text-sm sm:text-lg lg:text-xl font-bold mb-1"
-                  style={{ color: '#86a0b2' }}
-                >
-                  Sign In
-                </h2>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex">
+      {/* Left Side - Video */}
+      <div className="hidden lg:flex lg:w-2/3 relative overflow-hidden">
+        <div className="absolute inset-0 bg-black/20 z-10"></div>
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          volume={0}
+          className="w-full h-full object-cover"
+        >
+          <source src="/Exim-ex_video.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+        
+
+      </div>
+
+      {/* Right Side - Sign In Form */}
+      <div className="w-full lg:w-1/3 min-h-screen flex flex-col bg-[#1B2129]">
+        {/* Big Animated Eyes Only */}
+        <div className="flex items-center justify-center pt-8">
+          <div className="text-center">
+            <div className="relative mb-4">
+              {/* Professional Eyes */}
+              <div className="flex items-center justify-center space-x-8">
+                {/* Left Eye */}
+                <div className="relative w-16 h-16">
+                  {/* Eye Base */}
+                  <div className="w-16 h-16 bg-white rounded-full shadow-2xl border-4 border-gray-200 relative overflow-hidden">
+                    <div className="w-12 h-12 bg-gray-800 rounded-full mt-2 ml-2 relative">
+                      <div className="absolute top-2 right-2 w-3 h-3 bg-white rounded-full"></div>
+                      <div className="absolute bottom-1 left-2 w-2 h-2 bg-white rounded-full opacity-60"></div>
+                    </div>
+                    
+                    {/* Upper Eyelid */}
+                    <div className={`absolute top-0 left-0 w-full bg-gray-300 rounded-t-full transition-all duration-800 ease-in-out ${
+                      password ? 'h-8 shadow-inner' : 'h-0'
+                    }`}></div>
+                    
+                    {/* Lower Eyelid */}
+                    <div className={`absolute bottom-0 left-0 w-full bg-gray-300 rounded-b-full transition-all duration-800 ease-in-out ${
+                      password ? 'h-8 shadow-inner' : 'h-0'
+                    }`}></div>
+                  </div>
+                </div>
+                
+                {/* Right Eye */}
+                <div className="relative w-16 h-16">
+                  {/* Eye Base */}
+                  <div className="w-16 h-16 bg-white rounded-full shadow-2xl border-4 border-gray-200 relative overflow-hidden">
+                    <div className="w-12 h-12 bg-gray-800 rounded-full mt-2 ml-2 relative">
+                      <div className="absolute top-2 right-2 w-3 h-3 bg-white rounded-full"></div>
+                      <div className="absolute bottom-1 left-2 w-2 h-2 bg-white rounded-full opacity-60"></div>
+                    </div>
+                    
+                    {/* Upper Eyelid */}
+                    <div className={`absolute top-0 left-0 w-full bg-gray-300 rounded-t-full transition-all duration-800 ease-in-out ${
+                      password ? 'h-8 shadow-inner' : 'h-0'
+                    }`}></div>
+                    
+                    {/* Lower Eyelid */}
+                    <div className={`absolute bottom-0 left-0 w-full bg-gray-300 rounded-b-full transition-all duration-800 ease-in-out ${
+                      password ? 'h-8 shadow-inner' : 'h-0'
+                    }`}></div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Simple Status */}
+              <div className="mt-6">
+                <p className="text-white text-sm">
+                  {password ? 'Privacy Mode' : 'Ready to Sign In'}
+                </p>
               </div>
             </div>
+          </div>
+        </div>
+        
+        {/* Form Container */}
+        <div className="px-6 pb-6 mt-12">
+          <div className="w-full max-w-sm mx-auto">
+            {/* Form Card */}
+            <div className="auth-form-card bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl border border-white/20 overflow-hidden w-full">
+              {/* Header */}
+              <div
+                className="bg-white p-2 sm:p-3 lg:p-4 border-b-2"
+                style={{ borderColor: '#86a0b2' }}
+              >
+                <div className="text-center">
+                  <h2
+                    className="text-sm sm:text-lg lg:text-xl font-bold mb-1"
+                    style={{ color: '#86a0b2' }}
+                  >
+                    Sign In
+                  </h2>
+                </div>
+              </div>
 
-            {/* Form Content */}
-            <div className="p-2 sm:p-3 lg:p-4">
+              {/* Form Content */}
+              <div className="p-2 sm:p-3 lg:p-4">
               {/* Google Sign-In */}
               {/* <button
                 onClick={() => dispatch(googleLogin())}
@@ -171,6 +251,24 @@ export default function SignInForm() {
                   </Link>
                 </p>
               </div> */}
+              {/* Mobile Video Preview */}
+              <div className="lg:hidden mb-6">
+                <div className="relative rounded-xl overflow-hidden">
+                  <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-32 object-cover"
+                  >
+                    <source src="/Exim-ex_video.mp4" type="video/mp4" />
+                  </video>
+                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                    <p className="text-white font-semibold text-sm">EximEx Trading Platform</p>
+                  </div>
+                </div>
+              </div>
+              </div>
             </div>
           </div>
         </div>
