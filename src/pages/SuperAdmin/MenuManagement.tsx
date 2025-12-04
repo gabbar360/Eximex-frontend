@@ -1,10 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  Table,
-  Switch,
-  Pagination,
-} from 'antd';
+import { Table, Switch, Pagination } from 'antd';
 import { toast } from 'react-toastify';
 import {
   HiPlus,
@@ -33,7 +29,9 @@ import { useDebounce } from '../../utils/useDebounce';
 
 const MenuManagement = () => {
   const dispatch = useDispatch();
-  const { menus, loading, error, pagination } = useSelector((state) => state.menu);
+  const { menus, loading, error, pagination } = useSelector(
+    (state) => state.menu
+  );
 
   const [showForm, setShowForm] = useState(false);
   const [isSubmenuModal, setIsSubmenuModal] = useState(false);
@@ -55,35 +53,47 @@ const MenuManagement = () => {
   });
 
   useEffect(() => {
-    dispatch(fetchMenus({
-      page: currentPage,
-      limit: pageSize,
-      search: ''
-    }));
+    dispatch(
+      fetchMenus({
+        page: currentPage,
+        limit: pageSize,
+        search: '',
+      })
+    );
   }, [dispatch, currentPage, pageSize]);
 
   // Initial load
   useEffect(() => {
-    dispatch(fetchMenus({
-      page: 1,
-      limit: 10,
-      search: ''
-    }));
+    dispatch(
+      fetchMenus({
+        page: 1,
+        limit: 10,
+        search: '',
+      })
+    );
   }, [dispatch]);
 
-  const { debouncedCallback: debouncedSearch } = useDebounce((value: string) => {
-    dispatch(fetchMenus({
-      page: 1,
-      limit: pageSize,
-      search: value
-    }));
-  }, 500);
+  const { debouncedCallback: debouncedSearch } = useDebounce(
+    (value: string) => {
+      dispatch(
+        fetchMenus({
+          page: 1,
+          limit: pageSize,
+          search: value,
+        })
+      );
+    },
+    500
+  );
 
-  const handleSearch = useCallback((value: string) => {
-    setSearchTerm(value);
-    setCurrentPage(1);
-    debouncedSearch(value);
-  }, [debouncedSearch]);
+  const handleSearch = useCallback(
+    (value: string) => {
+      setSearchTerm(value);
+      setCurrentPage(1);
+      debouncedSearch(value);
+    },
+    [debouncedSearch]
+  );
 
   useEffect(() => {
     if (error) {
@@ -166,18 +176,24 @@ const MenuManagement = () => {
     if (confirmDelete) {
       try {
         if (deleteType === 'menu') {
-          const response = await dispatch(deleteMenu(confirmDelete.id)).unwrap();
+          const response = await dispatch(
+            deleteMenu(confirmDelete.id)
+          ).unwrap();
           toast.success(response?.message || 'Menu deleted successfully');
         } else {
-          const response = await dispatch(deleteSubmenu(confirmDelete.id)).unwrap();
+          const response = await dispatch(
+            deleteSubmenu(confirmDelete.id)
+          ).unwrap();
           toast.success(response?.message || 'Submenu deleted successfully');
         }
         setConfirmDelete(null);
-        dispatch(fetchMenus({
-          page: currentPage,
-          limit: pageSize,
-          search: searchTerm
-        }));
+        dispatch(
+          fetchMenus({
+            page: currentPage,
+            limit: pageSize,
+            search: searchTerm,
+          })
+        );
       } catch (error) {
         toast.error(error);
       }
@@ -215,11 +231,13 @@ const MenuManagement = () => {
         }
       }
       resetForm();
-      dispatch(fetchMenus({
-        page: currentPage,
-        limit: pageSize,
-        search: searchTerm
-      }));
+      dispatch(
+        fetchMenus({
+          page: currentPage,
+          limit: pageSize,
+          search: searchTerm,
+        })
+      );
     } catch (error) {
       toast.error(error);
     }
@@ -511,7 +529,9 @@ const MenuManagement = () => {
                   <input
                     type="text"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                     placeholder="Enter name"
                     required
@@ -525,7 +545,9 @@ const MenuManagement = () => {
                   <input
                     type="text"
                     value={formData.slug}
-                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, slug: e.target.value })
+                    }
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                     placeholder="Enter slug"
                     required
@@ -541,7 +563,9 @@ const MenuManagement = () => {
                   <input
                     type="text"
                     value={formData.path}
-                    onChange={(e) => setFormData({ ...formData, path: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, path: e.target.value })
+                    }
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                     placeholder="Enter path"
                   />
@@ -555,7 +579,9 @@ const MenuManagement = () => {
                     <input
                       type="text"
                       value={formData.icon}
-                      onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, icon: e.target.value })
+                      }
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                       placeholder="Enter icon"
                     />
@@ -569,7 +595,9 @@ const MenuManagement = () => {
                   <input
                     type="number"
                     value={formData.sortOrder}
-                    onChange={(e) => setFormData({ ...formData, sortOrder: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, sortOrder: e.target.value })
+                    }
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                     placeholder="Enter sort order"
                   />
@@ -582,7 +610,12 @@ const MenuManagement = () => {
                 </label>
                 <select
                   value={formData.isActive?.toString() || 'true'}
-                  onChange={(e) => setFormData({ ...formData, isActive: e.target.value === 'true' })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      isActive: e.target.value === 'true',
+                    })
+                  }
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                 >
                   <option value="true">Active</option>
@@ -612,7 +645,8 @@ const MenuManagement = () => {
                   ) : (
                     <>
                       <HiCheckCircle className="w-5 h-5 mr-2 inline" />
-                      {editingItem ? 'Update' : 'Create'} {isSubmenuModal ? 'Submenu' : 'Menu'}
+                      {editingItem ? 'Update' : 'Create'}{' '}
+                      {isSubmenuModal ? 'Submenu' : 'Menu'}
                     </>
                   )}
                 </button>
@@ -735,18 +769,18 @@ const MenuManagement = () => {
               pageSize={pageSize}
               onChange={(page) => {
                 setCurrentPage(page);
-                dispatch(fetchMenus({
-                  page: page,
-                  limit: pageSize,
-                  search: searchTerm
-                }));
+                dispatch(
+                  fetchMenus({
+                    page: page,
+                    limit: pageSize,
+                    search: searchTerm,
+                  })
+                );
               }}
             />
           </div>
         )}
       </div>
-
-
 
       {/* Delete Confirmation Modal */}
       {confirmDelete && (
@@ -760,8 +794,8 @@ const MenuManagement = () => {
                 Delete {deleteType === 'menu' ? 'Menu' : 'Submenu'}
               </h3>
               <p className="text-slate-600">
-                Are you sure you want to delete "{confirmDelete.name}"? This action
-                cannot be undone.
+                Are you sure you want to delete "{confirmDelete.name}"? This
+                action cannot be undone.
               </p>
             </div>
             <div className="flex items-center justify-center space-x-3">

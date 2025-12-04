@@ -14,7 +14,9 @@ export default function SignatureUpload({
   onUploadSuccess,
 }: SignatureUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
-  const [preview, setPreview] = useState<string | null>(currentSignature || null);
+  const [preview, setPreview] = useState<string | null>(
+    currentSignature || null
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,14 +90,18 @@ export default function SignatureUpload({
             </div>
           )}
         </div>
-        
+
         <div className="flex-1">
           <button
             onClick={handleClick}
             disabled={isUploading}
             className="px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isUploading ? 'Uploading...' : preview ? 'Change Signature' : 'Upload Signature'}
+            {isUploading
+              ? 'Uploading...'
+              : preview
+                ? 'Change Signature'
+                : 'Upload Signature'}
           </button>
           <p className="text-sm text-gray-500 mt-1">
             Upload signature image (max 2MB)

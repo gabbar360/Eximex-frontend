@@ -36,8 +36,8 @@ export const calculateTotalWeight = (
       ? packagingData.weightPerPackage
       : packagingData.weightPerPackage / 1000
     : packagingData?.weightPerPack
-    ? packagingData.weightPerPack / 1000  // Convert grams to kg
-    : 0;
+      ? packagingData.weightPerPack / 1000 // Convert grams to kg
+      : 0;
   const weightPerBox = packagingData?.weightPerBox
     ? weightPerBoxUnit === 'kg'
       ? packagingData.weightPerBox
@@ -50,8 +50,10 @@ export const calculateTotalWeight = (
     : 0;
 
   // Get packaging conversion factors
-  const piecesPerPackage = packagingData?.PiecesPerPack || packagingData?.PiecesPerPackage || 1;
-  const packagePerBox = packagingData?.PackPerBox || packagingData?.PackagePerBox || 1;
+  const piecesPerPackage =
+    packagingData?.PiecesPerPack || packagingData?.PiecesPerPackage || 1;
+  const packagePerBox =
+    packagingData?.PackPerBox || packagingData?.PackagePerBox || 1;
   const boxPerPallet =
     packagingData?.BoxPerPallet || packagingData?.boxesPerPallet || 1;
 
@@ -85,7 +87,7 @@ export const calculateTotalWeight = (
       if (weightPerBox > 0) {
         return qty * weightPerBox;
       }
-      
+
       // Check for weightPerBox in different possible fields
       if (packagingData?.weightPerBox) {
         return qty * packagingData.weightPerBox;
@@ -93,13 +95,19 @@ export const calculateTotalWeight = (
       if (product.weightPerBox) {
         return qty * product.weightPerBox;
       }
-      
+
       // For tiles, use unitWeight if weightUnitType is Box
-      if (product.unitWeight && product.weightUnitType?.toLowerCase() === 'box') {
-        const unitWeightKg = product.unitWeightUnit === 'kg' ? product.unitWeight : product.unitWeight / 1000;
+      if (
+        product.unitWeight &&
+        product.weightUnitType?.toLowerCase() === 'box'
+      ) {
+        const unitWeightKg =
+          product.unitWeightUnit === 'kg'
+            ? product.unitWeight
+            : product.unitWeight / 1000;
         return qty * unitWeightKg;
       }
-      
+
       // Fallback: calculate from packages
       if (weightPerPackage > 0 && packagePerBox > 0) {
         return qty * weightPerPackage * packagePerBox;
@@ -114,7 +122,7 @@ export const calculateTotalWeight = (
       if (weightPerPallet > 0) {
         return qty * weightPerPallet;
       }
-      
+
       // Check for weightPerPallet in different possible fields
       if (packagingData?.weightPerPallet) {
         return qty * packagingData.weightPerPallet;
@@ -122,7 +130,7 @@ export const calculateTotalWeight = (
       if (product.weightPerPallet) {
         return qty * product.weightPerPallet;
       }
-      
+
       // Fallback: calculate from boxes
       if (weightPerBox > 0 && boxPerPallet > 0) {
         return qty * weightPerBox * boxPerPallet;
@@ -153,20 +161,24 @@ export const calculateTotalWeight = (
     case 'm²':
       // Check for weight per square meter with space in field name
       if (packagingData?.['weightPerSquare Meter']) {
-        const weightPerSqmUnit = packagingData?.['weightPerSquare MeterUnit'] || 'kg';
+        const weightPerSqmUnit =
+          packagingData?.['weightPerSquare MeterUnit'] || 'kg';
         const weightPerSqm = packagingData['weightPerSquare Meter'];
-        const weightPerSqmKg = weightPerSqmUnit === 'kg' ? weightPerSqm : weightPerSqm / 1000;
+        const weightPerSqmKg =
+          weightPerSqmUnit === 'kg' ? weightPerSqm : weightPerSqm / 1000;
         return qty * weightPerSqmKg;
       }
-      
+
       // Check for standard field name without space
       if (packagingData?.weightPerSquareMeter) {
-        const weightPerSqmUnit = packagingData?.weightPerSquareMeterUnit || 'kg';
+        const weightPerSqmUnit =
+          packagingData?.weightPerSquareMeterUnit || 'kg';
         const weightPerSqm = packagingData.weightPerSquareMeter;
-        const weightPerSqmKg = weightPerSqmUnit === 'kg' ? weightPerSqm : weightPerSqm / 1000;
+        const weightPerSqmKg =
+          weightPerSqmUnit === 'kg' ? weightPerSqm : weightPerSqm / 1000;
         return qty * weightPerSqmKg;
       }
-      
+
       // Check if product has direct weight per square meter field
       if (product.weightPerSquareMeter) {
         return qty * product.weightPerSquareMeter;
@@ -250,9 +262,7 @@ export const calculateGrossWeight = (productList: any[], products: any[]) => {
         product.unit.toLowerCase() === 'pieces'
       ) {
         const piecesPerPack =
-          packagingData?.PiecesPerPack ||
-          packagingData?.PiecesPerPackage ||
-          1;
+          packagingData?.PiecesPerPack || packagingData?.PiecesPerPackage || 1;
         const packPerBox =
           packagingData?.PackPerBox || packagingData?.PackagePerBox || 1;
         boxes = Math.ceil(product.quantity / (piecesPerPack * packPerBox));
@@ -267,7 +277,7 @@ export const calculateGrossWeight = (productList: any[], products: any[]) => {
         // For pallets, calculate packaging weight directly based on number of pallets
         // Don't convert to boxes for packaging calculation
         const pallets = product.quantity;
-        
+
         // If packaging weight is per pallet (usually in kg for pallets)
         if (packagingUnit === 'kg') {
           packagingWeight = pallets * packagingWeightKg;
@@ -275,7 +285,7 @@ export const calculateGrossWeight = (productList: any[], products: any[]) => {
           // If packaging weight is in grams, convert to kg
           packagingWeight = pallets * (packagingMaterialWeight / 1000);
         }
-        
+
         return sum + netWeight + packagingWeight;
       } else if (
         product.unit.toLowerCase() === 'square meter' ||
@@ -284,18 +294,19 @@ export const calculateGrossWeight = (productList: any[], products: any[]) => {
       ) {
         // For square meter units, calculate pallets from packaging data
         const sqmPerBox = packagingData?.sqmPerBox || 0.72; // Default from your example
-        const boxesPerPallet = packagingData?.BoxPerPallet || packagingData?.boxesPerPallet || 30;
-        
+        const boxesPerPallet =
+          packagingData?.BoxPerPallet || packagingData?.boxesPerPallet || 30;
+
         const totalBoxes = Math.ceil(product.quantity / sqmPerBox);
         const totalPallets = Math.ceil(totalBoxes / boxesPerPallet);
-        
+
         // Calculate packaging weight based on pallets
         if (packagingUnit === 'kg') {
           packagingWeight = totalPallets * packagingWeightKg;
         } else {
           packagingWeight = totalPallets * (packagingMaterialWeight / 1000);
         }
-        
+
         return sum + netWeight + packagingWeight;
       } else {
         boxes = product.quantity;

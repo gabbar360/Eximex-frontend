@@ -48,7 +48,6 @@ export default function UserProfiles() {
   const [error, setError] = useState<string | null>(null);
   const [editingProfile, setEditingProfile] = useState(false);
 
-
   const fetchUserData = async () => {
     try {
       setLoading(true);
@@ -83,8 +82,6 @@ export default function UserProfiles() {
       setError(error.message);
     }
   };
-
-
 
   useEffect(() => {
     fetchUserData();
@@ -147,7 +144,9 @@ export default function UserProfiles() {
               <div className="bg-white rounded-3xl shadow-xl border border-gray-200 overflow-hidden mb-4">
                 <div className="relative">
                   <div className="h-16 bg-slate-700 flex items-center justify-center">
-                    <h2 className="text-white font-semibold text-lg">Manage Your Profile</h2>
+                    <h2 className="text-white font-semibold text-lg">
+                      Manage Your Profile
+                    </h2>
                   </div>
                   <div className="absolute -bottom-16 left-8">
                     <div className="relative">
@@ -249,8 +248,6 @@ export default function UserProfiles() {
                         </p>
                       </div>
                     </div>
-
-
                   </div>
 
                   <CompanyDetailsCard companyData={userData.company} />

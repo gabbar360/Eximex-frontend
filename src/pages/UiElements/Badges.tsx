@@ -7,7 +7,6 @@ import ComponentCard from '../../components/common/ComponentCard';
 export default function Badges() {
   return (
     <div>
-     
       <PageBreadcrumb pageTitle="Badges" />
       <div className="space-y-5 sm:space-y-6">
         <ComponentCard title="With Light Background">

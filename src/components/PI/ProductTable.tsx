@@ -25,7 +25,11 @@ interface ProductTableProps {
   onEditProduct: (index: number) => void;
   onDeleteProduct: (index: number) => void;
   formatCurrency: (value: number, currency?: string) => string;
-  calculateTotalWeight: (productId: string, quantity: string, unit: string) => number;
+  calculateTotalWeight: (
+    productId: string,
+    quantity: string,
+    unit: string
+  ) => number;
   calculateGrossWeight: (products: ProductData[]) => number;
   getCurrentTotals: () => { weight: number; volume: number };
 }
@@ -81,102 +85,98 @@ const ProductTable: React.FC<ProductTableProps> = ({
           <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
             {addedProducts.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-3 py-8 text-center text-gray-500 dark:text-gray-400">
-                  No products added yet. Click "Add Product" to add your first product.
+                <td
+                  colSpan={8}
+                  className="px-3 py-8 text-center text-gray-500 dark:text-gray-400"
+                >
+                  No products added yet. Click "Add Product" to add your first
+                  product.
                 </td>
               </tr>
             ) : (
               addedProducts.map((product, index) => {
-              const category = categories.find(
-                (c) =>
-                  c.id.toString() ===
-                  product.categoryId?.toString()
-              );
+                const category = categories.find(
+                  (c) => c.id.toString() === product.categoryId?.toString()
+                );
 
-              return (
-                <tr
-                  key={index}
-                  className={
-                    editingProductIndex === index
-                      ? 'bg-yellow-50 dark:bg-yellow-900'
-                      : ''
-                  }
-                >
-                  <td className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100">
-                    {category?.name ||
-                      category?.categoryName ||
-                      'sugarcane bagasse'}
-                  </td>
-                  <td className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100">
-                    {(() => {
-                      const foundProduct = products.find(
-                        (p) =>
-                          p.id.toString() ===
-                          product.productId.toString()
-                      );
-
-                      return (
-                        foundProduct?.name ||
-                        foundProduct?.productName ||
-                        product.name ||
-                        product.productName ||
-                        `Product ${product.productId}` ||
-                        'Unknown Product'
-                      );
-                    })()}
-                  </td>
-                  <td className="px-3 py-2 text-sm text-right text-gray-900 dark:text-gray-100">
-                    {product.quantity}
-                  </td>
-                  <td className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100">
-                    {product.unit || 'N/A'}
-                  </td>
-                  <td className="px-3 py-2 text-sm text-right text-gray-900 dark:text-gray-100">
-                    {(() => {
-                      const weight =
-                        product.totalWeight ||
-                        calculateTotalWeight(
-                          product.productId,
-                          product.quantity.toString(),
-                          product.unit
+                return (
+                  <tr
+                    key={index}
+                    className={
+                      editingProductIndex === index
+                        ? 'bg-yellow-50 dark:bg-yellow-900'
+                        : ''
+                    }
+                  >
+                    <td className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100">
+                      {category?.name ||
+                        category?.categoryName ||
+                        'sugarcane bagasse'}
+                    </td>
+                    <td className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100">
+                      {(() => {
+                        const foundProduct = products.find(
+                          (p) =>
+                            p.id.toString() === product.productId.toString()
                         );
-                      return weight > 0
-                        ? weight.toFixed(2)
-                        : 'N/A';
-                    })()}
-                  </td>
-                  <td className="px-3 py-2 text-sm text-right text-gray-900 dark:text-gray-100">
-                    {formatCurrency(
-                      product.rate,
-                      currency
-                    )}
-                  </td>
-                  <td className="px-3 py-2 text-sm text-right font-semibold text-gray-900 dark:text-gray-100">
-                    {formatCurrency(product.total)}
-                  </td>
-                  <td className="px-3 py-2 text-center">
-                    <div className="flex justify-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => onEditProduct(index)}
-                        className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                        title="Edit product"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => onDeleteProduct(index)}
-                        className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-                        title="Delete product"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })
+
+                        return (
+                          foundProduct?.name ||
+                          foundProduct?.productName ||
+                          product.name ||
+                          product.productName ||
+                          `Product ${product.productId}` ||
+                          'Unknown Product'
+                        );
+                      })()}
+                    </td>
+                    <td className="px-3 py-2 text-sm text-right text-gray-900 dark:text-gray-100">
+                      {product.quantity}
+                    </td>
+                    <td className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100">
+                      {product.unit || 'N/A'}
+                    </td>
+                    <td className="px-3 py-2 text-sm text-right text-gray-900 dark:text-gray-100">
+                      {(() => {
+                        const weight =
+                          product.totalWeight ||
+                          calculateTotalWeight(
+                            product.productId,
+                            product.quantity.toString(),
+                            product.unit
+                          );
+                        return weight > 0 ? weight.toFixed(2) : 'N/A';
+                      })()}
+                    </td>
+                    <td className="px-3 py-2 text-sm text-right text-gray-900 dark:text-gray-100">
+                      {formatCurrency(product.rate, currency)}
+                    </td>
+                    <td className="px-3 py-2 text-sm text-right font-semibold text-gray-900 dark:text-gray-100">
+                      {formatCurrency(product.total)}
+                    </td>
+                    <td className="px-3 py-2 text-center">
+                      <div className="flex justify-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => onEditProduct(index)}
+                          className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                          title="Edit product"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onDeleteProduct(index)}
+                          className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                          title="Delete product"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
           {addedProducts.length > 0 && (
@@ -194,10 +194,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
                 <td className="px-3 py-2"></td>
                 <td className="px-3 py-2 text-right font-semibold text-gray-900 dark:text-gray-100">
                   {formatCurrency(
-                    addedProducts.reduce(
-                      (sum, p) => sum + p.total,
-                      0
-                    ),
+                    addedProducts.reduce((sum, p) => sum + p.total, 0),
                     currency
                   )}
                 </td>
@@ -211,8 +208,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
                   Gross Weight:
                 </td>
                 <td className="px-3 py-2 text-right font-semibold text-blue-600 dark:text-blue-400">
-                  {calculateGrossWeight(addedProducts).toFixed(2)}{' '}
-                  KG
+                  {calculateGrossWeight(addedProducts).toFixed(2)} KG
                 </td>
                 <td className="px-3 py-2"></td>
                 <td className="px-3 py-2"></td>

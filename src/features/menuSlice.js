@@ -125,7 +125,12 @@ const menuSlice = createSlice({
       .addCase(fetchMenus.fulfilled, (state, { payload }) => {
         state.loading = false;
         state.menus = payload.data?.data || payload.data || [];
-        state.pagination = payload.data?.pagination || { total: 0, page: 1, limit: 10, totalPages: 0 };
+        state.pagination = payload.data?.pagination || {
+          total: 0,
+          page: 1,
+          limit: 10,
+          totalPages: 0,
+        };
       })
       .addCase(fetchMenus.rejected, (state, { payload }) => {
         state.loading = false;

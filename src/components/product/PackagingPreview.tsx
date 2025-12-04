@@ -19,33 +19,36 @@ const PackagingPreview: React.FC<PackagingPreviewProps> = ({
   // Calculate and save weight values whenever relevant fields change
   useEffect(() => {
     if (packagingHierarchy.length === 0) return;
-    
+
     // Special handling for Square Meter - always calculate if data is available
-    const squareMeterLevel = packagingHierarchy.find(level => level.from === 'Square Meter');
-    
+    const squareMeterLevel = packagingHierarchy.find(
+      (level) => level.from === 'Square Meter'
+    );
+
     if (squareMeterLevel) {
       const squareMeterPerBox = parseFloat(values['Square MeterPerBox']) || 0;
       const unitWeight = parseFloat(values.unitWeight) || 0;
-      
+
       if (squareMeterPerBox > 0 && unitWeight > 0) {
         const weightPerSquareMeter = unitWeight / squareMeterPerBox;
         const fieldName = `weightPer${squareMeterLevel.from}`; // Keep the space for backend compatibility
         setFieldValue(fieldName, parseFloat(weightPerSquareMeter.toFixed(2)));
       }
     }
-    
+
     if (!values.unitWeight || !values.weightUnitType) return;
 
     // Calculate weights for all packaging levels
     let currentWeight = parseFloat(values.unitWeight) || 0;
 
     // Set base unit weight (skip for Square Meter as it's calculated separately)
-    if (packagingHierarchy[0] && packagingHierarchy[0].from !== 'Square Meter') {
+    if (
+      packagingHierarchy[0] &&
+      packagingHierarchy[0].from !== 'Square Meter'
+    ) {
       const baseWeightField = `weightPer${packagingHierarchy[0].from}`;
       setFieldValue(baseWeightField, currentWeight);
     }
-
-
 
     // Calculate weights for each packaging level
     packagingHierarchy.forEach((level, index) => {
@@ -56,12 +59,16 @@ const PackagingPreview: React.FC<PackagingPreviewProps> = ({
       if (quantity > 0) {
         // Special handling for Square Meter
         if (level.from === 'Square Meter') {
-          const squareMeterPerBox = parseFloat(values['Square MeterPerBox']) || 0;
+          const squareMeterPerBox =
+            parseFloat(values['Square MeterPerBox']) || 0;
           if (squareMeterPerBox > 0) {
             const unitWeight = parseFloat(values.unitWeight) || 0;
             const weightPerSquareMeter = unitWeight / squareMeterPerBox;
             const fieldName = `weightPer${level.from}`; // Keep the space for backend compatibility
-            setFieldValue(fieldName, parseFloat(weightPerSquareMeter.toFixed(2)));
+            setFieldValue(
+              fieldName,
+              parseFloat(weightPerSquareMeter.toFixed(2))
+            );
           }
         } else {
           // For Box to Pallet: use the base unit weight (24 kg) * quantity (40)

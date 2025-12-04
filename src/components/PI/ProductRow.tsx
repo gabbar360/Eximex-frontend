@@ -24,7 +24,11 @@ interface ProductRowProps {
   selectedSubcategory: string;
   setSelectedCategory: (value: string) => void;
   setSelectedSubcategory: (value: string) => void;
-  calculateTotalWeight: (productId: string, quantity: string, unit: string) => number;
+  calculateTotalWeight: (
+    productId: string,
+    quantity: string,
+    unit: string
+  ) => number;
   calculateQuantityFromWeight: (productId: string, weightKg: string) => string;
 }
 
@@ -120,32 +124,41 @@ const ProductRow: React.FC<ProductRowProps> = ({
   }, [data.productId, data.quantity, data.unit, calculateTotalWeight]);
 
   const packagingCalculation = useMemo(() => {
-    if (!data.productId || !data.quantity || !data.unit || 
-        data.unit.toLowerCase() !== 'square meter' || 
-        !prod?.packagingHierarchyData?.dynamicFields) {
+    if (
+      !data.productId ||
+      !data.quantity ||
+      !data.unit ||
+      data.unit.toLowerCase() !== 'square meter' ||
+      !prod?.packagingHierarchyData?.dynamicFields
+    ) {
       return null;
     }
 
     const quantity = parseFloat(data.quantity);
     if (isNaN(quantity) || quantity <= 0) return null;
-    
+
     const packagingData = prod.packagingHierarchyData.dynamicFields;
     const sqmPerBox = packagingData['Square MeterPerBox'] || 0;
     const boxesPerPallet = packagingData['BoxPerPallet'] || 0;
-    
+
     if (!sqmPerBox || !boxesPerPallet) return null;
-    
+
     const totalBoxes = Math.ceil(quantity / sqmPerBox);
     const totalPallets = Math.ceil(totalBoxes / boxesPerPallet);
-    
+
     return {
       totalBoxes,
       totalPallets,
       sqmPerBox,
       boxesPerPallet,
-      calculatedFor: quantity
+      calculatedFor: quantity,
     };
-  }, [data.productId, data.quantity, data.unit, prod?.packagingHierarchyData?.dynamicFields]);
+  }, [
+    data.productId,
+    data.quantity,
+    data.unit,
+    prod?.packagingHierarchyData?.dynamicFields,
+  ]);
 
   useEffect(() => {
     if (packagingCalculation) {
@@ -269,17 +282,17 @@ const ProductRow: React.FC<ProductRowProps> = ({
       {prod && (
         <div className="mb-4 p-3 bg-slate-50 dark:bg-slate-900 rounded">
           <div className="text-sm text-gray-700 dark:text-gray-300">
-            <strong>Product:</strong> {prod.name || prod.productName || 'N/A'}{' '}
-            | <strong>HS Code:</strong>{' '}
+            <strong>Product:</strong> {prod.name || prod.productName || 'N/A'} |{' '}
+            <strong>HS Code:</strong>{' '}
             {prod.category?.hsnCode || prod.hsCode || 'N/A'} |{' '}
             <strong>Description:</strong> {prod.description || 'N/A'}
           </div>
-          
+
           {/* Dynamic Product Weight Information */}
           {(prod.packagingHierarchyData?.dynamicFields || prod.unitWeight) && (
             <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-900 rounded border border-blue-200 dark:border-blue-700">
               <div className="text-sm font-semibold text-blue-800 dark:text-blue-200 mb-2">
-                 Product Weight Information:
+                Product Weight Information:
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
                 {/* Show unit weight from main product data - dynamic */}
@@ -288,35 +301,53 @@ const ProductRow: React.FC<ProductRowProps> = ({
                     <div className="font-bold text-gray-900 dark:text-gray-100">
                       {prod.unitWeight} {prod.unitWeightUnit || 'g'}
                     </div>
-                    <div className="text-gray-600 dark:text-gray-400">per {prod.weightUnitType?.toLowerCase() || 'unit'}</div>
+                    <div className="text-gray-600 dark:text-gray-400">
+                      per {prod.weightUnitType?.toLowerCase() || 'unit'}
+                    </div>
                   </div>
                 )}
-                
+
                 {/* Show packaging hierarchy weights - completely dynamic */}
-                {prod.packagingHierarchyData?.dynamicFields && Object.entries(prod.packagingHierarchyData.dynamicFields)
-                  .filter(([key, value]) => key.startsWith('weight') && value && key !== 'weightUnitType' && !key.endsWith('Unit'))
-                  .map(([key, value]) => {
-                    let unitName = key.replace('weightPer', '').replace(/([A-Z])/g, ' $1').trim().toLowerCase();
-                    
-                    // Special handling for square meter
-                    if (unitName === 'square meter') {
-                      unitName = 'square meter';
-                    }
-                    
-                    const unitField = key + 'Unit';
-                    const unit = prod.packagingHierarchyData.dynamicFields[unitField] || 'kg';
-                    
-                    return (
-                      <div key={key} className="text-center p-1 bg-white dark:bg-gray-800 rounded">
-                        <div className="font-bold text-gray-900 dark:text-gray-100">
-                          {value} {unit}
+                {prod.packagingHierarchyData?.dynamicFields &&
+                  Object.entries(prod.packagingHierarchyData.dynamicFields)
+                    .filter(
+                      ([key, value]) =>
+                        key.startsWith('weight') &&
+                        value &&
+                        key !== 'weightUnitType' &&
+                        !key.endsWith('Unit')
+                    )
+                    .map(([key, value]) => {
+                      let unitName = key
+                        .replace('weightPer', '')
+                        .replace(/([A-Z])/g, ' $1')
+                        .trim()
+                        .toLowerCase();
+
+                      // Special handling for square meter
+                      if (unitName === 'square meter') {
+                        unitName = 'square meter';
+                      }
+
+                      const unitField = key + 'Unit';
+                      const unit =
+                        prod.packagingHierarchyData.dynamicFields[unitField] ||
+                        'kg';
+
+                      return (
+                        <div
+                          key={key}
+                          className="text-center p-1 bg-white dark:bg-gray-800 rounded"
+                        >
+                          <div className="font-bold text-gray-900 dark:text-gray-100">
+                            {value} {unit}
+                          </div>
+                          <div className="text-gray-600 dark:text-gray-400">
+                            per {unitName}
+                          </div>
                         </div>
-                        <div className="text-gray-600 dark:text-gray-400">per {unitName}</div>
-                      </div>
-                    );
-                  })}
-                
-                
+                      );
+                    })}
               </div>
             </div>
           )}
@@ -403,7 +434,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
           {data.unit && data.productId && prod && (
             <div className="text-xs mt-1 p-2 bg-gray-50 dark:bg-gray-800 rounded border">
               <span className="text-gray-600 dark:text-gray-400">
-                 Weight per {data.unit}:
+                Weight per {data.unit}:
               </span>
               <span className="font-mono font-bold text-gray-900 dark:text-gray-100 ml-1">
                 {(() => {
@@ -412,19 +443,22 @@ const ProductRow: React.FC<ProductRowProps> = ({
                     '1',
                     data.unit
                   );
-                  
+
                   // For square meter, show the exact weight from product data if available
-                  if (data.unit.toLowerCase() === 'square meter' && prod?.packagingHierarchyData?.dynamicFields?.weightPerSquareMeter) {
+                  if (
+                    data.unit.toLowerCase() === 'square meter' &&
+                    prod?.packagingHierarchyData?.dynamicFields
+                      ?.weightPerSquareMeter
+                  ) {
                     return `${prod.packagingHierarchyData.dynamicFields.weightPerSquareMeter.toFixed(4)} KG`;
                   }
-                  
+
                   return `${weightPer1Unit.toFixed(4)} KG`;
                 })()}
               </span>
             </div>
           )}
         </div>
-
       </div>
 
       {/* Quantity Input */}
@@ -462,13 +496,17 @@ const ProductRow: React.FC<ProductRowProps> = ({
                 <span className="text-xs opacity-75">
                   Rate:{' '}
                   {(() => {
-                    const packagingData = prod.packagingHierarchyData?.dynamicFields;
-                    
-                    if (data.unit.toLowerCase() === 'pack' && packagingData?.weightPerPack) {
+                    const packagingData =
+                      prod.packagingHierarchyData?.dynamicFields;
+
+                    if (
+                      data.unit.toLowerCase() === 'pack' &&
+                      packagingData?.weightPerPack
+                    ) {
                       const weightKg = packagingData.weightPerPack / 1000;
                       return `${weightKg.toFixed(4)} KG per ${data.unit}`;
                     }
-                    
+
                     return totalWeight > 0
                       ? `${(totalWeight / parseFloat(data.quantity || '1')).toFixed(4)} KG per ${data.unit}`
                       : `0 KG per ${data.unit}`;
@@ -477,7 +515,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
               </div>
             </div>
           )}
-          
+
           {/* Dynamic Tiles Box/Pallet Calculation */}
           {packagingCalculation && (
             <div className="text-xs bg-blue-50 dark:bg-blue-900 p-3 rounded mt-2 border border-blue-200 dark:border-blue-700">
@@ -486,10 +524,18 @@ const ProductRow: React.FC<ProductRowProps> = ({
                 <br />
                 <div className="space-y-1">
                   <div className="font-mono font-bold">
-                    {packagingCalculation.calculatedFor} SQM = <span className="text-green-600 dark:text-green-400">{packagingCalculation.totalBoxes} BOXES</span> / <span className="text-purple-600 dark:text-purple-400">{packagingCalculation.totalPallets} PALLETS</span>
+                    {packagingCalculation.calculatedFor} SQM ={' '}
+                    <span className="text-green-600 dark:text-green-400">
+                      {packagingCalculation.totalBoxes} BOXES
+                    </span>{' '}
+                    /{' '}
+                    <span className="text-purple-600 dark:text-purple-400">
+                      {packagingCalculation.totalPallets} PALLETS
+                    </span>
                   </div>
                   <div className="text-xs opacity-75">
-                    Calculation: {packagingCalculation.sqmPerBox.toFixed(2)} SQM/Box, {packagingCalculation.boxesPerPallet} Boxes/Pallet
+                    Calculation: {packagingCalculation.sqmPerBox.toFixed(2)}{' '}
+                    SQM/Box, {packagingCalculation.boxesPerPallet} Boxes/Pallet
                   </div>
                 </div>
               </div>

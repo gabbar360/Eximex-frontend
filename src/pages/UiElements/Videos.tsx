@@ -9,7 +9,6 @@ import TwentyOneIsToNine from '../../components/ui/videos/TwentyOneIsToNine';
 export default function Videos() {
   return (
     <>
-   
       <PageBreadcrumb pageTitle="Videos" />
       <div className="grid grid-cols-1 gap-5 sm:gap-6 xl:grid-cols-2">
         <div className="space-y-5 sm:space-y-6">

@@ -46,31 +46,40 @@ const UserManagement: React.FC = () => {
   const [companies, setCompanies] = useState([]);
 
   useEffect(() => {
-    dispatch(fetchUsers({
-      page: currentPage,
-      limit: pageSize,
-      search: ''
-    }));
+    dispatch(
+      fetchUsers({
+        page: currentPage,
+        limit: pageSize,
+        search: '',
+      })
+    );
     dispatch(getAllRoles());
     fetchCompanies();
   }, [dispatch, currentPage, pageSize]);
 
   // Initial load
   useEffect(() => {
-    dispatch(fetchUsers({
-      page: 1,
-      limit: 10,
-      search: ''
-    }));
+    dispatch(
+      fetchUsers({
+        page: 1,
+        limit: 10,
+        search: '',
+      })
+    );
   }, [dispatch]);
 
-  const { debouncedCallback: debouncedSearch } = useDebounce((value: string) => {
-    dispatch(fetchUsers({
-      page: 1,
-      limit: pageSize,
-      search: value
-    }));
-  }, 500);
+  const { debouncedCallback: debouncedSearch } = useDebounce(
+    (value: string) => {
+      dispatch(
+        fetchUsers({
+          page: 1,
+          limit: pageSize,
+          search: value,
+        })
+      );
+    },
+    500
+  );
 
   const fetchCompanies = async () => {
     try {
@@ -81,11 +90,14 @@ const UserManagement: React.FC = () => {
     }
   };
 
-  const handleSearch = useCallback((value: string) => {
-    setSearchTerm(value);
-    setCurrentPage(1);
-    debouncedSearch(value);
-  }, [debouncedSearch]);
+  const handleSearch = useCallback(
+    (value: string) => {
+      setSearchTerm(value);
+      setCurrentPage(1);
+      debouncedSearch(value);
+    },
+    [debouncedSearch]
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,11 +120,13 @@ const UserManagement: React.FC = () => {
         toast.success(result.message || 'User created successfully');
       }
       resetForm();
-      dispatch(fetchUsers({
-        page: currentPage,
-        limit: pageSize,
-        search: searchTerm
-      }));
+      dispatch(
+        fetchUsers({
+          page: currentPage,
+          limit: pageSize,
+          search: searchTerm,
+        })
+      );
     } catch (error) {
       toast.error(error || 'Operation failed');
     }
@@ -128,11 +142,13 @@ const UserManagement: React.FC = () => {
         const result = await dispatch(deleteUser(confirmDelete.id)).unwrap();
         toast.success(result.message || 'User deleted successfully');
         setConfirmDelete(null);
-        dispatch(fetchUsers({
-          page: currentPage,
-          limit: pageSize,
-          search: searchTerm
-        }));
+        dispatch(
+          fetchUsers({
+            page: currentPage,
+            limit: pageSize,
+            search: searchTerm,
+          })
+        );
       } catch (error) {
         toast.error(error || 'Delete failed');
       }
@@ -169,8 +185,6 @@ const UserManagement: React.FC = () => {
     resetForm();
     setShowForm(true);
   };
-
-
 
   if (loading && !users.length) {
     return (
@@ -302,7 +316,8 @@ const UserManagement: React.FC = () => {
                     ))}
                   </select>
                   <p className="text-xs text-slate-500 mt-1">
-                    Assign user to a company or leave blank for manual assignment later
+                    Assign user to a company or leave blank for manual
+                    assignment later
                   </p>
                 </div>
 
@@ -416,7 +431,9 @@ const UserManagement: React.FC = () => {
               No users found
             </h3>
             <p className="text-slate-600 mb-6">
-              {searchTerm ? 'Try adjusting your search.' : 'Create your first user to get started.'}
+              {searchTerm
+                ? 'Try adjusting your search.'
+                : 'Create your first user to get started.'}
             </p>
           </div>
         ) : (
@@ -522,11 +539,13 @@ const UserManagement: React.FC = () => {
               pageSize={pageSize}
               onChange={(page) => {
                 setCurrentPage(page);
-                dispatch(fetchUsers({
-                  page: page,
-                  limit: pageSize,
-                  search: searchTerm
-                }));
+                dispatch(
+                  fetchUsers({
+                    page: page,
+                    limit: pageSize,
+                    search: searchTerm,
+                  })
+                );
               }}
             />
           </div>
@@ -545,8 +564,8 @@ const UserManagement: React.FC = () => {
                 Delete User
               </h3>
               <p className="text-slate-600">
-                Are you sure you want to delete "{confirmDelete.name}"? This action
-                cannot be undone.
+                Are you sure you want to delete "{confirmDelete.name}"? This
+                action cannot be undone.
               </p>
             </div>
             <div className="flex items-center justify-center space-x-3">

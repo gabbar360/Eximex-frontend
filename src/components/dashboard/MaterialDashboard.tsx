@@ -1,17 +1,36 @@
 import React, { useState } from 'react';
-import { 
-  MdTrendingUp, 
-  MdTrendingDown, 
-  MdShoppingCart, 
-  MdPeople, 
-  MdAttachMoney, 
-  MdInventory, 
+import {
+  MdTrendingUp,
+  MdTrendingDown,
+  MdShoppingCart,
+  MdPeople,
+  MdAttachMoney,
+  MdInventory,
   MdMoreVert,
   MdDownload,
   MdFullscreen,
-  MdPrint
+  MdPrint,
 } from 'react-icons/md';
-import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, ComposedChart, RadialBarChart, RadialBar } from 'recharts';
+import {
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+  ComposedChart,
+  RadialBarChart,
+  RadialBar,
+} from 'recharts';
 
 // Professional HD Sample Data
 const salesData = [
@@ -94,16 +113,21 @@ const MetricCard = ({ title, value, change, icon, bgColor }: any) => (
           ) : (
             <MdTrendingDown className="w-3 h-3 text-red-500" />
           )}
-          <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${
-            change > 0 
-              ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400' 
-              : 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'
-          }`}>
-            {change > 0 ? '+' : ''}{change}%
+          <span
+            className={`text-xs font-medium px-1.5 py-0.5 rounded ${
+              change > 0
+                ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400'
+                : 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+            }`}
+          >
+            {change > 0 ? '+' : ''}
+            {change}%
           </span>
         </div>
       </div>
-      <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white ml-3 group-hover:scale-105 transition-transform duration-200 ${bgColor}`}>
+      <div
+        className={`w-10 h-10 rounded-lg flex items-center justify-center text-white ml-3 group-hover:scale-105 transition-transform duration-200 ${bgColor}`}
+      >
         {icon}
       </div>
     </div>
@@ -122,22 +146,24 @@ const ChartCard = ({ title, children, height = 400 }: any) => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         const svgElement = chartElement.querySelector('svg');
-        
+
         if (svgElement) {
           // Get SVG dimensions
           const rect = svgElement.getBoundingClientRect();
           canvas.width = rect.width;
           canvas.height = rect.height;
-          
+
           // Convert SVG to canvas
           const svgData = new XMLSerializer().serializeToString(svgElement);
-          const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+          const svgBlob = new Blob([svgData], {
+            type: 'image/svg+xml;charset=utf-8',
+          });
           const url = URL.createObjectURL(svgBlob);
-          
+
           const img = new Image();
           img.onload = () => {
             ctx?.drawImage(img, 0, 0);
-            
+
             // Download as PNG
             canvas.toBlob((blob) => {
               if (blob) {
@@ -148,10 +174,10 @@ const ChartCard = ({ title, children, height = 400 }: any) => {
                 URL.revokeObjectURL(link.href);
               }
             });
-            
+
             URL.revokeObjectURL(url);
           };
-          
+
           img.src = url;
         }
       } catch (error) {
@@ -216,7 +242,7 @@ const ChartCard = ({ title, children, height = 400 }: any) => {
             {title}
           </h3>
           <div className="relative">
-            <button 
+            <button
               onClick={() => setShowMenu(!showMenu)}
               className="p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
             >
@@ -249,7 +275,11 @@ const ChartCard = ({ title, children, height = 400 }: any) => {
             )}
           </div>
         </div>
-        <div style={{ height: `${height}px` }} className="w-full" data-chart={title}>
+        <div
+          style={{ height: `${height}px` }}
+          className="w-full"
+          data-chart={title}
+        >
           {children}
         </div>
       </div>
@@ -269,9 +299,7 @@ const ChartCard = ({ title, children, height = 400 }: any) => {
                 Cancel
               </button>
             </div>
-            <div className="w-full h-5/6">
-              {children}
-            </div>
+            <div className="w-full h-5/6">{children}</div>
           </div>
         </div>
       )}
@@ -328,46 +356,65 @@ export default function MaterialDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
           <ChartCard title="Sales & Revenue Trend" height={320}>
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={salesData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+              <LineChart
+                data={salesData}
+                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+              >
                 <defs>
-                  <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.05}/>
+                  <linearGradient
+                    id="salesGradient"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.05} />
                   </linearGradient>
-                  <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0.05}/>
+                  <linearGradient
+                    id="revenueGradient"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0.05} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
-                <XAxis 
-                  dataKey="month" 
-                  stroke="#6b7280" 
-                  fontSize={12} 
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#e5e7eb"
+                  opacity={0.5}
+                />
+                <XAxis
+                  dataKey="month"
+                  stroke="#6b7280"
+                  fontSize={12}
                   fontWeight={500}
                   axisLine={false}
                   tickLine={false}
                 />
-                <YAxis 
-                  stroke="#6b7280" 
-                  fontSize={12} 
+                <YAxis
+                  stroke="#6b7280"
+                  fontSize={12}
                   fontWeight={500}
                   axisLine={false}
                   tickLine={false}
-                  tickFormatter={(value) => `$${(value/1000).toFixed(0)}k`}
+                  tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
                 />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'white', 
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'white',
                     border: 'none',
                     borderRadius: '12px',
                     boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
                     fontSize: '14px',
-                    fontWeight: '500'
+                    fontWeight: '500',
                   }}
                   formatter={(value, name) => [
-                    `$${Number(value).toLocaleString()}`, 
-                    name === 'sales' ? 'Sales' : 'Revenue'
+                    `$${Number(value).toLocaleString()}`,
+                    name === 'sales' ? 'Sales' : 'Revenue',
                   ]}
                   labelStyle={{ color: '#374151', fontWeight: '600' }}
                 />
@@ -377,7 +424,12 @@ export default function MaterialDashboard() {
                   stroke="#3b82f6"
                   strokeWidth={3}
                   dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
-                  activeDot={{ r: 6, stroke: '#3b82f6', strokeWidth: 2, fill: 'white' }}
+                  activeDot={{
+                    r: 6,
+                    stroke: '#3b82f6',
+                    strokeWidth: 2,
+                    fill: 'white',
+                  }}
                 />
                 <Line
                   type="monotone"
@@ -385,12 +437,21 @@ export default function MaterialDashboard() {
                   stroke="#10b981"
                   strokeWidth={3}
                   dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }}
-                  activeDot={{ r: 6, stroke: '#10b981', strokeWidth: 2, fill: 'white' }}
+                  activeDot={{
+                    r: 6,
+                    stroke: '#10b981',
+                    strokeWidth: 2,
+                    fill: 'white',
+                  }}
                 />
-                <Legend 
+                <Legend
                   wrapperStyle={{ paddingTop: '20px' }}
                   iconType="circle"
-                  formatter={(value) => <span style={{ color: '#374151', fontWeight: '500' }}>{value === 'sales' ? 'Sales' : 'Revenue'}</span>}
+                  formatter={(value) => (
+                    <span style={{ color: '#374151', fontWeight: '500' }}>
+                      {value === 'sales' ? 'Sales' : 'Revenue'}
+                    </span>
+                  )}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -398,45 +459,58 @@ export default function MaterialDashboard() {
 
           <ChartCard title="Order Status Distribution" height={320}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={orderData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+              <BarChart
+                data={orderData}
+                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+              >
                 <defs>
-                  <linearGradient id="orderGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.6}/>
+                  <linearGradient
+                    id="orderGradient"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.6} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
-                <XAxis 
-                  dataKey="name" 
-                  stroke="#6b7280" 
-                  fontSize={12} 
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#e5e7eb"
+                  opacity={0.5}
+                />
+                <XAxis
+                  dataKey="name"
+                  stroke="#6b7280"
+                  fontSize={12}
                   fontWeight={500}
                   axisLine={false}
                   tickLine={false}
                 />
-                <YAxis 
-                  stroke="#6b7280" 
-                  fontSize={12} 
+                <YAxis
+                  stroke="#6b7280"
+                  fontSize={12}
                   fontWeight={500}
                   axisLine={false}
                   tickLine={false}
                   tickFormatter={(value) => `${value}%`}
                 />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'white', 
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'white',
                     border: 'none',
                     borderRadius: '12px',
                     boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
                     fontSize: '14px',
-                    fontWeight: '500'
+                    fontWeight: '500',
                   }}
                   formatter={(value) => [`${value}%`, 'Orders']}
                   labelStyle={{ color: '#374151', fontWeight: '600' }}
                 />
-                <Bar 
-                  dataKey="value" 
-                  fill="url(#orderGradient)" 
+                <Bar
+                  dataKey="value"
+                  fill="url(#orderGradient)"
                   radius={[4, 4, 0, 0]}
                 />
               </BarChart>
@@ -448,42 +522,61 @@ export default function MaterialDashboard() {
         <div className="mb-4 sm:mb-6 lg:mb-8">
           <ChartCard title="Monthly Revenue vs Target" height={350}>
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={revenueData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+              <ComposedChart
+                data={revenueData}
+                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+              >
                 <defs>
-                  <linearGradient id="revenueAreaGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.05}/>
+                  <linearGradient
+                    id="revenueAreaGradient"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.05} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
-                <XAxis 
-                  dataKey="month" 
-                  stroke="#6b7280" 
-                  fontSize={11} 
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#e5e7eb"
+                  opacity={0.5}
+                />
+                <XAxis
+                  dataKey="month"
+                  stroke="#6b7280"
+                  fontSize={11}
                   fontWeight={500}
                   axisLine={false}
                   tickLine={false}
                 />
-                <YAxis 
-                  stroke="#6b7280" 
-                  fontSize={11} 
+                <YAxis
+                  stroke="#6b7280"
+                  fontSize={11}
                   fontWeight={500}
                   axisLine={false}
                   tickLine={false}
-                  tickFormatter={(value) => `$${(value/1000).toFixed(0)}k`}
+                  tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
                 />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'white', 
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'white',
                     border: 'none',
                     borderRadius: '12px',
                     boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
                     fontSize: '13px',
-                    fontWeight: '500'
+                    fontWeight: '500',
                   }}
                   formatter={(value, name) => [
-                    name === 'growth' ? `${value}%` : `$${Number(value).toLocaleString()}`, 
-                    name === 'revenue' ? 'Revenue' : name === 'target' ? 'Target' : 'Growth %'
+                    name === 'growth'
+                      ? `${value}%`
+                      : `$${Number(value).toLocaleString()}`,
+                    name === 'revenue'
+                      ? 'Revenue'
+                      : name === 'target'
+                        ? 'Target'
+                        : 'Growth %',
                   ]}
                   labelStyle={{ color: '#374151', fontWeight: '600' }}
                 />
@@ -494,9 +587,9 @@ export default function MaterialDashboard() {
                   stroke="#8b5cf6"
                   strokeWidth={2}
                 />
-                <Bar 
-                  dataKey="target" 
-                  fill="#e2e8f0" 
+                <Bar
+                  dataKey="target"
+                  fill="#e2e8f0"
                   radius={[2, 2, 0, 0]}
                   opacity={0.6}
                 />
@@ -517,62 +610,85 @@ export default function MaterialDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
           <ChartCard title="Customer Prospects Analytics" height={320}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={customerProspectData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+              <BarChart
+                data={customerProspectData}
+                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+              >
                 <defs>
-                  <linearGradient id="activeGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0.6}/>
+                  <linearGradient
+                    id="activeGradient"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0.6} />
                   </linearGradient>
-                  <linearGradient id="inactiveGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0.6}/>
+                  <linearGradient
+                    id="inactiveGradient"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0.6} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
-                <XAxis 
-                  dataKey="type" 
-                  stroke="#6b7280" 
-                  fontSize={12} 
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#e5e7eb"
+                  opacity={0.5}
+                />
+                <XAxis
+                  dataKey="type"
+                  stroke="#6b7280"
+                  fontSize={12}
                   fontWeight={500}
                   axisLine={false}
                   tickLine={false}
                 />
-                <YAxis 
-                  stroke="#6b7280" 
-                  fontSize={12} 
+                <YAxis
+                  stroke="#6b7280"
+                  fontSize={12}
                   fontWeight={500}
                   axisLine={false}
                   tickLine={false}
                 />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'white', 
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'white',
                     border: 'none',
                     borderRadius: '12px',
                     boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
                     fontSize: '13px',
-                    fontWeight: '500'
+                    fontWeight: '500',
                   }}
                   formatter={(value, name) => [
-                    value, 
-                    name === 'active' ? 'Active' : 'Inactive'
+                    value,
+                    name === 'active' ? 'Active' : 'Inactive',
                   ]}
                   labelStyle={{ color: '#374151', fontWeight: '600' }}
                 />
-                <Bar 
-                  dataKey="active" 
-                  fill="url(#activeGradient)" 
+                <Bar
+                  dataKey="active"
+                  fill="url(#activeGradient)"
                   radius={[4, 4, 0, 0]}
                   name="active"
                 />
-                <Bar 
-                  dataKey="inactive" 
-                  fill="url(#inactiveGradient)" 
+                <Bar
+                  dataKey="inactive"
+                  fill="url(#inactiveGradient)"
                   radius={[4, 4, 0, 0]}
                   name="inactive"
                 />
-                <Legend 
-                  wrapperStyle={{ paddingTop: '15px', fontSize: '12px', fontWeight: '500' }}
+                <Legend
+                  wrapperStyle={{
+                    paddingTop: '15px',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                  }}
                   formatter={(value) => (
                     <span style={{ color: '#374151' }}>
                       {value === 'active' ? 'Active' : 'Inactive'}
@@ -585,52 +701,71 @@ export default function MaterialDashboard() {
 
           <ChartCard title="Weekly Performance" height={320}>
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={weeklyData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+              <ComposedChart
+                data={weeklyData}
+                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+              >
                 <defs>
-                  <linearGradient id="weeklyGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.05}/>
+                  <linearGradient
+                    id="weeklyGradient"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.05} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
-                <XAxis 
-                  dataKey="day" 
-                  stroke="#6b7280" 
-                  fontSize={11} 
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#e5e7eb"
+                  opacity={0.5}
+                />
+                <XAxis
+                  dataKey="day"
+                  stroke="#6b7280"
+                  fontSize={11}
                   fontWeight={500}
                   axisLine={false}
                   tickLine={false}
                 />
-                <YAxis 
+                <YAxis
                   yAxisId="left"
-                  stroke="#6b7280" 
-                  fontSize={11} 
+                  stroke="#6b7280"
+                  fontSize={11}
                   fontWeight={500}
                   axisLine={false}
                   tickLine={false}
                 />
-                <YAxis 
+                <YAxis
                   yAxisId="right"
                   orientation="right"
-                  stroke="#6b7280" 
-                  fontSize={11} 
+                  stroke="#6b7280"
+                  fontSize={11}
                   fontWeight={500}
                   axisLine={false}
                   tickLine={false}
-                  tickFormatter={(value) => `$${(value/1000).toFixed(0)}k`}
+                  tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
                 />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'white', 
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'white',
                     border: 'none',
                     borderRadius: '12px',
                     boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
                     fontSize: '13px',
-                    fontWeight: '500'
+                    fontWeight: '500',
                   }}
                   formatter={(value, name) => [
-                    name === 'revenue' ? `$${Number(value).toLocaleString()}` : value, 
-                    name === 'orders' ? 'Orders' : name === 'revenue' ? 'Revenue' : 'Customers'
+                    name === 'revenue'
+                      ? `$${Number(value).toLocaleString()}`
+                      : value,
+                    name === 'orders'
+                      ? 'Orders'
+                      : name === 'revenue'
+                        ? 'Revenue'
+                        : 'Customers',
                   ]}
                   labelStyle={{ color: '#374151', fontWeight: '600' }}
                 />
@@ -642,10 +777,10 @@ export default function MaterialDashboard() {
                   stroke="#3b82f6"
                   strokeWidth={2}
                 />
-                <Bar 
+                <Bar
                   yAxisId="left"
-                  dataKey="orders" 
-                  fill="#10b981" 
+                  dataKey="orders"
+                  fill="#10b981"
                   radius={[2, 2, 0, 0]}
                   opacity={0.8}
                 />
@@ -666,22 +801,41 @@ export default function MaterialDashboard() {
         <div className="mb-4 sm:mb-6 lg:mb-8">
           <ChartCard title="Category Performance Analysis" height={350}>
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={categoryData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+              <ComposedChart
+                data={categoryData}
+                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+              >
                 <defs>
-                  <linearGradient id="salesBarGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0.6}/>
+                  <linearGradient
+                    id="salesBarGradient"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0.6} />
                   </linearGradient>
-                  <linearGradient id="profitBarGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0.6}/>
+                  <linearGradient
+                    id="profitBarGradient"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0.6} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
-                <XAxis 
-                  dataKey="category" 
-                  stroke="#6b7280" 
-                  fontSize={12} 
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#e5e7eb"
+                  opacity={0.5}
+                />
+                <XAxis
+                  dataKey="category"
+                  stroke="#6b7280"
+                  fontSize={12}
                   fontWeight={500}
                   axisLine={false}
                   tickLine={false}
@@ -689,51 +843,57 @@ export default function MaterialDashboard() {
                   textAnchor="end"
                   height={80}
                 />
-                <YAxis 
+                <YAxis
                   yAxisId="left"
-                  stroke="#6b7280" 
-                  fontSize={12} 
+                  stroke="#6b7280"
+                  fontSize={12}
                   fontWeight={500}
                   axisLine={false}
                   tickLine={false}
-                  tickFormatter={(value) => `$${(value/1000).toFixed(0)}k`}
+                  tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
                 />
-                <YAxis 
+                <YAxis
                   yAxisId="right"
                   orientation="right"
-                  stroke="#6b7280" 
-                  fontSize={12} 
+                  stroke="#6b7280"
+                  fontSize={12}
                   fontWeight={500}
                   axisLine={false}
                   tickLine={false}
                   tickFormatter={(value) => `${value}%`}
                 />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'white', 
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'white',
                     border: 'none',
                     borderRadius: '12px',
                     boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
                     fontSize: '14px',
-                    fontWeight: '500'
+                    fontWeight: '500',
                   }}
                   formatter={(value, name) => [
-                    name === 'margin' ? `${value}%` : `$${Number(value).toLocaleString()}`, 
-                    name === 'sales' ? 'Sales' : name === 'profit' ? 'Profit' : 'Margin %'
+                    name === 'margin'
+                      ? `${value}%`
+                      : `$${Number(value).toLocaleString()}`,
+                    name === 'sales'
+                      ? 'Sales'
+                      : name === 'profit'
+                        ? 'Profit'
+                        : 'Margin %',
                   ]}
                   labelStyle={{ color: '#374151', fontWeight: '600' }}
                 />
-                <Bar 
+                <Bar
                   yAxisId="left"
-                  dataKey="sales" 
-                  fill="url(#salesBarGradient)" 
+                  dataKey="sales"
+                  fill="url(#salesBarGradient)"
                   radius={[4, 4, 0, 0]}
                   name="sales"
                 />
-                <Bar 
+                <Bar
                   yAxisId="left"
-                  dataKey="profit" 
-                  fill="url(#profitBarGradient)" 
+                  dataKey="profit"
+                  fill="url(#profitBarGradient)"
                   radius={[4, 4, 0, 0]}
                   name="profit"
                 />
@@ -744,13 +904,22 @@ export default function MaterialDashboard() {
                   stroke="#f59e0b"
                   strokeWidth={3}
                   dot={{ fill: '#f59e0b', strokeWidth: 2, r: 5 }}
-                  activeDot={{ r: 7, stroke: '#f59e0b', strokeWidth: 2, fill: 'white' }}
+                  activeDot={{
+                    r: 7,
+                    stroke: '#f59e0b',
+                    strokeWidth: 2,
+                    fill: 'white',
+                  }}
                 />
-                <Legend 
+                <Legend
                   wrapperStyle={{ paddingTop: '20px' }}
                   formatter={(value) => (
                     <span style={{ color: '#374151', fontWeight: '500' }}>
-                      {value === 'sales' ? 'Sales' : value === 'profit' ? 'Profit' : 'Margin %'}
+                      {value === 'sales'
+                        ? 'Sales'
+                        : value === 'profit'
+                          ? 'Profit'
+                          : 'Margin %'}
                     </span>
                   )}
                 />

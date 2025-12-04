@@ -87,8 +87,19 @@ const userManagementSlice = createSlice({
       })
       .addCase(fetchUsers.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.users = Array.isArray(payload?.data?.data) ? payload.data.data : Array.isArray(payload?.data) ? payload.data : Array.isArray(payload) ? payload : [];
-        state.pagination = payload?.data?.pagination || { total: 0, page: 1, limit: 10, totalPages: 0 };
+        state.users = Array.isArray(payload?.data?.data)
+          ? payload.data.data
+          : Array.isArray(payload?.data)
+            ? payload.data
+            : Array.isArray(payload)
+              ? payload
+              : [];
+        state.pagination = payload?.data?.pagination || {
+          total: 0,
+          page: 1,
+          limit: 10,
+          totalPages: 0,
+        };
       })
       .addCase(fetchUsers.rejected, (state, { payload }) => {
         state.loading = false;

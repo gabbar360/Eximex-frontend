@@ -25,7 +25,9 @@ import { useDebounce } from '../../utils/useDebounce';
 const RoleManagement: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { roles, loading, error, pagination } = useSelector((state: any) => state.role);
+  const { roles, loading, error, pagination } = useSelector(
+    (state: any) => state.role
+  );
 
   const [showForm, setShowForm] = useState(false);
   const [editingRole, setEditingRole] = useState(null);
@@ -40,37 +42,47 @@ const RoleManagement: React.FC = () => {
   });
 
   useEffect(() => {
-    dispatch(getAllRoles({
-      page: currentPage,
-      limit: pageSize,
-      search: ''
-    }));
+    dispatch(
+      getAllRoles({
+        page: currentPage,
+        limit: pageSize,
+        search: '',
+      })
+    );
   }, [dispatch, currentPage, pageSize]);
 
   // Initial load
   useEffect(() => {
-    dispatch(getAllRoles({
-      page: 1,
-      limit: 10,
-      search: ''
-    }));
+    dispatch(
+      getAllRoles({
+        page: 1,
+        limit: 10,
+        search: '',
+      })
+    );
   }, [dispatch]);
 
-  const { debouncedCallback: debouncedSearch } = useDebounce((value: string) => {
-    dispatch(getAllRoles({
-      page: 1,
-      limit: pageSize,
-      search: value
-    }));
-  }, 500);
+  const { debouncedCallback: debouncedSearch } = useDebounce(
+    (value: string) => {
+      dispatch(
+        getAllRoles({
+          page: 1,
+          limit: pageSize,
+          search: value,
+        })
+      );
+    },
+    500
+  );
 
-  const handleSearch = useCallback((value: string) => {
-    setSearchTerm(value);
-    setCurrentPage(1);
-    debouncedSearch(value);
-  }, [debouncedSearch]);
-
-
+  const handleSearch = useCallback(
+    (value: string) => {
+      setSearchTerm(value);
+      setCurrentPage(1);
+      debouncedSearch(value);
+    },
+    [debouncedSearch]
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,11 +97,13 @@ const RoleManagement: React.FC = () => {
         toast.success(result.message || 'Role created successfully');
       }
       resetForm();
-      dispatch(getAllRoles({
-        page: currentPage,
-        limit: pageSize,
-        search: searchTerm
-      }));
+      dispatch(
+        getAllRoles({
+          page: currentPage,
+          limit: pageSize,
+          search: searchTerm,
+        })
+      );
     } catch (error) {
       toast.error(error || 'Operation failed');
     }
@@ -105,11 +119,13 @@ const RoleManagement: React.FC = () => {
         const result = await dispatch(deleteRole(confirmDelete.id)).unwrap();
         toast.success(result.message || 'Role deleted successfully');
         setConfirmDelete(null);
-        dispatch(getAllRoles({
-          page: currentPage,
-          limit: pageSize,
-          search: searchTerm
-        }));
+        dispatch(
+          getAllRoles({
+            page: currentPage,
+            limit: pageSize,
+            search: searchTerm,
+          })
+        );
       } catch (error) {
         toast.error(error || 'Delete failed');
       }
@@ -319,7 +335,9 @@ const RoleManagement: React.FC = () => {
               No roles found
             </h3>
             <p className="text-slate-600 mb-6">
-              {searchTerm ? 'Try adjusting your search.' : 'Create your first role to get started.'}
+              {searchTerm
+                ? 'Try adjusting your search.'
+                : 'Create your first role to get started.'}
             </p>
           </div>
         ) : (
@@ -414,11 +432,13 @@ const RoleManagement: React.FC = () => {
               pageSize={pageSize}
               onChange={(page) => {
                 setCurrentPage(page);
-                dispatch(getAllRoles({
-                  page: page,
-                  limit: pageSize,
-                  search: searchTerm
-                }));
+                dispatch(
+                  getAllRoles({
+                    page: page,
+                    limit: pageSize,
+                    search: searchTerm,
+                  })
+                );
               }}
             />
           </div>
@@ -437,8 +457,8 @@ const RoleManagement: React.FC = () => {
                 Delete Role
               </h3>
               <p className="text-slate-600">
-                Are you sure you want to delete "{confirmDelete.name}"? This action
-                cannot be undone.
+                Are you sure you want to delete "{confirmDelete.name}"? This
+                action cannot be undone.
               </p>
             </div>
             <div className="flex items-center justify-center space-x-3">

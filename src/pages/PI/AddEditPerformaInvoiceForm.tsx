@@ -734,21 +734,24 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   };
 
   // Wrapper functions to pass products array to utility functions
-  const calculateTotalWeightWrapper = (productId: string, quantity: string, unit: string) => {
+  const calculateTotalWeightWrapper = (
+    productId: string,
+    quantity: string,
+    unit: string
+  ) => {
     return calculateTotalWeight(productId, quantity, unit, products);
   };
 
-  const calculateQuantityFromWeightWrapper = (productId: string, weightKg: string) => {
+  const calculateQuantityFromWeightWrapper = (
+    productId: string,
+    weightKg: string
+  ) => {
     return calculateQuantityFromWeight(productId, weightKg, products);
   };
 
   const calculateGrossWeightWrapper = (productList: any[]) => {
     return calculateGrossWeight(productList, products);
   };
-
-
-
-
 
   // Enhanced calculation functions for packing hierarchy
   const calculatePackingBreakdown = (
@@ -943,7 +946,13 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
       }
       // Use the improved calculateTotalWeight function with products array
       return (
-        sum + calculateTotalWeight(p.productId, p.quantity.toString(), p.unit, products)
+        sum +
+        calculateTotalWeight(
+          p.productId,
+          p.quantity.toString(),
+          p.unit,
+          products
+        )
       );
     }, 0);
 
@@ -1051,14 +1060,16 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   const addProductToTable = () => {
     try {
       const currentProduct = productsAdded[0];
-      
+
       if (
         !currentProduct ||
         !currentProduct.productId ||
         !currentProduct.rate ||
         !currentProduct.unit
       ) {
-        toast.error('Please fill all required fields: Category, Product, Unit, Quantity, and Rate');
+        toast.error(
+          'Please fill all required fields: Category, Product, Unit, Quantity, and Rate'
+        );
         return;
       }
 
@@ -1085,8 +1096,11 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         totalWeight = quantity * 1;
       }
 
-      const productName = product?.name || product?.productName || `Product ${currentProduct.productId}`;
-      
+      const productName =
+        product?.name ||
+        product?.productName ||
+        `Product ${currentProduct.productId}`;
+
       const productData: ProductData = {
         productId: currentProduct.productId,
         name: productName,
@@ -1110,23 +1124,24 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         setEditingProductIndex(null);
         toast.success('Product updated successfully!');
       } else {
-        setAddedProducts(prev => [...prev, productData]);
+        setAddedProducts((prev) => [...prev, productData]);
         toast.success('Product added successfully!');
       }
 
-      setProductsAdded([{
-        productId: '',
-        quantity: '',
-        rate: '',
-        unit: '',
-        categoryId: '',
-        subcategoryId: '',
-        quantityByWeight: '',
-      }]);
+      setProductsAdded([
+        {
+          productId: '',
+          quantity: '',
+          rate: '',
+          unit: '',
+          categoryId: '',
+          subcategoryId: '',
+          quantityByWeight: '',
+        },
+      ]);
       setSelectedCategory('');
       setSelectedSubcategory('');
       setQuantityByWeight('');
-      
     } catch (error) {
       toast.error('Failed to add product. Please try again.');
     }
@@ -1152,8 +1167,6 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
     // Set the selected category and subcategory to trigger unit dropdown update
     setSelectedCategory(categoryId);
     setSelectedSubcategory(subcategoryId);
-
-
 
     // Clear unit first to force dropdown refresh
     setProductsAdded([
@@ -1510,10 +1523,6 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
       return null;
     });
   };
-
-
-
-
 
   if (loading) {
     return (
@@ -2235,7 +2244,9 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                         setSelectedCategory={setSelectedCategory}
                         setSelectedSubcategory={setSelectedSubcategory}
                         calculateTotalWeight={calculateTotalWeightWrapper}
-                        calculateQuantityFromWeight={calculateQuantityFromWeightWrapper}
+                        calculateQuantityFromWeight={
+                          calculateQuantityFromWeightWrapper
+                        }
                       />
                     ))}
                   </div>
@@ -2752,9 +2763,9 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                                   Gross Weight:
                                 </td>
                                 <td className="text-right px-3 py-3">
-                                  {calculateGrossWeightWrapper(addedProducts).toFixed(
-                                    2
-                                  )}{' '}
+                                  {calculateGrossWeightWrapper(
+                                    addedProducts
+                                  ).toFixed(2)}{' '}
                                   KG
                                 </td>
                                 <td

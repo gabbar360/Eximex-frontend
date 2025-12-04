@@ -20,7 +20,23 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { getSuperAdminDashboardStats } from '../features/userSlice';
 import { toast } from 'react-toastify';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LineChart, Line, AreaChart, Area } from 'recharts';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+} from 'recharts';
 
 interface DashboardStats {
   users: number;
@@ -146,56 +162,103 @@ const SuperAdminOverview: React.FC = () => {
 
   // Generate chart data using useMemo for performance
   const generateChartData = (value: number, multipliers: number[]) => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     return months.map((month, index) => ({
       month,
-      value: index === 11 ? value : Math.max(0, Math.floor(value * multipliers[index]))
+      value:
+        index === 11
+          ? value
+          : Math.max(0, Math.floor(value * multipliers[index])),
     }));
   };
 
-  const usersChartData = useMemo(() => 
-    generateChartData(stats?.users || 0, [0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.98, 1]), 
+  const usersChartData = useMemo(
+    () =>
+      generateChartData(
+        stats?.users || 0,
+        [0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.98, 1]
+      ),
     [stats?.users]
   );
 
-  const companiesChartData = useMemo(() => 
-    generateChartData(stats?.companies || 0, [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1]), 
+  const companiesChartData = useMemo(
+    () =>
+      generateChartData(
+        stats?.companies || 0,
+        [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1]
+      ),
     [stats?.companies]
   );
 
-  const productsChartData = useMemo(() => 
-    generateChartData(stats?.products || 0, [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 0.95, 1]), 
+  const productsChartData = useMemo(
+    () =>
+      generateChartData(
+        stats?.products || 0,
+        [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 0.95, 1]
+      ),
     [stats?.products]
   );
 
-  const ordersChartData = useMemo(() => 
-    generateChartData(stats?.orders || 0, [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 0.95, 1]), 
+  const ordersChartData = useMemo(
+    () =>
+      generateChartData(
+        stats?.orders || 0,
+        [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 0.95, 1]
+      ),
     [stats?.orders]
   );
 
-  const partiesChartData = useMemo(() => 
-    generateChartData(stats?.parties || 0, [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1]), 
+  const partiesChartData = useMemo(
+    () =>
+      generateChartData(
+        stats?.parties || 0,
+        [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1]
+      ),
     [stats?.parties]
   );
 
-  const piInvoicesChartData = useMemo(() => 
-    generateChartData(stats?.piInvoices || 0, [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 0.95, 1]), 
+  const piInvoicesChartData = useMemo(
+    () =>
+      generateChartData(
+        stats?.piInvoices || 0,
+        [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 0.95, 1]
+      ),
     [stats?.piInvoices]
   );
 
-  const categoriesChartData = useMemo(() => 
-    generateChartData(stats?.categories || 0, [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1]), 
+  const categoriesChartData = useMemo(
+    () =>
+      generateChartData(
+        stats?.categories || 0,
+        [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1]
+      ),
     [stats?.categories]
   );
 
-  const pieChartData = useMemo(() => [
-    { name: 'Users', value: stats?.users || 0, color: '#3b82f6' },
-    { name: 'Companies', value: stats?.companies || 0, color: '#10b981' },
-    { name: 'Products', value: stats?.products || 0, color: '#8b5cf6' },
-    { name: 'Orders', value: stats?.orders || 0, color: '#f59e0b' },
-    { name: 'Parties', value: stats?.parties || 0, color: '#6366f1' },
-    { name: 'PI Invoices', value: stats?.piInvoices || 0, color: '#ec4899' },
-  ], [stats]);
+  const pieChartData = useMemo(
+    () => [
+      { name: 'Users', value: stats?.users || 0, color: '#3b82f6' },
+      { name: 'Companies', value: stats?.companies || 0, color: '#10b981' },
+      { name: 'Products', value: stats?.products || 0, color: '#8b5cf6' },
+      { name: 'Orders', value: stats?.orders || 0, color: '#f59e0b' },
+      { name: 'Parties', value: stats?.parties || 0, color: '#6366f1' },
+      { name: 'PI Invoices', value: stats?.piInvoices || 0, color: '#ec4899' },
+    ],
+    [stats]
+  );
 
   const FeatureSection = ({
     feature,
@@ -271,10 +334,8 @@ const SuperAdminOverview: React.FC = () => {
       ) : (
         stats && (
           <div className="mb-12">
-
-
             {/* Individual Charts Section */}
-            <div className="mt-8"> 
+            <div className="mt-8">
               {/* Charts Row 1 - Users & Companies */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 {/* Users Chart */}
@@ -284,18 +345,63 @@ const SuperAdminOverview: React.FC = () => {
                   </h3>
                   <div style={{ height: '250px' }}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={usersChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                      <AreaChart
+                        data={usersChartData}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                      >
                         <defs>
-                          <linearGradient id="usersGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.05}/>
+                          <linearGradient
+                            id="usersGradient"
+                            x1="0"
+                            y1="0"
+                            x2="0"
+                            y2="1"
+                          >
+                            <stop
+                              offset="5%"
+                              stopColor="#3b82f6"
+                              stopOpacity={0.3}
+                            />
+                            <stop
+                              offset="95%"
+                              stopColor="#3b82f6"
+                              stopOpacity={0.05}
+                            />
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
-                        <XAxis dataKey="month" stroke="#6b7280" fontSize={12} axisLine={false} tickLine={false} />
-                        <YAxis stroke="#6b7280" fontSize={12} axisLine={false} tickLine={false} />
-                        <Tooltip contentStyle={{ backgroundColor: 'white', border: 'none', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }} />
-                        <Area type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={2} fill="url(#usersGradient)" />
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke="#e5e7eb"
+                          opacity={0.5}
+                        />
+                        <XAxis
+                          dataKey="month"
+                          stroke="#6b7280"
+                          fontSize={12}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <YAxis
+                          stroke="#6b7280"
+                          fontSize={12}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: 'white',
+                            border: 'none',
+                            borderRadius: '12px',
+                            boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                          }}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="value"
+                          stroke="#3b82f6"
+                          strokeWidth={2}
+                          fill="url(#usersGradient)"
+                        />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
@@ -308,18 +414,61 @@ const SuperAdminOverview: React.FC = () => {
                   </h3>
                   <div style={{ height: '250px' }}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={companiesChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                      <BarChart
+                        data={companiesChartData}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                      >
                         <defs>
-                          <linearGradient id="companiesGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#10b981" stopOpacity={0.6}/>
+                          <linearGradient
+                            id="companiesGradient"
+                            x1="0"
+                            y1="0"
+                            x2="0"
+                            y2="1"
+                          >
+                            <stop
+                              offset="5%"
+                              stopColor="#10b981"
+                              stopOpacity={0.8}
+                            />
+                            <stop
+                              offset="95%"
+                              stopColor="#10b981"
+                              stopOpacity={0.6}
+                            />
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
-                        <XAxis dataKey="month" stroke="#6b7280" fontSize={12} axisLine={false} tickLine={false} />
-                        <YAxis stroke="#6b7280" fontSize={12} axisLine={false} tickLine={false} />
-                        <Tooltip contentStyle={{ backgroundColor: 'white', border: 'none', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }} />
-                        <Bar dataKey="value" fill="url(#companiesGradient)" radius={[4, 4, 0, 0]} />
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke="#e5e7eb"
+                          opacity={0.5}
+                        />
+                        <XAxis
+                          dataKey="month"
+                          stroke="#6b7280"
+                          fontSize={12}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <YAxis
+                          stroke="#6b7280"
+                          fontSize={12}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: 'white',
+                            border: 'none',
+                            borderRadius: '12px',
+                            boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                          }}
+                        />
+                        <Bar
+                          dataKey="value"
+                          fill="url(#companiesGradient)"
+                          radius={[4, 4, 0, 0]}
+                        />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -335,12 +484,43 @@ const SuperAdminOverview: React.FC = () => {
                   </h3>
                   <div style={{ height: '250px' }}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={productsChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
-                        <XAxis dataKey="month" stroke="#6b7280" fontSize={12} axisLine={false} tickLine={false} />
-                        <YAxis stroke="#6b7280" fontSize={12} axisLine={false} tickLine={false} />
-                        <Tooltip contentStyle={{ backgroundColor: 'white', border: 'none', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }} />
-                        <Line type="monotone" dataKey="value" stroke="#8b5cf6" strokeWidth={3} dot={{ fill: '#8b5cf6', r: 4 }} />
+                      <LineChart
+                        data={productsChartData}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                      >
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke="#e5e7eb"
+                          opacity={0.5}
+                        />
+                        <XAxis
+                          dataKey="month"
+                          stroke="#6b7280"
+                          fontSize={12}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <YAxis
+                          stroke="#6b7280"
+                          fontSize={12}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: 'white',
+                            border: 'none',
+                            borderRadius: '12px',
+                            boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                          }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="value"
+                          stroke="#8b5cf6"
+                          strokeWidth={3}
+                          dot={{ fill: '#8b5cf6', r: 4 }}
+                        />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
@@ -353,18 +533,63 @@ const SuperAdminOverview: React.FC = () => {
                   </h3>
                   <div style={{ height: '250px' }}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={ordersChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                      <AreaChart
+                        data={ordersChartData}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                      >
                         <defs>
-                          <linearGradient id="ordersGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.05}/>
+                          <linearGradient
+                            id="ordersGradient"
+                            x1="0"
+                            y1="0"
+                            x2="0"
+                            y2="1"
+                          >
+                            <stop
+                              offset="5%"
+                              stopColor="#f59e0b"
+                              stopOpacity={0.3}
+                            />
+                            <stop
+                              offset="95%"
+                              stopColor="#f59e0b"
+                              stopOpacity={0.05}
+                            />
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
-                        <XAxis dataKey="month" stroke="#6b7280" fontSize={12} axisLine={false} tickLine={false} />
-                        <YAxis stroke="#6b7280" fontSize={12} axisLine={false} tickLine={false} />
-                        <Tooltip contentStyle={{ backgroundColor: 'white', border: 'none', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }} />
-                        <Area type="monotone" dataKey="value" stroke="#f59e0b" strokeWidth={2} fill="url(#ordersGradient)" />
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke="#e5e7eb"
+                          opacity={0.5}
+                        />
+                        <XAxis
+                          dataKey="month"
+                          stroke="#6b7280"
+                          fontSize={12}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <YAxis
+                          stroke="#6b7280"
+                          fontSize={12}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: 'white',
+                            border: 'none',
+                            borderRadius: '12px',
+                            boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                          }}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="value"
+                          stroke="#f59e0b"
+                          strokeWidth={2}
+                          fill="url(#ordersGradient)"
+                        />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
@@ -380,18 +605,61 @@ const SuperAdminOverview: React.FC = () => {
                   </h3>
                   <div style={{ height: '250px' }}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={partiesChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                      <BarChart
+                        data={partiesChartData}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                      >
                         <defs>
-                          <linearGradient id="partiesGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#6366f1" stopOpacity={0.6}/>
+                          <linearGradient
+                            id="partiesGradient"
+                            x1="0"
+                            y1="0"
+                            x2="0"
+                            y2="1"
+                          >
+                            <stop
+                              offset="5%"
+                              stopColor="#6366f1"
+                              stopOpacity={0.8}
+                            />
+                            <stop
+                              offset="95%"
+                              stopColor="#6366f1"
+                              stopOpacity={0.6}
+                            />
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
-                        <XAxis dataKey="month" stroke="#6b7280" fontSize={12} axisLine={false} tickLine={false} />
-                        <YAxis stroke="#6b7280" fontSize={12} axisLine={false} tickLine={false} />
-                        <Tooltip contentStyle={{ backgroundColor: 'white', border: 'none', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }} />
-                        <Bar dataKey="value" fill="url(#partiesGradient)" radius={[4, 4, 0, 0]} />
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke="#e5e7eb"
+                          opacity={0.5}
+                        />
+                        <XAxis
+                          dataKey="month"
+                          stroke="#6b7280"
+                          fontSize={12}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <YAxis
+                          stroke="#6b7280"
+                          fontSize={12}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: 'white',
+                            border: 'none',
+                            borderRadius: '12px',
+                            boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                          }}
+                        />
+                        <Bar
+                          dataKey="value"
+                          fill="url(#partiesGradient)"
+                          radius={[4, 4, 0, 0]}
+                        />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -404,12 +672,43 @@ const SuperAdminOverview: React.FC = () => {
                   </h3>
                   <div style={{ height: '250px' }}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={piInvoicesChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
-                        <XAxis dataKey="month" stroke="#6b7280" fontSize={12} axisLine={false} tickLine={false} />
-                        <YAxis stroke="#6b7280" fontSize={12} axisLine={false} tickLine={false} />
-                        <Tooltip contentStyle={{ backgroundColor: 'white', border: 'none', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }} />
-                        <Line type="monotone" dataKey="value" stroke="#ec4899" strokeWidth={3} dot={{ fill: '#ec4899', r: 4 }} />
+                      <LineChart
+                        data={piInvoicesChartData}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                      >
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke="#e5e7eb"
+                          opacity={0.5}
+                        />
+                        <XAxis
+                          dataKey="month"
+                          stroke="#6b7280"
+                          fontSize={12}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <YAxis
+                          stroke="#6b7280"
+                          fontSize={12}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: 'white',
+                            border: 'none',
+                            borderRadius: '12px',
+                            boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                          }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="value"
+                          stroke="#ec4899"
+                          strokeWidth={3}
+                          dot={{ fill: '#ec4899', r: 4 }}
+                        />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
@@ -425,18 +724,63 @@ const SuperAdminOverview: React.FC = () => {
                   </h3>
                   <div style={{ height: '250px' }}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={categoriesChartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                      <AreaChart
+                        data={categoriesChartData}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                      >
                         <defs>
-                          <linearGradient id="categoriesGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#ef4444" stopOpacity={0.05}/>
+                          <linearGradient
+                            id="categoriesGradient"
+                            x1="0"
+                            y1="0"
+                            x2="0"
+                            y2="1"
+                          >
+                            <stop
+                              offset="5%"
+                              stopColor="#ef4444"
+                              stopOpacity={0.3}
+                            />
+                            <stop
+                              offset="95%"
+                              stopColor="#ef4444"
+                              stopOpacity={0.05}
+                            />
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
-                        <XAxis dataKey="month" stroke="#6b7280" fontSize={12} axisLine={false} tickLine={false} />
-                        <YAxis stroke="#6b7280" fontSize={12} axisLine={false} tickLine={false} />
-                        <Tooltip contentStyle={{ backgroundColor: 'white', border: 'none', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }} />
-                        <Area type="monotone" dataKey="value" stroke="#ef4444" strokeWidth={2} fill="url(#categoriesGradient)" />
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke="#e5e7eb"
+                          opacity={0.5}
+                        />
+                        <XAxis
+                          dataKey="month"
+                          stroke="#6b7280"
+                          fontSize={12}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <YAxis
+                          stroke="#6b7280"
+                          fontSize={12}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: 'white',
+                            border: 'none',
+                            borderRadius: '12px',
+                            boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                          }}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="value"
+                          stroke="#ef4444"
+                          strokeWidth={2}
+                          fill="url(#categoriesGradient)"
+                        />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
@@ -463,7 +807,14 @@ const SuperAdminOverview: React.FC = () => {
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
                         </Pie>
-                        <Tooltip contentStyle={{ backgroundColor: 'white', border: 'none', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }} />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: 'white',
+                            border: 'none',
+                            borderRadius: '12px',
+                            boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                          }}
+                        />
                         <Legend wrapperStyle={{ fontSize: '12px' }} />
                       </PieChart>
                     </ResponsiveContainer>

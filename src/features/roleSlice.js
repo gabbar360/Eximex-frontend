@@ -78,7 +78,12 @@ const roleSlice = createSlice({
       .addCase(getAllRoles.fulfilled, (state, { payload }) => {
         state.loading = false;
         state.roles = payload.data?.data || payload.data || [];
-        state.pagination = payload.data?.pagination || { total: 0, page: 1, limit: 10, totalPages: 0 };
+        state.pagination = payload.data?.pagination || {
+          total: 0,
+          page: 1,
+          limit: 10,
+          totalPages: 0,
+        };
         state.successMessage = payload.message;
       })
       .addCase(getAllRoles.rejected, (state, { payload }) => {
