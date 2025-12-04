@@ -264,22 +264,45 @@ export const calculateGrossWeight = (productList: any[], products: any[]) => {
           packagingData?.PackPerBox || packagingData?.PackagePerBox || 1;
         boxes = Math.ceil(product.quantity / packPerBox);
       } else if (product.unit.toLowerCase() === 'pallet') {
-        const boxPerPallet =
-          packagingData?.BoxPerPallet || packagingData?.boxesPerPallet || 32;
-        boxes = product.quantity * boxPerPallet;
+        // For pallets, calculate packaging weight directly based on number of pallets
+        // Don't convert to boxes for packaging calculation
+        const pallets = product.quantity;
+        
+        // If packaging weight is per pallet (usually in kg for pallets)
+        if (packagingUnit === 'kg') {
+          packagingWeight = pallets * packagingWeightKg;
+        } else {
+          // If packaging weight is in grams, convert to kg
+          packagingWeight = pallets * (packagingMaterialWeight / 1000);
+        }
+        
+        return sum + netWeight + packagingWeight;
+      } else if (
+        product.unit.toLowerCase() === 'square meter' ||
+        product.unit.toLowerCase() === 'sqm' ||
+        product.unit.toLowerCase() === 'm²'
+      ) {
+        // For square meter units, calculate pallets from packaging data
+        const sqmPerBox = packagingData?.sqmPerBox || 0.72; // Default from your example
+        const boxesPerPallet = packagingData?.BoxPerPallet || packagingData?.boxesPerPallet || 30;
+        
+        const totalBoxes = Math.ceil(product.quantity / sqmPerBox);
+        const totalPallets = Math.ceil(totalBoxes / boxesPerPallet);
+        
+        // Calculate packaging weight based on pallets
+        if (packagingUnit === 'kg') {
+          packagingWeight = totalPallets * packagingWeightKg;
+        } else {
+          packagingWeight = totalPallets * (packagingMaterialWeight / 1000);
+        }
+        
+        return sum + netWeight + packagingWeight;
       } else {
         boxes = product.quantity;
       }
 
-      // For tiles, if unit is pallet and packagingMaterialWeight is in kg,
-      // it might be per pallet, not per box
-      if (product.unit.toLowerCase() === 'pallet' && packagingUnit === 'kg') {
-        // Use packaging weight per pallet directly
-        packagingWeight = product.quantity * packagingWeightKg;
-      } else {
-        // Use packaging weight per box
-        packagingWeight = boxes * packagingWeightKg;
-      }
+      // Use packaging weight per box for other units
+      packagingWeight = boxes * packagingWeightKg;
     }
 
     return sum + netWeight + packagingWeight;
