@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
-import { HiPlus, HiOfficeBuilding, HiUsers, HiPencil, HiTrash } from 'react-icons/hi';
+import {
+  HiPlus,
+  HiOfficeBuilding,
+  HiUsers,
+  HiPencil,
+  HiTrash,
+} from 'react-icons/hi';
 import { HiMagnifyingGlass } from 'react-icons/hi2';
 import { Pagination } from 'antd';
 import axiosInstance from '../../utils/axiosInstance';
@@ -16,22 +22,34 @@ const CompanyManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [pagination, setPagination] = useState({ total: 0, page: 1, limit: 10, totalPages: 0 });
+  const [pagination, setPagination] = useState({
+    total: 0,
+    page: 1,
+    limit: 10,
+    totalPages: 0,
+  });
 
   useEffect(() => {
     fetchCompanies();
   }, [currentPage, pageSize]);
 
-  const { debouncedCallback: debouncedSearch } = useDebounce((value: string) => {
-    setCurrentPage(1);
-    fetchCompanies(1, pageSize, value);
-  }, 500);
+  const { debouncedCallback: debouncedSearch } = useDebounce(
+    (value: string) => {
+      setCurrentPage(1);
+      fetchCompanies(1, pageSize, value);
+    },
+    500
+  );
 
-  const fetchCompanies = async (page = currentPage, limit = pageSize, search = searchTerm) => {
+  const fetchCompanies = async (
+    page = currentPage,
+    limit = pageSize,
+    search = searchTerm
+  ) => {
     try {
       setLoading(true);
       const response = await axiosInstance.get('/super-admin/companies', {
-        params: { page, limit, search }
+        params: { page, limit, search },
       });
       setCompanies(response.data.data.data || response.data.data);
       if (response.data.data.pagination) {
@@ -51,10 +69,13 @@ const CompanyManagement: React.FC = () => {
     fetchCompanies();
   };
 
-  const handleSearch = useCallback((value: string) => {
-    setSearchTerm(value);
-    debouncedSearch(value);
-  }, [debouncedSearch]);
+  const handleSearch = useCallback(
+    (value: string) => {
+      setSearchTerm(value);
+      debouncedSearch(value);
+    },
+    [debouncedSearch]
+  );
 
   const handleEdit = (company: any) => {
     setEditingCompany(company);
@@ -68,19 +89,23 @@ const CompanyManagement: React.FC = () => {
   const handleConfirmDelete = async () => {
     if (confirmDelete) {
       try {
-        await axiosInstance.delete(`/super-admin/companies/${confirmDelete.id}`);
+        await axiosInstance.delete(
+          `/super-admin/companies/${confirmDelete.id}`
+        );
         toast.success('Company deleted successfully');
         fetchCompanies();
         setConfirmDelete(null);
       } catch (error: any) {
-        toast.error(error.response?.data?.message || 'Failed to delete company');
+        toast.error(
+          error.response?.data?.message || 'Failed to delete company'
+        );
       }
     }
   };
 
   if (showForm) {
     return (
-      <CompanySetupForm 
+      <CompanySetupForm
         editingCompany={editingCompany}
         onClose={handleFormClose}
         isSuperAdmin={true}
@@ -143,7 +168,9 @@ const CompanyManagement: React.FC = () => {
               No companies found
             </h3>
             <p className="text-slate-600 mb-6">
-              {searchTerm ? 'Try adjusting your search.' : 'Create your first company to get started.'}
+              {searchTerm
+                ? 'Try adjusting your search.'
+                : 'Create your first company to get started.'}
             </p>
           </div>
         ) : (
@@ -184,7 +211,9 @@ const CompanyManagement: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-slate-600">{company.email}</div>
+                        <div className="text-sm text-slate-600">
+                          {company.email}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center text-sm text-slate-600">
@@ -193,9 +222,13 @@ const CompanyManagement: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          company.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            company.isActive
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-red-100 text-red-800'
+                          }`}
+                        >
                           {company.isActive ? 'Active' : 'Inactive'}
                         </span>
                       </td>
@@ -258,8 +291,8 @@ const CompanyManagement: React.FC = () => {
                 Delete Company
               </h3>
               <p className="text-slate-600">
-                Are you sure you want to delete "{confirmDelete.name}"? This action
-                cannot be undone.
+                Are you sure you want to delete "{confirmDelete.name}"? This
+                action cannot be undone.
               </p>
             </div>
             <div className="flex items-center justify-center space-x-3">

@@ -121,11 +121,15 @@ const productService = {
   // Bulk upload products
   bulkUpload: async (formData) => {
     try {
-      const response = await axiosInstance.post('/bulk-upload/products', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await axiosInstance.post(
+        '/bulk-upload/products',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
       return response.data;
     } catch (error) {
       throw error;

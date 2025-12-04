@@ -67,7 +67,9 @@ const userPermissionService = {
   // Get all users with permissions
   getAllUsersWithPermissions: async (params = {}) => {
     try {
-      const { data } = await axiosInstance.get('/all-users-permissions', { params });
+      const { data } = await axiosInstance.get('/all-users-permissions', {
+        params,
+      });
       return data;
     } catch (error) {
       throw handleAxiosError(error, 'user permission', 'fetch');

@@ -79,8 +79,6 @@ import CompanyManagement from './pages/SuperAdmin/CompanyManagement';
 import PurchaseOrders from './pages/PO/PurchaseOrders';
 import AddEditPurchaseOrderForm from './pages/PO/AddEditPurchaseOrderForm';
 
-
-
 function AppContent() {
   const location = useLocation();
   const user = useSelector((state) => state.user.user);
@@ -133,7 +131,10 @@ function AppContent() {
           <Route path="/products" element={<Product />} />
           <Route path="/add-product" element={<AddEditProductForm />} />
           <Route path="/edit-product/:id" element={<AddEditProductForm />} />
-          <Route path="/bulk-upload-products" element={<BulkUploadProducts />} />
+          <Route
+            path="/bulk-upload-products"
+            element={<BulkUploadProducts />}
+          />
           <Route path="/proforma-invoices" element={<PerformaInvoice />} />
           <Route path="/add-pi" element={<AddEditPerformaInvoiceForm />} />
           <Route
@@ -189,7 +190,10 @@ function AppContent() {
 
           <Route path="/super-admin/roles" element={<RoleManagement />} />
           <Route path="/super-admin/users" element={<UserManagement />} />
-          <Route path="/super-admin/companies" element={<CompanyManagement />} />
+          <Route
+            path="/super-admin/companies"
+            element={<CompanyManagement />}
+          />
           <Route path="/super-admin/menus" element={<MenuManagement />} />
           <Route
             path="/super-admin/permissions"
@@ -206,7 +210,6 @@ function AppContent() {
           <Route path="/buttons" element={<Buttons />} />
           <Route path="/images" element={<Images />} />
           <Route path="/videos" element={<Videos />} />
-
         </Route>
       </Route>
     </Routes>

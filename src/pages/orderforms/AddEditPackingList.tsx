@@ -797,7 +797,8 @@ const AddEditPackingList = () => {
                   </h1>
                   {orderDetails && (
                     <p className="text-slate-600 mt-1">
-                      Order: {orderDetails.orderNumber} | PI: {orderDetails.piNumber}
+                      Order: {orderDetails.orderNumber} | PI:{' '}
+                      {orderDetails.piNumber}
                     </p>
                   )}
                 </div>

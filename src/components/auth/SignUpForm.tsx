@@ -167,7 +167,13 @@ export default function SignUpForm() {
 
                     <button
                       type="submit"
-                      disabled={isSubmitting || !values.name || !values.email || !values.mobileNum || !values.password}
+                      disabled={
+                        isSubmitting ||
+                        !values.name ||
+                        !values.email ||
+                        !values.mobileNum ||
+                        !values.password
+                      }
                       className="auth-form-button w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold py-2 rounded-lg hover:shadow-lg disabled:opacity-50 transition-all duration-200 disabled:cursor-not-allowed mb-3 text-sm mt-1"
                     >
                       {isSubmitting ? (

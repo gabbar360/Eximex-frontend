@@ -59,7 +59,7 @@ export const uploadSignature = async (id, signatureFile) => {
   try {
     const formData = new FormData();
     formData.append('signature', signatureFile);
-    
+
     const { data } = await axiosInstance.put(
       `/upload-signature/${id}`,
       formData,

@@ -42,7 +42,11 @@ interface CompanySetupFormProps {
   isSuperAdmin?: boolean;
 }
 
-export default function CompanySetupForm({ editingCompany, onClose, isSuperAdmin }: CompanySetupFormProps) {
+export default function CompanySetupForm({
+  editingCompany,
+  onClose,
+  isSuperAdmin,
+}: CompanySetupFormProps) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, error } = useSelector((state: any) => state.company || {});
@@ -97,7 +101,12 @@ export default function CompanySetupForm({ editingCompany, onClose, isSuperAdmin
         iec_number: editingCompany.iecNumber || '',
         currencies: editingCompany.currencies || [],
         default_currency: editingCompany.defaultCurrency || 'USD',
-        allowed_units: editingCompany.allowedUnits || ['sqm', 'kg', 'pcs', 'box'],
+        allowed_units: editingCompany.allowedUnits || [
+          'sqm',
+          'kg',
+          'pcs',
+          'box',
+        ],
         plan_id: editingCompany.planId || 'trial',
         bank_name: editingCompany.bankName || '',
         bank_address: editingCompany.bankAddress || '',
@@ -109,7 +118,12 @@ export default function CompanySetupForm({ editingCompany, onClose, isSuperAdmin
   }, [editingCompany]);
 
   // Show message if user has assigned company (but allow SuperAdmin)
-  if (user && user.companyId && user.role?.name !== 'SUPER_ADMIN' && !isSuperAdmin) {
+  if (
+    user &&
+    user.companyId &&
+    user.role?.name !== 'SUPER_ADMIN' &&
+    !isSuperAdmin
+  ) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full mx-4 text-center">
@@ -120,7 +134,8 @@ export default function CompanySetupForm({ editingCompany, onClose, isSuperAdmin
             Company Already Assigned
           </h2>
           <p className="text-gray-600 mb-6">
-            Your administrator has already assigned you to a company. You can now access the dashboard.
+            Your administrator has already assigned you to a company. You can
+            now access the dashboard.
           </p>
           <button
             onClick={() => navigate('/dashboard')}
@@ -203,13 +218,16 @@ export default function CompanySetupForm({ editingCompany, onClose, isSuperAdmin
         };
 
         if (editingCompany) {
-          await axiosInstance.put(`/super-admin/companies/${editingCompany.id}`, apiData);
+          await axiosInstance.put(
+            `/super-admin/companies/${editingCompany.id}`,
+            apiData
+          );
           toast.success('Company updated successfully!');
         } else {
           await axiosInstance.post('/super-admin/create-company', apiData);
           toast.success('Company created successfully!');
         }
-        
+
         if (onClose) {
           onClose();
         } else {
@@ -314,7 +332,9 @@ export default function CompanySetupForm({ editingCompany, onClose, isSuperAdmin
                     required
                   />
                   {fieldErrors.name && (
-                    <p className="text-red-500 text-sm mt-1">{fieldErrors.name}</p>
+                    <p className="text-red-500 text-sm mt-1">
+                      {fieldErrors.name}
+                    </p>
                   )}
                 </div>
 
@@ -334,7 +354,9 @@ export default function CompanySetupForm({ editingCompany, onClose, isSuperAdmin
                     required
                   />
                   {fieldErrors.email && (
-                    <p className="text-red-500 text-sm mt-1">{fieldErrors.email}</p>
+                    <p className="text-red-500 text-sm mt-1">
+                      {fieldErrors.email}
+                    </p>
                   )}
                 </div>
               </div>
@@ -346,9 +368,13 @@ export default function CompanySetupForm({ editingCompany, onClose, isSuperAdmin
                   </label>
                   {editingCompany?.logo && (
                     <div className="mb-3">
-                      <img 
-                        src={editingCompany.logo.startsWith('http') ? editingCompany.logo : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${editingCompany.logo}`} 
-                        alt="Current Logo" 
+                      <img
+                        src={
+                          editingCompany.logo.startsWith('http')
+                            ? editingCompany.logo
+                            : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${editingCompany.logo}`
+                        }
+                        alt="Current Logo"
                         className="h-20 w-auto border rounded-lg"
                         onError={(e) => {
                           e.currentTarget.style.display = 'none';
@@ -365,7 +391,9 @@ export default function CompanySetupForm({ editingCompany, onClose, isSuperAdmin
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    {editingCompany?.logo ? 'Upload new logo to replace current one' : 'Upload company logo (PNG, JPG)'}
+                    {editingCompany?.logo
+                      ? 'Upload new logo to replace current one'
+                      : 'Upload company logo (PNG, JPG)'}
                   </p>
                 </div>
 
@@ -375,15 +403,21 @@ export default function CompanySetupForm({ editingCompany, onClose, isSuperAdmin
                   </label>
                   {editingCompany?.signature && (
                     <div className="mb-3">
-                      <img 
-                        src={editingCompany.signature.startsWith('http') ? editingCompany.signature : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${editingCompany.signature}`} 
-                        alt="Current Signature" 
+                      <img
+                        src={
+                          editingCompany.signature.startsWith('http')
+                            ? editingCompany.signature
+                            : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${editingCompany.signature}`
+                        }
+                        alt="Current Signature"
                         className="h-16 w-auto border rounded-lg"
                         onError={(e) => {
                           e.currentTarget.style.display = 'none';
                         }}
                       />
-                      <p className="text-xs text-gray-500 mt-1">Current signature</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Current signature
+                      </p>
                     </div>
                   )}
                   <input
@@ -394,7 +428,9 @@ export default function CompanySetupForm({ editingCompany, onClose, isSuperAdmin
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    {editingCompany?.signature ? 'Upload new signature to replace current one' : 'Upload authorized signature (PNG, JPG)'}
+                    {editingCompany?.signature
+                      ? 'Upload new signature to replace current one'
+                      : 'Upload authorized signature (PNG, JPG)'}
                   </p>
                 </div>
               </div>
@@ -493,12 +529,16 @@ export default function CompanySetupForm({ editingCompany, onClose, isSuperAdmin
                     onChange={handleChange}
                     placeholder="Enter bank name"
                     className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent ${
-                      fieldErrors.bank_name ? 'border-red-500' : 'border-gray-300'
+                      fieldErrors.bank_name
+                        ? 'border-red-500'
+                        : 'border-gray-300'
                     }`}
                     required
                   />
                   {fieldErrors.bank_name && (
-                    <p className="text-red-500 text-sm mt-1">{fieldErrors.bank_name}</p>
+                    <p className="text-red-500 text-sm mt-1">
+                      {fieldErrors.bank_name}
+                    </p>
                   )}
                 </div>
 
@@ -512,12 +552,16 @@ export default function CompanySetupForm({ editingCompany, onClose, isSuperAdmin
                     onChange={handleChange}
                     placeholder="Enter account number"
                     className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent ${
-                      fieldErrors.account_number ? 'border-red-500' : 'border-gray-300'
+                      fieldErrors.account_number
+                        ? 'border-red-500'
+                        : 'border-gray-300'
                     }`}
                     required
                   />
                   {fieldErrors.account_number && (
-                    <p className="text-red-500 text-sm mt-1">{fieldErrors.account_number}</p>
+                    <p className="text-red-500 text-sm mt-1">
+                      {fieldErrors.account_number}
+                    </p>
                   )}
                 </div>
               </div>
@@ -533,12 +577,16 @@ export default function CompanySetupForm({ editingCompany, onClose, isSuperAdmin
                   placeholder="Enter bank address"
                   rows={2}
                   className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent ${
-                    fieldErrors.bank_address ? 'border-red-500' : 'border-gray-300'
+                    fieldErrors.bank_address
+                      ? 'border-red-500'
+                      : 'border-gray-300'
                   }`}
                   required
                 />
                 {fieldErrors.bank_address && (
-                  <p className="text-red-500 text-sm mt-1">{fieldErrors.bank_address}</p>
+                  <p className="text-red-500 text-sm mt-1">
+                    {fieldErrors.bank_address}
+                  </p>
                 )}
               </div>
 
@@ -553,12 +601,16 @@ export default function CompanySetupForm({ editingCompany, onClose, isSuperAdmin
                     onChange={handleChange}
                     placeholder="SBIN0001234"
                     className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent ${
-                      fieldErrors.ifsc_code ? 'border-red-500' : 'border-gray-300'
+                      fieldErrors.ifsc_code
+                        ? 'border-red-500'
+                        : 'border-gray-300'
                     }`}
                     required
                   />
                   {fieldErrors.ifsc_code && (
-                    <p className="text-red-500 text-sm mt-1">{fieldErrors.ifsc_code}</p>
+                    <p className="text-red-500 text-sm mt-1">
+                      {fieldErrors.ifsc_code}
+                    </p>
                   )}
                 </div>
 

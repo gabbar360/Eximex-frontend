@@ -8,7 +8,6 @@ import PageMeta from '../../components/common/PageMeta';
 export default function Images() {
   return (
     <>
-     
       <PageBreadcrumb pageTitle="Images" />
       <div className="space-y-5 sm:space-y-6">
         <ComponentCard title="Responsive image">

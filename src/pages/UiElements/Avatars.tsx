@@ -6,7 +6,6 @@ import PageMeta from '../../components/common/PageMeta';
 export default function Avatars() {
   return (
     <>
-     
       <PageBreadcrumb pageTitle="Avatars" />
       <div className="space-y-5 sm:space-y-6">
         <ComponentCard title="Default Avatar">

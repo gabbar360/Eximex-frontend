@@ -21,11 +21,14 @@ const OnboardingModal: React.FC = () => {
           Welcome to Eximex
         </h2>
         <p className="text-gray-600 mb-6">
-          Please wait while your administrator assigns you to a company. You will be able to access the dashboard once your company is assigned.
+          Please wait while your administrator assigns you to a company. You
+          will be able to access the dashboard once your company is assigned.
         </p>
         <div className="flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-          <span className="ml-2 text-gray-600">Waiting for company assignment...</span>
+          <span className="ml-2 text-gray-600">
+            Waiting for company assignment...
+          </span>
         </div>
       </div>
     </div>

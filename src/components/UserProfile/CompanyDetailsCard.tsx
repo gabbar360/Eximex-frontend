@@ -138,14 +138,16 @@ export default function CompanyDetailsCard({
         {companyData?.signature ? (
           <div className="mt-2">
             <Image
-              src={companyData.signature.startsWith('http') ? companyData.signature : `${import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || window.location.origin}${companyData.signature}`}
+              src={
+                companyData.signature.startsWith('http')
+                  ? companyData.signature
+                  : `${import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || window.location.origin}${companyData.signature}`
+              }
               alt="Company Signature"
               className="max-w-xs h-auto border border-gray-200 rounded-lg"
               preview={{
                 mask: (
-                  <EyeOutlined
-                    style={{ fontSize: '20px', color: 'white' }}
-                  />
+                  <EyeOutlined style={{ fontSize: '20px', color: 'white' }} />
                 ),
               }}
             />

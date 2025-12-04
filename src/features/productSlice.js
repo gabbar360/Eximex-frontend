@@ -189,6 +189,9 @@ const productSlice = createSlice({
   },
 });
 
-export const { setSelectedProduct, clearSelectedProduct, clearBulkUploadResult } =
-  productSlice.actions;
+export const {
+  setSelectedProduct,
+  clearSelectedProduct,
+  clearBulkUploadResult,
+} = productSlice.actions;
 export default productSlice.reducer;

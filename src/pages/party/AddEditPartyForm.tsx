@@ -74,18 +74,18 @@ const AddEditPartyForm = () => {
   const countryRef = useRef(null);
   const stateRef = useRef(null);
   const cityRef = useRef(null);
-  
+
   // Title dropdown states
   const [showTitleDropdown, setShowTitleDropdown] = useState(false);
   const titleRef = useRef(null);
-  
+
   const titleOptions = [
     { value: '', label: 'No Title' },
     { value: 'Mr', label: 'Mr' },
     { value: 'Mrs', label: 'Mrs' },
     { value: 'Ms', label: 'Ms' },
     { value: 'Dr', label: 'Dr' },
-    { value: 'Prof', label: 'Prof' }
+    { value: 'Prof', label: 'Prof' },
   ];
 
   useEffect(() => {
@@ -449,15 +449,24 @@ const AddEditPartyForm = () => {
                       <div className="relative w-24" ref={titleRef}>
                         <div
                           className="w-full px-3 py-3 border border-gray-300 bg-white rounded-lg cursor-pointer flex items-center justify-between transition-all duration-300 shadow-sm hover:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200 focus-within:border-slate-500"
-                          onClick={() => setShowTitleDropdown(!showTitleDropdown)}
+                          onClick={() =>
+                            setShowTitleDropdown(!showTitleDropdown)
+                          }
                         >
-                          <span className={`text-sm ${values.contactPersonTitle ? 'text-slate-900' : 'text-slate-500'}`}>
+                          <span
+                            className={`text-sm ${values.contactPersonTitle ? 'text-slate-900' : 'text-slate-500'}`}
+                          >
                             {values.contactPersonTitle || 'Title'}
                           </span>
-                          <HiChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${showTitleDropdown ? 'rotate-180' : ''}`} />
+                          <HiChevronDown
+                            className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${showTitleDropdown ? 'rotate-180' : ''}`}
+                          />
                         </div>
                         {showTitleDropdown && (
-                          <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl" style={{ top: '100%', marginTop: '4px' }}>
+                          <div
+                            className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl"
+                            style={{ top: '100%', marginTop: '4px' }}
+                          >
                             <div className="max-h-60 overflow-y-auto">
                               {titleOptions.map((option) => (
                                 <div
@@ -468,8 +477,14 @@ const AddEditPartyForm = () => {
                                       : 'text-slate-700'
                                   }`}
                                   onClick={() => {
-                                    console.log('Setting contactPersonTitle to:', option.value);
-                                    setFieldValue('contactPersonTitle', option.value);
+                                    console.log(
+                                      'Setting contactPersonTitle to:',
+                                      option.value
+                                    );
+                                    setFieldValue(
+                                      'contactPersonTitle',
+                                      option.value
+                                    );
                                     setShowTitleDropdown(false);
                                   }}
                                 >

@@ -41,9 +41,8 @@ const { Panel } = Collapse;
 
 const UserPermissionManagement = () => {
   const dispatch = useDispatch();
-  const { allUsersPermissions, userPermissions, loading, error, pagination } = useSelector(
-    (state) => state.userPermission
-  );
+  const { allUsersPermissions, userPermissions, loading, error, pagination } =
+    useSelector((state) => state.userPermission);
   const { menus } = useSelector((state) => state.menu);
 
   const [showForm, setShowForm] = useState(false);
@@ -56,36 +55,48 @@ const UserPermissionManagement = () => {
   const [confirmDelete, setConfirmDelete] = useState(null);
 
   useEffect(() => {
-    dispatch(fetchAllUsersWithPermissions({
-      page: currentPage,
-      limit: pageSize,
-      search: ''
-    }));
+    dispatch(
+      fetchAllUsersWithPermissions({
+        page: currentPage,
+        limit: pageSize,
+        search: '',
+      })
+    );
     dispatch(fetchMenus());
   }, [dispatch, currentPage, pageSize]);
 
   // Initial load
   useEffect(() => {
-    dispatch(fetchAllUsersWithPermissions({
-      page: 1,
-      limit: 10,
-      search: ''
-    }));
+    dispatch(
+      fetchAllUsersWithPermissions({
+        page: 1,
+        limit: 10,
+        search: '',
+      })
+    );
   }, [dispatch]);
 
-  const { debouncedCallback: debouncedSearch } = useDebounce((value: string) => {
-    dispatch(fetchAllUsersWithPermissions({
-      page: 1,
-      limit: pageSize,
-      search: value
-    }));
-  }, 500);
+  const { debouncedCallback: debouncedSearch } = useDebounce(
+    (value: string) => {
+      dispatch(
+        fetchAllUsersWithPermissions({
+          page: 1,
+          limit: pageSize,
+          search: value,
+        })
+      );
+    },
+    500
+  );
 
-  const handleSearch = useCallback((value: string) => {
-    setSearchTerm(value);
-    setCurrentPage(1);
-    debouncedSearch(value);
-  }, [debouncedSearch]);
+  const handleSearch = useCallback(
+    (value: string) => {
+      setSearchTerm(value);
+      setCurrentPage(1);
+      debouncedSearch(value);
+    },
+    [debouncedSearch]
+  );
 
   useEffect(() => {
     if (error) {
@@ -213,11 +224,13 @@ const UserPermissionManagement = () => {
       setPermissions({});
       setInitialPermissions({});
       setSelectedUser(null);
-      dispatch(fetchAllUsersWithPermissions({
-        page: currentPage,
-        limit: pageSize,
-        search: searchTerm
-      }));
+      dispatch(
+        fetchAllUsersWithPermissions({
+          page: currentPage,
+          limit: pageSize,
+          search: searchTerm,
+        })
+      );
     } catch (error) {
       toast.error(error?.message || 'Failed to update permissions');
     }
@@ -233,11 +246,13 @@ const UserPermissionManagement = () => {
         const result = await dispatch(deleteUser(confirmDelete.id)).unwrap();
         toast.success(result.message || 'User deleted successfully');
         setConfirmDelete(null);
-        dispatch(fetchAllUsersWithPermissions({
-          page: currentPage,
-          limit: pageSize,
-          search: searchTerm
-        }));
+        dispatch(
+          fetchAllUsersWithPermissions({
+            page: currentPage,
+            limit: pageSize,
+            search: searchTerm,
+          })
+        );
       } catch (error) {
         toast.error(error?.message || 'Delete failed');
       }
@@ -350,8 +365,9 @@ const UserPermissionManagement = () => {
                     Permission Guidelines
                   </p>
                   <p className="text-sm text-blue-700">
-                    Only menus with at least one permission enabled will be saved.
-                    Configure permissions carefully to ensure proper access control.
+                    Only menus with at least one permission enabled will be
+                    saved. Configure permissions carefully to ensure proper
+                    access control.
                   </p>
                 </div>
               </div>
@@ -473,9 +489,7 @@ const UserPermissionManagement = () => {
       ),
       dataIndex: 'email',
       key: 'email',
-      render: (email) => (
-        <div className="text-sm text-slate-600">{email}</div>
-      ),
+      render: (email) => <div className="text-sm text-slate-600">{email}</div>,
     },
     {
       title: (
@@ -615,18 +629,18 @@ const UserPermissionManagement = () => {
               pageSize={pageSize}
               onChange={(page) => {
                 setCurrentPage(page);
-                dispatch(fetchAllUsersWithPermissions({
-                  page: page,
-                  limit: pageSize,
-                  search: searchTerm
-                }));
+                dispatch(
+                  fetchAllUsersWithPermissions({
+                    page: page,
+                    limit: pageSize,
+                    search: searchTerm,
+                  })
+                );
               }}
             />
           </div>
         )}
       </div>
-
-
 
       {/* Delete Confirmation Modal */}
       {confirmDelete && (

@@ -133,9 +133,11 @@ const AddEditPurchaseOrderForm: React.FC = () => {
         // Fetch categories and products
         console.log('Fetching categories...');
         await dispatch(fetchCategories()).unwrap();
-        
+
         console.log('Fetching products...');
-        const productsResponse = await dispatch(fetchProducts({ limit: 1000 })).unwrap();
+        const productsResponse = await dispatch(
+          fetchProducts({ limit: 1000 })
+        ).unwrap();
         console.log('Products response:', productsResponse);
 
         // Handle different response structures
@@ -243,12 +245,18 @@ const AddEditPurchaseOrderForm: React.FC = () => {
   };
 
   const addProductToItems = () => {
-    if (!selectedCategory || !selectedProduct || !selectedUnit || !newItemQuantity || !newItemRate) {
+    if (
+      !selectedCategory ||
+      !selectedProduct ||
+      !selectedUnit ||
+      !newItemQuantity ||
+      !newItemRate
+    ) {
       toast.error('Please fill all required fields');
       return;
     }
 
-    const product = products.find(p => p.id.toString() === selectedProduct);
+    const product = products.find((p) => p.id.toString() === selectedProduct);
     if (!product) {
       toast.error('Selected product not found');
       return;
@@ -256,17 +264,18 @@ const AddEditPurchaseOrderForm: React.FC = () => {
 
     if (editingItemKey) {
       // Update existing item
-      const updatedItems = items.map(item => {
+      const updatedItems = items.map((item) => {
         if (item.key === editingItemKey) {
           return {
             ...item,
             productId: product.id,
-            itemDescription: product.name || product.productName || `Product ${product.id}`,
+            itemDescription:
+              product.name || product.productName || `Product ${product.id}`,
             hsnSac: product.hsnCode || product.category?.hsnCode || '',
             unit: selectedUnit,
             quantity: Number(newItemQuantity),
             rate: Number(newItemRate),
-            amount: Number(newItemQuantity) * Number(newItemRate)
+            amount: Number(newItemQuantity) * Number(newItemRate),
           };
         }
         return item;
@@ -279,17 +288,18 @@ const AddEditPurchaseOrderForm: React.FC = () => {
       const newItem: PoItem = {
         key: Date.now().toString(),
         productId: product.id,
-        itemDescription: product.name || product.productName || `Product ${product.id}`,
+        itemDescription:
+          product.name || product.productName || `Product ${product.id}`,
         hsnSac: product.hsnCode || product.category?.hsnCode || '',
         unit: selectedUnit,
         quantity: Number(newItemQuantity),
         rate: Number(newItemRate),
-        amount: Number(newItemQuantity) * Number(newItemRate)
+        amount: Number(newItemQuantity) * Number(newItemRate),
       };
       setItems([...items, newItem]);
       toast.success('Product added successfully');
     }
-    
+
     // Reset form
     setSelectedCategory('');
     setSelectedSubcategory('');
@@ -743,11 +753,12 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                             }}
                           >
                             <option value="">Select Category</option>
-                            {Array.isArray(categories) && categories.map((cat) => (
-                              <option key={cat.id} value={cat.id}>
-                                {cat.name}
-                              </option>
-                            ))}
+                            {Array.isArray(categories) &&
+                              categories.map((cat) => (
+                                <option key={cat.id} value={cat.id}>
+                                  {cat.name}
+                                </option>
+                              ))}
                           </select>
                         </div>
 
@@ -766,14 +777,19 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                             disabled={!selectedCategory}
                           >
                             <option value="">Select Subcategory</option>
-                            {selectedCategory && (() => {
-                              const category = categories.find(c => c.id.toString() === selectedCategory);
-                              return category?.subcategories?.map((subcat) => (
-                                <option key={subcat.id} value={subcat.id}>
-                                  {subcat.name}
-                                </option>
-                              ));
-                            })()}
+                            {selectedCategory &&
+                              (() => {
+                                const category = categories.find(
+                                  (c) => c.id.toString() === selectedCategory
+                                );
+                                return category?.subcategories?.map(
+                                  (subcat) => (
+                                    <option key={subcat.id} value={subcat.id}>
+                                      {subcat.name}
+                                    </option>
+                                  )
+                                );
+                              })()}
                           </select>
                         </div>
 
@@ -787,11 +803,24 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                             onChange={(e) => {
                               setSelectedProduct(e.target.value);
                               setSelectedUnit('');
-                              
+
                               if (e.target.value) {
-                                const product = products.find(p => p.id.toString() === e.target.value);
-                                if (product && (product.rate || product.price || product.unitPrice)) {
-                                  setNewItemRate((product.rate || product.price || product.unitPrice).toString());
+                                const product = products.find(
+                                  (p) => p.id.toString() === e.target.value
+                                );
+                                if (
+                                  product &&
+                                  (product.rate ||
+                                    product.price ||
+                                    product.unitPrice)
+                                ) {
+                                  setNewItemRate(
+                                    (
+                                      product.rate ||
+                                      product.price ||
+                                      product.unitPrice
+                                    ).toString()
+                                  );
                                 }
                               }
                             }}
@@ -799,19 +828,29 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                           >
                             <option value="">Choose product</option>
                             {(() => {
-                              const filteredProducts = products.filter(product => {
-                                const categoryMatch = !selectedCategory || 
-                                  product.categoryId?.toString() === selectedCategory ||
-                                  product.category?.id?.toString() === selectedCategory;
-                                const subcategoryMatch = !selectedSubcategory || 
-                                  product.subcategoryId?.toString() === selectedSubcategory ||
-                                  product.subCategory?.id?.toString() === selectedSubcategory;
-                                return categoryMatch && subcategoryMatch;
-                              });
-                              
+                              const filteredProducts = products.filter(
+                                (product) => {
+                                  const categoryMatch =
+                                    !selectedCategory ||
+                                    product.categoryId?.toString() ===
+                                      selectedCategory ||
+                                    product.category?.id?.toString() ===
+                                      selectedCategory;
+                                  const subcategoryMatch =
+                                    !selectedSubcategory ||
+                                    product.subcategoryId?.toString() ===
+                                      selectedSubcategory ||
+                                    product.subCategory?.id?.toString() ===
+                                      selectedSubcategory;
+                                  return categoryMatch && subcategoryMatch;
+                                }
+                              );
+
                               return filteredProducts.map((product) => (
                                 <option key={product.id} value={product.id}>
-                                  {product.name || product.productName || `Product ${product.id}`}
+                                  {product.name ||
+                                    product.productName ||
+                                    `Product ${product.id}`}
                                 </option>
                               ));
                             })()}
@@ -832,46 +871,73 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                           >
                             <option value="">Choose unit</option>
                             {(() => {
-                              const category = categories.find(c => c.id.toString() === selectedCategory);
-                              const packagingHierarchy = category?.packagingHierarchy || [];
+                              const category = categories.find(
+                                (c) => c.id.toString() === selectedCategory
+                              );
+                              const packagingHierarchy =
+                                category?.packagingHierarchy || [];
                               const availableUnits = [];
 
                               if (packagingHierarchy.length > 0) {
-                                packagingHierarchy.forEach((level, levelIdx) => {
-                                  availableUnits.push(
-                                    <option key={`from-${levelIdx}`} value={level.from}>
-                                      {level.from}
-                                    </option>
-                                  );
-                                });
+                                packagingHierarchy.forEach(
+                                  (level, levelIdx) => {
+                                    availableUnits.push(
+                                      <option
+                                        key={`from-${levelIdx}`}
+                                        value={level.from}
+                                      >
+                                        {level.from}
+                                      </option>
+                                    );
+                                  }
+                                );
 
-                                const lastLevel = packagingHierarchy[packagingHierarchy.length - 1];
+                                const lastLevel =
+                                  packagingHierarchy[
+                                    packagingHierarchy.length - 1
+                                  ];
                                 if (lastLevel?.to) {
                                   availableUnits.push(
-                                    <option key={`to-final`} value={lastLevel.to}>
+                                    <option
+                                      key={`to-final`}
+                                      value={lastLevel.to}
+                                    >
                                       {lastLevel.to}
                                     </option>
                                   );
                                 }
                               } else {
-                                const subcategory = category?.subcategories?.find(
-                                  s => s.id.toString() === selectedSubcategory
-                                );
+                                const subcategory =
+                                  category?.subcategories?.find(
+                                    (s) =>
+                                      s.id.toString() === selectedSubcategory
+                                  );
 
                                 const unitSet = new Set();
-                                if (category?.primary_unit) unitSet.add(category.primary_unit);
-                                if (category?.secondary_unit) unitSet.add(category.secondary_unit);
-                                if (subcategory?.primary_unit) unitSet.add(subcategory.primary_unit);
-                                if (subcategory?.secondary_unit) unitSet.add(subcategory.secondary_unit);
+                                if (category?.primary_unit)
+                                  unitSet.add(category.primary_unit);
+                                if (category?.secondary_unit)
+                                  unitSet.add(category.secondary_unit);
+                                if (subcategory?.primary_unit)
+                                  unitSet.add(subcategory.primary_unit);
+                                if (subcategory?.secondary_unit)
+                                  unitSet.add(subcategory.secondary_unit);
 
                                 if (unitSet.size === 0) {
-                                  ['pcs', 'box', 'kg', 'pieces', 'cartons'].forEach(unit => unitSet.add(unit));
+                                  [
+                                    'pcs',
+                                    'box',
+                                    'kg',
+                                    'pieces',
+                                    'cartons',
+                                  ].forEach((unit) => unitSet.add(unit));
                                 }
 
-                                Array.from(unitSet).forEach(unit => {
+                                Array.from(unitSet).forEach((unit) => {
                                   availableUnits.push(
                                     <option key={unit} value={unit}>
-                                      {unit.charAt(0).toUpperCase() + unit.slice(1)}
+                                      {unit.charAt(0).toUpperCase() +
+                                        unit.slice(1)}
                                     </option>
                                   );
                                 });
@@ -892,7 +958,9 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                                 type="radio"
                                 value="By Quantity"
                                 checked={quantityMethod === 'By Quantity'}
-                                onChange={(e) => setQuantityMethod(e.target.value)}
+                                onChange={(e) =>
+                                  setQuantityMethod(e.target.value)
+                                }
                                 className="mr-2 text-blue-600"
                               />
                               By Quantity
@@ -902,7 +970,9 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                                 type="radio"
                                 value="By Weight (KG)"
                                 checked={quantityMethod === 'By Weight (KG)'}
-                                onChange={(e) => setQuantityMethod(e.target.value)}
+                                onChange={(e) =>
+                                  setQuantityMethod(e.target.value)
+                                }
                                 className="mr-2 text-blue-600"
                               />
                               By Weight (KG)
@@ -929,7 +999,8 @@ const AddEditPurchaseOrderForm: React.FC = () => {
 
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Rate per Unit <span className="text-red-500">*</span>
+                            Rate per Unit{' '}
+                            <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="number"
@@ -949,8 +1020,18 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                           onClick={addProductToItems}
                           className="px-6 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 inline-flex items-center gap-2"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 4v16m8-8H4"
+                            />
                           </svg>
                           {editingItemKey ? 'Update Product' : 'Add Product'}
                         </button>
@@ -968,8 +1049,18 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                             }}
                             className="px-6 py-2 bg-gray-500 text-white font-medium rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 inline-flex items-center gap-2"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M6 18L18 6M6 6l12 12"
+                              />
                             </svg>
                             Cancel Edit
                           </button>
@@ -983,7 +1074,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                         <h4 className="text-base font-medium text-gray-800 dark:text-gray-200 mb-4">
                           Added Items
                         </h4>
-                        
+
                         <div className="overflow-x-auto">
                           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead className="bg-gray-50 dark:bg-gray-700">
@@ -1016,7 +1107,10 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                             </thead>
                             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                               {items.map((item, index) => (
-                                <tr key={item.key} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                <tr
+                                  key={item.key}
+                                  className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                                >
                                   <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">
                                     {index + 1}
                                   </td>
@@ -1036,29 +1130,56 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                                     {item.rate || 0}
                                   </td>
                                   <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">
-                                    {getCurrencySymbol()}{((item.quantity || 0) * (item.rate || 0)).toFixed(2)}
+                                    {getCurrencySymbol()}
+                                    {(
+                                      (item.quantity || 0) * (item.rate || 0)
+                                    ).toFixed(2)}
                                   </td>
                                   <td className="px-4 py-3 text-sm">
                                     <div className="flex gap-2">
                                       <button
                                         type="button"
                                         onClick={() => {
-                                          const product = products.find(p => p.id === item.productId);
+                                          const product = products.find(
+                                            (p) => p.id === item.productId
+                                          );
                                           if (product) {
                                             setEditingItemKey(item.key!);
-                                            setSelectedCategory(product.categoryId?.toString() || '');
-                                            setSelectedSubcategory(product.subcategoryId?.toString() || '');
-                                            setSelectedProduct(product.id.toString());
+                                            setSelectedCategory(
+                                              product.categoryId?.toString() ||
+                                                ''
+                                            );
+                                            setSelectedSubcategory(
+                                              product.subcategoryId?.toString() ||
+                                                ''
+                                            );
+                                            setSelectedProduct(
+                                              product.id.toString()
+                                            );
                                             setSelectedUnit(item.unit || 'pcs');
-                                            setNewItemQuantity(item.quantity.toString());
-                                            setNewItemRate(item.rate.toString());
+                                            setNewItemQuantity(
+                                              item.quantity.toString()
+                                            );
+                                            setNewItemRate(
+                                              item.rate.toString()
+                                            );
                                           }
                                         }}
                                         className="text-blue-600 hover:text-blue-800 focus:outline-none dark:text-blue-400 dark:hover:text-blue-300"
                                         title="Edit item"
                                       >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        <svg
+                                          className="w-4 h-4"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          viewBox="0 0 24 24"
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                          />
                                         </svg>
                                       </button>
                                       <button
@@ -1067,8 +1188,18 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                                         className="text-red-600 hover:text-red-800 focus:outline-none dark:text-red-400 dark:hover:text-red-300"
                                         title="Delete item"
                                       >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        <svg
+                                          className="w-4 h-4"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          viewBox="0 0 24 24"
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                          />
                                         </svg>
                                       </button>
                                     </div>
@@ -1158,8 +1289,6 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                         </div>
                       </div>
                     </div>
-
-
 
                     {/* Submit Buttons */}
                     <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
