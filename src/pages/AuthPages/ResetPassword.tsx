@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { resetPassword } from '../../features/authSlice';
 import { toast } from 'react-toastify';
+import { HiEye, HiEyeOff } from 'react-icons/hi';
 
 const ResetPassword: React.FC = () => {
   const dispatch = useDispatch();
@@ -15,6 +16,7 @@ const ResetPassword: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [isValidToken, setIsValidToken] = useState<boolean | null>(null);
+  const [errors, setErrors] = useState({ newPassword: '', confirmPassword: '' });
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -23,12 +25,23 @@ const ResetPassword: React.FC = () => {
     const tokenFromUrl = searchParams.get('token');
     if (tokenFromUrl) {
       setToken(tokenFromUrl);
-      setIsValidToken(true);
+      // Don't set as valid immediately, let the backend validate
+      validateToken(tokenFromUrl);
     } else {
       setIsValidToken(false);
-      toast.error('Invalid reset link. Please request a new password reset.');
     }
   }, [searchParams]);
+
+  const validateToken = async (tokenToValidate) => {
+    try {
+      // You can add a token validation API call here if needed
+      // For now, we'll assume token is valid and let the reset call handle validation
+      setIsValidToken(true);
+    } catch (error) {
+      setIsValidToken(false);
+      // Remove static toast, let backend handle error messages
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -36,33 +49,32 @@ const ResetPassword: React.FC = () => {
   };
 
   const validateForm = () => {
-    if (!formData.newPassword) {
-      toast.error('New password is required');
-      return false;
-    }
-    if (formData.newPassword.length < 8) {
-      toast.error('Password must be at least 8 characters long');
-      return false;
-    }
-    if (
+    const newErrors = { newPassword: '', confirmPassword: '' };
+    
+    if (!formData.newPassword.trim()) {
+      newErrors.newPassword = 'New password is required';
+    } else if (formData.newPassword.length < 8) {
+      newErrors.newPassword = 'Password must be at least 8 characters long';
+    } else if (
       !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(
         formData.newPassword
       )
     ) {
-      toast.error(
-        'Password must include uppercase, lowercase, number, and special character'
-      );
-      return false;
+      newErrors.newPassword = 'Must include uppercase, lowercase, number, and special character';
     }
-    if (formData.newPassword !== formData.confirmPassword) {
-      toast.error('Passwords do not match');
-      return false;
+    
+    if (!formData.confirmPassword.trim()) {
+      newErrors.confirmPassword = 'Please confirm your password';
+    } else if (formData.newPassword !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
     }
-    return true;
+    
+    setErrors(newErrors);
+    return !newErrors.newPassword && !newErrors.confirmPassword;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
 
     if (!token) {
       toast.error('Invalid reset token');
@@ -93,8 +105,12 @@ const ResetPassword: React.FC = () => {
         });
       }, 2000);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to reset password');
-      if (error.message?.includes('Invalid or expired')) {
+      // Handle backend error response
+      const errorMessage = error.message || error || 'Failed to reset password';
+      toast.error(errorMessage);
+      
+      // Check if token is invalid/expired based on backend response
+      if (errorMessage.includes('Invalid or expired') || errorMessage.includes('expired reset token')) {
         setIsValidToken(false);
       }
     } finally {
@@ -104,43 +120,38 @@ const ResetPassword: React.FC = () => {
 
   if (isValidToken === false) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
-          <div className="text-center">
-            <div className="mx-auto h-16 w-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
-              <svg
-                className="h-8 w-8 text-red-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
-                />
-              </svg>
-            </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              Invalid Reset Link
-            </h2>
-            <p className="text-gray-600 mb-6">
-              This password reset link is invalid or has expired.
-            </p>
-            <Link
-              to="/forgot-password"
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out"
-            >
-              Request New Reset Link
-            </Link>
-            <div className="mt-4">
-              <Link
-                to="/signin"
-                className="text-indigo-600 hover:text-indigo-500 text-sm font-medium"
-              >
-                ← Back to Sign In
-              </Link>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="w-full max-w-sm">
+            <div className="auth-form-card bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl overflow-hidden w-full">
+              <div className="bg-white p-2 sm:p-3 lg:p-4">
+                <div className="text-center">
+                  <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-1 text-black">
+                    Invalid Reset Link
+                  </h2>
+                </div>
+              </div>
+              <div className="p-2 sm:p-3 lg:p-4">
+                <div className="text-center space-y-3 sm:space-y-4">
+                  <p className="text-xs sm:text-sm text-black">
+                    This password reset link is invalid or has expired.
+                  </p>
+                </div>
+                <Link
+                  to="/forgot-password"
+                  className="w-full bg-black hover:bg-gray-950 text-white font-bold py-2 sm:py-2.5 rounded-lg hover:shadow-lg transition-all duration-200 mt-4 text-xs sm:text-sm flex justify-center"
+                >
+                  Request New Reset Link
+                </Link>
+                <div className="text-center mt-3">
+                  <Link
+                    to="/signin"
+                    className="font-semibold text-xs sm:text-sm text-black"
+                  >
+                    ← Back to Sign In
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -157,185 +168,126 @@ const ResetPassword: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <div className="mx-auto h-16 w-16 bg-indigo-100 rounded-full flex items-center justify-center mb-4">
-            <svg
-              className="h-8 w-8 text-indigo-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-              />
-            </svg>
-          </div>
-          <h2 className="text-center text-3xl font-bold text-gray-900">
-            Set New Password
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Enter your new password below
-          </p>
-        </div>
-
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div>
-              <label
-                htmlFor="newPassword"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                New Password
-              </label>
-              <div className="relative">
-                <input
-                  id="newPassword"
-                  name="newPassword"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  required
-                  value={formData.newPassword}
-                  onChange={handleInputChange}
-                  className="appearance-none relative block w-full px-3 py-3 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  placeholder="Enter new password"
-                  disabled={isLoading}
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  <svg
-                    className="h-5 w-5 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    {showPassword ? (
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"
-                      />
-                    ) : (
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                      />
-                    )}
-                  </svg>
-                </button>
-              </div>
-              <p className="mt-1 text-xs text-gray-500">
-                Must include uppercase, lowercase, number, and special character
-              </p>
-            </div>
-
-            <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Confirm New Password
-              </label>
-              <div className="relative">
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  required
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  className="appearance-none relative block w-full px-3 py-3 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  placeholder="Confirm new password"
-                  disabled={isLoading}
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  <svg
-                    className="h-5 w-5 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    {showConfirmPassword ? (
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"
-                      />
-                    ) : (
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                      />
-                    )}
-                  </svg>
-                </button>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="w-full max-w-sm">
+          {/* Form Card */}
+          <div className="auth-form-card bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl overflow-hidden w-full">
+            {/* Header */}
+            <div className="bg-white p-2 sm:p-3 lg:p-4">
+              <div className="text-center">
+                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-1 text-black">
+                  Set New Password
+                </h2>
+                <p className="text-black text-xs sm:text-sm">
+                  Enter your new password below
+                </p>
               </div>
             </div>
-          </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition duration-150 ease-in-out"
-            >
-              {isLoading ? (
-                <div className="flex items-center">
-                  <svg
-                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Setting Password...
+            {/* Form Content */}
+            <div className="p-2 sm:p-3 lg:p-4">
+              <div className="auth-form-fields space-y-2 sm:space-y-3">
+                <div className="auth-form-field form-field-spacing">
+                  <label className="block text-xs sm:text-sm font-semibold text-black mb-2">
+                    New Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      name="newPassword"
+                      type={showPassword ? 'text' : 'password'}
+                      value={formData.newPassword}
+                      onChange={(e) => {
+                        handleInputChange(e);
+                        if (errors.newPassword) setErrors(prev => ({ ...prev, newPassword: '' }));
+                      }}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+                      placeholder="Enter new password"
+                      className={`auth-form-input w-full px-3 py-2 sm:py-2.5 pr-10 border-2 ${errors.newPassword ? 'border-red-500' : 'border-black'} rounded-lg focus:ring-2 focus:ring-gray-300 focus:border-black transition-all duration-200 text-xs sm:text-sm text-gray-900 placeholder-black`}
+                      disabled={isLoading}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-black hover:text-gray-700 transition-colors z-10 p-1"
+                    >
+                      {showPassword ? (
+                        <HiEye className="w-4 h-4 sm:w-5 sm:h-5" />
+                      ) : (
+                        <HiEyeOff className="w-4 h-4 sm:w-5 sm:h-5" />
+                      )}
+                    </button>
+                  </div>
+                  {errors.newPassword && (
+                    <p className="text-red-500 text-xs mt-1">{errors.newPassword}</p>
+                  )}
+                  <p className="text-black text-xs mt-1">
+                    Must include uppercase, lowercase, number, and special character
+                  </p>
                 </div>
-              ) : (
-                'Set New Password'
-              )}
-            </button>
-          </div>
 
-          <div className="text-center">
-            <Link
-              to="/signin"
-              className="font-medium text-indigo-600 hover:text-indigo-500 transition duration-150 ease-in-out"
-            >
-              ← Back to Sign In
-            </Link>
+                <div className="auth-form-field form-field-spacing">
+                  <label className="block text-xs sm:text-sm font-semibold text-black mb-2">
+                    Confirm New Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      name="confirmPassword"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      value={formData.confirmPassword}
+                      onChange={(e) => {
+                        handleInputChange(e);
+                        if (errors.confirmPassword) setErrors(prev => ({ ...prev, confirmPassword: '' }));
+                      }}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+                      placeholder="Confirm new password"
+                      className={`auth-form-input w-full px-3 py-2 sm:py-2.5 pr-10 border-2 ${errors.confirmPassword ? 'border-red-500' : 'border-black'} rounded-lg focus:ring-2 focus:ring-gray-300 focus:border-black transition-all duration-200 text-xs sm:text-sm text-gray-900 placeholder-black`}
+                      disabled={isLoading}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-black hover:text-gray-700 transition-colors z-10 p-1"
+                    >
+                      {showConfirmPassword ? (
+                        <HiEye className="w-4 h-4 sm:w-5 sm:h-5" />
+                      ) : (
+                        <HiEyeOff className="w-4 h-4 sm:w-5 sm:h-5" />
+                      )}
+                    </button>
+                  </div>
+                  {errors.confirmPassword && (
+                    <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
+                  )}
+                </div>
+              </div>
+
+              <button
+                onClick={() => handleSubmit()}
+                disabled={isLoading}
+                className="auth-form-button w-full bg-black hover:bg-gray-950 text-white font-bold py-2 sm:py-2.5 rounded-lg hover:shadow-lg transition-all duration-200 disabled:cursor-not-allowed mb-3 sm:mb-4 text-xs sm:text-sm mt-4"
+              >
+                {isLoading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Setting Password...
+                  </div>
+                ) : (
+                  'Set New Password'
+                )}
+              </button>
+
+              <div className="text-center">
+                <Link
+                  to="/signin"
+                  className="font-semibold text-xs sm:text-sm text-black"
+                >
+                  ← Back to Sign In
+                </Link>
+              </div>
+            </div>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
