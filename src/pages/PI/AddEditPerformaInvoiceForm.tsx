@@ -358,6 +358,9 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   const [companyId, setCompanyId] = useState<string>('');
   const [company, setCompany] = useState<Company | null>(null);
   const [paymentTerm, setPaymentTerm] = useState<string>('');
+  const [advancePercentage, setAdvancePercentage] = useState<string>('');
+  const [balancePaymentTerm, setBalancePaymentTerm] = useState<string>('');
+  const [showToTheOrder, setShowToTheOrder] = useState<boolean>(false);
   const [deliveryTerm, setDeliveryTerm] = useState<string>('');
   const [charges, setCharges] = useState<Charges>({});
   const [otherCharges, setOtherCharges] = useState<any[]>([]);
@@ -588,6 +591,9 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
 
               // Set terms
               setPaymentTerm(pi.paymentTerm || '');
+              setAdvancePercentage(pi.advancePercentage || '');
+              setBalancePaymentTerm(pi.balancePaymentTerm || '');
+              setShowToTheOrder(pi.showToTheOrder || false);
               setDeliveryTerm(pi.deliveryTerm || '');
 
               // Set charges
@@ -696,8 +702,23 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
     }
   };
 
-  const handlePaymentTermChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
+  const handlePaymentTermChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setPaymentTerm(e.target.value);
+    setAdvancePercentage('');
+    setBalancePaymentTerm('');
+  };
+
+  const getFormattedPaymentTerm = () => {
+    if (paymentTerm === 'advance' && advancePercentage) {
+      const advance = parseInt(advancePercentage);
+      const balance = 100 - advance;
+      if (balance > 0 && balancePaymentTerm) {
+        return `${advance}% ADVANCE. ${balance}% ${balancePaymentTerm}`;
+      }
+      return `${advance}% ADVANCE`;
+    }
+    return paymentTermNames[paymentTerm] || paymentTerm || 'N/A';
+  };
 
   const handleDeliveryTermChange = (
     e: React.ChangeEvent<HTMLSelectElement>
@@ -1334,6 +1355,9 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         email: company?.email || '',
         phone: company?.phone || '',
         paymentTerm: paymentTerm || '',
+        advancePercentage: advancePercentage || '',
+        balancePaymentTerm: balancePaymentTerm || '',
+        showToTheOrder: showToTheOrder,
         deliveryTerm: deliveryTerm || '',
         containerType: containerType || '',
         capacityBasis,
@@ -1409,6 +1433,9 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         email: company?.email || '',
         phone: company?.phone || '',
         paymentTerm,
+        advancePercentage,
+        balancePaymentTerm,
+        showToTheOrder,
         deliveryTerm,
         containerType,
         capacityBasis,
@@ -1819,6 +1846,19 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                       )}
                     </div>
                   </div>
+                  
+                  {/* Consignee Display Option */}
+                  <div className="mt-6">
+                    <label className="inline-flex items-center space-x-2 text-gray-700 dark:text-gray-300 font-medium">
+                      <input
+                        type="checkbox"
+                        checked={showToTheOrder}
+                        onChange={(e) => setShowToTheOrder(e.target.checked)}
+                        className="rounded border-gray-300 text-brand-500 shadow-sm focus:ring-brand-500 dark:border-gray-700 dark:bg-gray-800"
+                      />
+                      <span>Show "TO THE ORDER" in PDF instead of customer details</span>
+                    </label>
+                  </div>
                 </div>
               )}
 
@@ -2129,7 +2169,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                           Choose Payment Term
                         </option>
                         <option value="advance">Advance</option>
-                        <option value="lc">LC</option>
+                        <option value="lc">LC (Letter of Credit)</option>
                       </select>
                       {validationErrors.paymentTerm && (
                         <p className="text-red-500 text-sm mt-1">
@@ -2167,6 +2207,66 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                       )}
                     </div>
                   </div>
+                  
+                  {/* Payment Term Configuration */}
+                  {paymentTerm === 'advance' && (
+                    <div className="mt-6 space-y-4">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="advancePercentage">Advance Percentage *</Label>
+                          <Input
+                            type="number"
+                            id="advancePercentage"
+                            value={advancePercentage}
+                            onChange={(e) => setAdvancePercentage(e.target.value)}
+                            placeholder="Enter percentage (e.g., 30)"
+                            min="1"
+                            max="100"
+                            required
+                          />
+                        </div>
+                        {advancePercentage && parseInt(advancePercentage) < 100 && (
+                          <div>
+                            <Label htmlFor="balancePaymentTerm">
+                              Balance {100 - parseInt(advancePercentage)}% Payment Term *
+                            </Label>
+                            <select
+                              id="balancePaymentTerm"
+                              value={balancePaymentTerm}
+                              onChange={(e) => setBalancePaymentTerm(e.target.value)}
+                              className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm py-3 px-4 text-base bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                              required
+                            >
+                              <option value="">Select balance payment term</option>
+                              <option value="AGAINST BL">AGAINST BL</option>
+                              <option value="AGAINST DOCUMENTS">AGAINST DOCUMENTS</option>
+                              <option value="ON DELIVERY">ON DELIVERY</option>
+                              <option value="BEFORE DISPATCH">BEFORE DISPATCH</option>
+                            
+                            </select>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Live Preview */}
+                      {advancePercentage && (
+                        <div className="p-3 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-lg">
+                          <div className="flex items-center">
+                            <FontAwesomeIcon icon={faCheck} className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-3" />
+                            <div>
+                              <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                                Payment Terms Preview:
+                              </p>
+                              <p className="text-sm text-blue-700 dark:text-blue-300 font-semibold">
+                                {getFormattedPaymentTerm()}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
                   <div className="mt-8 space-y-6">{renderChargesFields()}</div>
                 </div>
               )}
@@ -2585,9 +2685,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                             Payment Term
                           </dt>
                           <dd className="mt-1 font-semibold">
-                            {paymentTermNames[paymentTerm] ||
-                              paymentTerm ||
-                              'N/A'}
+                            {getFormattedPaymentTerm()}
                           </dd>
                         </div>
                         <div>
