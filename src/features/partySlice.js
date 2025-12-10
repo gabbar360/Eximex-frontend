@@ -178,7 +178,7 @@ const partySlice = createSlice({
         state.error = payload;
       })
       .addCase(deleteParty.pending, (state) => {
-        state.loading = true;
+        state.loading = false; // Don't show global loading for delete
         state.error = null;
       })
       .addCase(deleteParty.fulfilled, (state, { payload }) => {
@@ -192,7 +192,7 @@ const partySlice = createSlice({
       })
       .addCase(deleteParty.rejected, (state, { payload }) => {
         state.loading = false;
-        state.error = payload;
+        state.error = null; // Don't set global error for delete
       })
       .addCase(getAllParties.pending, (state) => {
         state.loading = true;

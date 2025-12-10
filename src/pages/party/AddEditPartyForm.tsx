@@ -224,7 +224,7 @@ const AddEditPartyForm = () => {
         response = await dispatch(createParty(values)).unwrap();
       }
       toast.success(response.message);
-      setTimeout(() => navigate('/cprospect'), 1500);
+      setTimeout(() => navigate('/contacts'), 1500);
     } catch (err) {
       toast.error(err);
       if (err.response?.status === 401) {
@@ -367,14 +367,14 @@ const AddEditPartyForm = () => {
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
               <div className="flex items-center gap-4">
                 <button
-                  onClick={() => navigate('/cprospect')}
+                  onClick={() => navigate('/contacts')}
                   className="p-3 rounded-lg bg-slate-700 text-white hover:bg-slate-800 transition-all duration-300 hover:shadow-lg"
                 >
                   <HiArrowLeft className="w-5 h-5" />
                 </button>
                 <div>
                   <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
-                    {isEditMode ? 'Edit Party' : 'Add New Party'}
+                    {isEditMode ? 'Edit Contact' : 'Add New Contact'}
                   </h1>
                 </div>
               </div>
@@ -899,7 +899,7 @@ const AddEditPartyForm = () => {
                 <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
                   <button
                     type="button"
-                    onClick={() => navigate('/cprospect')}
+                    onClick={() => navigate('/contacts')}
                     className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50 transition-all duration-300"
                   >
                     Cancel
@@ -917,7 +917,7 @@ const AddEditPartyForm = () => {
                     ) : (
                       <>
                         <HiCheckCircle className="w-5 h-5 mr-2 inline" />
-                        {isEditMode ? 'Update Party' : 'Create Party'}
+                        {isEditMode ? 'Update Contact' : 'Create Contact'}
                       </>
                     )}
                   </button>
