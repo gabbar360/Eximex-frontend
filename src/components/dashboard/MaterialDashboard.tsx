@@ -608,7 +608,7 @@ export default function MaterialDashboard() {
 
         {/* Charts Row 3 - Performance Analytics */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
-          <ChartCard title="Customer Prospects Analytics" height={320}>
+          <ChartCard title="Contact Analytics" height={320}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={customerProspectData}

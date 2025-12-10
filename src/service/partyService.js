@@ -35,43 +35,6 @@ export const getAllParties = async (params = {}) => {
       error.response?.data || error.message
     );
 
-    // If pagination request fails, try without pagination
-    if (params.page || params.limit) {
-      try {
-        const { data } = await axiosInstance.get('/get-all/parties');
-        const parties = data.data || data;
-
-        // Apply client-side filtering if search term exists
-        let filteredParties = parties;
-        if (params.search) {
-          const searchTerm = params.search.toLowerCase();
-          filteredParties = parties.filter(
-            (party) =>
-              party.companyName?.toLowerCase().includes(searchTerm) ||
-              party.contactPerson?.toLowerCase().includes(searchTerm) ||
-              party.email?.toLowerCase().includes(searchTerm)
-          );
-        }
-
-        // Apply client-side pagination
-        const page = parseInt(params.page) || 1;
-        const limit = parseInt(params.limit) || 10;
-        const start = (page - 1) * limit;
-        const paginatedData = filteredParties.slice(start, start + limit);
-
-        return {
-          data: paginatedData,
-          pagination: {
-            page,
-            limit,
-            total: filteredParties.length,
-          },
-        };
-      } catch (fallbackError) {
-        throw handleAxiosError(fallbackError, 'party', 'fetch');
-      }
-    }
-
     throw handleAxiosError(error, 'party', 'fetch');
   }
 };
@@ -122,12 +85,25 @@ export const deleteParty = async (id) => {
   }
 };
 
+export const updatePartyStage = async (id, stage) => {
+  try {
+    const response = await axiosInstance.put(`/update/party/${id}/stage`, { stage });
+    return {
+      data: response.data.data,
+      message: response.data.message,
+    };
+  } catch (error) {
+    throw handleAxiosError(error, 'party', 'update stage');
+  }
+};
+
 const partyService = {
   getAllParties,
   getPartyById,
   createParty,
   updateParty,
   deleteParty,
+  updatePartyStage,
 };
 
 export default partyService;

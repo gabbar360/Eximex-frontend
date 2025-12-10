@@ -65,7 +65,7 @@ const ViewParty = () => {
             {error || 'The requested party could not be found'}
           </p>
           <button
-            onClick={() => navigate('/cprospect')}
+            onClick={() => navigate('/contacts')}
             className="px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 shadow-lg"
           >
             Back to Prospects
@@ -84,7 +84,7 @@ const ViewParty = () => {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center gap-3 sm:gap-4">
                 <button
-                  onClick={() => navigate('/cprospect')}
+                  onClick={() => navigate('/contacts')}
                   className="p-2 sm:p-3 rounded-lg bg-slate-700 text-white hover:bg-slate-800 transition-all duration-300 hover:shadow-lg"
                 >
                   <HiArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -125,11 +125,11 @@ const ViewParty = () => {
                   )}
                 </span>
                 <Link
-                  to={`/edit-party/${party.id}`}
+                  to={`/edit-customer/${party.id}`}
                   className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-xl shadow-lg text-center text-sm sm:text-base"
                 >
                   <HiPencil className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 inline" />
-                  Edit Party
+                  Edit Contact
                 </Link>
               </div>
             </div>

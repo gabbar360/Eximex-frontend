@@ -121,9 +121,10 @@ function AppContent() {
           <Route path="/dashboard" element={<RoleBasedDashboard />} />
           {/* <Route path="/admin/dashboard" element={<Home />} /> */}
           <Route path="/profile" element={<UserProfiles />} />
-          <Route path="/cprospect" element={<Cprospect />} />
-          <Route path="/add-party" element={<AddEditPartyForm />} />
-          <Route path="/edit-party/:id" element={<AddEditPartyForm />} />
+          <Route path="/contacts" element={<Cprospect />} />
+          <Route path="/add-contact" element={<AddEditPartyForm />} />
+          {/* <Route path="/edit-customer/:id" element={<AddEditPartyForm />} /> */}
+          <Route path="/edit-contact/:id" element={<AddEditPartyForm />} />
           <Route path="/view-party/:id" element={<ViewParty />} />
           <Route path="/categories" element={<Category />} />
           <Route path="/add-category" element={<AddEditCategoryForm />} />
