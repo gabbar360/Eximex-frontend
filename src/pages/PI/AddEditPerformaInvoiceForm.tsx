@@ -648,22 +648,29 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
 
                 setAddedProducts(productDataList);
 
-                // Set the first product form
-                const firstProduct = pi.products[0];
+                // Keep product form empty in edit mode
                 setProductsAdded([
                   {
-                    productId: firstProduct.productId?.toString() || '',
-                    quantity: firstProduct.quantity.toString(),
-                    rate: firstProduct.rate.toString(),
-                    unit: firstProduct.unit,
-                    categoryId: firstProduct.categoryId?.toString(),
-                    subcategoryId: firstProduct.subcategoryId?.toString(),
+                    productId: '',
+                    quantity: '',
+                    rate: '',
+                    unit: '',
+                    categoryId: '',
+                    subcategoryId: '',
                     quantityByWeight: '',
                   },
                 ]);
               } else {
                 setProductsAdded([
-                  { productId: '', quantity: '', rate: '', unit: '' },
+                  {
+                    productId: '',
+                    quantity: '',
+                    rate: '',
+                    unit: '',
+                    categoryId: '',
+                    subcategoryId: '',
+                    quantityByWeight: '',
+                  },
                 ]);
               }
             }
@@ -933,11 +940,12 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
     if (containerType && addedProducts.length > 0) {
       const utilization = calculateContainerUtilization();
       setContainerUtilization(utilization);
-      if (utilization.recommendedContainers > 0) {
+      // Don't auto-update numberOfContainers in edit mode to preserve backend value
+      if (!isEditMode && utilization.recommendedContainers > 0) {
         setNumberOfContainers(Math.max(utilization.recommendedContainers, 1));
       }
-    } else {
-      // Ensure numberOfContainers is never 0
+    } else if (!isEditMode) {
+      // Ensure numberOfContainers is never 0, but only in create mode
       setNumberOfContainers(Math.max(numberOfContainers, 1));
     }
   };

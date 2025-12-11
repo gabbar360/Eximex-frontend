@@ -29,6 +29,7 @@ const AddEditPackingList = () => {
   const [piProducts, setPiProducts] = useState([]);
   const [piData, setPiData] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showToTheOrder, setShowToTheOrder] = useState(false);
 
   // Packaging List State
   const [packagingList, setPackagingList] = useState({
@@ -304,6 +305,14 @@ const AddEditPackingList = () => {
           isExisting: true,
         };
 
+        // Load showToTheOrder from existing data - check notes first, then fallback to entry level
+        const showToTheOrderValue = detailedPackingData.showToTheOrder !== undefined 
+          ? detailedPackingData.showToTheOrder 
+          : rawPackingData.showToTheOrder;
+        if (showToTheOrderValue !== undefined) {
+          setShowToTheOrder(showToTheOrderValue);
+        }
+
         console.log('✅ LoadPackagingData - Found meaningful data:', {
           containerDataLength: containerData.length,
           hasMeaningfulData,
@@ -389,6 +398,7 @@ const AddEditPackingList = () => {
     quantity: '',
     quantityUnit: 'Pcs',
     noOfBoxes: '',
+    noOfPallets: '',
     netWeight: '',
     grossWeight: '',
     measurement: '',
@@ -412,6 +422,7 @@ const AddEditPackingList = () => {
       quantity: '',
       quantityUnit: 'Pcs',
       noOfBoxes: '',
+      noOfPallets: '',
       netWeight: '',
       grossWeight: '',
       measurement: '',
@@ -677,6 +688,7 @@ const AddEditPackingList = () => {
       const packagingData = {
         ...packagingList,
         piId: currentOrder.piInvoiceId,
+        showToTheOrder: showToTheOrder,
       };
 
       const hasExistingData =
@@ -1191,13 +1203,44 @@ const AddEditPackingList = () => {
                                       totalWeightFromPI / piQuantity;
                                     netWeightKg = qty * netWeightPerBox;
                                     const product =
-                                      productForm.productData.product ||
+                                      productForm.productData.product 
                                       productForm.productData;
                                     const boxWeightGrams =
-                                      product.packagingMaterialWeight || 700;
+                                      product.packagingMaterialWeight ;
                                     const boxWeightKg = boxWeightGrams / 1000;
                                     grossWeightKg =
                                       netWeightKg + qty * boxWeightKg;
+                                  } else if (unit.toLowerCase() === 'square meter' || unit.toLowerCase() === 'sqm') {
+                                    // Tiles calculation logic - Box weight based
+                                    const product =
+                                      productForm.productData.product ||
+                                      productForm.productData;
+                                    const packagingData =
+                                      product.packagingHierarchyData
+                                        ?.dynamicFields || {};
+                                    
+                                    const sqmPerBox = packagingData['Square MeterPerBox'];
+                                    const boxPerPallet = packagingData['BoxPerPallet'] ;
+                                    const netWeightPerBox = packagingData['weightPerBox'] || (product.grossWeightPerBox - product.packagingMaterialWeight) || 930; // Net weight per box in kg
+                                    
+                                    boxesNeeded = Math.ceil(qty / sqmPerBox);
+                                    const palletsNeeded = Math.ceil(boxesNeeded / boxPerPallet);
+                                    
+                                    // Calculate net weight: boxes × per box weight (simple calculation)
+                                    const totalWeightFromPI = productForm.productData.totalWeight || 0;
+                                    const calculatedBoxes = productForm.productData.calculatedBoxes || boxesNeeded;
+                                    const perBoxWeightFromPI = calculatedBoxes > 0 ? Math.round(totalWeightFromPI / calculatedBoxes) : 31;
+                                    netWeightKg = boxesNeeded * perBoxWeightFromPI;
+                                    
+                                    // Calculate gross weight: net weight + (pallets × packaging weight)
+                                    const packagingWeightPerPallet = product.packagingMaterialWeight; // kg per pallet
+                                    grossWeightKg = netWeightKg + (palletsNeeded * packagingWeightPerPallet);
+                                    
+                                    // Add pallet to form
+                                    setProductForm((prev) => ({
+                                      ...prev,
+                                      noOfPallets: palletsNeeded.toString(),
+                                    }));
                                   } else {
                                     const product =
                                       productForm.productData.product ||
@@ -1238,16 +1281,24 @@ const AddEditPackingList = () => {
                                     volumeM3 = boxesNeeded * 0.0055;
                                   }
 
+                                  // Calculate correct per box weight for tiles using PI data
+                                  let perBoxWeightValue = '';
+                                  if (unit.toLowerCase() === 'square meter' || unit.toLowerCase() === 'sqm') {
+                                    // Use PI data for accurate per box weight
+                                    const totalWeightFromPI = productForm.productData.totalWeight || 0;
+                                    const calculatedBoxes = productForm.productData.calculatedBoxes || boxesNeeded;
+                                    perBoxWeightValue = calculatedBoxes > 0 ? (totalWeightFromPI / calculatedBoxes).toFixed(2) : '';
+                                  } else {
+                                    perBoxWeightValue = boxesNeeded > 0 ? (netWeightKg / boxesNeeded).toFixed(2) : '';
+                                  }
+
                                   setProductForm((prev) => ({
                                     ...prev,
                                     noOfBoxes: boxesNeeded.toString(),
                                     netWeight: netWeightKg.toFixed(2),
                                     grossWeight: grossWeightKg.toFixed(2),
                                     measurement: volumeM3.toFixed(4),
-                                    perBoxWeight:
-                                      boxesNeeded > 0
-                                        ? (netWeightKg / boxesNeeded).toFixed(2)
-                                        : '',
+                                    perBoxWeight: perBoxWeightValue,
                                   }));
                                 }
                               }}
@@ -1297,6 +1348,20 @@ const AddEditPackingList = () => {
                               ...prev,
                               noOfBoxes: e.target.value,
                             }));
+                            // Auto-calculate pallets for tiles
+                            if (productForm.productData && e.target.value) {
+                              const unit = productForm.productData.unit || 'Box';
+                              if (unit.toLowerCase() === 'square meter' || unit.toLowerCase() === 'sqm') {
+                                const product = productForm.productData.product || productForm.productData;
+                                const packagingData = product.packagingHierarchyData?.dynamicFields || {};
+                                const boxPerPallet = packagingData['BoxPerPallet'] || 30;
+                                const palletsNeeded = Math.ceil(parseFloat(e.target.value) / boxPerPallet);
+                                setProductForm((prev) => ({
+                                  ...prev,
+                                  noOfPallets: palletsNeeded.toString(),
+                                }));
+                              }
+                            }
                             // Auto-calculate net weight if per box weight is available
                             if (productForm.perBoxWeight && e.target.value) {
                               const totalNetWeight =
@@ -1329,6 +1394,26 @@ const AddEditPackingList = () => {
                           step="1"
                         />
                       </div>
+                      {/* Show Pallets field only for tiles (Square Meter unit) */}
+                      {productForm.productData && 
+                       (productForm.productData.unit?.toLowerCase() === 'square meter' || 
+                        productForm.productData.unit?.toLowerCase() === 'sqm') && (
+                        <div>
+                          <Label>No. of Pallets</Label>
+                          <InputField
+                            type="number"
+                            value={productForm.noOfPallets}
+                            onChange={(e) => {
+                              setProductForm((prev) => ({
+                                ...prev,
+                                noOfPallets: e.target.value,
+                              }));
+                            }}
+                            placeholder="Enter number of pallets"
+                            step="1"
+                          />
+                        </div>
+                      )}
                       <div>
                         <Label>Per Box Weight (kg) ✏️</Label>
                         <InputField
@@ -1348,19 +1433,30 @@ const AddEditPackingList = () => {
                                 ...prev,
                                 netWeight: totalNetWeight.toFixed(2),
                               }));
-                              // Auto-calculate gross weight using box weight
+                              
+                              // Auto-calculate gross weight - different logic for tiles vs other products
                               const productInfo =
                                 productForm.productData?.product ||
                                 productForm.productData ||
                                 {};
-                              const boxWeightGrams =
-                                productInfo.packagingMaterialWeight ||
-                                productInfo.boxWeight ||
-                                700;
-                              const boxWeightKg = boxWeightGrams / 1000;
-                              const totalGrossWeight =
-                                totalNetWeight +
-                                parseFloat(productForm.noOfBoxes) * boxWeightKg;
+                              const unit = productForm.productData?.unit || 'Box';
+                              
+                              let totalGrossWeight;
+                              if (unit.toLowerCase() === 'square meter' || unit.toLowerCase() === 'sqm') {
+                                // For tiles: use pallets × packaging weight
+                                const pallets = parseFloat(productForm.noOfPallets) || 0;
+                                const packagingWeightPerPallet = productInfo.packagingMaterialWeight || 20;
+                                totalGrossWeight = totalNetWeight + (pallets * packagingWeightPerPallet);
+                              } else {
+                                // For other products: use boxes × packaging weight
+                                const boxWeightGrams =
+                                  productInfo.packagingMaterialWeight ||
+                                  productInfo.boxWeight ||
+                                  700;
+                                const boxWeightKg = boxWeightGrams / 1000;
+                                totalGrossWeight = totalNetWeight + parseFloat(productForm.noOfBoxes) * boxWeightKg;
+                              }
+                              
                               setProductForm((prev) => ({
                                 ...prev,
                                 grossWeight: totalGrossWeight.toFixed(2),
@@ -1521,6 +1617,20 @@ const AddEditPackingList = () => {
                 <h3 className="text-xl font-semibold text-slate-700 border-b border-slate-200 pb-3">
                   Additional Information
                 </h3>
+                
+                {/* Consignee Display Option */}
+                <div>
+                  <label className="inline-flex items-center space-x-2 text-gray-700 dark:text-gray-300 font-medium">
+                    <input
+                      type="checkbox"
+                      checked={showToTheOrder}
+                      onChange={(e) => setShowToTheOrder(e.target.checked)}
+                      className="rounded border-gray-300 text-brand-500 shadow-sm focus:ring-brand-500 dark:border-gray-700 dark:bg-gray-800"
+                    />
+                    <span>Show "TO THE ORDER" in PDF instead of customer details</span>
+                  </label>
+                </div>
+                
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     Notes
@@ -1564,6 +1674,28 @@ const AddEditPackingList = () => {
                         <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right text-sm font-medium">
                           Quantity
                         </th>
+                        {/* Show Square Meter column for tiles products */}
+                        {packagingList.containers.some(container => 
+                          container.products.some(product => 
+                            product.unit?.toLowerCase() === 'square meter' || 
+                            product.unit?.toLowerCase() === 'sqm'
+                          )
+                        ) && (
+                          <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right text-sm font-medium">
+                            Square Meter
+                          </th>
+                        )}
+                        {/* Show Pallets column for tiles products */}
+                        {packagingList.containers.some(container => 
+                          container.products.some(product => 
+                            product.unit?.toLowerCase() === 'square meter' || 
+                            product.unit?.toLowerCase() === 'sqm'
+                          )
+                        ) && (
+                          <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right text-sm font-medium">
+                            Pallets
+                          </th>
+                        )}
                         <th className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-right text-sm font-medium">
                           Unit Wt (kg)
                         </th>
@@ -1625,6 +1757,34 @@ const AddEditPackingList = () => {
                                     '-'
                                   : product.noOfBoxes || '-'}
                               </td>
+                              {/* Show Square Meter column for tiles products */}
+                              {packagingList.containers.some(container => 
+                                container.products.some(p => 
+                                  p.unit?.toLowerCase() === 'square meter' || 
+                                  p.unit?.toLowerCase() === 'sqm'
+                                )
+                              ) && (
+                                <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right">
+                                  {(product.unit?.toLowerCase() === 'square meter' || 
+                                    product.unit?.toLowerCase() === 'sqm') 
+                                    ? product.packedQuantity || '-' 
+                                    : '-'}
+                                </td>
+                              )}
+                              {/* Show Pallets column for tiles products */}
+                              {packagingList.containers.some(container => 
+                                container.products.some(p => 
+                                  p.unit?.toLowerCase() === 'square meter' || 
+                                  p.unit?.toLowerCase() === 'sqm'
+                                )
+                              ) && (
+                                <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right">
+                                  {(product.unit?.toLowerCase() === 'square meter' || 
+                                    product.unit?.toLowerCase() === 'sqm') 
+                                    ? product.noOfPallets || '-' 
+                                    : '-'}
+                                </td>
+                              )}
                               <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right">
                                 {(() => {
                                   const boxes = parseFloat(
@@ -1689,6 +1849,7 @@ const AddEditPackingList = () => {
                                           quantityUnit:
                                             product.quantityUnit || 'Pcs',
                                           noOfBoxes: product.noOfBoxes || '',
+                                          noOfPallets: product.noOfPallets || '',
                                           netWeight: product.netWeight || '',
                                           grossWeight:
                                             product.grossWeight || '',
@@ -1803,7 +1964,12 @@ const AddEditPackingList = () => {
                       ) && (
                         <tr>
                           <td
-                            colSpan={10}
+                            colSpan={packagingList.containers.some(container => 
+                              container.products.some(product => 
+                                product.unit?.toLowerCase() === 'square meter' || 
+                                product.unit?.toLowerCase() === 'sqm'
+                              )
+                            ) ? 12 : 10}
                             className="border border-gray-300 dark:border-gray-600 px-3 py-8 text-center text-gray-500"
                           >
                             No products added yet. Add products to containers to
@@ -1823,6 +1989,50 @@ const AddEditPackingList = () => {
                         <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right font-semibold">
                           {packagingList.totalBoxes}
                         </td>
+                        {/* Show Square Meter total for tiles products */}
+                        {packagingList.containers.some(container => 
+                          container.products.some(product => 
+                            product.unit?.toLowerCase() === 'square meter' || 
+                            product.unit?.toLowerCase() === 'sqm'
+                          )
+                        ) && (
+                          <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right font-semibold">
+                            {(() => {
+                              let totalSqm = 0;
+                              packagingList.containers.forEach(container => {
+                                container.products.forEach(product => {
+                                  if (product.unit?.toLowerCase() === 'square meter' || 
+                                      product.unit?.toLowerCase() === 'sqm') {
+                                    totalSqm += parseFloat(product.packedQuantity) || 0;
+                                  }
+                                });
+                              });
+                              return totalSqm > 0 ? totalSqm : '-';
+                            })()}
+                          </td>
+                        )}
+                        {/* Show Pallets total for tiles products */}
+                        {packagingList.containers.some(container => 
+                          container.products.some(product => 
+                            product.unit?.toLowerCase() === 'square meter' || 
+                            product.unit?.toLowerCase() === 'sqm'
+                          )
+                        ) && (
+                          <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right font-semibold">
+                            {(() => {
+                              let totalPallets = 0;
+                              packagingList.containers.forEach(container => {
+                                container.products.forEach(product => {
+                                  if (product.unit?.toLowerCase() === 'square meter' || 
+                                      product.unit?.toLowerCase() === 'sqm') {
+                                    totalPallets += parseFloat(product.noOfPallets) || 0;
+                                  }
+                                });
+                              });
+                              return totalPallets > 0 ? totalPallets : '-';
+                            })()}
+                          </td>
+                        )}
                         <td className="border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-right font-semibold">
                           {(() => {
                             const avgUnitWeight =
