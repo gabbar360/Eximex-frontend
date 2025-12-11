@@ -62,15 +62,8 @@ const OrderSelector: React.FC<OrderSelectorProps> = ({
               );
             case 'packingList':
               // Show orders that don't have packing lists created
-              const hasPackingList =
-                (order.packingList &&
-                  Object.keys(order.packingList).length > 0 &&
-                  order.packingList.containers &&
-                  order.packingList.containers.length > 0) ||
-                (order.piInvoice?.packingLists &&
-                  order.piInvoice.packingLists.length > 0 &&
-                  order.piInvoice.packingLists[0]?.notes?.containers &&
-                  order.piInvoice.packingLists[0].notes.containers.length > 0);
+              const hasPackingList = order.piInvoice?.packingLists && 
+                order.piInvoice.packingLists.length > 0;
               return !hasPackingList;
             default:
               return true;

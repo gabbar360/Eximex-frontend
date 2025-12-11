@@ -39,18 +39,35 @@ const PackingListManagement: React.FC = () => {
     setCurrentPage(1);
   }, []);
 
-  const handleDeleteClick = (id: string) => {
-    setConfirmDelete(id);
+  const handleDeleteClick = (orderId: string) => {
+    setConfirmDelete(orderId);
   };
 
   const handleConfirmDelete = async () => {
     if (!confirmDelete) return;
 
     try {
-      await dispatch(deletePackingList(confirmDelete)).unwrap();
+      // Find the order and get the correct packing list ID
+      const order = orders.find(o => o.id.toString() === confirmDelete);
+      const packingListId = order?.piInvoice?.packingLists?.[0]?.id;
+      
+      console.log('Delete attempt:', {
+        confirmDelete,
+        foundOrder: !!order,
+        orderId: order?.id,
+        packingListId,
+        packingListsCount: order?.piInvoice?.packingLists?.length || 0
+      });
+      
+      if (!packingListId) {
+        toast.error('No packing list found to delete');
+        return;
+      }
+
+      await dispatch(deletePackingList(packingListId)).unwrap();
       toast.success('Packing list deleted successfully');
       setConfirmDelete(null);
-      // Refresh orders to update the UI
+      // Refresh orders data without page reload
       dispatch(fetchOrders());
     } catch (error: any) {
       console.log('Delete packing list error:', error);
@@ -63,8 +80,7 @@ const PackingListManagement: React.FC = () => {
       toast.info('Preparing PDF download...', { autoClose: 2000 });
 
       // Get packing list ID from order
-      const packingListId =
-        order.packingList?.id || order.piInvoice?.packingLists?.[0]?.id;
+      const packingListId = order.piInvoice?.packingLists?.[0]?.id;
 
       if (!packingListId) {
         toast.error('No packing list found for this order');
@@ -107,8 +123,7 @@ const PackingListManagement: React.FC = () => {
       toast.info('Preparing Port Delivery PDF...', { autoClose: 2000 });
 
       // Get packing list ID from order
-      const packingListId =
-        order.packingList?.id || order.piInvoice?.packingLists?.[0]?.id;
+      const packingListId = order.piInvoice?.packingLists?.[0]?.id;
 
       if (!packingListId) {
         toast.error('No packing list found for this order');
@@ -138,16 +153,10 @@ const PackingListManagement: React.FC = () => {
 
   // Filter orders to show only those with packing lists and match search term
   const filteredOrders = orders.filter((order: any) => {
-    // Check if order has packing list
+    // Check if order has packing list - use piInvoice.packingLists instead of order.packingLists
     const hasPackingList =
-      (order.packingList &&
-        Object.keys(order.packingList).length > 0 &&
-        order.packingList.containers &&
-        order.packingList.containers.length > 0) ||
-      (order.piInvoice?.packingLists &&
-        order.piInvoice.packingLists.length > 0 &&
-        order.piInvoice.packingLists[0]?.notes?.containers &&
-        order.piInvoice.packingLists[0].notes.containers.length > 0);
+      order.piInvoice?.packingLists &&
+      order.piInvoice.packingLists.length > 0;
 
     // Only show orders with packing lists
     if (!hasPackingList) return false;
@@ -271,22 +280,15 @@ const PackingListManagement: React.FC = () => {
               </div>
               <div className="divide-y divide-white/20">
                 {paginatedOrders.map((order: any) => {
-                  const hasPackingList =
-                    (order.packingList &&
-                      Object.keys(order.packingList).length > 0 &&
-                      order.packingList.containers &&
-                      order.packingList.containers.length > 0) ||
-                    (order.piInvoice?.packingLists &&
-                      order.piInvoice.packingLists.length > 0 &&
-                      order.piInvoice.packingLists[0]?.notes?.containers &&
-                      order.piInvoice.packingLists[0].notes.containers.length >
-                        0);
+                  const packingLists = order.piInvoice?.packingLists || [];
+                  const hasPackingList = packingLists.length > 0;
 
-                  const containers =
-                    order.packingList?.containers?.length > 0
-                      ? order.packingList.containers
-                      : order.piInvoice?.packingLists?.[0]?.notes?.containers ||
-                        [];
+                  const containers = packingLists.reduce((acc: any[], pl: any) => {
+                    if (pl.notes?.containers) {
+                      return [...acc, ...pl.notes.containers];
+                    }
+                    return acc;
+                  }, []);
 
                   const totalWeight = containers.reduce(
                     (sum: number, container: any) =>
@@ -373,7 +375,7 @@ const PackingListManagement: React.FC = () => {
                             <HiPencil className="w-4 h-4" />
                           </Link>
                           <button
-                            onClick={() => handleDeleteClick(order.id)}
+                            onClick={() => handleDeleteClick(order.id.toString())}
                             className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
                             title="Delete"
                           >
@@ -426,22 +428,15 @@ const PackingListManagement: React.FC = () => {
                   </div>
                   <div className="divide-y divide-white/20">
                     {paginatedOrders.map((order: any) => {
-                      const hasPackingList =
-                        (order.packingList &&
-                          Object.keys(order.packingList).length > 0 &&
-                          order.packingList.containers &&
-                          order.packingList.containers.length > 0) ||
-                        (order.piInvoice?.packingLists &&
-                          order.piInvoice.packingLists.length > 0 &&
-                          order.piInvoice.packingLists[0]?.notes?.containers &&
-                          order.piInvoice.packingLists[0].notes.containers
-                            .length > 0);
+                      const packingLists = order.piInvoice?.packingLists || [];
+                      const hasPackingList = packingLists.length > 0;
 
-                      const containers =
-                        order.packingList?.containers?.length > 0
-                          ? order.packingList.containers
-                          : order.piInvoice?.packingLists?.[0]?.notes
-                              ?.containers || [];
+                      const containers = packingLists.reduce((acc: any[], pl: any) => {
+                        if (pl.notes?.containers) {
+                          return [...acc, ...pl.notes.containers];
+                        }
+                        return acc;
+                      }, []);
 
                       const totalWeight = containers.reduce(
                         (sum: number, container: any) =>
@@ -530,7 +525,7 @@ const PackingListManagement: React.FC = () => {
                                 <HiPencil className="w-4 h-4" />
                               </Link>
                               <button
-                                onClick={() => handleDeleteClick(order.id)}
+                                onClick={() => handleDeleteClick(order.id.toString())}
                                 className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
                                 title="Delete"
                               >
