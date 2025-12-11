@@ -82,6 +82,12 @@ const Cprospect = () => {
     return stages.find(s => s.value === stage) || stages[0];
   };
 
+  const truncateCompanyName = (name) => {
+    if (!name) return '-';
+    if (name.length <= 10) return name;
+    return name.substring(0, 10) + '...';
+  };
+
   const handleStageSelect = async (partyId, newStage) => {
     setOpenStageDropdown(null);
     try {
@@ -290,8 +296,8 @@ const Cprospect = () => {
                     className="grid gap-2 text-sm font-semibold text-slate-700"
                     style={{
                       gridTemplateColumns: hasCustomers
-                        ? '2fr 1.5fr 1fr 1fr 1fr 0.8fr 0.8fr'
-                        : '2fr 1.5fr 1fr 1fr 0.8fr 0.8fr',
+                        ? '1.5fr 1.8fr 1fr 1fr 1fr 0.8fr 0.8fr'
+                        : '1.5fr 1.8fr 1fr 1fr 0.8fr 0.8fr',
                     }}
                   >
                     <div className="flex items-center gap-2">
@@ -330,8 +336,8 @@ const Cprospect = () => {
                         className="grid gap-2 items-center"
                         style={{
                           gridTemplateColumns: hasCustomers
-                            ? '2fr 1.5fr 1fr 1fr 1fr 0.8fr 0.8fr'
-                            : '2fr 1.5fr 1fr 1fr 0.8fr 0.8fr',
+                            ? '1.5fr 1.8fr 1fr 1fr 1fr 0.8fr 0.8fr'
+                            : '1.5fr 1.8fr 1fr 1fr 0.8fr 0.8fr',
                         }}
                       >
                         {/* Company */}
@@ -340,10 +346,10 @@ const Cprospect = () => {
                             <HiBuildingOffice2 className="w-4 h-4 text-white" />
                           </div>
                           <span
-                            className="text-slate-800 font-medium truncate"
+                            className="text-slate-800 font-medium"
                             title={party.companyName}
                           >
-                            {party.companyName}
+                            {truncateCompanyName(party.companyName)}
                           </span>
                         </div>
 
@@ -508,8 +514,8 @@ const Cprospect = () => {
                         <div className="p-2 rounded-lg bg-slate-700 shadow-md flex-shrink-0">
                           <HiBuildingOffice2 className="w-4 h-4 text-white" />
                         </div>
-                        <h3 className="font-semibold text-slate-800">
-                          {party.companyName}
+                        <h3 className="font-semibold text-slate-800" title={party.companyName}>
+                          {truncateCompanyName(party.companyName)}
                         </h3>
                       </div>
                     </div>
