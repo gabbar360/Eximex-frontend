@@ -60,7 +60,7 @@ const convertSidebarMenuToNavItems = (sidebarMenu: any[]): NavItem[] => {
 
   const iconMap: { [key: string]: React.ReactNode } = {
     dashboard: <MdDashboard className="w-4 h-4" />,
-    'customer-prospect': <MdPeople className="w-4 h-4" />,
+    contacts: <MdPeople className="w-4 h-4" />,
     categories: <MdCategory className="w-4 h-4" />,
     products: <MdInventory className="w-4 h-4" />,
     'proforma-invoices': <HiOutlineDocumentText className="w-4 h-4" />,
