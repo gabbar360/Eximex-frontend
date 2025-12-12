@@ -154,6 +154,7 @@ type PIData = {
   capacityBasis?: string;
   numberOfContainers?: number;
   maxWeight?: number;
+  notes?: string;
 };
 
 type PI = {
@@ -418,6 +419,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   );
   const [showPIPreview, setShowPIPreview] = useState<boolean>(false);
   const [currency, setCurrency] = useState<string>('USD');
+  const [notes, setNotes] = useState<string>('');
   const dispatch = useDispatch();
   const { categories } = useSelector((state: any) => state.category);
   const { products } = useSelector((state: any) => state.product);
@@ -612,6 +614,9 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
 
               // Set currency
               setCurrency(pi.currency || 'USD');
+
+              // Set notes
+              setNotes(pi.notes || '');
 
               // Store original PI status
               setOriginalPiStatus(pi.status || '');
@@ -1299,6 +1304,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
       maxWeight: maxPermissibleWeight
         ? parseFloat(maxPermissibleWeight)
         : undefined,
+      notes,
     };
   };
 
@@ -1386,6 +1392,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         portOfDischarge,
         finalDestination,
         totalGrossWeight: calculateGrossWeightWrapper(formData.productsData),
+        notes,
         status: 'draft',
         products: formData.productsData.map((product) => ({
           productId: product.productId ? parseInt(product.productId) : null,
@@ -1464,6 +1471,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         portOfDischarge,
         finalDestination,
         totalGrossWeight: calculateGrossWeightWrapper(formData.productsData),
+        notes,
         status:
           isEditMode && originalPiStatus === 'confirmed'
             ? 'confirmed'
@@ -2276,6 +2284,21 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                   )}
                   
                   <div className="mt-8 space-y-6">{renderChargesFields()}</div>
+                  
+                  {/* Notes Section */}
+                  <div className="mt-8">
+                    <Label htmlFor="notes">Notes (Optional)</Label>
+                    <TextArea
+                      value={notes}
+                      onChange={(value) => setNotes(value)}
+                      rows={4}
+                      placeholder="Enter any additional notes or special instructions for the PI..."
+                      className="mt-1"
+                    />
+                    <p className="text-sm text-gray-500 mt-1">
+                      These notes will appear in the PDF and can include special instructions, terms, or other relevant information.
+                    </p>
+                  </div>
                 </div>
               )}
 
@@ -2722,6 +2745,16 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                           </dt>
                           <dd className="mt-1 font-semibold">{currency}</dd>
                         </div>
+                        {notes && (
+                          <div className="sm:col-span-2">
+                            <dt className="font-medium text-gray-500 dark:text-gray-400">
+                              Notes
+                            </dt>
+                            <dd className="mt-1 font-semibold whitespace-pre-line">
+                              {notes}
+                            </dd>
+                          </div>
+                        )}
                       </dl>
                     </section>
 
