@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   TrendingUp,
   TrendingDown,
@@ -21,23 +22,10 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-
-// Sample data
-const salesData = [
-  { month: 'Jan', sales: 4000, revenue: 2400 },
-  { month: 'Feb', sales: 3000, revenue: 1398 },
-  { month: 'Mar', sales: 2000, revenue: 9800 },
-  { month: 'Apr', sales: 2780, revenue: 3908 },
-  { month: 'May', sales: 1890, revenue: 4800 },
-  { month: 'Jun', sales: 2390, revenue: 3800 },
-];
-
-const orderData = [
-  { name: 'Pending', value: 400, color: '#ff9800' },
-  { name: 'Processing', value: 300, color: '#2196f3' },
-  { name: 'Shipped', value: 300, color: '#4caf50' },
-  { name: 'Delivered', value: 200, color: '#9c27b0' },
-];
+import { fetchOrders } from '../../features/orderSlice';
+import { fetchProducts } from '../../features/productSlice';
+import { fetchParties } from '../../features/partySlice';
+import { toast } from 'react-toastify';
 
 const MobileMetricCard = ({ title, value, change, icon, color }: any) => (
   <div
@@ -89,6 +77,103 @@ const MobileChartCard = ({ title, children, height = 250 }: any) => (
 );
 
 export default function MobileOptimizedDashboard() {
+  const dispatch = useDispatch();
+  const { orders, loading: ordersLoading } = useSelector((state: any) => state.order);
+  const { products, loading: productsLoading } = useSelector((state: any) => state.product);
+  const { parties, loading: partiesLoading } = useSelector((state: any) => state.party);
+  
+  const loading = ordersLoading || productsLoading || partiesLoading;
+
+  const fetchStats = async () => {
+    try {
+      await Promise.all([
+        dispatch(fetchOrders()),
+        dispatch(fetchProducts()),
+        dispatch(fetchParties())
+      ]);
+    } catch (error) {
+      toast.error('Failed to fetch dashboard stats');
+      console.error('Error fetching stats:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+  }, [dispatch]);
+
+  const stats = useMemo(() => {
+    const totalRevenue = orders.reduce((sum: number, order: any) => {
+      return sum + (parseFloat(order.totalAmount) || 0);
+    }, 0);
+
+    return {
+      totalRevenue,
+      totalOrders: orders.length,
+      totalProducts: products.length,
+      totalParties: parties.length
+    };
+  }, [orders, products, parties]); 
+
+  // Generate chart data using useMemo for performance
+  const generateChartData = (value: number, multipliers: number[]) => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+    return months.map((month, index) => ({
+      month,
+      sales: index === 5 ? value : Math.max(0, Math.floor(value * multipliers[index])),
+    }));
+  };
+
+  const salesData = useMemo(() => {
+    if (!orders.length) return generateChartData(
+      stats.totalRevenue || 0,
+      [0.3, 0.4, 0.5, 0.6, 0.8, 1]
+    );
+
+    const monthlyData = orders.reduce((acc: any, order: any) => {
+      const date = new Date(order.createdAt || order.orderDate);
+      const month = date.toLocaleDateString('en-US', { month: 'short' });
+      
+      if (!acc[month]) {
+        acc[month] = { month, revenue: 0 };
+      }
+      
+      acc[month].revenue += parseFloat(order.totalAmount) || 0;
+      return acc;
+    }, {});
+
+    return Object.values(monthlyData).slice(-6);
+  }, [orders, stats.totalRevenue]);
+
+  const orderData = useMemo(() => {
+    if (!orders.length) return [
+      { name: 'Pending', value: 0, color: '#ff9800' },
+      { name: 'Processing', value: 0, color: '#2196f3' },
+      { name: 'Shipped', value: 0, color: '#4caf50' },
+      { name: 'Delivered', value: 0, color: '#9c27b0' },
+    ];
+
+    const statusCounts = orders.reduce((acc: any, order: any) => {
+      const status = order.status || 'Pending';
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {});
+
+    const colors = ['#ff9800', '#2196f3', '#4caf50', '#9c27b0', '#f44336'];
+    return Object.entries(statusCounts).map(([status, count], index) => ({
+      name: status,
+      value: count as number,
+      color: colors[index % colors.length],
+    }));
+  }, [orders]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Mobile Header */}
@@ -106,28 +191,28 @@ export default function MobileOptimizedDashboard() {
         <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
           <MobileMetricCard
             title="Revenue"
-            value="$54.2K"
+            value={`₹${((stats.totalRevenue || 0) / 1000).toFixed(1)}K`}
             change={12.5}
             icon={<AttachMoney />}
             color="#1976d2"
           />
           <MobileMetricCard
             title="Orders"
-            value="1,429"
+            value={(stats.totalOrders || 0).toLocaleString()}
             change={-2.3}
             icon={<ShoppingCart />}
             color="#4caf50"
           />
           <MobileMetricCard
-            title="Customers"
-            value="9.7K"
+            title="Parties"
+            value={`${((stats.totalParties || 0) / 1000).toFixed(1)}K`}
             change={8.1}
             icon={<People />}
             color="#2196f3"
           />
           <MobileMetricCard
             title="Products"
-            value="2,847"
+            value={(stats.totalProducts || 0).toLocaleString()}
             change={5.7}
             icon={<Inventory />}
             color="#ff9800"
@@ -137,7 +222,7 @@ export default function MobileOptimizedDashboard() {
         {/* Mobile Charts */}
         <div className="space-y-4">
           {/* Sales Trend - Mobile */}
-          <MobileChartCard title="Sales Trend" height={200}>
+          <MobileChartCard title="Revenue Trend" height={200}>
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={salesData}>
                 <defs>
@@ -156,10 +241,11 @@ export default function MobileOptimizedDashboard() {
                     borderRadius: '6px',
                     fontSize: '12px',
                   }}
+                  formatter={(value) => [`₹${Number(value).toLocaleString()}`, 'Revenue']}
                 />
                 <Area
                   type="monotone"
-                  dataKey="sales"
+                  dataKey="revenue"
                   stroke="#1976d2"
                   strokeWidth={2}
                   fillOpacity={1}
