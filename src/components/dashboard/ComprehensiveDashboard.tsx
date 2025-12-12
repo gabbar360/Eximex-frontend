@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import MaterialDashboard from './MaterialDashboard';
+import UserDashboard from './UserDashboard';
 import MobileOptimizedDashboard from './MobileOptimizedDashboard';
 
 export default function ComprehensiveDashboard() {
@@ -21,6 +21,6 @@ export default function ComprehensiveDashboard() {
     return <MobileOptimizedDashboard />;
   }
 
-  // Show only MaterialDashboard without tabs
-  return <MaterialDashboard />;
+  // Show only UserDashboard without tabs
+  return <UserDashboard />;
 }
