@@ -14,7 +14,6 @@ import { Pagination } from 'antd';
 import { fetchOrders } from '../../features/orderSlice';
 import {
   downloadPackingListPdf,
-  downloadPackingListPortPdf,
   deletePackingList,
 } from '../../features/packingListSlice';
 import { toast } from 'react-toastify';
@@ -118,38 +117,7 @@ const PackingListManagement: React.FC = () => {
     }
   };
 
-  const handlePortDeliveryPDFDownload = async (order: any) => {
-    try {
-      toast.info('Preparing Port Delivery PDF...', { autoClose: 2000 });
 
-      // Get packing list ID from order
-      const packingListId = order.piInvoice?.packingLists?.[0]?.id;
-
-      if (!packingListId) {
-        toast.error('No packing list found for this order');
-        return;
-      }
-
-      const response = await dispatch(
-        downloadPackingListPortPdf(packingListId)
-      ).unwrap();
-
-      const blob = new Blob([response.data]);
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `port-delivery-${order.orderNumber}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-
-      toast.success('Port Delivery PDF downloaded successfully');
-    } catch (error) {
-      console.error('Error downloading Port Delivery PDF:', error);
-      toast.error('Failed to download Port Delivery PDF');
-    }
-  };
 
   // Filter orders to show only those with packing lists and match search term
   const filteredOrders = orders.filter((order: any) => {
@@ -360,13 +328,6 @@ const PackingListManagement: React.FC = () => {
                           >
                             <HiArrowDownTray className="w-4 h-4" />
                           </button>
-                          <button
-                            onClick={() => handlePortDeliveryPDFDownload(order)}
-                            className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-purple-600 transition-all duration-300"
-                            title="Download Port Delivery PDF"
-                          >
-                            <HiDocumentText className="w-4 h-4" />
-                          </button>
                           <Link
                             to={`/packing-list/${order.id}`}
                             className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-600 transition-all duration-300"
@@ -507,15 +468,6 @@ const PackingListManagement: React.FC = () => {
                                 title="Download Packing List PDF"
                               >
                                 <HiArrowDownTray className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() =>
-                                  handlePortDeliveryPDFDownload(order)
-                                }
-                                className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-purple-600 transition-all duration-300"
-                                title="Download Port Delivery PDF"
-                              >
-                                <HiDocumentText className="w-4 h-4" />
                               </button>
                               <Link
                                 to={`/packing-list/${order.id}`}

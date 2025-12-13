@@ -131,6 +131,7 @@ type ProductData = {
   convertedQuantity?: number;
   categoryId?: string;
   subcategoryId?: string;
+  containerNumber?: number;
   packagingCalculation?: {
     totalBoxes: number;
     totalPallets: number;
@@ -420,6 +421,12 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   const [showPIPreview, setShowPIPreview] = useState<boolean>(false);
   const [currency, setCurrency] = useState<string>('USD');
   const [notes, setNotes] = useState<string>('');
+
+  // Container-wise product management
+  const [selectedContainer, setSelectedContainer] = useState<number>(1);
+  const [containerProducts, setContainerProducts] = useState<{
+    [containerNumber: number]: ProductData[];
+  }>({});
   const dispatch = useDispatch();
   const { categories } = useSelector((state: any) => state.category);
   const { products } = useSelector((state: any) => state.product);
@@ -649,9 +656,32 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                   totalWeight: p.totalWeight,
                   categoryId: p.categoryId?.toString(),
                   subcategoryId: p.subcategoryId?.toString(),
+                  containerNumber: p.containerNumber || 1,
                 }));
 
                 setAddedProducts(productDataList);
+                
+                // Initialize container products for edit mode using actual container numbers
+                const containers = pi.numberOfContainers || 1;
+                const containerProds: { [key: number]: ProductData[] } = {};
+                
+                // Initialize all containers
+                for (let i = 1; i <= containers; i++) {
+                  containerProds[i] = [];
+                }
+                
+                // Group products by their actual container numbers
+                productDataList.forEach((product: ProductData) => {
+                  const containerNum = product.containerNumber || 1;
+                  if (containerProds[containerNum]) {
+                    containerProds[containerNum].push(product);
+                  } else {
+                    // If container number doesn't exist, add to container 1
+                    containerProds[1].push(product);
+                  }
+                });
+                
+                setContainerProducts(containerProds);
 
                 // Keep product form empty in edit mode
                 setProductsAdded([
@@ -960,6 +990,34 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
     updateContainerUtilization();
   }, [addedProducts, containerType, capacityBasis]);
 
+  // Initialize container products when number of containers changes
+  useEffect(() => {
+    if (numberOfContainers > 0) {
+      setContainerProducts(prev => {
+        const updated = { ...prev };
+        // Initialize containers that don't exist
+        for (let i = 1; i <= numberOfContainers; i++) {
+          if (!updated[i]) {
+            updated[i] = [];
+          }
+        }
+        // Remove containers that exceed the current count
+        Object.keys(updated).forEach(key => {
+          const containerNum = parseInt(key);
+          if (containerNum > numberOfContainers) {
+            delete updated[containerNum];
+          }
+        });
+        return updated;
+      });
+      
+      // Set selected container to 1 if it's out of range
+      if (selectedContainer > numberOfContainers) {
+        setSelectedContainer(1);
+      }
+    }
+  }, [numberOfContainers]);
+
   const getContainerLimits = () => {
     const config = getContainerConfig();
     if (!config) return { weight: 0, volume: 0 };
@@ -1148,18 +1206,74 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         totalWeight: totalWeight,
         categoryId: currentProduct.categoryId || selectedCategory,
         subcategoryId: currentProduct.subcategoryId || selectedSubcategory,
+        containerNumber: numberOfContainers > 1 ? selectedContainer : 1,
         packagingCalculation: currentProduct.packagingCalculation,
       };
 
       if (editingProductIndex !== null) {
-        const updated = [...addedProducts];
-        updated[editingProductIndex] = productData;
-        setAddedProducts(updated);
+        // Update existing product in the selected container
+        const containerNum = numberOfContainers > 1 ? selectedContainer : 1;
+        const updatedContainerProducts = [...(containerProducts[containerNum] || [])];
+        const globalIndex = editingProductIndex;
+        
+        // Find which container and local index this global index refers to
+        let currentIndex = 0;
+        let targetContainer = 1;
+        let localIndex = 0;
+        
+        for (let i = 1; i <= numberOfContainers; i++) {
+          const containerProds = containerProducts[i] || [];
+          if (currentIndex + containerProds.length > globalIndex) {
+            targetContainer = i;
+            localIndex = globalIndex - currentIndex;
+            break;
+          }
+          currentIndex += containerProds.length;
+        }
+        
+        const targetContainerProducts = [...(containerProducts[targetContainer] || [])];
+        targetContainerProducts[localIndex] = productData;
+        
+        setContainerProducts(prev => ({
+          ...prev,
+          [targetContainer]: targetContainerProducts
+        }));
+        
+        // Update global addedProducts
+        const allProducts: ProductData[] = [];
+        for (let i = 1; i <= numberOfContainers; i++) {
+          if (i === targetContainer) {
+            allProducts.push(...targetContainerProducts);
+          } else {
+            allProducts.push(...(containerProducts[i] || []));
+          }
+        }
+        setAddedProducts(allProducts);
+        
         setEditingProductIndex(null);
         toast.success('Product updated successfully!');
       } else {
-        setAddedProducts((prev) => [...prev, productData]);
-        toast.success('Product added successfully!');
+        // Add new product to selected container
+        const containerNum = numberOfContainers > 1 ? selectedContainer : 1;
+        const updatedContainerProducts = [...(containerProducts[containerNum] || []), productData];
+        
+        setContainerProducts(prev => ({
+          ...prev,
+          [containerNum]: updatedContainerProducts
+        }));
+        
+        // Update global addedProducts
+        const allProducts: ProductData[] = [];
+        for (let i = 1; i <= numberOfContainers; i++) {
+          if (i === containerNum) {
+            allProducts.push(...updatedContainerProducts);
+          } else {
+            allProducts.push(...(containerProducts[i] || []));
+          }
+        }
+        setAddedProducts(allProducts);
+        
+        toast.success(`Product added to Container ${containerNum} successfully!`);
       }
 
       setProductsAdded([
@@ -1232,7 +1346,40 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   };
 
   const deleteProduct = (index: number) => {
-    setAddedProducts((prev) => prev.filter((_, i) => i !== index));
+    // Find which container this product belongs to
+    let currentIndex = 0;
+    let targetContainer = 1;
+    let localIndex = 0;
+    
+    for (let i = 1; i <= numberOfContainers; i++) {
+      const containerProds = containerProducts[i] || [];
+      if (currentIndex + containerProds.length > index) {
+        targetContainer = i;
+        localIndex = index - currentIndex;
+        break;
+      }
+      currentIndex += containerProds.length;
+    }
+    
+    // Remove from container
+    const updatedContainerProducts = [...(containerProducts[targetContainer] || [])];
+    updatedContainerProducts.splice(localIndex, 1);
+    
+    setContainerProducts(prev => ({
+      ...prev,
+      [targetContainer]: updatedContainerProducts
+    }));
+    
+    // Update global addedProducts
+    const allProducts: ProductData[] = [];
+    for (let i = 1; i <= numberOfContainers; i++) {
+      if (i === targetContainer) {
+        allProducts.push(...updatedContainerProducts);
+      } else {
+        allProducts.push(...(containerProducts[i] || []));
+      }
+    }
+    setAddedProducts(allProducts);
   };
 
   const removeProduct = (idx: number) =>
@@ -1408,6 +1555,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
           rate: product.rate,
           total: product.total,
           totalWeight: product.totalWeight,
+          containerNumber: product.containerNumber || 1,
           packagingCalculation: product.packagingCalculation,
         })),
       };
@@ -1492,6 +1640,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
           rate: product.rate,
           total: product.total,
           totalWeight: product.totalWeight,
+          containerNumber: product.containerNumber || 1,
           packagingCalculation: product.packagingCalculation,
         })),
       };
@@ -2360,6 +2509,43 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                       </select>
                     </div>
                   </div>
+
+                  {/* Container Selection */}
+                  {numberOfContainers > 1 && (
+                    <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <Label className="text-blue-800 font-semibold mb-3">
+                        Select Container for Product Addition
+                      </Label>
+                      <div className="flex flex-wrap gap-2">
+                        {Array.from({ length: numberOfContainers }, (_, index) => {
+                          const containerNum = index + 1;
+                          const containerProductCount = containerProducts[containerNum]?.length || 0;
+                          return (
+                            <button
+                              key={containerNum}
+                              type="button"
+                              onClick={() => setSelectedContainer(containerNum)}
+                              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                                selectedContainer === containerNum
+                                  ? 'bg-blue-600 text-white shadow-md'
+                                  : 'bg-white text-blue-600 border border-blue-300 hover:bg-blue-50'
+                              }`}
+                            >
+                              Container {containerNum}
+                              {containerProductCount > 0 && (
+                                <span className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                                  {containerProductCount}
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <div className="text-sm text-blue-600 mt-2">
+                        Adding products to Container {selectedContainer}
+                      </div>
+                    </div>
+                  )}
                   <div className="space-y-6">
                     {productsAdded.map((p, idx) => (
                       <ProductRow

@@ -14,6 +14,7 @@ interface ProductData {
   convertedQuantity?: number;
   categoryId?: string;
   subcategoryId?: string;
+  containerNumber?: number;
 }
 
 interface ProductTableProps {
@@ -57,6 +58,9 @@ const ProductTable: React.FC<ProductTableProps> = ({
           <thead className="bg-gray-50 dark:bg-gray-800">
             <tr>
               <th className="px-3 py-2 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
+                Container
+              </th>
+              <th className="px-3 py-2 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
                 Category
               </th>
               <th className="px-3 py-2 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
@@ -86,7 +90,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
             {addedProducts.length === 0 ? (
               <tr>
                 <td
-                  colSpan={8}
+                  colSpan={9}
                   className="px-3 py-8 text-center text-gray-500 dark:text-gray-400"
                 >
                   No products added yet. Click "Add Product" to add your first
@@ -99,6 +103,13 @@ const ProductTable: React.FC<ProductTableProps> = ({
                   (c) => c.id.toString() === product.categoryId?.toString()
                 );
 
+                const containerNum = product.containerNumber || 1;
+                const isFirstInContainer = index === 0 || 
+                  (addedProducts[index - 1].containerNumber || 1) !== containerNum;
+                const containerProductCount = addedProducts.filter(
+                  p => (p.containerNumber || 1) === containerNum
+                ).length;
+
                 return (
                   <tr
                     key={index}
@@ -108,6 +119,14 @@ const ProductTable: React.FC<ProductTableProps> = ({
                         : ''
                     }
                   >
+                    {isFirstInContainer && (
+                      <td 
+                        rowSpan={containerProductCount}
+                        className="px-3 py-2 text-sm text-center text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-gray-700 bg-blue-50 dark:bg-blue-900 font-semibold"
+                      >
+                        {containerNum}
+                      </td>
+                    )}
                     <td className="px-3 py-2 text-sm text-gray-900 dark:text-gray-100">
                       {category?.name ||
                         category?.categoryName ||
@@ -183,7 +202,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
             <tfoot className="bg-gray-50 dark:bg-gray-800">
               <tr>
                 <td
-                  colSpan={4}
+                  colSpan={5}
                   className="px-3 py-2 text-right font-semibold text-gray-900 dark:text-gray-100"
                 >
                   Net Weight:
@@ -202,7 +221,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
               </tr>
               <tr>
                 <td
-                  colSpan={4}
+                  colSpan={5}
                   className="px-3 py-2 text-right font-semibold text-gray-900 dark:text-gray-100"
                 >
                   Gross Weight:
