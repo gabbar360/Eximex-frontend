@@ -9,67 +9,63 @@ import {
   Inventory,
 } from '@mui/icons-material';
 import {
-  AreaChart,
-  Area,
-  BarChart,
+  ComposedChart,
   Bar,
-  PieChart,
-  Pie,
-  Cell,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
+  Legend,
   ResponsiveContainer,
 } from 'recharts';
 import { fetchOrders } from '../../features/orderSlice';
 import { fetchProducts } from '../../features/productSlice';
 import { fetchParties } from '../../features/partySlice';
+import { fetchPiInvoices } from '../../features/piSlice';
+import { getShipments } from '../../features/shipmentSlice';
+import { fetchPackingLists } from '../../features/packingListSlice';
+import { fetchVgmDocuments } from '../../features/vgmSlice';
+import { fetchPurchaseOrders } from '../../features/purchaseOrderSlice';
 import { toast } from 'react-toastify';
 
-const MobileMetricCard = ({ title, value, change, icon, color }: any) => (
-  <div
-    className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border-l-4"
-    style={{ borderLeftColor: color }}
-  >
-    <div className="flex items-center justify-between">
-      <div className="flex-1">
-        <p className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
-          {title}
-        </p>
-        <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mt-1">
-          {value}
-        </p>
-        <div className="flex items-center mt-2">
-          {change > 0 ? (
-            <TrendingUp className="w-3 h-3 text-green-500 mr-1" />
-          ) : (
-            <TrendingDown className="w-3 h-3 text-red-500 mr-1" />
-          )}
-          <span
-            className={`text-xs font-semibold ${
-              change > 0 ? 'text-green-600' : 'text-red-600'
-            }`}
-          >
-            {Math.abs(change)}%
-          </span>
+const MobileMetricCard = ({ title, value, icon }: any) => {
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-3 h-16">
+      <div className="flex items-center justify-between">
+        <div className="flex-1">
+          <p className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+            {title}
+          </p>
+          <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">
+            {typeof value === 'number' ? value.toLocaleString() : value}
+          </p>
+        </div>
+        <div className="w-7 h-7 bg-slate-700 rounded-lg flex items-center justify-center text-white ml-2">
+          {icon}
         </div>
       </div>
-      <div
-        className={`w-10 h-10 rounded-full flex items-center justify-center text-white ml-3`}
-        style={{ backgroundColor: color }}
-      >
-        {React.cloneElement(icon, { className: 'w-5 h-5' })}
+    </div>
+  );
+};
+
+const MobileChartCard = ({ title, description, icon, children, height = 250 }: any) => (
+  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-4 sm:p-6">
+    <div className="flex items-start justify-between mb-4">
+      <div className="flex items-center space-x-3">
+        <div className="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center text-white shadow-md">
+          {icon}
+        </div>
+        <div>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white">{title}</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{description}</p>
+        </div>
+      </div>
+      <div className="flex items-center space-x-1">
+        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+        <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Live</span>
       </div>
     </div>
-  </div>
-);
-
-const MobileChartCard = ({ title, children, height = 250 }: any) => (
-  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-    <h3 className="text-base font-bold text-gray-900 dark:text-white mb-3">
-      {title}
-    </h3>
     <div style={{ height: `${height}px` }} className="w-full">
       {children}
     </div>
@@ -78,221 +74,178 @@ const MobileChartCard = ({ title, children, height = 250 }: any) => (
 
 export default function MobileOptimizedDashboard() {
   const dispatch = useDispatch();
-  const { orders, loading: ordersLoading } = useSelector((state: any) => state.order);
-  const { products, loading: productsLoading } = useSelector((state: any) => state.product);
-  const { parties, loading: partiesLoading } = useSelector((state: any) => state.party);
-  
-  const loading = ordersLoading || productsLoading || partiesLoading;
-
-  const fetchStats = async () => {
-    try {
-      await Promise.all([
-        dispatch(fetchOrders()),
-        dispatch(fetchProducts()),
-        dispatch(fetchParties())
-      ]);
-    } catch (error) {
-      toast.error('Failed to fetch dashboard stats');
-      console.error('Error fetching stats:', error);
-    }
-  };
+  const currentUser = useSelector((state: any) => state.user.user);
+  const { orders = [] } = useSelector((state: any) => state.order);
+  const { products = [] } = useSelector((state: any) => state.product);
+  const { parties = [] } = useSelector((state: any) => state.party);
+  const { piInvoices = [] } = useSelector((state: any) => state.pi);
+  const { shipments = [] } = useSelector((state: any) => state.shipment);
+  const { packingLists = [] } = useSelector((state: any) => state.packingList);
+  const { vgmDocuments = [] } = useSelector((state: any) => state.vgm);
+  const { purchaseOrders = [] } = useSelector((state: any) => state.purchaseOrder);
 
   useEffect(() => {
-    fetchStats();
-  }, [dispatch]);
+    dispatch(fetchOrders());
+    dispatch(fetchProducts());
+    dispatch(fetchParties());
+    dispatch(fetchPiInvoices());
+    dispatch(getShipments({}));
+    dispatch(fetchPackingLists());
+    // dispatch(fetchVgmDocuments()); // Temporarily disabled due to 500 error
+    dispatch(fetchPurchaseOrders());
+  }, []); // Empty dependency array to run only once
 
-  const stats = useMemo(() => {
-    const totalRevenue = orders.reduce((sum: number, order: any) => {
-      return sum + (parseFloat(order.totalAmount) || 0);
-    }, 0);
+  const stats = useMemo(() => ({
+    totalOrders: orders.length,
+    totalProducts: products.length,
+    totalParties: parties.length,
+    totalPiInvoices: piInvoices.length,
+    totalShipments: shipments.length,
+    totalPackingLists: packingLists.length,
+    totalVgmDocuments: vgmDocuments.length,
+    totalPurchaseOrders: purchaseOrders.length,
+  }), [
+    orders,
+    products,
+    parties,
+    piInvoices,
+    shipments,
+    packingLists,
+    vgmDocuments,
+    purchaseOrders
+  ]); 
 
-    return {
-      totalRevenue,
-      totalOrders: orders.length,
-      totalProducts: products.length,
-      totalParties: parties.length
-    };
-  }, [orders, products, parties]); 
-
-  // Generate chart data using useMemo for performance
-  const generateChartData = (value: number, multipliers: number[]) => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-    return months.map((month, index) => ({
-      month,
-      sales: index === 5 ? value : Math.max(0, Math.floor(value * multipliers[index])),
+  const chart1Data = useMemo(() => {
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    return months.map((m, i) => ({
+      month: m,
+      contacts: Math.round(stats.totalParties * (i / 12)),
+      products: Math.round(stats.totalProducts * (i / 12)),
+      piInvoices: Math.round(stats.totalPiInvoices * (i / 12)),
+      orders: Math.round(stats.totalOrders * (i / 12)),
     }));
-  };
+  }, [stats.totalParties, stats.totalProducts, stats.totalPiInvoices, stats.totalOrders]);
 
-  const salesData = useMemo(() => {
-    if (!orders.length) return generateChartData(
-      stats.totalRevenue || 0,
-      [0.3, 0.4, 0.5, 0.6, 0.8, 1]
-    );
-
-    const monthlyData = orders.reduce((acc: any, order: any) => {
-      const date = new Date(order.createdAt || order.orderDate);
-      const month = date.toLocaleDateString('en-US', { month: 'short' });
-      
-      if (!acc[month]) {
-        acc[month] = { month, revenue: 0 };
-      }
-      
-      acc[month].revenue += parseFloat(order.totalAmount) || 0;
-      return acc;
-    }, {});
-
-    return Object.values(monthlyData).slice(-6);
-  }, [orders, stats.totalRevenue]);
-
-  const orderData = useMemo(() => {
-    if (!orders.length) return [
-      { name: 'Pending', value: 0, color: '#ff9800' },
-      { name: 'Processing', value: 0, color: '#2196f3' },
-      { name: 'Shipped', value: 0, color: '#4caf50' },
-      { name: 'Delivered', value: 0, color: '#9c27b0' },
-    ];
-
-    const statusCounts = orders.reduce((acc: any, order: any) => {
-      const status = order.status || 'Pending';
-      acc[status] = (acc[status] || 0) + 1;
-      return acc;
-    }, {});
-
-    const colors = ['#ff9800', '#2196f3', '#4caf50', '#9c27b0', '#f44336'];
-    return Object.entries(statusCounts).map(([status, count], index) => ({
-      name: status,
-      value: count as number,
-      color: colors[index % colors.length],
+  const chart2Data = useMemo(() => {
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    return months.map((m, i) => ({
+      month: m,
+      packing: Math.round(stats.totalPackingLists * (i / 12)),
+      purchaseOrders: Math.round(stats.totalPurchaseOrders * (i / 12)),
+      shipments: Math.round(stats.totalShipments * (i / 12)),
+      vgm: Math.round(stats.totalVgmDocuments * (i / 12)),
+  
     }));
-  }, [orders]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
+  }, [stats.totalPackingLists, stats.totalPurchaseOrders, stats.totalShipments, stats.totalVgmDocuments]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Mobile Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm p-4 sticky top-0 z-10">
-        <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-          Dashboard
-        </h1>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-          Business Overview
-        </p>
+      <div className="bg-white dark:bg-gray-800 shadow-lg border-b border-gray-200 dark:border-gray-700 p-4 sticky top-0 z-10">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
+              Welcome Back, {currentUser?.name?.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ') || 'User'}!
+            </h1>
+          </div>
+          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-slate-700 rounded-xl flex items-center justify-center">
+            <div className="w-4 h-4 sm:w-6 sm:h-6 bg-white rounded opacity-90"></div>
+          </div>
+        </div>
       </div>
 
       <div className="p-4 space-y-4">
         {/* Metrics Grid - Mobile Optimized */}
-        <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
-          <MobileMetricCard
-            title="Revenue"
-            value={`₹${((stats.totalRevenue || 0) / 1000).toFixed(1)}K`}
-            change={12.5}
-            icon={<AttachMoney />}
-            color="#1976d2"
-          />
-          <MobileMetricCard
-            title="Orders"
-            value={(stats.totalOrders || 0).toLocaleString()}
-            change={-2.3}
-            icon={<ShoppingCart />}
-            color="#4caf50"
-          />
-          <MobileMetricCard
-            title="Parties"
-            value={`${((stats.totalParties || 0) / 1000).toFixed(1)}K`}
-            change={8.1}
-            icon={<People />}
-            color="#2196f3"
-          />
-          <MobileMetricCard
-            title="Products"
-            value={(stats.totalProducts || 0).toLocaleString()}
-            change={5.7}
-            icon={<Inventory />}
-            color="#ff9800"
-          />
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+          <MobileMetricCard title="Contacts" value={stats.totalParties} icon={<People className="w-3 h-3" />} />
+          <MobileMetricCard title="PI Invoices" value={stats.totalPiInvoices} icon={<AttachMoney className="w-3 h-3" />} />
+          <MobileMetricCard title="Products" value={stats.totalProducts} icon={<Inventory className="w-3 h-3" />} />
+          <MobileMetricCard title="Orders" value={stats.totalOrders} icon={<ShoppingCart className="w-3 h-3" />} />
+          <MobileMetricCard title="Shipments" value={stats.totalShipments} icon={<ShoppingCart className="w-3 h-3" />} />
+          <MobileMetricCard title="Packing Lists" value={stats.totalPackingLists} icon={<Inventory className="w-3 h-3" />} />
+
+          <MobileMetricCard title="VGM Documents" value={stats.totalVgmDocuments} icon={<AttachMoney className="w-3 h-3" />} />
+          <MobileMetricCard title="Purchase Orders" value={stats.totalPurchaseOrders} icon={<ShoppingCart className="w-3 h-3" />} />
         </div>
 
-        {/* Mobile Charts */}
+        {/* Mobile Charts - Two Separate Charts */}
         <div className="space-y-4">
-          {/* Sales Trend - Mobile */}
-          <MobileChartCard title="Revenue Trend" height={200}>
+          {/* First Mobile Chart */}
+          <MobileChartCard 
+            title="Core Business Metrics" 
+            description="Contacts, products, invoices & orders"
+            icon={<People className="w-5 h-5" />}
+            height={280}
+          >
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={salesData}>
+              <ComposedChart data={chart1Data} margin={{ top: 20, right: 10, left: 10, bottom: 20 }}>
                 <defs>
-                  <linearGradient id="mobileSales" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#1976d2" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#1976d2" stopOpacity={0.1} />
+                  <linearGradient id="mobileContactsGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0.3}/>
+                  </linearGradient>
+                  <linearGradient id="mobileProductsGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.3}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="month" stroke="#666" fontSize={10} />
-                <YAxis stroke="#666" fontSize={10} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#fff',
-                    border: '1px solid #e0e0e0',
-                    borderRadius: '6px',
-                    fontSize: '12px',
-                  }}
-                  formatter={(value) => [`₹${Number(value).toLocaleString()}`, 'Revenue']}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="revenue"
-                  stroke="#1976d2"
-                  strokeWidth={2}
-                  fillOpacity={1}
-                  fill="url(#mobileSales)"
-                />
-              </AreaChart>
+                
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.6} />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#6b7280' }} />
+                <YAxis domain={[0, (dataMax) => Math.ceil(dataMax + dataMax * 0.1)]} allowDecimals={false} axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#6b7280' }} width={35} />
+                <Tooltip contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '6px', fontSize: '10px' }} />
+                <Legend wrapperStyle={{ fontSize: '10px' }} />
+
+                <Bar dataKey="contacts" fill="url(#mobileContactsGradient)" name="Contacts" radius={[2, 2, 0, 0]} maxBarSize={20} />
+                <Bar dataKey="products" fill="url(#mobileProductsGradient)" name="Products" radius={[2, 2, 0, 0]} maxBarSize={20} />
+                <Line dataKey="piInvoices" stroke="#10b981" strokeWidth={2} name="PI Invoices" type="monotone" dot={{ r: 2 }} />
+                <Line dataKey="orders" stroke="#3b82f6" strokeWidth={2} name="Orders" type="monotone" dot={{ r: 2 }} />
+              </ComposedChart>
             </ResponsiveContainer>
           </MobileChartCard>
 
-          {/* Order Status - Mobile */}
-          <MobileChartCard title="Order Status" height={200}>
+          {/* Second Mobile Chart */}
+          <MobileChartCard 
+            title="Operations & Logistics" 
+            description="Shipments, packing & documentation"
+            icon={<Inventory className="w-5 h-5" />}
+            height={280}
+          >
             <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={orderData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={40}
-                  outerRadius={80}
-                  paddingAngle={3}
-                  dataKey="value"
-                >
-                  {orderData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#fff',
-                    border: '1px solid #e0e0e0',
-                    borderRadius: '6px',
-                    fontSize: '12px',
-                  }}
-                />
-              </PieChart>
+              <ComposedChart data={chart2Data} margin={{ top: 20, right: 10, left: 10, bottom: 20 }}>
+                <defs>
+                  <linearGradient id="mobilePackingGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0.3}/>
+                  </linearGradient>
+                  <linearGradient id="mobilePurchaseGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#f97316" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#f97316" stopOpacity={0.3}/>
+                  </linearGradient>
+                  <linearGradient id="mobileShipmentsGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                  </linearGradient>
+                  <linearGradient id="mobileVgmGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.3}/>
+                  </linearGradient>
+
+                </defs>
+                
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.6} />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#6b7280' }} />
+                <YAxis domain={[0, (dataMax) => Math.ceil(dataMax + dataMax * 0.1)]} allowDecimals={false} axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#6b7280' }} width={35} />
+                <Tooltip contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '6px', fontSize: '10px' }} />
+                <Legend wrapperStyle={{ fontSize: '10px' }} />
+
+                <Bar dataKey="packing" fill="url(#mobilePackingGradient)" name="Packing Lists" radius={[2, 2, 0, 0]} maxBarSize={20} />
+                <Bar dataKey="purchaseOrders" fill="url(#mobilePurchaseGradient)" name="Purchase Orders" radius={[2, 2, 0, 0]} maxBarSize={20} />
+                <Bar dataKey="shipments" fill="url(#mobileShipmentsGradient)" name="Shipments" radius={[2, 2, 0, 0]} maxBarSize={20} />
+                <Bar dataKey="vgm" fill="url(#mobileVgmGradient)" name="VGM Documents" radius={[2, 2, 0, 0]} maxBarSize={20} />
+
+              </ComposedChart>
             </ResponsiveContainer>
-            <div className="flex flex-wrap justify-center gap-1 mt-2">
-              {orderData.map((item, index) => (
-                <span
-                  key={index}
-                  className="px-2 py-1 text-xs font-medium text-white rounded"
-                  style={{ backgroundColor: item.color }}
-                >
-                  {item.name}
-                </span>
-              ))}
-            </div>
           </MobileChartCard>
         </div>
       </div>

@@ -195,6 +195,14 @@ const Sidebar: React.FC = () => {
     console.log('🔑 Is Super Admin:', isSuperAdmin);
     console.log('📊 Nav items count:', navItems.length);
     console.log('🗺 Converted nav items:', navItems);
+    navItems.forEach((item, index) => {
+      console.log(`Menu ${index}:`, item.name, 'Path:', item.path);
+      if (item.subItems) {
+        item.subItems.forEach((sub, subIndex) => {
+          console.log(`  Submenu ${subIndex}:`, sub.name, 'Path:', sub.path);
+        });
+      }
+    });
   }, [sidebarMenu, currentUser, isSuperAdmin, navItems]);
 
   const handleLogout = async () => {
@@ -296,6 +304,8 @@ const Sidebar: React.FC = () => {
                   e.preventDefault();
                   e.stopPropagation();
 
+                  console.log('🔄 Navigating to:', nav.path);
+                  
                   if (isMobileOpen) {
                     toggleMobileSidebar();
                   }
@@ -335,6 +345,8 @@ const Sidebar: React.FC = () => {
                         e.preventDefault();
                         e.stopPropagation();
 
+                        console.log('🔄 Navigating to submenu:', subItem.path);
+                        
                         if (isMobileOpen) {
                           toggleMobileSidebar();
                         }
@@ -396,9 +408,10 @@ const Sidebar: React.FC = () => {
 
   return (
     <>
-      {/* Debug component removed - system working */}
+
+      
       <aside
-        className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-slate-800 h-screen transition-all duration-300 ease-in-out z-40 border-r border-gray-200 
+        className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-slate-800 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
         ${
           isExpanded || isMobileOpen
             ? 'w-[240px]'
