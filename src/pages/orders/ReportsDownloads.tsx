@@ -31,6 +31,13 @@ const ReportsDownloads: React.FC = () => {
   }, []);
 
   const handleCommercialInvoiceDownload = async (order: any) => {
+    const hasPackingList = order.piInvoice?.packingLists && order.piInvoice.packingLists.length > 0;
+    
+    if (!hasPackingList) {
+      toast.error('Packing list must be created before downloading Commercial Invoice');
+      return;
+    }
+
     try {
       toast.info('Preparing Commercial Invoice PDF...', { autoClose: 2000 });
       const response = await axiosInstance.get(
@@ -60,6 +67,13 @@ const ReportsDownloads: React.FC = () => {
   };
 
   const handleBLDraftDownload = async (order: any) => {
+    const hasPackingList = order.piInvoice?.packingLists && order.piInvoice.packingLists.length > 0;
+    
+    if (!hasPackingList) {
+      toast.error('Packing list must be created before downloading BL Draft');
+      return;
+    }
+
     try {
       toast.info('Preparing BL Draft PDF...', { autoClose: 2000 });
       const response = await axiosInstance.get(

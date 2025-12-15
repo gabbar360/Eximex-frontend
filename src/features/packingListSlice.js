@@ -67,16 +67,7 @@ export const downloadPackingListPdf = createAsyncThunk(
   }
 );
 
-export const downloadPackingListPortPdf = createAsyncThunk(
-  'packingList/downloadPackingListPortPdf',
-  async (id, { rejectWithValue }) => {
-    try {
-      return await packingListService.downloadPDFPortPackingListPDF(id);
-    } catch (err) {
-      return rejectWithValue(err.message);
-    }
-  }
-);
+
 
 export const downloadBLDraftPdf = createAsyncThunk(
   'packingList/downloadBLDraftPdf',
@@ -181,17 +172,7 @@ const packingListSlice = createSlice({
         state.loading = false;
         state.error = payload;
       })
-      .addCase(downloadPackingListPortPdf.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(downloadPackingListPortPdf.fulfilled, (state) => {
-        state.loading = false;
-      })
-      .addCase(downloadPackingListPortPdf.rejected, (state, { payload }) => {
-        state.loading = false;
-        state.error = payload;
-      });
+
   },
 });
 

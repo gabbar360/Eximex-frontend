@@ -168,14 +168,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
 
   return (
     <div className="border border-gray-300 dark:border-gray-700 rounded-md p-4 space-y-4 relative bg-gray-50 dark:bg-gray-800">
-      <button
-        type="button"
-        className="absolute top-2 right-2 text-red-600 hover:text-red-800 focus:outline-none dark:text-red-400 dark:hover:text-red-300"
-        title="Remove product"
-        onClick={() => onRemove(idx)}
-      >
-        <FontAwesomeIcon icon={faTimes} />
-      </button>
+   
 
       {/* Category Selection */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
