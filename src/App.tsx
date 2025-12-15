@@ -78,6 +78,9 @@ import UserPermissionManagement from './pages/SuperAdmin/UserPermissionManagemen
 import CompanyManagement from './pages/SuperAdmin/CompanyManagement';
 import PurchaseOrders from './pages/PO/PurchaseOrders';
 import AddEditPurchaseOrderForm from './pages/PO/AddEditPurchaseOrderForm';
+import TaskManagement from './pages/task-management/TaskManagement';
+import AddEditTaskManagementForm from './pages/task-management/AddEditTaskManagementForm';
+import MyTasks from './pages/task-management/MyTasks';
 
 function AppContent() {
   const location = useLocation();
@@ -200,6 +203,10 @@ function AppContent() {
             path="/super-admin/permissions"
             element={<UserPermissionManagement />}
           />
+          <Route path="/task-management" element={<TaskManagement />} />
+          <Route path="/task-management/add-task" element={<AddEditTaskManagementForm />} />
+          <Route path="/task-management/edit-task/:id" element={<AddEditTaskManagementForm />} />
+          <Route path="/my-tasks" element={<MyTasks />} />
 
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/blank" element={<Blank />} />
