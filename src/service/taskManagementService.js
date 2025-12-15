@@ -20,9 +20,9 @@ const taskManagementService = {
     return response.data;
   },
 
-  // Update task status
-  updateTaskStatus: async (taskId, status) => {
-    const response = await axiosInstance.patch(`/task-management/tasks/${taskId}/status`, { status });
+  // Update complete task
+  updateTask: async (taskId, taskData) => {
+    const response = await axiosInstance.put(`/task-management/tasks/${taskId}`, taskData);
     return response.data;
   },
 

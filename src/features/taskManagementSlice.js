@@ -29,12 +29,12 @@ export const createTask = createAsyncThunk(
   }
 );
 
-// Update task status
-export const updateTaskStatus = createAsyncThunk(
-  'task/updateTaskStatus',
-  async ({ taskId, status }, { rejectWithValue }) => {
+// Update complete task
+export const updateTask = createAsyncThunk(
+  'task/updateTask',
+  async ({ taskId, taskData }, { rejectWithValue }) => {
     try {
-      return await taskManagementService.updateTaskStatus(taskId, status);
+      return await taskManagementService.updateTask(taskId, taskData);
     } catch (err) {
       return rejectWithValue(err.message);
     }
@@ -115,11 +115,14 @@ const taskManagementSlice = createSlice({
         state.tasks.unshift(payload.data);
       })
 
-      // Update task status
-      .addCase(updateTaskStatus.fulfilled, (state, { payload }) => {
+      // Update complete task
+      .addCase(updateTask.fulfilled, (state, { payload }) => {
         const index = state.tasks.findIndex(task => task.id === payload.data.id);
         if (index !== -1) {
           state.tasks[index] = payload.data;
+        }
+        if (state.currentTask?.id === payload.data.id) {
+          state.currentTask = payload.data;
         }
       })
 
