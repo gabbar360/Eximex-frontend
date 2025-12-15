@@ -66,7 +66,7 @@ const convertSidebarMenuToNavItems = (sidebarMenu: any[]): NavItem[] => {
     'proforma-invoices': <HiOutlineDocumentText className="w-4 h-4" />,
     orders: <MdShoppingCart className="w-4 h-4" />,
     'purchase-orders': <HiOutlineClipboardDocumentList className="w-4 h-4" />,
-    'staff-management': <MdSupervisorAccount className="w-4 h-4" />,
+    'task-management': <MdSupervisorAccount className="w-4 h-4" />,
     'user-profile': <MdAccountCircle className="w-4 h-4" />,
     'all-orders': <HiOutlineShoppingBag className="w-4 h-4" />,
     shipments: <HiOutlineTruck className="w-4 h-4" />,
