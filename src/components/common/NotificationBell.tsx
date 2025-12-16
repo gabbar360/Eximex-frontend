@@ -3,7 +3,7 @@ import { HiBell, HiCheck, HiCheckCircle } from 'react-icons/hi2';
 import { useSocket } from '../../context/SocketContext';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { getNotifications, getUnreadCount, markNotificationAsRead, markAllNotificationsAsRead } from '../../features/notificationSlice';
+import { getNotifications, getUnreadCount, markNotificationAsRead, markAllNotificationsAsRead, deleteNotification } from '../../features/notificationSlice';
 import { NotificationSound } from '../../utils/notificationSound';
 
 interface Notification {
@@ -68,9 +68,9 @@ const NotificationBell: React.FC = () => {
     }
   };
 
-  const handleMarkAsRead = (notificationId: number) => {
-    dispatch(markNotificationAsRead(notificationId));
-    markAsRead(notificationId);
+  const handleNotificationClick = (notification: Notification) => {
+    // Delete notification from database
+    dispatch(deleteNotification(notification.id));
   };
 
   const handleMarkAllAsRead = () => {
@@ -161,7 +161,7 @@ const NotificationBell: React.FC = () => {
                   className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${
                     !notification.isRead ? 'bg-blue-50' : ''
                   }`}
-                  onClick={() => !notification.isRead && handleMarkAsRead(notification.id)}
+                  onClick={() => handleNotificationClick(notification)}
                 >
                   <div className="flex items-start gap-3">
                     <div className="text-2xl flex-shrink-0">

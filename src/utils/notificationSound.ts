@@ -11,37 +11,44 @@ export class NotificationSound {
     return this.audioContext;
   }
 
-  // Generate notification beep sound programmatically
+  // Generate doorbell notification sound programmatically
   private static generateBeepSound(): void {
     try {
       const audioContext = this.getAudioContext();
       
-      // Create oscillator for beep sound
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      
-      // Connect nodes
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-      
-      // Configure sound
-      oscillator.frequency.setValueAtTime(800, audioContext.currentTime); // 800Hz frequency
-      oscillator.type = 'sine';
-      
-      // Configure volume envelope
-      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.01);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-      
-      // Play sound
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 0.5);
+      // Create doorbell sound with two tones (ding-dong)
+      this.playDoorbellTone(audioContext, 800, 0, 0.3); // First tone (ding)
+      this.playDoorbellTone(audioContext, 600, 0.4, 0.4); // Second tone (dong)
       
     } catch (error) {
       console.warn('Could not play notification sound:', error);
       // Fallback to system beep
       this.fallbackBeep();
     }
+  }
+
+  // Play individual doorbell tone
+  private static playDoorbellTone(audioContext: AudioContext, frequency: number, startTime: number, duration: number): void {
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    // Connect nodes
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    // Configure sound
+    oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime + startTime);
+    oscillator.type = 'sine';
+    
+    // Configure volume envelope for doorbell effect
+    const currentTime = audioContext.currentTime + startTime;
+    gainNode.gain.setValueAtTime(0, currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.4, currentTime + 0.02);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, currentTime + duration);
+    
+    // Play sound
+    oscillator.start(currentTime);
+    oscillator.stop(currentTime + duration);
   }
 
   // Fallback beep using HTML5 Audio

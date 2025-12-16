@@ -19,6 +19,12 @@ const notificationService = {
     return response.data;
   },
 
+  // Delete notification
+  deleteNotification: async (notificationId) => {
+    const response = await axiosInstance.delete(`/notifications/${notificationId}`);
+    return response.data;
+  },
+
   // Mark all notifications as read
   markAllAsRead: async () => {
     const response = await axiosInstance.patch('/notifications/mark-all-read');
