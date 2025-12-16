@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { getTasks, updateTaskStatus, deleteTask } from '../../features/taskManagementSlice';
+import { getTasks, updateTask, deleteTask } from '../../features/taskManagementSlice';
 import PageMeta from '../../components/common/PageMeta';
 import {
   HiEye,
@@ -67,10 +67,10 @@ const TaskManagement: React.FC = () => {
 
   const handleStatusUpdate = async (taskId: number, newStatus: string) => {
     try {
-      await dispatch(updateTaskStatus({ taskId, status: newStatus }));
-      toast.success('Task status updated successfully');
-    } catch (error) {
-      toast.error('Failed to update task status');
+      const result = await dispatch(updateTask({ taskId, taskData: { status: newStatus } })).unwrap();
+      toast.success(result.message || 'Task updated successfully');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update task status');
     }
   };
 
@@ -105,7 +105,9 @@ const TaskManagement: React.FC = () => {
       case 'COMPLETED': return 'bg-green-100 text-green-800';
       case 'IN_PROGRESS': return 'bg-blue-100 text-blue-800';
       case 'PENDING': return 'bg-yellow-100 text-yellow-800';
+      case 'ON_HOLD': return 'bg-orange-100 text-orange-800';
       case 'CANCELLED': return 'bg-red-100 text-red-800';
+      case 'OVERDUE': return 'bg-red-200 text-red-900';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -128,11 +130,8 @@ const TaskManagement: React.FC = () => {
                   </div>
                   <div>
                     <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
-                      Task Manage
+                      Task Management
                     </h1>
-                    {/* <p className="text-slate-600">
-                      {isAdmin ? 'Manage and assign tasks to your team' : 'View your assigned tasks'}
-                    </p> */}
                   </div>
                 </div>
 
@@ -157,8 +156,10 @@ const TaskManagement: React.FC = () => {
                     <option value="">All Status</option>
                     <option value="PENDING">Pending</option>
                     <option value="IN_PROGRESS">In Progress</option>
+                    <option value="ON_HOLD">On Hold</option>
                     <option value="COMPLETED">Completed</option>
                     <option value="CANCELLED">Cancelled</option>
+                    <option value="OVERDUE">Overdue</option>
                   </select>
 
                   <select
@@ -214,11 +215,12 @@ const TaskManagement: React.FC = () => {
               {/* Desktop Table View */}
               <div className="hidden lg:block">
                 <div className="bg-gray-50 border-b border-gray-200 p-4">
-                  <div className="grid grid-cols-7 gap-3 text-sm font-semibold text-slate-700">
+                  <div className="grid grid-cols-8 gap-3 text-sm font-semibold text-slate-700">
                     <div className="flex items-center gap-2">
                       <MdTask className="w-4 h-4 text-slate-600" />
                       <span>Task</span>
                     </div>
+                    <div>Type</div>
                     <div>Assigned To</div>
                     <div>Assigned By</div>
                     <div>Priority</div>
@@ -233,12 +235,17 @@ const TaskManagement: React.FC = () => {
                 <div className="divide-y divide-gray-200">
                   {tasks.map((task: any) => (
                     <div key={task.id} className="p-4 hover:bg-gray-50">
-                      <div className="grid grid-cols-7 gap-3 items-center">
+                      <div className="grid grid-cols-8 gap-3 items-center">
                         <div>
                           <h3 className="font-semibold text-slate-900">{task.title}</h3>
                           {task.description && (
                             <p className="text-sm text-slate-600 mt-1 truncate">{task.description}</p>
                           )}
+                        </div>
+                        <div className="text-sm text-slate-700">
+                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {task.type?.replace('_', ' ')}
+                          </span>
                         </div>
                         <div className="text-sm text-slate-700">{task.assignee?.name}</div>
                         <div className="text-sm text-slate-700">{task.assigner?.name}</div>
@@ -257,6 +264,7 @@ const TaskManagement: React.FC = () => {
                             >
                               <option value="PENDING">Pending</option>
                               <option value="IN_PROGRESS">In Progress</option>
+                              <option value="ON_HOLD">On Hold</option>
                               <option value="COMPLETED">Completed</option>
                               <option value="CANCELLED">Cancelled</option>
                             </select>
@@ -324,6 +332,14 @@ const TaskManagement: React.FC = () => {
 
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
+                        <span className="font-medium text-slate-500 text-xs">Type:</span>
+                        <div>
+                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {task.type?.replace('_', ' ')}
+                          </span>
+                        </div>
+                      </div>
+                      <div>
                         <span className="font-medium text-slate-500 text-xs">Assigned To:</span>
                         <div className="text-slate-700">{task.assignee?.name}</div>
                       </div>
@@ -351,6 +367,7 @@ const TaskManagement: React.FC = () => {
                             >
                               <option value="PENDING">Pending</option>
                               <option value="IN_PROGRESS">In Progress</option>
+                              <option value="ON_HOLD">On Hold</option>
                               <option value="COMPLETED">Completed</option>
                               <option value="CANCELLED">Cancelled</option>
                             </select>

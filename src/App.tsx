@@ -11,6 +11,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { HelmetProvider } from 'react-helmet-async';
 import AntdConfig from './components/form/AntdConfig';
 import { AuthProvider } from './context/AuthContext';
+import { SocketProvider } from './context/SocketContext';
 import SEOHead from './components/common/SEOHead';
 
 import SignIn from './pages/AuthPages/SignIn';
@@ -81,6 +82,7 @@ import AddEditPurchaseOrderForm from './pages/PO/AddEditPurchaseOrderForm';
 import TaskManagement from './pages/task-management/TaskManagement';
 import AddEditTaskManagementForm from './pages/task-management/AddEditTaskManagementForm';
 import MyTasks from './pages/task-management/MyTasks';
+import Notifications from './pages/notifications/Notifications';
 
 function AppContent() {
   const location = useLocation();
@@ -207,6 +209,7 @@ function AppContent() {
           <Route path="/task-management/add-task" element={<AddEditTaskManagementForm />} />
           <Route path="/task-management/edit-task/:id" element={<AddEditTaskManagementForm />} />
           <Route path="/my-tasks" element={<MyTasks />} />
+          <Route path="/notifications" element={<Notifications />} />
 
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/blank" element={<Blank />} />
@@ -291,7 +294,8 @@ export default function App() {
     <HelmetProvider>
       <AntdConfig>
         <AuthProvider>
-          <Router>
+          <SocketProvider>
+            <Router>
             <SEOHead />
             <ScrollToTop />
             <ToastContainer
@@ -313,6 +317,7 @@ export default function App() {
             />
             <AppContent />
           </Router>
+          </SocketProvider>
         </AuthProvider>
       </AntdConfig>
     </HelmetProvider>

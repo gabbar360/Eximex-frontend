@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { createTask, updateTaskStatus, getTaskById, getStaffList } from '../../features/taskManagementSlice';
+import { createTask, updateTask, getTaskById, getStaffList } from '../../features/taskManagementSlice';
 import { useAuth } from '../../context/AuthContext';
 import {
   HiArrowLeft,
@@ -19,9 +19,11 @@ import { Formik } from 'formik';
 interface FormValues {
   title: string;
   description: string;
+  type: string;
   priority: string;
   dueDate: string;
   assignedTo: string;
+  slaHours: string;
 }
 
 const AddEditTaskManagementForm: React.FC = () => {
@@ -56,15 +58,18 @@ const AddEditTaskManagementForm: React.FC = () => {
       setTask({
         title: currentTask.title || '',
         description: currentTask.description || '',
+        type: currentTask.type || 'INTERNAL',
         priority: currentTask.priority || 'MEDIUM',
         dueDate: currentTask.dueDate ? new Date(currentTask.dueDate).toISOString().slice(0, 16) : '',
-        assignedTo: currentTask.assignedTo?.toString() || ''
+        assignedTo: currentTask.assignedTo?.toString() || '',
+        slaHours: currentTask.slaHours?.toString() || ''
       });
     }
   }, [currentTask, isEditMode]);
 
   const validationSchema = Yup.object({
     title: Yup.string().required('Task title is required'),
+    type: Yup.string().required('Task type is required'),
     assignedTo: Yup.string().required('Please select a staff member'),
     priority: Yup.string().required('Priority is required'),
   });
@@ -73,22 +78,32 @@ const AddEditTaskManagementForm: React.FC = () => {
     setSubmitting(true);
     try {
       if (isEditMode) {
-        // Update task status or details
-        await dispatch(updateTaskStatus({ 
+        // Update complete task
+        const result = await dispatch(updateTask({ 
           taskId: Number(id), 
-          status: 'IN_PROGRESS' // This would be dynamic based on form
+          taskData: {
+            title: values.title,
+            description: values.description,
+            type: values.type,
+            priority: values.priority,
+            dueDate: values.dueDate || null,
+            assignedTo: Number(values.assignedTo),
+            slaHours: values.slaHours ? Number(values.slaHours) : null
+          }
         })).unwrap();
-        toast.success('Task updated successfully');
+        toast.success(result.message || 'Task updated successfully');
       } else {
         // Create new task
-        await dispatch(createTask({
+        const result = await dispatch(createTask({
           title: values.title,
           description: values.description,
+          type: values.type,
           priority: values.priority,
           dueDate: values.dueDate || null,
-          assignedTo: Number(values.assignedTo)
+          assignedTo: Number(values.assignedTo),
+          slaHours: values.slaHours ? Number(values.slaHours) : null
         })).unwrap();
-        toast.success('Task assigned successfully');
+        toast.success(result.message || 'Task assigned successfully');
       }
       
       setTimeout(() => navigate('/task-management'), 1500);
@@ -144,9 +159,11 @@ const AddEditTaskManagementForm: React.FC = () => {
             initialValues={{
               title: task.title || '',
               description: task.description || '',
+              type: task.type || 'INTERNAL',
               priority: task.priority || 'MEDIUM',
               dueDate: task.dueDate || '',
               assignedTo: task.assignedTo || '',
+              slaHours: task.slaHours || '',
             }}
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
@@ -179,6 +196,31 @@ const AddEditTaskManagementForm: React.FC = () => {
                     />
                     {touched.title && errors.title && (
                       <div className="text-sm text-red-500 mt-1">{errors.title}</div>
+                    )}
+                  </div>
+
+                  {/* Task Type */}
+                  <div>
+                    <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
+                      <HiClipboardDocumentList className="w-4 h-4 mr-2 text-slate-600" />
+                      Task Type *
+                    </label>
+                    <select
+                      name="type"
+                      value={values.type}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
+                    >
+                      <option value="LEAD_FOLLOW_UP">Lead Follow Up</option>
+                      <option value="QUOTATION">Quotation</option>
+                      <option value="DOCUMENTATION">Documentation</option>
+                      <option value="SHIPMENT">Shipment</option>
+                      <option value="PAYMENT">Payment</option>
+                      <option value="INTERNAL">Internal</option>
+                    </select>
+                    {touched.type && errors.type && (
+                      <div className="text-sm text-red-500 mt-1">{errors.type}</div>
                     )}
                   </div>
 
@@ -240,6 +282,23 @@ const AddEditTaskManagementForm: React.FC = () => {
                       name="dueDate"
                       type="datetime-local"
                       value={values.dueDate}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
+                    />
+                  </div>
+
+                  {/* SLA Hours */}
+                  <div>
+                    <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
+                      <HiExclamationTriangle className="w-4 h-4 mr-2 text-slate-600" />
+                      SLA Hours
+                    </label>
+                    <input
+                      name="slaHours"
+                      type="number"
+                      placeholder="Enter SLA hours"
+                      value={values.slaHours}
                       onChange={handleChange}
                       onBlur={handleBlur}
                       className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"

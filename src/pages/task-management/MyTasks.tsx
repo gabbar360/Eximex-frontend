@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { getTasks, updateTaskStatus } from '../../features/taskManagementSlice';
+import { getTasks, updateTask } from '../../features/taskManagementSlice';
 import PageMeta from '../../components/common/PageMeta';
 import {
   HiMagnifyingGlass,
@@ -55,10 +55,10 @@ const MyTasks: React.FC = () => {
 
   const handleStatusUpdate = async (taskId: number, newStatus: string) => {
     try {
-      await dispatch(updateTaskStatus({ taskId, status: newStatus }));
-      toast.success('Task status updated successfully');
-    } catch (error) {
-      toast.error('Failed to update task status');
+      const result = await dispatch(updateTask({ taskId, taskData: { status: newStatus } })).unwrap();
+      toast.success(result.message || 'Task updated successfully');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update task status');
     }
   };
 
