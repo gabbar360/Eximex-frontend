@@ -87,7 +87,6 @@ export default function CompanySetupForm({
   // Populate form with editing company data
   useEffect(() => {
     if (editingCompany) {
-      console.log('Editing company data:', editingCompany); // Debug log
       setForm({
         name: editingCompany.name || '',
         logo: null,
@@ -201,30 +200,48 @@ export default function CompanySetupForm({
 
     try {
       if (isSuperAdmin) {
-        // SuperAdmin API call
-        const apiData = {
-          name: form.name,
-          email: form.email,
-          address: form.address,
-          phoneNo: form.phone_no,
-          gstNumber: form.gst_number,
-          iecNumber: form.iec_number,
-          defaultCurrency: form.default_currency,
-          bankName: form.bank_name,
-          accountNumber: form.account_number,
-          ifscCode: form.ifsc_code,
-          bankAddress: form.bank_address,
-          swiftCode: form.swift_code,
-        };
+        // SuperAdmin API call - use FormData for file uploads
+        const formData = new FormData();
+        
+        // Add text fields
+        formData.append('name', form.name);
+        formData.append('email', form.email);
+        formData.append('address', form.address);
+        formData.append('phoneNo', form.phone_no);
+        formData.append('gstNumber', form.gst_number);
+        formData.append('iecNumber', form.iec_number);
+        formData.append('defaultCurrency', form.default_currency);
+        formData.append('bankName', form.bank_name);
+        formData.append('accountNumber', form.account_number);
+        formData.append('ifscCode', form.ifsc_code);
+        formData.append('bankAddress', form.bank_address);
+        formData.append('swiftCode', form.swift_code);
+        
+        // Add files if selected
+        if (form.logo) {
+          formData.append('logo', form.logo);
+        }
+        if (form.signature) {
+          formData.append('signature', form.signature);
+        }
 
         if (editingCompany) {
           await axiosInstance.put(
             `/super-admin/companies/${editingCompany.id}`,
-            apiData
+            formData,
+            {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+              },
+            }
           );
           toast.success('Company updated successfully!');
         } else {
-          await axiosInstance.post('/super-admin/create-company', apiData);
+          await axiosInstance.post('/super-admin/create-company', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
           toast.success('Company created successfully!');
         }
 
