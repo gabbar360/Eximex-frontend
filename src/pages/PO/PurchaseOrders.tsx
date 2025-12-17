@@ -258,294 +258,163 @@ const PurchaseOrders: React.FC = () => {
               </p>
             </div>
           ) : (
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-visible">
-              {/* Desktop Table View */}
-              <div className="hidden lg:block">
-                {/* Table Header */}
-                <div className="bg-gray-50 border-b border-gray-200 p-4">
-                  <div
-                    className="grid gap-2 text-sm font-semibold text-slate-700"
-                    style={{
-                      gridTemplateColumns: '1.5fr 1.2fr 1fr 1fr 1fr 1fr 0.8fr',
-                    }}
-                  >
-                    <div className="flex items-center gap-2">
-                      <HiDocumentText className="w-4 h-4 text-slate-600" />
-                      <span>PO Number</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <HiBuildingOffice2 className="w-4 h-4 text-slate-600" />
-                      <span>Supplier</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <HiCalendar className="w-4 h-4 text-slate-600" />
-                      <span>Date</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <HiClock className="w-4 h-4 text-slate-600" />
-                      <span>Status</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <HiDocument className="w-4 h-4 text-slate-600" />
-                      <span>Type</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <HiCurrencyDollar className="w-4 h-4 text-slate-600" />
-                      <span>Amount</span>
-                    </div>
-                    <div className="flex items-center justify-end gap-2">
-                      <HiDocumentText className="w-4 h-4 text-slate-600" />
-                      <span>Actions</span>
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <div className="min-w-[800px]">
+                  {/* Table Header */}
+                  <div className="bg-gray-50 border-b border-gray-200 p-4">
+                    <div
+                      className="grid gap-2 text-sm font-semibold text-slate-700"
+                      style={{
+                        gridTemplateColumns: '1.5fr 1.2fr 1fr 1fr 1fr 1fr 0.8fr',
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <HiDocumentText className="w-4 h-4 text-slate-600" />
+                        <span>PO Number</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <HiBuildingOffice2 className="w-4 h-4 text-slate-600" />
+                        <span>Supplier</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <HiCalendar className="w-4 h-4 text-slate-600" />
+                        <span>Date</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <HiClock className="w-4 h-4 text-slate-600" />
+                        <span>Status</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <HiDocument className="w-4 h-4 text-slate-600" />
+                        <span>Type</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <HiCurrencyDollar className="w-4 h-4 text-slate-600" />
+                        <span>Amount</span>
+                      </div>
+                      <div className="flex items-center justify-end gap-2">
+                        <HiDocumentText className="w-4 h-4 text-slate-600" />
+                        <span>Actions</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="divide-y divide-white/20">
-                  {filteredPurchaseOrders.map((po: any) => {
-                    const statusConfig = getStatusConfig(po.status);
-                    const StatusIcon = statusConfig.icon;
+                  <div className="divide-y divide-white/20">
+                    {filteredPurchaseOrders.map((po: any) => {
+                      const statusConfig = getStatusConfig(po.status);
+                      const StatusIcon = statusConfig.icon;
 
-                    return (
-                      <div
-                        key={po.id}
-                        className="p-4 hover:bg-white/50 transition-all duration-300"
-                      >
+                      return (
                         <div
-                          className="grid gap-2 items-center"
-                          style={{
-                            gridTemplateColumns:
-                              '1.5fr 1.2fr 1fr 1fr 1fr 1fr 0.8fr',
-                          }}
+                          key={po.id}
+                          className="p-4 hover:bg-white/50 transition-all duration-300"
                         >
-                          {/* PO Number */}
-                          <div className="flex items-center gap-2">
-                            <HiDocumentText className="w-4 h-4 text-slate-600 flex-shrink-0" />
-                            <span
-                              className="text-slate-800 font-medium truncate"
-                              title={po.poNumber}
-                            >
-                              {po.poNumber}
-                            </span>
-                          </div>
-
-                          {/* Supplier */}
                           <div
-                            className="text-slate-700 text-sm truncate"
-                            title={po.vendorName}
+                            className="grid gap-2 items-center"
+                            style={{
+                              gridTemplateColumns:
+                                '1.5fr 1.2fr 1fr 1fr 1fr 1fr 0.8fr',
+                            }}
                           >
-                            {po.vendorName || '-'}
-                          </div>
+                            {/* PO Number */}
+                            <div className="flex items-center gap-2">
+                              <HiDocumentText className="w-4 h-4 text-slate-600 flex-shrink-0" />
+                              <span
+                                className="text-slate-800 font-medium truncate"
+                                title={po.poNumber}
+                              >
+                                {po.poNumber}
+                              </span>
+                            </div>
 
-                          {/* Date */}
-                          <div className="text-slate-700 text-sm">
-                            {po.poDate
-                              ? new Date(po.poDate).toLocaleDateString(
-                                  'en-US',
-                                  {
-                                    month: 'short',
-                                    day: 'numeric',
-                                    year: 'numeric',
-                                  }
-                                )
-                              : '-'}
-                          </div>
-
-                          {/* Status */}
-                          <div>
-                            <span
-                              className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${statusConfig.bg} ${statusConfig.color} ${statusConfig.border}`}
+                            {/* Supplier */}
+                            <div
+                              className="text-slate-700 text-sm truncate"
+                              title={po.vendorName}
                             >
-                              <StatusIcon className="w-3 h-3 mr-1" />
-                              {po.status?.charAt(0).toUpperCase() +
-                                po.status?.slice(1) || 'Draft'}
-                            </span>
-                          </div>
+                              {po.vendorName || '-'}
+                            </div>
 
-                          {/* Type */}
-                          <div className="text-slate-700 text-sm">
-                            <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
-                              DOMESTIC
-                            </span>
-                          </div>
+                            {/* Date */}
+                            <div className="text-slate-700 text-sm">
+                              {po.poDate
+                                ? new Date(po.poDate).toLocaleDateString(
+                                    'en-US',
+                                    {
+                                      month: 'short',
+                                      day: 'numeric',
+                                      year: 'numeric',
+                                    }
+                                  )
+                                : '-'}
+                            </div>
 
-                          {/* Amount */}
-                          <div className="text-slate-700 text-sm font-medium">
-                            {po.totalAmount && po.currency
-                              ? new Intl.NumberFormat('en-US', {
-                                  style: 'currency',
-                                  currency: po.currency,
-                                  maximumFractionDigits: 0,
-                                }).format(po.totalAmount)
-                              : '-'}
-                          </div>
+                            {/* Status */}
+                            <div>
+                              <span
+                                className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${statusConfig.bg} ${statusConfig.color} ${statusConfig.border}`}
+                              >
+                                <StatusIcon className="w-3 h-3 mr-1" />
+                                {po.status?.charAt(0).toUpperCase() +
+                                  po.status?.slice(1) || 'Draft'}
+                              </span>
+                            </div>
 
-                          {/* Actions */}
-                          <div className="flex items-center justify-end space-x-2">
-                            <button
-                              onClick={async () =>
-                                await handleDownload(po.id, po.poNumber)
-                              }
-                              disabled={downloadingPdf === po.id}
-                              className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-blue-600 transition-all duration-300"
-                              title="Download PDF"
-                            >
-                              {downloadingPdf === po.id ? (
-                                <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-300 border-t-blue-600"></div>
-                              ) : (
-                                <HiArrowDownTray className="w-4 h-4" />
-                              )}
-                            </button>
-                            <Link
-                              to={`/purchase-orders/edit/${po.id}`}
-                              className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-600 transition-all duration-300"
-                              title="Edit"
-                            >
-                              <HiPencil className="w-4 h-4" />
-                            </Link>
-                            <button
-                              onClick={() => setConfirmDelete(po.id)}
-                              className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
-                              title="Delete"
-                            >
-                              <HiTrash className="w-4 h-4" />
-                            </button>
+                            {/* Type */}
+                            <div className="text-slate-700 text-sm">
+                              <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
+                                DOMESTIC
+                              </span>
+                            </div>
+
+                            {/* Amount */}
+                            <div className="text-slate-700 text-sm font-medium">
+                              {po.totalAmount && po.currency
+                                ? new Intl.NumberFormat('en-US', {
+                                    style: 'currency',
+                                    currency: po.currency,
+                                    maximumFractionDigits: 0,
+                                  }).format(po.totalAmount)
+                                : '-'}
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex items-center justify-end space-x-2">
+                              <button
+                                onClick={async () =>
+                                  await handleDownload(po.id, po.poNumber)
+                                }
+                                disabled={downloadingPdf === po.id}
+                                className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-blue-600 transition-all duration-300"
+                                title="Download PDF"
+                              >
+                                {downloadingPdf === po.id ? (
+                                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-300 border-t-blue-600"></div>
+                                ) : (
+                                  <HiArrowDownTray className="w-4 h-4" />
+                                )}
+                              </button>
+                              <Link
+                                to={`/purchase-orders/edit/${po.id}`}
+                                className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-600 transition-all duration-300"
+                                title="Edit"
+                              >
+                                <HiPencil className="w-4 h-4" />
+                              </Link>
+                              <button
+                                onClick={() => setConfirmDelete(po.id)}
+                                className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
+                                title="Delete"
+                              >
+                                <HiTrash className="w-4 h-4" />
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-
-              {/* Mobile Card View */}
-              <div className="lg:hidden divide-y divide-white/20">
-                {filteredPurchaseOrders.map((po: any) => {
-                  const statusConfig = getStatusConfig(po.status);
-                  const StatusIcon = statusConfig.icon;
-
-                  return (
-                    <div key={po.id} className="p-4">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <HiDocumentText className="w-5 h-5 text-slate-600 flex-shrink-0" />
-                          <h3 className="font-semibold text-slate-800">
-                            {po.poNumber}
-                          </h3>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Link
-                            to={`/purchase-orders/edit/${po.id}`}
-                            className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-600 transition-all duration-300"
-                          >
-                            <HiPencil className="w-4 h-4" />
-                          </Link>
-                          <button
-                            onClick={() => setConfirmDelete(po.id)}
-                            className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
-                          >
-                            <HiTrash className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3 text-sm">
-                        <div>
-                          <span className="font-medium text-slate-500 text-xs">
-                            Supplier:
-                          </span>
-                          <div className="text-slate-700 truncate">
-                            {po.vendorName || '-'}
-                          </div>
-                        </div>
-                        <div>
-                          <span className="font-medium text-slate-500 text-xs">
-                            Date:
-                          </span>
-                          <div className="text-slate-700">
-                            {po.poDate
-                              ? new Date(po.poDate).toLocaleDateString(
-                                  'en-US',
-                                  {
-                                    month: 'short',
-                                    day: 'numeric',
-                                    year: 'numeric',
-                                  }
-                                )
-                              : '-'}
-                          </div>
-                        </div>
-                        <div>
-                          <span className="font-medium text-slate-500 text-xs">
-                            Status:
-                          </span>
-                          <div>
-                            <span
-                              className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${statusConfig.bg} ${statusConfig.color} ${statusConfig.border}`}
-                            >
-                              <StatusIcon className="w-3 h-3 mr-1" />
-                              {po.status?.charAt(0).toUpperCase() +
-                                po.status?.slice(1) || 'Draft'}
-                            </span>
-                          </div>
-                        </div>
-                        <div>
-                          <span className="font-medium text-slate-500 text-xs">
-                            Type:
-                          </span>
-                          <div className="text-slate-700">
-                            <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
-                              DOMESTIC
-                            </span>
-                          </div>
-                        </div>
-                        <div className="col-span-2">
-                          <span className="font-medium text-slate-500 text-xs">
-                            Amount:
-                          </span>
-                          <div className="text-slate-700 font-medium">
-                            {po.totalAmount && po.currency
-                              ? new Intl.NumberFormat('en-US', {
-                                  style: 'currency',
-                                  currency: po.currency,
-                                  maximumFractionDigits: 0,
-                                }).format(po.totalAmount)
-                              : '-'}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-center space-x-2 pt-3 mt-3 border-t border-gray-200">
-                        <button
-                          onClick={async () =>
-                            await handleDownload(po.id, po.poNumber)
-                          }
-                          disabled={downloadingPdf === po.id}
-                          className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-blue-600 transition-all duration-300"
-                          title="Download PDF"
-                        >
-                          {downloadingPdf === po.id ? (
-                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-300 border-t-blue-600"></div>
-                          ) : (
-                            <HiArrowDownTray className="w-4 h-4" />
-                          )}
-                        </button>
-                        <Link
-                          to={`/purchase-orders/edit/${po.id}`}
-                          className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-600 transition-all duration-300"
-                          title="Edit"
-                        >
-                          <HiPencil className="w-4 h-4" />
-                        </Link>
-                        <button
-                          onClick={() => setConfirmDelete(po.id)}
-                          className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
-                          title="Delete"
-                        >
-                          <HiTrash className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
               </div>
             </div>
           )}

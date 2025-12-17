@@ -385,154 +385,58 @@ const Category: React.FC = () => {
                 </div>
               </div>
 
-              {/* Mobile Card View */}
-              <div className="lg:hidden divide-y divide-white/20">
-                {categories.map((category: any) => (
-                  <div key={category.id} className="p-4">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <BiCategory className="w-5 h-5 text-slate-600 flex-shrink-0" />
-                        <h3 className="font-semibold text-slate-800">
-                          {category.name}
-                        </h3>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Link
-                          to={`/edit-category/${category.id}`}
-                          className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-600 transition-all duration-300"
-                        >
-                          <HiPencil className="w-4 h-4" />
-                        </Link>
-                        <button
-                          onClick={() => handleDeleteClick(category.id)}
-                          className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
-                        >
-                          <HiTrash className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div>
-                        <span className="font-medium text-slate-500 text-xs">
-                          HSN Code:
-                        </span>
-                        <div className="text-slate-700">
-                          {category.useParentHsnCode ? (
-                            <span className="italic text-slate-500">
-                              (Parent's HSN)
-                            </span>
-                          ) : (
-                            category.hsn_code || category.hsnCode || '-'
-                          )}
+              {/* Tablet/Mobile Table View with Horizontal Scroll */}
+              <div className="lg:hidden">
+                <div className="overflow-x-auto">
+                  <div className="min-w-[800px]">
+                    {/* Table Header */}
+                    <div className="bg-gray-50 border-b border-gray-200 p-4">
+                      <div className="grid grid-cols-7 gap-3 text-sm font-semibold text-slate-700">
+                        <div className="flex items-center gap-2">
+                          <MdCategory className="w-4 h-4 text-slate-600" />
+                          <span>Name</span>
                         </div>
-                      </div>
-                      <div>
-                        <span className="font-medium text-slate-500 text-xs">
-                          Primary Unit:
-                        </span>
-                        <div className="text-slate-700">
-                          {category.primary_unit || category.primaryUnit || '-'}
+                        <div className="flex items-center gap-2">
+                          <FaBarcode className="w-4 h-4 text-slate-600" />
+                          <span>HSN Code</span>
                         </div>
-                      </div>
-                      <div>
-                        <span className="font-medium text-slate-500 text-xs">
-                          Secondary Unit:
-                        </span>
-                        <div className="text-slate-700">
-                          {category.secondary_unit ||
-                            category.secondaryUnit ||
-                            '-'}
+                        <div className="flex items-center gap-2">
+                          <MdDescription className="w-4 h-4 text-slate-600" />
+                          <span>Description</span>
                         </div>
-                      </div>
-                      <div>
-                        <span className="font-medium text-slate-500 text-xs">
-                          Subcategories:
-                        </span>
-                        <div className="text-slate-700">
-                          {category.subcategories?.length > 0 ? (
-                            <button
-                              onClick={() => toggleExpand(category.id)}
-                              className="text-slate-600 hover:text-slate-800 font-medium"
-                            >
-                              {category.subcategories.length}{' '}
-                              {expandedCategories.includes(category.id)
-                                ? '▼'
-                                : '►'}
-                            </button>
-                          ) : (
-                            'None'
-                          )}
+                        <div className="flex items-center gap-2">
+                          <FaCubes className="w-4 h-4 text-slate-600" />
+                          <span>Primary Unit</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <BiPackage className="w-4 h-4 text-slate-600" />
+                          <span>Secondary Unit</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <FaLayerGroup className="w-4 h-4 text-slate-600" />
+                          <span>Subcategories</span>
+                        </div>
+                        <div className="flex items-center justify-end gap-2">
+                          <HiSparkles className="w-4 h-4 text-slate-600" />
+                          <span>Actions</span>
                         </div>
                       </div>
                     </div>
-
-                    {(category.description || category.desc) && (
-                      <div className="mt-3 pt-3 border-t border-white/20">
-                        <span className="font-medium text-slate-500 text-xs">
-                          Description:
-                        </span>
-                        <div className="text-slate-700 text-sm mt-1">
-                          {category.description || category.desc}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Mobile Subcategories */}
-                    {expandedCategories.includes(category.id) &&
-                      category.subcategories?.map((subcategory: any) => (
-                        <div
-                          key={subcategory.id}
-                          className="mt-3 ml-6 p-3 bg-gray-50 rounded-lg border border-gray-200"
-                        >
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <BiCategory className="w-4 h-4 text-slate-500 flex-shrink-0" />
-                              <span className="font-medium text-slate-700">
-                                ↳ {subcategory.name}
-                              </span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <Link
-                                to={`/edit-category/${subcategory.id}`}
-                                className="p-1.5 rounded text-slate-500 hover:text-emerald-600"
-                              >
-                                <HiPencil className="w-3 h-3" />
-                              </Link>
-                              <button
-                                onClick={() =>
-                                  handleDeleteClick(subcategory.id)
-                                }
-                                className="p-1.5 rounded text-slate-500 hover:text-red-600"
-                              >
-                                <HiTrash className="w-3 h-3" />
-                              </button>
-                            </div>
-                          </div>
-                          <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div>
-                              <span className="text-slate-500">HSN:</span>
-                              <span className="ml-1 text-slate-700">
-                                {subcategory.useParentHsnCode
-                                  ? '(Parent)'
-                                  : subcategory.hsn_code ||
-                                    subcategory.hsnCode ||
-                                    '-'}
-                              </span>
-                            </div>
-                            <div>
-                              <span className="text-slate-500">Desc:</span>
-                              <span className="ml-1 text-slate-700">
-                                {subcategory.description ||
-                                  subcategory.desc ||
-                                  '-'}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
+                    <div className="divide-y divide-white/20">
+                      {categories.map((category: any) => (
+                        <CategoryRow
+                          key={category.id}
+                          category={category}
+                          level={0}
+                          expandedCategories={expandedCategories}
+                          toggleExpand={toggleExpand}
+                          handleDeleteClick={handleDeleteClick}
+                          searchTerm={searchTerm}
+                        />
                       ))}
+                    </div>
                   </div>
-                ))}
+                </div>
               </div>
             </div>
           )}
