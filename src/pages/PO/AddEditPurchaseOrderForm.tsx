@@ -1,10 +1,10 @@
 import { useDispatch, useSelector } from 'react-redux';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import { toast } from 'react-toastify';
-import { HiArrowLeft, HiCheckCircle } from 'react-icons/hi2';
+import { HiArrowLeft, HiCheckCircle, HiChevronDown, HiMagnifyingGlass } from 'react-icons/hi2';
 import {
   getPurchaseOrderById,
   updatePurchaseOrder,
@@ -16,7 +16,6 @@ import { getAllParties } from '../../features/partySlice';
 import { fetchCategories } from '../../features/categorySlice';
 
 import DatePicker from '../../components/form/DatePicker';
-import SearchableDropdown from '../../components/SearchableDropdown';
 
 interface PoItem {
   key?: string;
@@ -92,13 +91,131 @@ const AddEditPurchaseOrderForm: React.FC = () => {
   const [selectedSubcategory, setSelectedSubcategory] = useState('');
   const [selectedProduct, setSelectedProduct] = useState('');
   const [selectedUnit, setSelectedUnit] = useState('');
-  const [quantityMethod, setQuantityMethod] = useState('By Quantity');
+
   const [newItemQuantity, setNewItemQuantity] = useState('');
   const [newItemRate, setNewItemRate] = useState('');
   const [editingItemKey, setEditingItemKey] = useState<string | null>(null);
 
+  // Dropdown states
+  const [vendorSearch, setVendorSearch] = useState('');
+  const [showVendorDropdown, setShowVendorDropdown] = useState(false);
+  const [currencySearch, setCurrencySearch] = useState('');
+  const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
+  const [categorySearch, setCategorySearch] = useState('');
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [subcategorySearch, setSubcategorySearch] = useState('');
+  const [showSubcategoryDropdown, setShowSubcategoryDropdown] = useState(false);
+  const [productSearch, setProductSearch] = useState('');
+  const [showProductDropdown, setShowProductDropdown] = useState(false);
+  const [unitSearch, setUnitSearch] = useState('');
+  const [showUnitDropdown, setShowUnitDropdown] = useState(false);
+
+  // Refs for dropdowns
+  const vendorRef = useRef(null);
+  const currencyRef = useRef(null);
+  const categoryRef = useRef(null);
+  const subcategoryRef = useRef(null);
+  const productRef = useRef(null);
+  const unitRef = useRef(null);
+
+  // Custom Dropdown Component (same as ProformaInvoice)
+  const SearchableDropdown = ({
+    label,
+    value,
+    options,
+    onSelect,
+    searchValue,
+    onSearchChange,
+    isOpen,
+    onToggle,
+    placeholder,
+    disabled = false,
+    dropdownRef,
+    displayKey = 'name',
+    valueKey = 'id',
+    className = '',
+    style = {},
+  }) => {
+    const selectedOption = options.find((opt) => opt[valueKey]?.toString() === value?.toString());
+
+    return (
+      <div className="relative" ref={dropdownRef}>
+        <div
+          className={`w-full px-4 py-3 border border-gray-300 bg-white rounded-lg cursor-pointer flex items-center justify-between transition-all duration-300 shadow-sm ${className} ${
+            disabled
+              ? 'bg-gray-100 cursor-not-allowed'
+              : 'hover:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200 focus-within:border-slate-500'
+          }`}
+          onClick={() => !disabled && onToggle()}
+          style={style}
+        >
+          <span
+            className={`text-sm ${selectedOption ? 'text-slate-900' : 'text-slate-500'}`}
+          >
+            {selectedOption ? selectedOption[displayKey] : placeholder}
+          </span>
+          <HiChevronDown
+            className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          />
+        </div>
+
+        {isOpen && !disabled && (
+          <div
+            className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl"
+            style={{ top: '100%', marginTop: '4px' }}
+          >
+            <div className="p-3 border-b border-gray-100">
+              <div className="relative">
+                <HiMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder={`Search ${label.toLowerCase()}...`}
+                  value={searchValue}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                  onClick={(e) => e.stopPropagation()}
+                  autoFocus
+                />
+              </div>
+            </div>
+            <div className="max-h-60 overflow-y-auto">
+              {options.length === 0 ? (
+                <div className="px-4 py-3 text-slate-500 text-sm text-center">
+                  No {label.toLowerCase()} found
+                </div>
+              ) : (
+                options.map((option) => (
+                  <div
+                    key={option[valueKey]}
+                    className={`px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm transition-colors duration-150 ${
+                      option[valueKey]?.toString() === value?.toString()
+                        ? 'bg-slate-100 text-slate-900 font-medium'
+                        : 'text-slate-700'
+                    }`}
+                    onClick={() => {
+                      onSelect(option[valueKey]);
+                      onToggle();
+                    }}
+                  >
+                    {option[displayKey]}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+
+
   // Redux state for categories
   const { categories } = useSelector((state: any) => state.category);
+
+
+
+
 
   const validationSchema = Yup.object().shape({
     poDate: Yup.date().required('PO date is required'),
@@ -305,7 +422,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
     setSelectedSubcategory('');
     setSelectedProduct('');
     setSelectedUnit('');
-    setQuantityMethod('By Quantity');
+
     setNewItemQuantity('');
     setNewItemRate('');
   };
@@ -477,7 +594,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
 
         {/* Form Container */}
         <div className="bg-white rounded-xl shadow-xl border border-slate-200">
-          <div className="p-8">
+          <div className="p-4 lg:p-8">
             <Formik
               initialValues={getInitialValues()}
               enableReinitialize={true}
@@ -486,64 +603,70 @@ const AddEditPurchaseOrderForm: React.FC = () => {
             >
               {({ values, errors, touched, setFieldValue, isSubmitting }) => {
                 return (
-                  <Form className="space-y-6">
+                  <Form className="space-y-4 lg:space-y-6">
                     {/* Vendor Information */}
-                    <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
-                      <h3 className="text-xl font-semibold text-slate-700 mb-6">
+                    <div className="bg-slate-50 p-4 lg:p-6 rounded-lg border border-slate-200">
+                      <h3 className="text-lg lg:text-xl font-semibold text-slate-700 mb-4 lg:mb-6">
                         Vendor Information
                       </h3>
                       <div className="space-y-4">
-                        <div>
-                          <label className="mb-2 block text-sm font-medium text-gray-700">
-                            Select Vendor{' '}
-                            <span className="text-red-500">*</span>
-                          </label>
-                          <select
-                            value={selectedVendor?.id || ''}
-                            onChange={(e) => {
-                              const vendorId = e.target.value;
-                              const vendor = vendors.find(
-                                (v) =>
-                                  v.id === parseInt(vendorId) &&
-                                  v.role === 'Supplier'
-                              );
-                              setSelectedVendor(vendor || null);
-
-                              if (vendor) {
-                                setFieldValue(
-                                  'supplierName',
-                                  vendor.companyName
-                                );
-                                setFieldValue(
-                                  'supplierAddress',
-                                  vendor.address
-                                );
-                                setFieldValue(
-                                  'supplierGstNumber',
-                                  vendor.gstNumber
-                                );
-                              } else {
-                                setFieldValue('supplierName', '');
-                                setFieldValue('supplierAddress', '');
-                                setFieldValue('supplierGstNumber', '');
-                              }
-                            }}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
-                          >
-                            <option value="">Choose Vendor</option>
-                            {vendors
-                              .filter((v) => v.role === 'Supplier')
-                              .map((vendor) => (
-                                <option key={vendor.id} value={vendor.id}>
-                                  {vendor.companyName} -{' '}
-                                  {vendor.contactPerson || 'No Contact'}
-                                </option>
-                              ))}
-                          </select>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                           <div>
-                            <label className="mb-2 block text-sm font-medium text-gray-700">
+                            <label className="block text-sm font-semibold text-slate-700 mb-3">
+                              Select Vendor{' '}
+                              <span className="text-red-500">*</span>
+                            </label>
+                            <SearchableDropdown
+                              label=""
+                              value={selectedVendor?.id?.toString() || ''}
+                              options={vendors
+                                .filter((v) => v.role === 'Supplier')
+                                .filter(vendor => {
+                                  const searchText = `${vendor.companyName || ''} - ${vendor.contactPerson || 'No Contact'}`;
+                                  return searchText.toLowerCase().includes((vendorSearch || '').toLowerCase());
+                                })
+                                .map(vendor => ({
+                                  id: vendor.id.toString(),
+                                  name: `${vendor.companyName || ''} - ${vendor.contactPerson || 'No Contact'}`
+                                }))}
+                              onSelect={(value) => {
+                                const vendor = vendors.find(
+                                  (v) =>
+                                    v.id.toString() === value &&
+                                    v.role === 'Supplier'
+                                );
+                                setSelectedVendor(vendor || null);
+                                setVendorSearch('');
+
+                                if (vendor) {
+                                  setFieldValue(
+                                    'supplierName',
+                                    vendor.companyName
+                                  );
+                                  setFieldValue(
+                                    'supplierAddress',
+                                    vendor.address
+                                  );
+                                  setFieldValue(
+                                    'supplierGstNumber',
+                                    vendor.gstNumber
+                                  );
+                                } else {
+                                  setFieldValue('supplierName', '');
+                                  setFieldValue('supplierAddress', '');
+                                  setFieldValue('supplierGstNumber', '');
+                                }
+                              }}
+                              searchValue={vendorSearch}
+                              onSearchChange={setVendorSearch}
+                              isOpen={showVendorDropdown}
+                              onToggle={() => setShowVendorDropdown(!showVendorDropdown)}
+                              placeholder="Choose Vendor"
+                              dropdownRef={vendorRef}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-3">
                               Company Name{' '}
                               <span className="text-red-500">*</span>
                             </label>
@@ -551,7 +674,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                               type="text"
                               name="supplierName"
                               placeholder="Company Name"
-                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
+                              className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                             />
                             {touched.supplierName && errors.supplierName && (
                               <div className="mt-1 text-sm text-red-600">
@@ -559,56 +682,67 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                               </div>
                             )}
                           </div>
+                        </div>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                           <div>
-                            <label className="mb-2 block text-sm font-medium text-gray-700">
+                            <label className="block text-sm font-semibold text-slate-700 mb-3">
                               GSTIN
                             </label>
                             <Field
                               type="text"
                               name="supplierGstNumber"
                               placeholder="GSTIN"
-                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
+                              className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                             />
                           </div>
-                        </div>
-                        <div>
-                          <label className="mb-2 block text-sm font-medium text-gray-700">
-                            Address
-                          </label>
-                          <Field
-                            as="textarea"
-                            name="supplierAddress"
-                            rows={3}
-                            placeholder="Address"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
-                          />
+                          <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-3">
+                              Address
+                            </label>
+                            <Field
+                              type="text"
+                              name="supplierAddress"
+                              placeholder="Address"
+                              className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
 
                     {/* Currency and Tax Settings */}
-                    <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
-                      <h3 className="text-xl font-semibold text-slate-700 mb-6">
+                    <div className="bg-slate-50 p-4 lg:p-6 rounded-lg border border-slate-200">
+                      <h3 className="text-lg lg:text-xl font-semibold text-slate-700 mb-4 lg:mb-6">
                         Currency & Tax Settings
                       </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-4 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-4">
                         <div>
-                          <label className="mb-2 block text-sm font-medium text-gray-700">
+                          <label className="block text-sm font-semibold text-slate-700 mb-3">
                             Currency
                           </label>
-                          <select
+                          <SearchableDropdown
+                            label=""
                             value={currency}
-                            onChange={(e) => setCurrency(e.target.value)}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
-                          >
-                            <option value="INR">INR (₹)</option>
-                            <option value="USD">USD ($)</option>
-                            <option value="EUR">EUR (€)</option>
-                            <option value="GBP">GBP (£)</option>
-                          </select>
+                            options={[
+                              { id: 'INR', name: 'INR (₹)' },
+                              { id: 'USD', name: 'USD ($)' },
+                              { id: 'EUR', name: 'EUR (€)' },
+                              { id: 'GBP', name: 'GBP (£)' }
+                            ].filter(curr => (curr.name || '').toLowerCase().includes((currencySearch || '').toLowerCase()))}
+                            onSelect={(value) => {
+                              setCurrency(value);
+                              setCurrencySearch('');
+                            }}
+                            searchValue={currencySearch}
+                            onSearchChange={setCurrencySearch}
+                            isOpen={showCurrencyDropdown}
+                            onToggle={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
+                            placeholder="Select Currency"
+                            dropdownRef={currencyRef}
+                          />
                         </div>
                         <div>
-                          <label className="mb-2 block text-sm font-medium text-gray-700">
+                          <label className="block text-sm font-semibold text-slate-700 mb-3">
                             CGST %
                           </label>
                           <input
@@ -621,11 +755,11 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                               setCgstRate(Number(e.target.value) || 0)
                             }
                             placeholder="Enter CGST %"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
+                            className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                           />
                         </div>
                         <div>
-                          <label className="mb-2 block text-sm font-medium text-gray-700">
+                          <label className="block text-sm font-semibold text-slate-700 mb-3">
                             SGST %
                           </label>
                           <input
@@ -638,7 +772,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                               setSgstRate(Number(e.target.value) || 0)
                             }
                             placeholder="Enter SGST %"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
+                            className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                           />
                         </div>
                       </div>
@@ -646,167 +780,198 @@ const AddEditPurchaseOrderForm: React.FC = () => {
 
                     {/* Purchase Order Details */}
                     <div className="rounded-lg border border-gray-200 bg-gray-50/50 p-4 dark:border-gray-700 dark:bg-gray-800/50">
-                      <h4 className="text-base font-medium text-gray-800 dark:text-gray-200 mb-4">
+                      <h4 className="text-sm lg:text-base font-medium text-gray-800 dark:text-gray-200 mb-4">
                         Purchase Order Details
                       </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div>
-                          <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            PO Number
-                          </label>
-                          <Field
-                            type="text"
-                            name="poNumber"
-                            placeholder="PO Number"
-                            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                          />
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                          <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                              PO Number
+                            </label>
+                            <Field
+                              type="text"
+                              name="poNumber"
+                              placeholder="PO Number"
+                              className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                              PO Date <span className="text-red-500">*</span>
+                            </label>
+                            <DatePicker
+                              value={values.poDate}
+                              onChange={(value) => setFieldValue('poDate', value)}
+                              placeholder="Select PO date"
+                            />
+                            {touched.poDate && errors.poDate && (
+                              <div className="mt-1 text-sm text-red-600">
+                                {errors.poDate}
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                              Delivery Date
+                            </label>
+                            <DatePicker
+                              value={values.deliveryDate}
+                              onChange={(value) =>
+                                setFieldValue('deliveryDate', value)
+                              }
+                              placeholder="Select delivery date"
+                            />
+                          </div>
                         </div>
-                        <div>
-                          <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            PO Date <span className="text-red-500">*</span>
-                          </label>
-                          <DatePicker
-                            value={values.poDate}
-                            onChange={(value) => setFieldValue('poDate', value)}
-                            placeholder="Select PO date"
-                          />
-                          {touched.poDate && errors.poDate && (
-                            <div className="mt-1 text-sm text-red-600">
-                              {errors.poDate}
-                            </div>
-                          )}
-                        </div>
-                        <div>
-                          <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Delivery Date
-                          </label>
-                          <DatePicker
-                            value={values.deliveryDate}
-                            onChange={(value) =>
-                              setFieldValue('deliveryDate', value)
-                            }
-                            placeholder="Select delivery date"
-                          />
-                        </div>
-                        <div>
-                          <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Reference Number
-                          </label>
-                          <Field
-                            type="text"
-                            name="refNumber"
-                            placeholder="Reference Number"
-                            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                          />
-                        </div>
-                        <div>
-                          <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Place of Supply
-                          </label>
-                          <Field
-                            type="text"
-                            name="placeOfSupply"
-                            placeholder="Place of Supply"
-                            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                          />
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                          <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                              Reference Number
+                            </label>
+                            <Field
+                              type="text"
+                              name="refNumber"
+                              placeholder="Reference Number"
+                              className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                              Place of Supply
+                            </label>
+                            <Field
+                              type="text"
+                              name="placeOfSupply"
+                              placeholder="Place of Supply"
+                              className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                              Delivery Address
+                            </label>
+                            <Field
+                              type="text"
+                              name="deliverToAddress"
+                              placeholder="Delivery Address"
+                              className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
 
-                    {/* Deliver To Section */}
-                    <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
-                      <h3 className="text-xl font-semibold text-slate-700 mb-6">
-                        Deliver To
-                      </h3>
-                      <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-700">
-                          Delivery Address
-                        </label>
-                        <Field
-                          as="textarea"
-                          name="deliverToAddress"
-                          rows={4}
-                          placeholder="Enter complete delivery address."
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
-                        />
-                      </div>
-                    </div>
+
 
                     {/* Product Addition Section */}
-                    <div className="bg-white rounded-lg border border-gray-200 p-6 dark:border-gray-700 dark:bg-gray-800">
-                      <h4 className="text-base font-medium text-gray-800 dark:text-gray-200 mb-4">
+                    <div className="bg-white rounded-lg border border-gray-200 p-4 lg:p-6 dark:border-gray-700 dark:bg-gray-800">
+                      <h4 className="text-sm lg:text-base font-medium text-gray-800 dark:text-gray-200 mb-4">
                         Add Product
                       </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="space-y-4 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-4 mb-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Category <span className="text-red-500">*</span>
                           </label>
-                          <select
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
+                          <SearchableDropdown
+                            label=""
                             value={selectedCategory}
-                            onChange={(e) => {
-                              setSelectedCategory(e.target.value);
+                            options={Array.isArray(categories) ? 
+                              categories
+                                .filter(cat => (cat.name || '').toLowerCase().includes((categorySearch || '').toLowerCase()))
+                                .map(cat => ({ id: cat.id.toString(), name: cat.name || '' }))
+                              : []}
+                            onSelect={(value) => {
+                              setSelectedCategory(value);
                               setSelectedSubcategory('');
                               setSelectedProduct('');
                               setSelectedUnit('');
+                              setCategorySearch('');
                             }}
-                          >
-                            <option value="">Select Category</option>
-                            {Array.isArray(categories) &&
-                              categories.map((cat) => (
-                                <option key={cat.id} value={cat.id}>
-                                  {cat.name}
-                                </option>
-                              ))}
-                          </select>
+                            searchValue={categorySearch}
+                            onSearchChange={setCategorySearch}
+                            isOpen={showCategoryDropdown}
+                            onToggle={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                            placeholder="Select Category"
+                            dropdownRef={categoryRef}
+                          />
                         </div>
 
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Subcategory
                           </label>
-                          <select
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
+                          <SearchableDropdown
+                            label=""
                             value={selectedSubcategory}
-                            onChange={(e) => {
-                              setSelectedSubcategory(e.target.value);
-                              setSelectedProduct('');
-                              setSelectedUnit('');
-                            }}
-                            disabled={!selectedCategory}
-                          >
-                            <option value="">Select Subcategory</option>
-                            {selectedCategory &&
+                            options={selectedCategory ? 
                               (() => {
                                 const category = categories.find(
                                   (c) => c.id.toString() === selectedCategory
                                 );
-                                return category?.subcategories?.map(
-                                  (subcat) => (
-                                    <option key={subcat.id} value={subcat.id}>
-                                      {subcat.name}
-                                    </option>
-                                  )
+                                return (
+                                  category?.subcategories
+                                    ?.filter(subcat => (subcat.name || '').toLowerCase().includes((subcategorySearch || '').toLowerCase()))
+                                    ?.map(subcat => ({ id: subcat.id.toString(), name: subcat.name || '' })) || []
                                 );
-                              })()}
-                          </select>
+                              })()
+                              : []}
+                            onSelect={(value) => {
+                              setSelectedSubcategory(value);
+                              setSelectedProduct('');
+                              setSelectedUnit('');
+                              setSubcategorySearch('');
+                            }}
+                            searchValue={subcategorySearch}
+                            onSearchChange={setSubcategorySearch}
+                            isOpen={showSubcategoryDropdown}
+                            onToggle={() => setShowSubcategoryDropdown(!showSubcategoryDropdown)}
+                            placeholder="Select Subcategory"
+                            dropdownRef={subcategoryRef}
+                            disabled={!selectedCategory}
+                          />
                         </div>
 
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Product <span className="text-red-500">*</span>
                           </label>
-                          <select
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
+                          <SearchableDropdown
+                            label=""
                             value={selectedProduct}
-                            onChange={(e) => {
-                              setSelectedProduct(e.target.value);
+                            options={products
+                              .filter((product) => {
+                                const categoryMatch =
+                                  !selectedCategory ||
+                                  product.categoryId?.toString() ===
+                                    selectedCategory ||
+                                  product.category?.id?.toString() ===
+                                    selectedCategory;
+                                const subcategoryMatch =
+                                  !selectedSubcategory ||
+                                  product.subcategoryId?.toString() ===
+                                    selectedSubcategory ||
+                                  product.subCategory?.id?.toString() ===
+                                    selectedSubcategory;
+                                return categoryMatch && subcategoryMatch;
+                              })
+                              .filter(product => {
+                                const productName = product.name || product.productName || `Product ${product.id}`;
+                                return (productName || '').toLowerCase().includes((productSearch || '').toLowerCase());
+                              })
+                              .map(product => ({
+                                id: product.id.toString(),
+                                name: product.name || product.productName || `Product ${product.id}`
+                              }))}
+                            onSelect={(value) => {
+                              setSelectedProduct(value);
                               setSelectedUnit('');
+                              setProductSearch('');
 
-                              if (e.target.value) {
+                              if (value) {
                                 const product = products.find(
-                                  (p) => p.id.toString() === e.target.value
+                                  (p) => p.id.toString() === value
                                 );
                                 if (
                                   product &&
@@ -824,53 +989,26 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                                 }
                               }
                             }}
+                            searchValue={productSearch}
+                            onSearchChange={setProductSearch}
+                            isOpen={showProductDropdown}
+                            onToggle={() => setShowProductDropdown(!showProductDropdown)}
+                            placeholder="Choose product"
+                            dropdownRef={productRef}
                             disabled={!selectedCategory}
-                          >
-                            <option value="">Choose product</option>
-                            {(() => {
-                              const filteredProducts = products.filter(
-                                (product) => {
-                                  const categoryMatch =
-                                    !selectedCategory ||
-                                    product.categoryId?.toString() ===
-                                      selectedCategory ||
-                                    product.category?.id?.toString() ===
-                                      selectedCategory;
-                                  const subcategoryMatch =
-                                    !selectedSubcategory ||
-                                    product.subcategoryId?.toString() ===
-                                      selectedSubcategory ||
-                                    product.subCategory?.id?.toString() ===
-                                      selectedSubcategory;
-                                  return categoryMatch && subcategoryMatch;
-                                }
-                              );
-
-                              return filteredProducts.map((product) => (
-                                <option key={product.id} value={product.id}>
-                                  {product.name ||
-                                    product.productName ||
-                                    `Product ${product.id}`}
-                                </option>
-                              ));
-                            })()}
-                          </select>
+                          />
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Unit <span className="text-red-500">*</span>
                           </label>
-                          <select
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
+                          <SearchableDropdown
+                            label=""
                             value={selectedUnit}
-                            onChange={(e) => setSelectedUnit(e.target.value)}
-                            disabled={!selectedCategory}
-                          >
-                            <option value="">Choose unit</option>
-                            {(() => {
+                            options={(() => {
                               const category = categories.find(
                                 (c) => c.id.toString() === selectedCategory
                               );
@@ -881,14 +1019,10 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                               if (packagingHierarchy.length > 0) {
                                 packagingHierarchy.forEach(
                                   (level, levelIdx) => {
-                                    availableUnits.push(
-                                      <option
-                                        key={`from-${levelIdx}`}
-                                        value={level.from}
-                                      >
-                                        {level.from}
-                                      </option>
-                                    );
+                                    availableUnits.push({
+                                      id: level.from,
+                                      name: level.from,
+                                    });
                                   }
                                 );
 
@@ -897,14 +1031,10 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                                     packagingHierarchy.length - 1
                                   ];
                                 if (lastLevel?.to) {
-                                  availableUnits.push(
-                                    <option
-                                      key={`to-final`}
-                                      value={lastLevel.to}
-                                    >
-                                      {lastLevel.to}
-                                    </option>
-                                  );
+                                  availableUnits.push({
+                                    id: lastLevel.to,
+                                    name: lastLevel.to,
+                                  });
                                 }
                               } else {
                                 const subcategory =
@@ -934,54 +1064,30 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                                 }
 
                                 Array.from(unitSet).forEach((unit) => {
-                                  availableUnits.push(
-                                    <option key={unit} value={unit}>
-                                      {unit.charAt(0).toUpperCase() +
-                                        unit.slice(1)}
-                                    </option>
-                                  );
+                                  availableUnits.push({
+                                    id: unit,
+                                    name: unit.charAt(0).toUpperCase() + unit.slice(1),
+                                  });
                                 });
                               }
 
-                              return availableUnits;
+                              return availableUnits.filter(unit => 
+                                (unit.name || '').toLowerCase().includes((unitSearch || '').toLowerCase())
+                              );
                             })()}
-                          </select>
+                            onSelect={(value) => {
+                              setSelectedUnit(value);
+                              setUnitSearch('');
+                            }}
+                            searchValue={unitSearch}
+                            onSearchChange={setUnitSearch}
+                            isOpen={showUnitDropdown}
+                            onToggle={() => setShowUnitDropdown(!showUnitDropdown)}
+                            placeholder="Choose unit"
+                            dropdownRef={unitRef}
+                            disabled={!selectedCategory}
+                          />
                         </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Quantity Input Method
-                          </label>
-                          <div className="flex gap-4 pt-2">
-                            <label className="flex items-center">
-                              <input
-                                type="radio"
-                                value="By Quantity"
-                                checked={quantityMethod === 'By Quantity'}
-                                onChange={(e) =>
-                                  setQuantityMethod(e.target.value)
-                                }
-                                className="mr-2 text-blue-600"
-                              />
-                              By Quantity
-                            </label>
-                            <label className="flex items-center">
-                              <input
-                                type="radio"
-                                value="By Weight (KG)"
-                                checked={quantityMethod === 'By Weight (KG)'}
-                                onChange={(e) =>
-                                  setQuantityMethod(e.target.value)
-                                }
-                                className="mr-2 text-blue-600"
-                              />
-                              By Weight (KG)
-                            </label>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Quantity <span className="text-red-500">*</span>
@@ -993,10 +1099,9 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                             step="0.01"
                             placeholder="Enter quantity"
                             onChange={(e) => setNewItemQuantity(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
+                            className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                           />
                         </div>
-
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Rate per Unit{' '}
@@ -1009,16 +1114,16 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                             step="0.01"
                             placeholder="Enter rate per unit"
                             onChange={(e) => setNewItemRate(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300"
+                            className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                           />
                         </div>
                       </div>
 
-                      <div className="flex gap-3">
+                      <div className="flex flex-col lg:flex-row gap-3">
                         <button
                           type="button"
                           onClick={addProductToItems}
-                          className="px-6 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 inline-flex items-center gap-2"
+                          className="px-4 py-3 lg:px-6 lg:py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 inline-flex items-center justify-center gap-2 text-sm lg:text-base"
                         >
                           <svg
                             className="w-4 h-4"
@@ -1047,7 +1152,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                               setNewItemQuantity('');
                               setNewItemRate('');
                             }}
-                            className="px-6 py-2 bg-gray-500 text-white font-medium rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 inline-flex items-center gap-2"
+                            className="px-4 py-3 lg:px-6 lg:py-2 bg-gray-500 text-white font-medium rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 inline-flex items-center justify-center gap-2 text-sm lg:text-base"
                           >
                             <svg
                               className="w-4 h-4"
@@ -1217,7 +1322,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                       <h4 className="text-base font-medium text-gray-800 dark:text-gray-200 mb-4">
                         Order Summary
                       </h4>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div className="text-center p-3 bg-white rounded-lg shadow-sm dark:bg-gray-800">
                           <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
                             {getCurrencySymbol()}
@@ -1262,59 +1367,59 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                       <h4 className="text-base font-medium text-gray-800 dark:text-gray-200 mb-4">
                         Additional Information
                       </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-4 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-4">
                         <div>
-                          <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                          <label className="block text-sm font-semibold text-slate-700 mb-3">
                             Notes
                           </label>
                           <Field
                             as="textarea"
                             name="notes"
-                            rows={4}
+                            rows={2}
                             placeholder="Notes"
-                            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                            className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                           />
                         </div>
                         <div>
-                          <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                          <label className="block text-sm font-semibold text-slate-700 mb-3">
                             Terms & Conditions
                           </label>
                           <Field
                             as="textarea"
                             name="termsConditions"
-                            rows={4}
+                            rows={2}
                             placeholder="Terms & Conditions"
-                            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                            className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                           />
                         </div>
                       </div>
                     </div>
 
                     {/* Submit Buttons */}
-                    <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+                    <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-end space-y-3 lg:space-y-0 lg:space-x-4 pt-4 lg:pt-6 border-t border-gray-200">
                       <button
                         type="button"
                         onClick={() => navigate('/purchase-orders')}
-                        className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50 transition-all duration-300"
+                        className="px-4 py-3 lg:px-6 lg:py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50 transition-all duration-300 text-sm lg:text-base"
                       >
                         Cancel
                       </button>
                       <button
                         type="submit"
                         disabled={loading || isSubmitting}
-                        className="px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-xl disabled:opacity-50 shadow-lg"
+                        className="px-4 py-3 lg:px-6 lg:py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-xl disabled:opacity-50 shadow-lg text-sm lg:text-base"
                       >
                         {loading || isSubmitting ? (
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 justify-center">
                             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                            {isEdit ? 'Updating...' : 'Creating...'}
+                            <span className="lg:hidden">{isEdit ? 'Updating...' : 'Creating...'}</span>
+                            <span className="hidden lg:inline">{isEdit ? 'Updating...' : 'Creating...'}</span>
                           </div>
                         ) : (
                           <>
-                            <HiCheckCircle className="w-5 h-5 mr-2 inline" />
-                            {isEdit
-                              ? 'Update Purchase Order'
-                              : 'Create Purchase Order'}
+                            <HiCheckCircle className="w-4 h-4 lg:w-5 lg:h-5 mr-2 inline" />
+                            <span className="lg:hidden">{isEdit ? 'Update PO' : 'Create PO'}</span>
+                            <span className="hidden lg:inline">{isEdit ? 'Update Purchase Order' : 'Create Purchase Order'}</span>
                           </>
                         )}
                       </button>

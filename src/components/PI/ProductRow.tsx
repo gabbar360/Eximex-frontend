@@ -64,13 +64,16 @@ const ProductRow: React.FC<ProductRowProps> = ({
   const [categorySearch, setCategorySearch] = useState('');
   const [subcategorySearch, setSubcategorySearch] = useState('');
   const [productSearch, setProductSearch] = useState('');
+  const [unitSearch, setUnitSearch] = useState('');
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [showSubcategoryDropdown, setShowSubcategoryDropdown] = useState(false);
   const [showProductDropdown, setShowProductDropdown] = useState(false);
+  const [showUnitDropdown, setShowUnitDropdown] = useState(false);
   
   const categoryRef = useRef(null);
   const subcategoryRef = useRef(null);
   const productRef = useRef(null);
+  const unitRef = useRef(null);
 
   // Custom Dropdown Component
   const SearchableDropdown = ({
@@ -182,6 +185,9 @@ const ProductRow: React.FC<ProductRowProps> = ({
       }
       if (productRef.current && !productRef.current.contains(event.target)) {
         setShowProductDropdown(false);
+      }
+      if (unitRef.current && !unitRef.current.contains(event.target)) {
+        setShowUnitDropdown(false);
       }
     };
 
@@ -497,17 +503,10 @@ const ProductRow: React.FC<ProductRowProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
           <Label>Unit *</Label>
-          <select
-            key={`unit-dropdown-${data.categoryId}-${idx}`}
-            className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm py-2 px-3 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+          <SearchableDropdown
+            label="Unit"
             value={data.unit || ''}
-            onChange={(e) => {
-              onChange(idx, 'unit', e.target.value);
-            }}
-            required
-          >
-            <option value="">Choose unit</option>
-            {(() => {
+            options={(() => {
               const category = categories.find(
                 (c) => c.id.toString() === data.categoryId
               );
@@ -517,21 +516,19 @@ const ProductRow: React.FC<ProductRowProps> = ({
 
               if (packagingHierarchy.length > 0) {
                 packagingHierarchy.forEach((level, levelIdx) => {
-                  availableUnits.push(
-                    <option key={`from-${levelIdx}`} value={level.from}>
-                      {level.from}
-                    </option>
-                  );
+                  availableUnits.push({
+                    id: level.from,
+                    name: level.from,
+                  });
                 });
 
                 const lastLevel =
                   packagingHierarchy[packagingHierarchy.length - 1];
                 if (lastLevel?.to) {
-                  availableUnits.push(
-                    <option key={`to-final`} value={lastLevel.to}>
-                      {lastLevel.to}
-                    </option>
-                  );
+                  availableUnits.push({
+                    id: lastLevel.to,
+                    name: lastLevel.to,
+                  });
                 }
               } else {
                 const subcategory = category?.subcategories?.find(
@@ -559,17 +556,29 @@ const ProductRow: React.FC<ProductRowProps> = ({
                 }
 
                 Array.from(unitSet).forEach((unit) => {
-                  availableUnits.push(
-                    <option key={unit} value={unit}>
-                      {unit.charAt(0).toUpperCase() + unit.slice(1)}
-                    </option>
-                  );
+                  availableUnits.push({
+                    id: unit,
+                    name: unit.charAt(0).toUpperCase() + unit.slice(1),
+                  });
                 });
               }
 
-              return availableUnits;
+              return availableUnits.filter((unit) =>
+                unit.name.toLowerCase().includes(unitSearch.toLowerCase())
+              );
             })()}
-          </select>
+            onSelect={(unitValue) => {
+              onChange(idx, 'unit', unitValue);
+              setUnitSearch('');
+            }}
+            searchValue={unitSearch}
+            onSearchChange={setUnitSearch}
+            isOpen={showUnitDropdown}
+            onToggle={() => setShowUnitDropdown(!showUnitDropdown)}
+            placeholder="Choose unit"
+            disabled={!data.categoryId}
+            dropdownRef={unitRef}
+          />
           {/* Unit Weight Helper */}
           {data.unit && data.productId && prod && (
             <div className="text-xs mt-1 p-2 bg-gray-50 dark:bg-gray-800 rounded border">
