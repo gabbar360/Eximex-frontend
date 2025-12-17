@@ -93,6 +93,17 @@ export const fetchUserSidebarMenu = createAsyncThunk(
   }
 );
 
+export const bulkUpdateUserPermissions = createAsyncThunk(
+  'userPermission/bulkUpdateUserPermissions',
+  async ({ userId, enableAll }, { rejectWithValue }) => {
+    try {
+      return await userPermissionService.bulkUpdateUserPermissions(userId, enableAll);
+    } catch (err) {
+      return rejectWithValue(err.message || 'Failed to bulk update permissions');
+    }
+  }
+);
+
 const userPermissionSlice = createSlice({
   name: 'userPermission',
   initialState: {
@@ -208,6 +219,18 @@ const userPermissionSlice = createSlice({
         state.sidebarMenu = payload?.data || payload || [];
       })
       .addCase(fetchUserSidebarMenu.rejected, (state, { payload }) => {
+        state.loading = false;
+        state.error = payload;
+      })
+      // Bulk update user permissions
+      .addCase(bulkUpdateUserPermissions.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(bulkUpdateUserPermissions.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(bulkUpdateUserPermissions.rejected, (state, { payload }) => {
         state.loading = false;
         state.error = payload;
       });
