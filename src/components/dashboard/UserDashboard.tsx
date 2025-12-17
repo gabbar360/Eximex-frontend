@@ -40,17 +40,17 @@ import { toast } from "react-toastify";
 // ---------------------- Metric Card ---------------------------
 const MetricCard = ({ title, value, icon }) => {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-200 p-3 h-20">
+    <div className="dashboard-metric-card bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-200 p-2 sm:p-3 h-16 sm:h-20">
       <div className="flex items-center justify-between">
         <div className="flex-1">
-          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+          <p className="dashboard-metric-title text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
             {title}
           </p>
-          <p className="text-xl font-bold text-gray-900 dark:text-white mt-1">
+          <p className="dashboard-metric-value text-sm sm:text-xl font-bold text-gray-900 dark:text-white mt-1">
             {typeof value === 'number' ? value.toLocaleString() : value}
           </p>
         </div>
-        <div className="w-8 h-8 bg-slate-700 rounded-lg flex items-center justify-center text-white ml-2">
+        <div className="w-6 h-6 sm:w-8 sm:h-8 bg-slate-700 rounded-lg flex items-center justify-center text-white ml-2">
           {icon}
         </div>
       </div>
@@ -62,24 +62,25 @@ const MetricCard = ({ title, value, icon }) => {
 // ---------------------- Chart Wrapper -------------------------
 const ChartCard = ({ title, description, icon, height = 400, children }) => {
   return (
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-6">
-      <div className="flex items-start justify-between mb-6">
-        <div className="flex items-center space-x-3">
-          <div className="w-12 h-12 bg-slate-700 rounded-xl flex items-center justify-center text-white shadow-lg">
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-3 sm:p-6">
+      <div className="flex items-start justify-between mb-3 sm:mb-6">
+        <div className="flex items-center space-x-2 sm:space-x-3">
+          <div className="w-8 h-8 sm:w-12 sm:h-12 bg-slate-700 rounded-xl flex items-center justify-center text-white shadow-lg">
             {icon}
           </div>
           <div>
-            <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{title}</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{description}</p>
+            <h3 className="text-base sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-white">{title}</h3>
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">{description}</p>
           </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-          <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Live Data</span>
+        <div className="flex items-center space-x-1 sm:space-x-2">
+          <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-500 rounded-full animate-pulse"></div>
+          <span className="text-xs text-gray-500 dark:text-gray-400 font-medium hidden sm:inline">Live Data</span>
+          <span className="text-xs text-gray-500 dark:text-gray-400 font-medium sm:hidden">Live</span>
         </div>
       </div>
 
-      <div style={{ height }} className="w-full" data-chart={title}>
+      <div style={{ height: window.innerWidth < 640 ? Math.max(250, height * 0.6) : height }} className="dashboard-chart-container w-full" data-chart={title}>
         {children}
       </div>
     </div>
@@ -180,7 +181,7 @@ export default function UserDashboard() {
         </div>
 
         {/* METRIC BOXES */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-2 sm:gap-3 lg:gap-4 xl:gap-6 mb-4 sm:mb-6 lg:mb-8">
           
           <MetricCard title="Contacts" value={stats.totalParties} icon={<MdPeople className="w-4 h-4" />} />
           <MetricCard title="PI Invoices" value={stats.totalPiInvoices} icon={<MdAttachMoney className="w-4 h-4" />} />
@@ -195,7 +196,7 @@ export default function UserDashboard() {
         </div>
 
         {/* TWO CHARTS IN SINGLE COLUMN */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* FIRST CHART */}
           <ChartCard 
             title="Core Business Metrics" 
@@ -204,7 +205,7 @@ export default function UserDashboard() {
             height={400}
           >
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={chart1Data} margin={{ top: 20, right: 20, left: 10, bottom: 20 }}>
+              <ComposedChart data={chart1Data} margin={{ top: 10, right: 10, left: 5, bottom: 10 }}>
                 <defs>
                   <linearGradient id="contactsGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#6366f1" stopOpacity={0.8}/>
@@ -238,7 +239,7 @@ export default function UserDashboard() {
             height={400}
           >
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={chart2Data} margin={{ top: 20, right: 20, left: 10, bottom: 20 }}>
+              <ComposedChart data={chart2Data} margin={{ top: 10, right: 10, left: 5, bottom: 10 }}>
                 <defs>
                   <linearGradient id="packingGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>

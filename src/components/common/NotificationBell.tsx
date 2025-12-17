@@ -127,17 +127,19 @@ const NotificationBell: React.FC = () => {
 
       {/* Notification Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-96 overflow-hidden">
+        <div className={`${
+            window.innerWidth < 1024 ? 'fixed inset-x-4 top-16' : 'absolute right-0 mt-2'
+          } w-auto sm:w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-hidden`}>
           {/* Header */}
-          <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
+          <div className="px-3 sm:px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Notifications</h3>
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllAsRead}
-                className="text-sm text-red-600 hover:text-red-800 flex items-center gap-1 px-2 py-1 rounded hover:bg-red-50 transition-colors"
+                className="text-xs sm:text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 flex items-center gap-1 px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
               >
-                <HiCheckCircle className="w-4 h-4" />
-                Clear All ({unreadCount})
+                <HiCheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Clear All</span> ({unreadCount})
               </button>
             )}
           </div>
@@ -158,35 +160,35 @@ const NotificationBell: React.FC = () => {
               notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${
-                    !notification.isRead ? 'bg-blue-50' : ''
+                  className={`p-3 sm:p-4 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors ${
+                    !notification.isRead ? 'bg-blue-50 dark:bg-blue-900/20' : ''
                   }`}
                   onClick={() => handleNotificationClick(notification)}
                 >
-                  <div className="flex items-start gap-3">
-                    <div className="text-2xl flex-shrink-0">
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <div className="text-lg sm:text-2xl flex-shrink-0">
                       {getNotificationIcon(notification.type)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <h4 className={`text-sm font-medium ${
-                          !notification.isRead ? 'text-gray-900' : 'text-gray-700'
+                        <h4 className={`text-xs sm:text-sm font-medium ${
+                          !notification.isRead ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'
                         }`}>
                           {notification.title}
                         </h4>
                         {!notification.isRead && (
-                          <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
+                          <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
                         {notification.message}
                       </p>
-                      <div className="flex items-center justify-between mt-2">
-                        <span className="text-xs text-gray-500">
+                      <div className="flex items-center justify-between mt-1 sm:mt-2">
+                        <span className="text-xs text-gray-500 dark:text-gray-500">
                           {formatTimeAgo(notification.createdAt)}
                         </span>
                         {notification.sender && (
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-gray-500 dark:text-gray-500 truncate ml-2">
                             by {notification.sender.name}
                           </span>
                         )}
@@ -199,21 +201,23 @@ const NotificationBell: React.FC = () => {
           </div>
 
           {/* Footer */}
-          <div className="px-4 py-3 border-t border-gray-200">
+          <div className="px-3 sm:px-4 py-3 border-t border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <button 
                 onClick={handleViewAllNotifications}
-                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                className="text-xs sm:text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
               >
-                View all notifications
+                <span className="hidden sm:inline">View all notifications</span>
+                <span className="sm:hidden">View all</span>
               </button>
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAllAsRead}
-                  className="text-sm text-red-600 hover:text-red-800 font-medium flex items-center gap-1 px-3 py-1 rounded-lg hover:bg-red-50 transition-colors"
+                  className="text-xs sm:text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-medium flex items-center gap-1 px-2 sm:px-3 py-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                 >
-                  <HiCheckCircle className="w-4 h-4" />
-                  Clear All
+                  <HiCheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Clear All</span>
+                  <span className="sm:hidden">Clear</span>
                 </button>
               )}
             </div>

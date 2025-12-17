@@ -923,6 +923,30 @@ span.flatpickr-weekday,
     margin-top: 0.25rem;
     font-size: 0.75rem;
   }
+
+  /* Dashboard Mobile Responsiveness */
+  .dashboard-chart-container {
+    height: 250px !important;
+  }
+
+  .dashboard-metric-card {
+    padding: 0.5rem !important;
+    height: 3.5rem !important;
+  }
+
+  .dashboard-metric-title {
+    font-size: 0.625rem !important;
+  }
+
+  .dashboard-metric-value {
+    font-size: 0.875rem !important;
+  }
+
+  .notification-dropdown {
+    width: calc(100vw - 2rem) !important;
+    max-width: 20rem !important;
+    right: -0.5rem !important;
+  }
 }
 
 @media (max-width: 375px) {
@@ -938,5 +962,14 @@ span.flatpickr-weekday,
   .auth-form-button {
     padding: 0.625rem !important;
     font-size: 0.875rem !important;
+  }
+
+  .dashboard-chart-container {
+    height: 200px !important;
+  }
+
+  .notification-dropdown {
+    width: calc(100vw - 1rem) !important;
+    right: -0.25rem !important;
   }
 }
