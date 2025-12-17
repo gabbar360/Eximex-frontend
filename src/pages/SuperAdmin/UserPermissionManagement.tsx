@@ -29,6 +29,7 @@ import {
   fetchAllUsersWithPermissions,
   fetchUserPermissions,
   updateUserPermissions,
+  bulkUpdateUserPermissions,
   clearError,
 } from '../../features/userPermissionSlice';
 import { deleteUser } from '../../features/userManagementSlice';
@@ -53,6 +54,7 @@ const UserPermissionManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [confirmDelete, setConfirmDelete] = useState(null);
+  const [selectAll, setSelectAll] = useState(false);
 
   useEffect(() => {
     dispatch(
@@ -166,6 +168,13 @@ const UserPermissionManagement = () => {
 
       setPermissions(userPerms);
       setInitialPermissions(userPerms);
+      
+      // Check if all permissions are selected
+      const allSelected = Object.values(userPerms).every(perm => 
+        perm.canView && perm.canCreate && perm.canUpdate && perm.canDelete
+      );
+      setSelectAll(allSelected);
+      
       console.log('Final mapped permissions:', userPerms);
     } catch (error) {
       toast.error(error?.message || 'Failed to fetch user permissions');
@@ -187,6 +196,36 @@ const UserPermissionManagement = () => {
       return updated;
     });
   };
+
+  const handleSelectAll = (checked) => {
+    setSelectAll(checked);
+    
+    // Update local state only
+    const updatedPermissions = {};
+    Object.keys(permissions).forEach((key) => {
+      updatedPermissions[key] = {
+        canView: checked,
+        canCreate: checked,
+        canUpdate: checked,
+        canDelete: checked,
+      };
+    });
+    
+    setPermissions(updatedPermissions);
+  };
+
+  const checkIfAllSelected = () => {
+    const allPermissions = Object.values(permissions);
+    if (allPermissions.length === 0) return false;
+    
+    return allPermissions.every(perm => 
+      perm.canView && perm.canCreate && perm.canUpdate && perm.canDelete
+    );
+  };
+
+  useEffect(() => {
+    setSelectAll(checkIfAllSelected());
+  }, [permissions]);
 
   const handleSavePermissions = async () => {
     try {
@@ -219,7 +258,7 @@ const UserPermissionManagement = () => {
         })
       ).unwrap();
 
-      toast.success(response?.message || 'Permissions updated successfully');
+      toast.success(response?.data?.message || response?.message);
       setShowForm(false);
       setPermissions({});
       setInitialPermissions({});
@@ -263,6 +302,7 @@ const UserPermissionManagement = () => {
     setPermissions({});
     setInitialPermissions({});
     setSelectedUser(null);
+    setSelectAll(false);
     setShowForm(false);
   };
 
@@ -277,51 +317,53 @@ const UserPermissionManagement = () => {
 
     return (
       <div className="grid grid-cols-4 gap-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">
+        <div className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            id={`${key}_view`}
+            checked={Boolean(itemPermissions.canView)}
+            onChange={(e) => handlePermissionChange(key, 'canView', e.target.checked)}
+            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
+          />
+          <label htmlFor={`${key}_view`} className="text-sm font-medium text-slate-700 cursor-pointer">
             View
           </label>
-          <Switch
-            checked={Boolean(itemPermissions.canView)}
-            onChange={(value) => handlePermissionChange(key, 'canView', value)}
-            className={itemPermissions.canView ? 'bg-brand-500' : ''}
-          />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">
+        <div className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            id={`${key}_create`}
+            checked={Boolean(itemPermissions.canCreate)}
+            onChange={(e) => handlePermissionChange(key, 'canCreate', e.target.checked)}
+            className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2 cursor-pointer"
+          />
+          <label htmlFor={`${key}_create`} className="text-sm font-medium text-slate-700 cursor-pointer">
             Create
           </label>
-          <Switch
-            checked={Boolean(itemPermissions.canCreate)}
-            onChange={(value) =>
-              handlePermissionChange(key, 'canCreate', value)
-            }
-            className={itemPermissions.canCreate ? 'bg-brand-500' : ''}
-          />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">
+        <div className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            id={`${key}_update`}
+            checked={Boolean(itemPermissions.canUpdate)}
+            onChange={(e) => handlePermissionChange(key, 'canUpdate', e.target.checked)}
+            className="w-4 h-4 text-yellow-600 bg-gray-100 border-gray-300 rounded focus:ring-yellow-500 focus:ring-2 cursor-pointer"
+          />
+          <label htmlFor={`${key}_update`} className="text-sm font-medium text-slate-700 cursor-pointer">
             Update
           </label>
-          <Switch
-            checked={Boolean(itemPermissions.canUpdate)}
-            onChange={(value) =>
-              handlePermissionChange(key, 'canUpdate', value)
-            }
-            className={itemPermissions.canUpdate ? 'bg-brand-500' : ''}
-          />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">
+        <div className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            id={`${key}_delete`}
+            checked={Boolean(itemPermissions.canDelete)}
+            onChange={(e) => handlePermissionChange(key, 'canDelete', e.target.checked)}
+            className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 focus:ring-2 cursor-pointer"
+          />
+          <label htmlFor={`${key}_delete`} className="text-sm font-medium text-slate-700 cursor-pointer">
             Delete
           </label>
-          <Switch
-            checked={Boolean(itemPermissions.canDelete)}
-            onChange={(value) =>
-              handlePermissionChange(key, 'canDelete', value)
-            }
-            className={itemPermissions.canDelete ? 'bg-brand-500' : ''}
-          />
         </div>
       </div>
     );
@@ -357,14 +399,14 @@ const UserPermissionManagement = () => {
 
           {/* Form */}
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 lg:p-8">
-            <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-slate-200">
               <div className="flex items-start gap-3">
-                <HiShieldCheck className="w-5 h-5 text-blue-600 mt-0.5" />
+                <HiShieldCheck className="w-5 h-5 text-slate-600 mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium text-blue-800 mb-1">
+                  <p className="text-sm font-medium text-slate-800 mb-1">
                     Permission Guidelines
                   </p>
-                  <p className="text-sm text-blue-700">
+                  <p className="text-sm text-slate-700">
                     Only menus with at least one permission enabled will be
                     saved. Configure permissions carefully to ensure proper
                     access control.
@@ -373,61 +415,121 @@ const UserPermissionManagement = () => {
               </div>
             </div>
 
-            <div className="max-h-96 overflow-y-auto">
-              <Collapse className="permission-collapse">
-                {menus.map((menu) => (
-                  <Panel
-                    header={
-                      <div className="flex items-center gap-3">
-                        <HiCog6Tooth className="w-4 h-4 text-slate-600" />
-                        <span className="font-medium text-slate-800">
-                          {menu.name}
-                        </span>
+            {/* Select All Checkbox */}
+            <div className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="selectAll"
+                  checked={selectAll}
+                  onChange={(e) => handleSelectAll(e.target.checked)}
+                  className="w-5 h-5 text-slate-600 bg-gray-100 border-gray-300 rounded focus:ring-slate-500 focus:ring-2 cursor-pointer accent-slate-600"
+                />
+                <label htmlFor="selectAll" className="text-sm font-medium text-slate-700 cursor-pointer">
+                  Select All Permissions (Grant all permissions to all menus and submenus)
+                </label>
+              </div>
+            </div>
+
+            <div className="border rounded-lg overflow-hidden overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-gradient-to-r from-slate-100 to-slate-200">
+                  <tr>
+                    <th className="px-4 py-3 text-left font-semibold text-slate-800">
+                      <div className="flex items-center gap-2">
+                        <HiCog6Tooth className="w-4 h-4" />
+                        Menu / Submenu
                       </div>
-                    }
-                    key={menu.id}
-                    className="mb-2"
-                  >
-                    <div className="space-y-4">
-                      {menu.submenus && menu.submenus.length > 0 ? (
-                        <div>
-                          <div className="mb-4">
-                            <h4 className="font-medium text-slate-800 mb-3 flex items-center gap-2">
-                              <HiCog6Tooth className="w-4 h-4" />
-                              Main Menu Permissions
-                            </h4>
-                            {renderPermissionControls(menu, 'menu')}
+                    </th>
+                    <th className="px-3 py-3 text-center font-semibold text-slate-700">
+                      <div className="flex items-center justify-center gap-1">
+                        <HiUser className="w-4 h-4" />
+                        View
+                      </div>
+                    </th>
+                    <th className="px-3 py-3 text-center font-semibold text-slate-700">
+                      <div className="flex items-center justify-center gap-1">
+                        <HiCheckCircle className="w-4 h-4" />
+                        Create
+                      </div>
+                    </th>
+                    <th className="px-3 py-3 text-center font-semibold text-slate-700">
+                      <div className="flex items-center justify-center gap-1">
+                        <HiPencil className="w-4 h-4" />
+                        Update
+                      </div>
+                    </th>
+                    <th className="px-3 py-3 text-center font-semibold text-slate-700">
+                      <div className="flex items-center justify-center gap-1">
+                        <HiTrash className="w-4 h-4" />
+                        Delete
+                      </div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {menus.map((menu) => (
+                    <React.Fragment key={menu.id}>
+                      <tr className="hover:bg-slate-50 transition-colors">
+                        <td className="px-4 py-3 font-medium text-slate-900">
+                          <div className="flex items-center gap-2">
+                            <HiCog6Tooth className="w-4 h-4 text-slate-600" />
+                            {menu.name}
                           </div>
-                          <div>
-                            <h4 className="font-medium text-slate-800 mb-3 flex items-center gap-2">
-                              <HiCog6Tooth className="w-4 h-4" />
-                              Submenu Permissions
-                            </h4>
-                            <div className="space-y-4">
-                              {menu.submenus.map((submenu) => (
-                                <div
-                                  key={submenu.id}
-                                  className="pl-4 border-l-2 border-gray-200"
-                                >
-                                  <h5 className="text-sm font-medium text-slate-700 mb-3">
-                                    ↳ {submenu.name}
-                                  </h5>
-                                  {renderPermissionControls(submenu, 'submenu')}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        <div>
-                          <h4 className="font-medium mb-2">Menu Permissions</h4>
-                          {renderPermissionControls(menu, 'menu')}
-                        </div>
-                      )}
-                    </div>
-                  </Panel>
-                ))}
-              </Collapse>
+                        </td>
+                        {(() => {
+                          const key = `menu_${menu.id}`;
+                          const itemPermissions = permissions[key] || { canView: false, canCreate: false, canUpdate: false, canDelete: false };
+                          return (
+                            <>
+                              <td className="px-3 py-3 text-center">
+                                <input type="checkbox" checked={Boolean(itemPermissions.canView)} onChange={(e) => handlePermissionChange(key, 'canView', e.target.checked)} className="w-4 h-4 cursor-pointer accent-slate-600" />
+                              </td>
+                              <td className="px-3 py-3 text-center">
+                                <input type="checkbox" checked={Boolean(itemPermissions.canCreate)} onChange={(e) => handlePermissionChange(key, 'canCreate', e.target.checked)} className="w-4 h-4 cursor-pointer accent-slate-600" />
+                              </td>
+                              <td className="px-3 py-3 text-center">
+                                <input type="checkbox" checked={Boolean(itemPermissions.canUpdate)} onChange={(e) => handlePermissionChange(key, 'canUpdate', e.target.checked)} className="w-4 h-4 cursor-pointer accent-slate-600" />
+                              </td>
+                              <td className="px-3 py-3 text-center">
+                                <input type="checkbox" checked={Boolean(itemPermissions.canDelete)} onChange={(e) => handlePermissionChange(key, 'canDelete', e.target.checked)} className="w-4 h-4 cursor-pointer accent-slate-600" />
+                              </td>
+                            </>
+                          );
+                        })()}
+                      </tr>
+                      {menu.submenus?.map((submenu) => (
+                        <tr key={submenu.id} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-4 py-2 pl-8 text-slate-600">
+                            <span className="text-gray-400 mr-2">↳</span>
+                            {submenu.name}
+                          </td>
+                          {(() => {
+                            const key = `submenu_${submenu.id}`;
+                            const itemPermissions = permissions[key] || { canView: false, canCreate: false, canUpdate: false, canDelete: false };
+                            return (
+                              <>
+                                <td className="px-3 py-2 text-center">
+                                  <input type="checkbox" checked={Boolean(itemPermissions.canView)} onChange={(e) => handlePermissionChange(key, 'canView', e.target.checked)} className="w-4 h-4 cursor-pointer accent-slate-600" />
+                                </td>
+                                <td className="px-3 py-2 text-center">
+                                  <input type="checkbox" checked={Boolean(itemPermissions.canCreate)} onChange={(e) => handlePermissionChange(key, 'canCreate', e.target.checked)} className="w-4 h-4 cursor-pointer accent-slate-600" />
+                                </td>
+                                <td className="px-3 py-2 text-center">
+                                  <input type="checkbox" checked={Boolean(itemPermissions.canUpdate)} onChange={(e) => handlePermissionChange(key, 'canUpdate', e.target.checked)} className="w-4 h-4 cursor-pointer accent-slate-600" />
+                                </td>
+                                <td className="px-3 py-2 text-center">
+                                  <input type="checkbox" checked={Boolean(itemPermissions.canDelete)} onChange={(e) => handlePermissionChange(key, 'canDelete', e.target.checked)} className="w-4 h-4 cursor-pointer accent-slate-600" />
+                                </td>
+                              </>
+                            );
+                          })()}
+                        </tr>
+                      ))}
+                    </React.Fragment>
+                  ))}
+                </tbody>
+              </table>
             </div>
 
             {/* Submit Buttons */}
@@ -589,6 +691,7 @@ const UserPermissionManagement = () => {
 
         {/* Users Table */}
         <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
           {loading ? (
             <div className="p-12 text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-slate-600 mx-auto mb-4"></div>
@@ -615,9 +718,11 @@ const UserPermissionManagement = () => {
               loading={loading}
               rowKey="id"
               pagination={false}
+              scroll={{ x: 800 }}
               className="permission-management-table"
             />
           )}
+          </div>
         </div>
 
         {/* Pagination */}
