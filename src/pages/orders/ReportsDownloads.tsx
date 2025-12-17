@@ -170,82 +170,84 @@ const ReportsDownloads: React.FC = () => {
           </div>
         ) : (
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-            <div className="hidden lg:block">
-              <div className="bg-gray-50 border-b border-gray-200 p-4">
-                <div className="grid grid-cols-5 gap-3 text-sm font-semibold text-slate-700">
-                  <div className="flex items-center gap-2">
-                    <HiDocumentText className="w-4 h-4 text-slate-600" />
-                    <span>Order Number</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <HiCube className="w-4 h-4 text-slate-600" />
-                    <span>Company</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <HiCube className="w-4 h-4 text-slate-600" />
-                    <span>Total Amount</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <HiCube className="w-4 h-4 text-slate-600" />
-                    <span>Commercial Invoice</span>
-                  </div>
-                  <div className="flex items-center justify-end gap-2">
-                    <HiCube className="w-4 h-4 text-slate-600" />
-                    <span>BL Draft</span>
+            <div className="overflow-x-auto">
+              <div className="min-w-[800px]">
+                <div className="bg-gray-50 border-b border-gray-200 p-4">
+                  <div className="grid grid-cols-5 gap-3 text-sm font-semibold text-slate-700">
+                    <div className="flex items-center gap-2">
+                      <HiDocumentText className="w-4 h-4 text-slate-600" />
+                      <span>Order Number</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <HiCube className="w-4 h-4 text-slate-600" />
+                      <span>Company</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <HiCube className="w-4 h-4 text-slate-600" />
+                      <span>Total Amount</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <HiCube className="w-4 h-4 text-slate-600" />
+                      <span>Commercial Invoice</span>
+                    </div>
+                    <div className="flex items-center justify-end gap-2">
+                      <HiCube className="w-4 h-4 text-slate-600" />
+                      <span>BL Draft</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="divide-y divide-white/20">
-                {paginatedOrders.map((order: any) => {
-                  return (
-                    <div
-                      key={order.id}
-                      className="p-4 hover:bg-white/50 transition-all duration-300"
-                    >
-                      <div className="grid grid-cols-5 gap-3 items-center">
-                        <div className="flex items-center gap-2">
-                          <HiDocumentText className="w-4 h-4 text-slate-600 flex-shrink-0" />
-                          <span
-                            className="text-slate-800 font-medium truncate"
-                            title={order.orderNumber}
-                          >
-                            #{order.orderNumber}
-                          </span>
-                        </div>
+                <div className="divide-y divide-white/20">
+                  {paginatedOrders.map((order: any) => {
+                    return (
+                      <div
+                        key={order.id}
+                        className="p-4 hover:bg-white/50 transition-all duration-300"
+                      >
+                        <div className="grid grid-cols-5 gap-3 items-center">
+                          <div className="flex items-center gap-2">
+                            <HiDocumentText className="w-4 h-4 text-slate-600 flex-shrink-0" />
+                            <span
+                              className="text-slate-800 font-medium truncate"
+                              title={order.orderNumber}
+                            >
+                              #{order.orderNumber}
+                            </span>
+                          </div>
 
-                        <div className="text-slate-700 text-sm">
-                          {order.piInvoice?.party?.companyName || '-'}
-                        </div>
+                          <div className="text-slate-700 text-sm">
+                            {order.piInvoice?.party?.companyName || '-'}
+                          </div>
 
-                        <div className="text-slate-700 text-sm font-medium">
-                          ${order.totalAmount?.toLocaleString() || '0'}
-                        </div>
+                          <div className="text-slate-700 text-sm font-medium">
+                            ${order.totalAmount?.toLocaleString() || '0'}
+                          </div>
 
-                        <div className="text-slate-700 text-sm">
-                          <button
-                            onClick={() =>
-                              handleCommercialInvoiceDownload(order)
-                            }
-                            className="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
-                          >
-                            <HiArrowDownTray className="w-3 h-3" />
-                            Download
-                          </button>
-                        </div>
+                          <div className="text-slate-700 text-sm">
+                            <button
+                              onClick={() =>
+                                handleCommercialInvoiceDownload(order)
+                              }
+                              className="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
+                            >
+                              <HiArrowDownTray className="w-3 h-3" />
+                              Download
+                            </button>
+                          </div>
 
-                        <div className="flex items-center justify-end">
-                          <button
-                            onClick={() => handleBLDraftDownload(order)}
-                            className="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium bg-orange-100 text-orange-800 hover:bg-orange-200 transition-colors"
-                          >
-                            <HiArrowDownTray className="w-3 h-3" />
-                            Download
-                          </button>
+                          <div className="flex items-center justify-end">
+                            <button
+                              onClick={() => handleBLDraftDownload(order)}
+                              className="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium bg-orange-100 text-orange-800 hover:bg-orange-200 transition-colors"
+                            >
+                              <HiArrowDownTray className="w-3 h-3" />
+                              Download
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>

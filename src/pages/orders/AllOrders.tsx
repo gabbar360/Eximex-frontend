@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import PageMeta from '../../components/common/PageMeta';
@@ -19,6 +19,7 @@ import {
   HiScale,
   HiPlus,
   HiTrash,
+  HiChevronDown,
 } from 'react-icons/hi2';
 import { toast } from 'react-toastify';
 import { fetchOrders, deleteOrder } from '../../features/orderSlice';
@@ -33,6 +34,99 @@ const AllOrders: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+
+  // Dropdown states
+  const [statusSearch, setStatusSearch] = useState('');
+  const [showStatusDropdown, setShowStatusDropdown] = useState(false);
+  const statusRef = useRef(null);
+
+  // Custom Dropdown Component
+  const SearchableDropdown = ({
+    label,
+    value,
+    options,
+    onSelect,
+    searchValue,
+    onSearchChange,
+    isOpen,
+    onToggle,
+    placeholder,
+    disabled = false,
+    dropdownRef,
+    displayKey = 'name',
+    valueKey = 'id',
+    className = '',
+  }) => {
+    const selectedOption = options.find((opt) => opt[valueKey]?.toString() === value?.toString());
+
+    return (
+      <div className="relative" ref={dropdownRef}>
+        <div
+          className={`w-full px-4 py-3 border border-gray-300 bg-white rounded-lg cursor-pointer flex items-center justify-between transition-all duration-300 shadow-sm ${className} ${
+            disabled
+              ? 'bg-gray-100 cursor-not-allowed'
+              : 'hover:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200 focus-within:border-slate-500'
+          }`}
+          onClick={() => !disabled && onToggle()}
+        >
+          <span
+            className={`text-sm ${selectedOption ? 'text-slate-900' : 'text-slate-500'}`}
+          >
+            {selectedOption ? selectedOption[displayKey] : placeholder}
+          </span>
+          <HiChevronDown
+            className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          />
+        </div>
+
+        {isOpen && !disabled && (
+          <div
+            className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl"
+            style={{ top: '100%', marginTop: '4px' }}
+          >
+            <div className="p-3 border-b border-gray-100">
+              <div className="relative">
+                <HiMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder={`Search ${label.toLowerCase()}...`}
+                  value={searchValue}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                  onClick={(e) => e.stopPropagation()}
+                  autoFocus
+                />
+              </div>
+            </div>
+            <div className="max-h-60 overflow-y-auto">
+              {options.length === 0 ? (
+                <div className="px-4 py-3 text-slate-500 text-sm text-center">
+                  No {label.toLowerCase()} found
+                </div>
+              ) : (
+                options.map((option) => (
+                  <div
+                    key={option[valueKey]}
+                    className={`px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm transition-colors duration-150 ${
+                      option[valueKey]?.toString() === value?.toString()
+                        ? 'bg-slate-100 text-slate-900 font-medium'
+                        : 'text-slate-700'
+                    }`}
+                    onClick={() => {
+                      onSelect(option[valueKey]);
+                      onToggle();
+                    }}
+                  >
+                    {option[displayKey]}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   useEffect(() => {
     dispatch(fetchOrders());
@@ -70,12 +164,16 @@ const AllOrders: React.FC = () => {
       if (openDropdown && !target.closest('.dropdown-container')) {
         setOpenDropdown(null);
       }
+      if (statusRef.current && !statusRef.current.contains(event.target)) {
+        setShowStatusDropdown(false);
+      }
     };
 
     if (openDropdown) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -188,19 +286,37 @@ const AllOrders: React.FC = () => {
                     />
                   </div>
 
-                  <select
-                    value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
-                    className="px-4 py-3 w-full sm:w-40 rounded-lg border border-gray-300 bg-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-all duration-300 text-sm shadow-sm"
-                  >
-                    <option value="all">All Status</option>
-                    <option value="pending">Pending</option>
-                    <option value="confirmed">Confirmed</option>
-                    <option value="processing">Processing</option>
-                    <option value="shipped">Shipped</option>
-                    <option value="delivered">Delivered</option>
-                    <option value="cancelled">Cancelled</option>
-                  </select>
+                  <div className="w-full sm:w-40">
+                    <SearchableDropdown
+                      label="Status"
+                      value={filterStatus}
+                      options={[
+                        { id: 'all', name: 'All Status' },
+                        { id: 'pending', name: 'Pending' },
+                        { id: 'confirmed', name: 'Confirmed' },
+                        { id: 'processing', name: 'Processing' },
+                        { id: 'shipped', name: 'Shipped' },
+                        { id: 'delivered', name: 'Delivered' },
+                        { id: 'cancelled', name: 'Cancelled' },
+                      ]
+                        .filter((status) =>
+                          status.name
+                            .toLowerCase()
+                            .includes(statusSearch.toLowerCase())
+                        )}
+                      onSelect={(statusValue) => {
+                        setFilterStatus(statusValue);
+                        setStatusSearch('');
+                      }}
+                      searchValue={statusSearch}
+                      onSearchChange={setStatusSearch}
+                      isOpen={showStatusDropdown}
+                      onToggle={() => setShowStatusDropdown(!showStatusDropdown)}
+                      placeholder="All Status"
+                      dropdownRef={statusRef}
+                      className="text-sm"
+                    />
+                  </div>
 
                   <Link
                     to="/add-order"
@@ -389,123 +505,161 @@ const AllOrders: React.FC = () => {
                 </div>
               </div>
 
-              {/* Mobile Card View */}
-              <div className="lg:hidden divide-y divide-white/20">
-                {filteredOrders.map((order) => {
-                  const statusConfig = getStatusConfig(order.orderStatus);
-                  const StatusIcon = statusConfig.icon;
-
-                  return (
-                    <div key={order.id} className="p-4">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <HiDocumentText className="w-5 h-5 text-slate-600 flex-shrink-0" />
-                          <h3 className="font-semibold text-slate-800">
-                            {order.orderNumber}
-                          </h3>
+              {/* Tablet/Mobile Table View with Horizontal Scroll */}
+              <div className="lg:hidden">
+                <div className="overflow-x-auto">
+                  <div className="min-w-[800px]">
+                    {/* Table Header */}
+                    <div className="bg-gray-50 border-b border-gray-200 p-4">
+                      <div
+                        className="grid gap-2 text-sm font-semibold text-slate-700"
+                        style={{
+                          gridTemplateColumns:
+                            '1.5fr 1.2fr 1fr 1fr 1fr 1fr 1fr 0.8fr',
+                        }}
+                      >
+                        <div className="flex items-center gap-2">
+                          <HiDocumentText className="w-4 h-4 text-slate-600" />
+                          <span>Order No.</span>
                         </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3 text-sm">
-                        <div>
-                          <span className="font-medium text-slate-500 text-xs">
-                            Client:
-                          </span>
-                          <div className="text-slate-700 truncate">
-                            {order.piInvoice?.party?.companyName || '-'}
-                          </div>
+                        <div className="flex items-center gap-2">
+                          <HiBuildingOffice2 className="w-4 h-4 text-slate-600" />
+                          <span>Client</span>
                         </div>
-                        <div>
-                          <span className="font-medium text-slate-500 text-xs">
-                            Date:
-                          </span>
-                          <div className="text-slate-700">
-                            {new Date(order.createdAt).toLocaleDateString(
-                              'en-US',
-                              {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric',
-                              }
-                            )}
-                          </div>
+                        <div className="flex items-center gap-2">
+                          <HiCalendar className="w-4 h-4 text-slate-600" />
+                          <span>Date</span>
                         </div>
-                        <div>
-                          <span className="font-medium text-slate-500 text-xs">
-                            Status:
-                          </span>
-                          <div>
-                            <span
-                              className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${statusConfig.bg} ${statusConfig.color} ${statusConfig.border}`}
-                            >
-                              <StatusIcon className="w-3 h-3 mr-1" />
-                              {order.orderStatus?.charAt(0).toUpperCase() +
-                                order.orderStatus?.slice(1)}
-                            </span>
-                          </div>
+                        <div className="flex items-center gap-2">
+                          <HiClock className="w-4 h-4 text-slate-600" />
+                          <span>Status</span>
                         </div>
-                        <div>
-                          <span className="font-medium text-slate-500 text-xs">
-                            PI Number:
-                          </span>
-                          <div className="text-slate-700">
-                            {order.piNumber || '-'}
-                          </div>
+                        <div className="flex items-center gap-2">
+                          <HiDocument className="w-4 h-4 text-slate-600" />
+                          <span>PI Number</span>
                         </div>
-                        <div className="col-span-2">
-                          <span className="font-medium text-slate-500 text-xs">
-                            Amount:
-                          </span>
-                          <div className="text-slate-700 font-medium">
-                            {new Intl.NumberFormat('en-US', {
-                              style: 'currency',
-                              currency: 'USD',
-                              maximumFractionDigits: 0,
-                            }).format(order.totalAmount || 0)}
-                          </div>
+                        <div className="flex items-center gap-2">
+                          <HiCurrencyDollar className="w-4 h-4 text-slate-600" />
+                          <span>Amount</span>
                         </div>
-                        <div>
-                          <span className="font-medium text-slate-500 text-xs">
-                            Advance Payment:
-                          </span>
-                          <div className="text-slate-700 font-medium">
-                            {new Intl.NumberFormat('en-US', {
-                              style: 'currency',
-                              currency: 'USD',
-                              maximumFractionDigits: 0,
-                            }).format(order.piInvoice?.advanceAmount || 0)}
-                          </div>
+                        <div className="flex items-center gap-2">
+                          <HiCurrencyDollar className="w-4 h-4 text-slate-600" />
+                          <span>Advance Payment</span>
                         </div>
-                      </div>
-
-                      <div className="flex items-center justify-center pt-3 mt-3 border-t border-gray-200">
-                        <div className="flex gap-2">
-                          <Link
-                            to={`/orders/shipments`}
-                            className="flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-all duration-300 text-sm font-medium"
-                          >
-                            <HiTruck className="w-4 h-4" />
-                            Shipment
-                          </Link>
-                          <Link
-                            to={`/orders/packing-lists`}
-                            className="flex items-center gap-2 px-3 py-2 bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 transition-all duration-300 text-sm font-medium"
-                          >
-                            <HiClipboard className="w-4 h-4" />
-                            Packing
-                          </Link>
-                          <Link
-                            to={`/orders/vgm`}
-                            className="flex items-center gap-2 px-3 py-2 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-all duration-300 text-sm font-medium"
-                          >
-                            <HiScale className="w-4 h-4" />
-                            VGM
-                          </Link>
+                        <div className="flex items-center justify-end gap-2">
+                          <HiDocumentText className="w-4 h-4 text-slate-600" />
+                          <span>Actions</span>
                         </div>
                       </div>
                     </div>
-                  );
-                })}
+                    <div className="divide-y divide-white/20">
+                      {filteredOrders.map((order) => {
+                        const statusConfig = getStatusConfig(order.orderStatus);
+                        const StatusIcon = statusConfig.icon;
+
+                        return (
+                          <div
+                            key={order.id}
+                            className="p-4 hover:bg-white/50 transition-all duration-300"
+                          >
+                            <div
+                              className="grid gap-2 items-center"
+                              style={{
+                                gridTemplateColumns:
+                                  '1.5fr 1.2fr 1fr 1fr 1fr 1fr 1fr 0.8fr',
+                              }}
+                            >
+                              {/* Order Number */}
+                              <div className="flex items-center gap-2">
+                                <HiDocumentText className="w-4 h-4 text-slate-600 flex-shrink-0" />
+                                <span
+                                  className="text-slate-800 font-medium truncate"
+                                  title={order.orderNumber}
+                                >
+                                  {order.orderNumber}
+                                </span>
+                              </div>
+
+                              {/* Client */}
+                              <div
+                                className="text-slate-700 text-sm truncate"
+                                title={order.piInvoice?.party?.companyName}
+                              >
+                                {order.piInvoice?.party?.companyName || '-'}
+                              </div>
+
+                              {/* Date */}
+                              <div className="text-slate-700 text-sm">
+                                {new Date(order.createdAt).toLocaleDateString(
+                                  'en-US',
+                                  {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric',
+                                  }
+                                )}
+                              </div>
+
+                              {/* Status */}
+                              <div>
+                                <span
+                                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${statusConfig.bg} ${statusConfig.color} ${statusConfig.border}`}
+                                >
+                                  <StatusIcon className="w-3 h-3 mr-1" />
+                                  {order.orderStatus?.charAt(0).toUpperCase() +
+                                    order.orderStatus?.slice(1)}
+                                </span>
+                              </div>
+
+                              {/* PI Number */}
+                              <div className="text-slate-700 text-sm">
+                                {order.piNumber || '-'}
+                              </div>
+
+                              {/* Amount */}
+                              <div className="text-slate-700 text-sm font-medium">
+                                {new Intl.NumberFormat('en-US', {
+                                  style: 'currency',
+                                  currency: 'USD',
+                                  maximumFractionDigits: 0,
+                                }).format(order.totalAmount || 0)}
+                              </div>
+
+                              {/* Advance Payment */}
+                              <div className="text-slate-700 text-sm font-medium">
+                                {new Intl.NumberFormat('en-US', {
+                                  style: 'currency',
+                                  currency: 'USD',
+                                  maximumFractionDigits: 0,
+                                }).format(order.piInvoice?.advanceAmount || 0)}
+                              </div>
+
+                              {/* Actions */}
+                              <div className="flex items-center justify-end space-x-2">
+                                {order.piInvoiceId && (
+                                  <Link
+                                    to={`/pi-details/${order.piInvoiceId}`}
+                                    className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-blue-600 transition-all duration-300"
+                                    title="View Order"
+                                  >
+                                    <HiEye className="w-4 h-4" />
+                                  </Link>
+                                )}
+                                <button
+                                  onClick={() => setConfirmDelete(order.id)}
+                                  className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
+                                  title="Delete Order"
+                                >
+                                  <HiTrash className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}

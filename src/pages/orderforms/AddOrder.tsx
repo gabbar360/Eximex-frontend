@@ -1,13 +1,15 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchPiInvoices, updatePiAmount } from '../../features/piSlice';
 import { fetchOrders, createOrder } from '../../features/orderSlice';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   HiArrowLeft,
   HiCheckCircle,
   HiDocumentText,
   HiCurrencyDollar,
+  HiChevronDown,
+  HiMagnifyingGlass,
 } from 'react-icons/hi2';
 import { toast } from 'react-toastify';
 import PageBreadCrumb from '../../components/common/PageBreadCrumb';
@@ -28,6 +30,98 @@ const AddOrder = () => {
     advanceAmount: '',
     balanceAmount: '',
   });
+
+  // Dropdown states
+  const [piSearch, setPiSearch] = useState('');
+  const [showPiDropdown, setShowPiDropdown] = useState(false);
+  const piRef = useRef(null);
+
+  // Custom Dropdown Component
+  const SearchableDropdown = ({
+    label,
+    value,
+    options,
+    onSelect,
+    searchValue,
+    onSearchChange,
+    isOpen,
+    onToggle,
+    placeholder,
+    disabled = false,
+    dropdownRef,
+    displayKey = 'name',
+    valueKey = 'id',
+  }) => {
+    const selectedOption = options.find((opt) => opt[valueKey]?.toString() === value?.toString());
+
+    return (
+      <div className="relative" ref={dropdownRef}>
+        <div
+          className={`w-full px-4 py-3 border border-gray-300 bg-white rounded-lg cursor-pointer flex items-center justify-between transition-all duration-300 shadow-sm ${
+            disabled
+              ? 'bg-gray-100 cursor-not-allowed'
+              : 'hover:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200 focus-within:border-slate-500'
+          }`}
+          onClick={() => !disabled && onToggle()}
+        >
+          <span
+            className={`text-sm ${selectedOption ? 'text-slate-900' : 'text-slate-500'}`}
+          >
+            {selectedOption ? selectedOption[displayKey] : placeholder}
+          </span>
+          <HiChevronDown
+            className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          />
+        </div>
+
+        {isOpen && !disabled && (
+          <div
+            className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl"
+            style={{ top: '100%', marginTop: '4px' }}
+          >
+            <div className="p-3 border-b border-gray-100">
+              <div className="relative">
+                <HiMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder={`Search ${label.toLowerCase()}...`}
+                  value={searchValue}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                  onClick={(e) => e.stopPropagation()}
+                  autoFocus
+                />
+              </div>
+            </div>
+            <div className="max-h-60 overflow-y-auto">
+              {options.length === 0 ? (
+                <div className="px-4 py-3 text-slate-500 text-sm text-center">
+                  No {label.toLowerCase()} found
+                </div>
+              ) : (
+                options.map((option) => (
+                  <div
+                    key={option[valueKey]}
+                    className={`px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm transition-colors duration-150 ${
+                      option[valueKey]?.toString() === value?.toString()
+                        ? 'bg-slate-100 text-slate-900 font-medium'
+                        : 'text-slate-700'
+                    }`}
+                    onClick={() => {
+                      onSelect(option[valueKey]);
+                      onToggle();
+                    }}
+                  >
+                    {option[displayKey]}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   useEffect(() => {
     const fetchPIList = async () => {
@@ -68,6 +162,18 @@ const AddOrder = () => {
     };
     fetchPIList();
   }, [dispatch]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (piRef.current && !piRef.current.contains(event.target)) {
+        setShowPiDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handlePISelect = (pi) => {
     setSelectedPI(pi);
@@ -225,33 +331,35 @@ const AddOrder = () => {
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     Select PI Invoice *
                   </label>
-                  <select
+                  <SearchableDropdown
+                    label="PI Invoice"
                     value={selectedPI?.id || ''}
-                    onChange={(e) => {
-                      const selectedId = parseInt(e.target.value);
-                      const selected = piList.find(
-                        (pi) => pi.id === selectedId
-                      );
-                      if (selected) handlePISelect(selected);
+                    options={piList
+                      .filter((pi) => {
+                        const searchText = `${pi.piNumber || pi.invoiceNumber} ${pi.party?.companyName || pi.customerName}`;
+                        return searchText
+                          .toLowerCase()
+                          .includes(piSearch.toLowerCase());
+                      })
+                      .map((pi) => ({
+                        id: pi.id,
+                        name: `${pi.piNumber || pi.invoiceNumber} - ${pi.party?.companyName || pi.customerName} - $${(pi.totalAmount || 0).toLocaleString()}`,
+                      }))}
+                    onSelect={(piId) => {
+                      const selected = piList.find((pi) => pi.id === piId);
+                      if (selected) {
+                        handlePISelect(selected);
+                        setPiSearch('');
+                      }
                     }}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
-                    required
-                  >
-                    <option value="">Choose a PI Invoice...</option>
-                    {piLoading ? (
-                      <option disabled>Loading PI invoices...</option>
-                    ) : Array.isArray(piList) && piList.length > 0 ? (
-                      piList.map((pi) => (
-                        <option key={pi.id} value={pi.id}>
-                          {pi.piNumber || pi.invoiceNumber} -{' '}
-                          {pi.party?.companyName || pi.customerName} - $
-                          {(pi.totalAmount || 0).toLocaleString()}
-                        </option>
-                      ))
-                    ) : (
-                      <option disabled>No PI invoices available</option>
-                    )}
-                  </select>
+                    searchValue={piSearch}
+                    onSearchChange={setPiSearch}
+                    isOpen={showPiDropdown}
+                    onToggle={() => setShowPiDropdown(!showPiDropdown)}
+                    placeholder={piLoading ? "Loading PI invoices..." : piList.length === 0 ? "No PI invoices available" : "Choose a PI Invoice..."}
+                    disabled={piLoading || piList.length === 0}
+                    dropdownRef={piRef}
+                  />
                 </div>
 
                 {/* Selected PI Details */}

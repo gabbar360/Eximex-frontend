@@ -174,126 +174,128 @@ const VgmManagement: React.FC = () => {
           </div>
         ) : (
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-            <div className="hidden lg:block">
-              <div className="bg-gray-50 border-b border-gray-200 p-4">
-                <div className="grid grid-cols-7 gap-3 text-sm font-semibold text-slate-700">
-                  <div className="flex items-center gap-2">
-                    <HiDocumentText className="w-4 h-4 text-slate-600" />
-                    <span>Order Number</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <HiCube className="w-4 h-4 text-slate-600" />
-                    <span>Company</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <HiCube className="w-4 h-4 text-slate-600" />
-                    <span>Verified By</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <HiCube className="w-4 h-4 text-slate-600" />
-                    <span>VGM Weight</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <HiCube className="w-4 h-4 text-slate-600" />
-                    <span>Method</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <HiCube className="w-4 h-4 text-slate-600" />
-                    <span>Status</span>
-                  </div>
-                  <div className="flex items-center justify-end gap-2">
-                    <HiCube className="w-4 h-4 text-slate-600" />
-                    <span>Actions</span>
+            <div className="overflow-x-auto">
+              <div className="min-w-[800px]">
+                <div className="bg-gray-50 border-b border-gray-200 p-4">
+                  <div className="grid grid-cols-7 gap-3 text-sm font-semibold text-slate-700">
+                    <div className="flex items-center gap-2">
+                      <HiDocumentText className="w-4 h-4 text-slate-600" />
+                      <span>Order Number</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <HiCube className="w-4 h-4 text-slate-600" />
+                      <span>Company</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <HiCube className="w-4 h-4 text-slate-600" />
+                      <span>Verified By</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <HiCube className="w-4 h-4 text-slate-600" />
+                      <span>VGM Weight</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <HiCube className="w-4 h-4 text-slate-600" />
+                      <span>Method</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <HiCube className="w-4 h-4 text-slate-600" />
+                      <span>Status</span>
+                    </div>
+                    <div className="flex items-center justify-end gap-2">
+                      <HiCube className="w-4 h-4 text-slate-600" />
+                      <span>Actions</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="divide-y divide-white/20">
-                {paginatedOrders.map((order: any) => {
-                  const vgmDoc = order.piInvoice?.vgmDocuments?.[0];
-                  const hasVgm = vgmDoc && Object.keys(vgmDoc).length > 0;
-                  const vgmWeight = vgmDoc?.verifiedGrossMass || 0;
+                <div className="divide-y divide-white/20">
+                  {paginatedOrders.map((order: any) => {
+                    const vgmDoc = order.piInvoice?.vgmDocuments?.[0];
+                    const hasVgm = vgmDoc && Object.keys(vgmDoc).length > 0;
+                    const vgmWeight = vgmDoc?.verifiedGrossMass || 0;
 
-                  return (
-                    <div
-                      key={order.id}
-                      className="p-4 hover:bg-white/50 transition-all duration-300"
-                    >
-                      <div className="grid grid-cols-7 gap-3 items-center">
-                        <div className="flex items-center gap-2">
-                          <HiDocumentText className="w-4 h-4 text-slate-600 flex-shrink-0" />
-                          <span
-                            className="text-slate-800 font-medium truncate"
-                            title={order.orderNumber}
-                          >
-                            #{order.orderNumber}
-                          </span>
-                        </div>
+                    return (
+                      <div
+                        key={order.id}
+                        className="p-4 hover:bg-white/50 transition-all duration-300"
+                      >
+                        <div className="grid grid-cols-7 gap-3 items-center">
+                          <div className="flex items-center gap-2">
+                            <HiDocumentText className="w-4 h-4 text-slate-600 flex-shrink-0" />
+                            <span
+                              className="text-slate-800 font-medium truncate"
+                              title={order.orderNumber}
+                            >
+                              #{order.orderNumber}
+                            </span>
+                          </div>
 
-                        <div className="text-slate-700 text-sm">
-                          {order.piInvoice?.party?.companyName || '-'}
-                        </div>
+                          <div className="text-slate-700 text-sm">
+                            {order.piInvoice?.party?.companyName || '-'}
+                          </div>
 
-                        <div className="text-slate-700 text-sm">
-                          {vgmDoc?.verifiedBy || '-'}
-                        </div>
+                          <div className="text-slate-700 text-sm">
+                            {vgmDoc?.verifiedBy || '-'}
+                          </div>
 
-                        <div className="text-slate-700 text-sm font-medium">
-                          {vgmWeight > 0 ? `${vgmWeight}kg` : '-'}
-                        </div>
+                          <div className="text-slate-700 text-sm font-medium">
+                            {vgmWeight > 0 ? `${vgmWeight}kg` : '-'}
+                          </div>
 
-                        <div className="text-slate-700 text-sm">
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              vgmDoc?.method === 'METHOD_1'
-                                ? 'bg-blue-100 text-blue-800'
-                                : 'bg-green-100 text-green-800'
-                            }`}
-                          >
-                            {vgmDoc?.method === 'METHOD_1'
-                              ? 'Method 1'
-                              : 'Method 2'}
-                          </span>
-                        </div>
+                          <div className="text-slate-700 text-sm">
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                vgmDoc?.method === 'METHOD_1'
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : 'bg-green-100 text-green-800'
+                              }`}
+                            >
+                              {vgmDoc?.method === 'METHOD_1'
+                                ? 'Method 1'
+                                : 'Method 2'}
+                            </span>
+                          </div>
 
-                        <div className="text-slate-700 text-sm">
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              hasVgm
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-yellow-100 text-yellow-800'
-                            }`}
-                          >
-                            {hasVgm ? 'Complete' : 'Pending'}
-                          </span>
-                        </div>
+                          <div className="text-slate-700 text-sm">
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                hasVgm
+                                  ? 'bg-green-100 text-green-800'
+                                  : 'bg-yellow-100 text-yellow-800'
+                              }`}
+                            >
+                              {hasVgm ? 'Complete' : 'Pending'}
+                            </span>
+                          </div>
 
-                        <div className="flex items-center justify-end space-x-2">
-                          <button
-                            onClick={() => handlePDFDownload(order)}
-                            className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-blue-600 transition-all duration-300"
-                            title="Download VGM PDF"
-                          >
-                            <HiArrowDownTray className="w-4 h-4" />
-                          </button>
-                          <Link
-                            to={`/vgm/${vgmDoc?.id}`}
-                            className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-600 transition-all duration-300"
-                            title="Edit VGM"
-                          >
-                            <HiPencil className="w-4 h-4" />
-                          </Link>
-                          <button
-                            onClick={() => handleDeleteClick(vgmDoc?.id)}
-                            className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
-                            title="Delete VGM"
-                          >
-                            <HiTrash className="w-4 h-4" />
-                          </button>
+                          <div className="flex items-center justify-end space-x-2">
+                            <button
+                              onClick={() => handlePDFDownload(order)}
+                              className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-blue-600 transition-all duration-300"
+                              title="Download VGM PDF"
+                            >
+                              <HiArrowDownTray className="w-4 h-4" />
+                            </button>
+                            <Link
+                              to={`/vgm/${vgmDoc?.id}`}
+                              className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-600 transition-all duration-300"
+                              title="Edit VGM"
+                            >
+                              <HiPencil className="w-4 h-4" />
+                            </Link>
+                            <button
+                              onClick={() => handleDeleteClick(vgmDoc?.id)}
+                              className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
+                              title="Delete VGM"
+                            >
+                              <HiTrash className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>

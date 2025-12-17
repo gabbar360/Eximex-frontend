@@ -212,181 +212,94 @@ const TaskManagement: React.FC = () => {
             </div>
           ) : (
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-              {/* Desktop Table View */}
-              <div className="hidden lg:block">
-                <div className="bg-gray-50 border-b border-gray-200 p-4">
-                  <div className="grid grid-cols-8 gap-3 text-sm font-semibold text-slate-700">
-                    <div className="flex items-center gap-2">
-                      <MdTask className="w-4 h-4 text-slate-600" />
-                      <span>Task</span>
-                    </div>
-                    <div>Type</div>
-                    <div>Assigned To</div>
-                    <div>Assigned By</div>
-                    <div>Priority</div>
-                    <div>Status</div>
-                    <div>Due Date</div>
-                    <div className="flex items-center justify-end gap-2">
-                      <HiSparkles className="w-4 h-4 text-slate-600" />
-                      <span>Actions</span>
+              <div className="overflow-x-auto">
+                <div className="min-w-[800px]">
+                  <div className="bg-gray-50 border-b border-gray-200 p-4">
+                    <div className="grid grid-cols-8 gap-3 text-sm font-semibold text-slate-700">
+                      <div className="flex items-center gap-2">
+                        <MdTask className="w-4 h-4 text-slate-600" />
+                        <span>Task</span>
+                      </div>
+                      <div>Type</div>
+                      <div>Assigned To</div>
+                      <div>Assigned By</div>
+                      <div>Priority</div>
+                      <div>Status</div>
+                      <div>Due Date</div>
+                      <div className="flex items-center justify-end gap-2">
+                        <HiSparkles className="w-4 h-4 text-slate-600" />
+                        <span>Actions</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="divide-y divide-gray-200">
-                  {tasks.map((task: any) => (
-                    <div key={task.id} className="p-4 hover:bg-gray-50">
-                      <div className="grid grid-cols-8 gap-3 items-center">
-                        <div>
-                          <h3 className="font-semibold text-slate-900">{task.title}</h3>
-                          {task.description && (
-                            <p className="text-sm text-slate-600 mt-1 truncate">{task.description}</p>
-                          )}
-                        </div>
-                        <div className="text-sm text-slate-700">
-                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            {task.type?.replace('_', ' ')}
-                          </span>
-                        </div>
-                        <div className="text-sm text-slate-700">{task.assignee?.name}</div>
-                        <div className="text-sm text-slate-700">{task.assigner?.name}</div>
-                        <div>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(task.priority)}`}>
-                            {task.priority}
-                          </span>
-                        </div>
-                        <div>
-                          {!isAdmin ? (
-                            <select
-                              value={task.status}
-                              onChange={(e) => handleStatusUpdate(task.id, e.target.value)}
-                              className={`px-2 py-1 rounded-full text-xs font-medium border-0 ${getStatusColor(task.status)}`}
-                              disabled={task.status === 'COMPLETED'}
-                            >
-                              <option value="PENDING">Pending</option>
-                              <option value="IN_PROGRESS">In Progress</option>
-                              <option value="ON_HOLD">On Hold</option>
-                              <option value="COMPLETED">Completed</option>
-                              <option value="CANCELLED">Cancelled</option>
-                            </select>
-                          ) : (
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}>
-                              {task.status.replace('_', ' ')}
+                  <div className="divide-y divide-gray-200">
+                    {tasks.map((task: any) => (
+                      <div key={task.id} className="p-4 hover:bg-gray-50">
+                        <div className="grid grid-cols-8 gap-3 items-center">
+                          <div>
+                            <h3 className="font-semibold text-slate-900">{task.title}</h3>
+                            {task.description && (
+                              <p className="text-sm text-slate-600 mt-1 truncate">{task.description}</p>
+                            )}
+                          </div>
+                          <div className="text-sm text-slate-700">
+                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              {task.type?.replace('_', ' ')}
                             </span>
-                          )}
-                        </div>
-                        <div className="text-sm text-slate-700">
-                          {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '-'}
-                        </div>
-                        <div className="flex items-center justify-end space-x-2">
-                          {isAdmin && (
-                            <>
-                              <Link
-                                to={`/task-management/edit-task/${task.id}`}
-                                className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-600 transition-all duration-300"
-                              >
-                                <HiPencil className="w-4 h-4" />
-                              </Link>
-                              <button
-                                onClick={() => handleDeleteClick(task.id)}
-                                className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
-                              >
-                                <HiTrash className="w-4 h-4" />
-                              </button>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Mobile Card View */}
-              <div className="lg:hidden divide-y divide-gray-200">
-                {tasks.map((task: any) => (
-                  <div key={task.id} className="p-4">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h3 className="font-semibold text-slate-800">{task.title}</h3>
-                        {task.description && (
-                          <p className="text-sm text-slate-600 mt-1">{task.description}</p>
-                        )}
-                      </div>
-                      {isAdmin && (
-                        <div className="flex items-center space-x-2">
-                          <Link
-                            to={`/task-management/edit-task/${task.id}`}
-                            className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-600 transition-all duration-300"
-                          >
-                            <HiPencil className="w-4 h-4" />
-                          </Link>
-                          <button 
-                            onClick={() => handleDeleteClick(task.id)}
-                            className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
-                          >
-                            <HiTrash className="w-4 h-4" />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div>
-                        <span className="font-medium text-slate-500 text-xs">Type:</span>
-                        <div>
-                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            {task.type?.replace('_', ' ')}
-                          </span>
-                        </div>
-                      </div>
-                      <div>
-                        <span className="font-medium text-slate-500 text-xs">Assigned To:</span>
-                        <div className="text-slate-700">{task.assignee?.name}</div>
-                      </div>
-                      <div>
-                        <span className="font-medium text-slate-500 text-xs">Assigned By:</span>
-                        <div className="text-slate-700">{task.assigner?.name}</div>
-                      </div>
-                      <div>
-                        <span className="font-medium text-slate-500 text-xs">Priority:</span>
-                        <div>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(task.priority)}`}>
-                            {task.priority}
-                          </span>
-                        </div>
-                      </div>
-                      <div>
-                        <span className="font-medium text-slate-500 text-xs">Status:</span>
-                        <div>
-                          {!isAdmin ? (
-                            <select
-                              value={task.status}
-                              onChange={(e) => handleStatusUpdate(task.id, e.target.value)}
-                              className={`px-2 py-1 rounded-full text-xs font-medium border-0 ${getStatusColor(task.status)}`}
-                              disabled={task.status === 'COMPLETED'}
-                            >
-                              <option value="PENDING">Pending</option>
-                              <option value="IN_PROGRESS">In Progress</option>
-                              <option value="ON_HOLD">On Hold</option>
-                              <option value="COMPLETED">Completed</option>
-                              <option value="CANCELLED">Cancelled</option>
-                            </select>
-                          ) : (
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}>
-                              {task.status.replace('_', ' ')}
+                          </div>
+                          <div className="text-sm text-slate-700">{task.assignee?.name}</div>
+                          <div className="text-sm text-slate-700">{task.assigner?.name}</div>
+                          <div>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(task.priority)}`}>
+                              {task.priority}
                             </span>
-                          )}
+                          </div>
+                          <div>
+                            {!isAdmin ? (
+                              <select
+                                value={task.status}
+                                onChange={(e) => handleStatusUpdate(task.id, e.target.value)}
+                                className={`px-2 py-1 rounded-full text-xs font-medium border-0 ${getStatusColor(task.status)}`}
+                                disabled={task.status === 'COMPLETED'}
+                              >
+                                <option value="PENDING">Pending</option>
+                                <option value="IN_PROGRESS">In Progress</option>
+                                <option value="ON_HOLD">On Hold</option>
+                                <option value="COMPLETED">Completed</option>
+                                <option value="CANCELLED">Cancelled</option>
+                              </select>
+                            ) : (
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}>
+                                {task.status.replace('_', ' ')}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-sm text-slate-700">
+                            {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '-'}
+                          </div>
+                          <div className="flex items-center justify-end space-x-2">
+                            {isAdmin && (
+                              <>
+                                <Link
+                                  to={`/task-management/edit-task/${task.id}`}
+                                  className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-600 transition-all duration-300"
+                                >
+                                  <HiPencil className="w-4 h-4" />
+                                </Link>
+                                <button
+                                  onClick={() => handleDeleteClick(task.id)}
+                                  className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
+                                >
+                                  <HiTrash className="w-4 h-4" />
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </div>
                       </div>
-                      {task.dueDate && (
-                        <div className="col-span-2">
-                          <span className="font-medium text-slate-500 text-xs">Due Date:</span>
-                          <div className="text-slate-700">{new Date(task.dueDate).toLocaleDateString()}</div>
-                        </div>
-                      )}
-                    </div>
+                    ))}
                   </div>
-                ))}
+                </div>
               </div>
             </div>
           )}

@@ -2,6 +2,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { fetchCategories } from '../../features/categorySlice';
 import { fetchProducts } from '../../features/productSlice';
+import {
+  HiChevronDown,
+  HiMagnifyingGlass,
+} from 'react-icons/hi2';
 
 // Extend Window interface for timeout handling
 declare global {
@@ -432,14 +436,150 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   const { products } = useSelector((state: any) => state.product);
   const [companies, setCompanies] = useState<Company[]>([]);
 
-  // Debug Redux state
-  console.log('Redux categories:', categories);
-  console.log('Redux products:', products);
-  console.log('Companies state:', companies);
+
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (companyRef.current && !companyRef.current.contains(event.target)) {
+        setShowCompanyDropdown(false);
+      }
+      if (containerTypeRef.current && !containerTypeRef.current.contains(event.target)) {
+        setShowContainerTypeDropdown(false);
+      }
+      if (paymentTermRef.current && !paymentTermRef.current.contains(event.target)) {
+        setShowPaymentTermDropdown(false);
+      }
+      if (deliveryTermRef.current && !deliveryTermRef.current.contains(event.target)) {
+        setShowDeliveryTermDropdown(false);
+      }
+      if (currencyRef.current && !currencyRef.current.contains(event.target)) {
+        setShowCurrencyDropdown(false);
+      }
+      if (preCarriageRef.current && !preCarriageRef.current.contains(event.target)) {
+        setShowPreCarriageDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Custom Dropdown Component
+  const SearchableDropdown = ({
+    label,
+    value,
+    options,
+    onSelect,
+    searchValue,
+    onSearchChange,
+    isOpen,
+    onToggle,
+    placeholder,
+    disabled = false,
+    dropdownRef,
+    displayKey = 'name',
+    valueKey = 'id',
+    className = '',
+    style = {},
+  }) => {
+    const selectedOption = options.find((opt) => opt[valueKey]?.toString() === value?.toString());
+
+    return (
+      <div className="relative" ref={dropdownRef}>
+        <div
+          className={`w-full px-4 py-3 border border-gray-300 bg-white rounded-lg cursor-pointer flex items-center justify-between transition-all duration-300 shadow-sm ${className} ${
+            disabled
+              ? 'bg-gray-100 cursor-not-allowed'
+              : 'hover:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200 focus-within:border-slate-500'
+          }`}
+          onClick={() => !disabled && onToggle()}
+          style={style}
+        >
+          <span
+            className={`text-sm ${selectedOption ? 'text-slate-900' : 'text-slate-500'}`}
+          >
+            {selectedOption ? selectedOption[displayKey] : placeholder}
+          </span>
+          <HiChevronDown
+            className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          />
+        </div>
+
+        {isOpen && !disabled && (
+          <div
+            className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl"
+            style={{ top: '100%', marginTop: '4px' }}
+          >
+            <div className="p-3 border-b border-gray-100">
+              <div className="relative">
+                <HiMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder={`Search ${label.toLowerCase()}...`}
+                  value={searchValue}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                  onClick={(e) => e.stopPropagation()}
+                  autoFocus
+                />
+              </div>
+            </div>
+            <div className="max-h-60 overflow-y-auto">
+              {options.length === 0 ? (
+                <div className="px-4 py-3 text-slate-500 text-sm text-center">
+                  No {label.toLowerCase()} found
+                </div>
+              ) : (
+                options.map((option) => (
+                  <div
+                    key={option[valueKey]}
+                    className={`px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm transition-colors duration-150 ${
+                      option[valueKey]?.toString() === value?.toString()
+                        ? 'bg-slate-100 text-slate-900 font-medium'
+                        : 'text-slate-700'
+                    }`}
+                    onClick={() => {
+                      onSelect(option[valueKey]);
+                      onToggle();
+                    }}
+                  >
+                    {option[displayKey]}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   // Backend integration state
   const [formDataLoaded, setFormDataLoaded] = useState<boolean>(false);
   const [validationResult, setValidationResult] = useState<any>(null);
+
+  // Dropdown states for searchable dropdowns
+  const [companySearch, setCompanySearch] = useState('');
+  const [containerTypeSearch, setContainerTypeSearch] = useState('');
+  const [paymentTermSearch, setPaymentTermSearch] = useState('');
+  const [deliveryTermSearch, setDeliveryTermSearch] = useState('');
+  const [currencySearch, setCurrencySearch] = useState('');
+  const [preCarriageSearch, setPreCarriageSearch] = useState('');
+  
+  const [showCompanyDropdown, setShowCompanyDropdown] = useState(false);
+  const [showContainerTypeDropdown, setShowContainerTypeDropdown] = useState(false);
+  const [showPaymentTermDropdown, setShowPaymentTermDropdown] = useState(false);
+  const [showDeliveryTermDropdown, setShowDeliveryTermDropdown] = useState(false);
+  const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
+  const [showPreCarriageDropdown, setShowPreCarriageDropdown] = useState(false);
+  
+  const companyRef = useRef(null);
+  const containerTypeRef = useRef(null);
+  const paymentTermRef = useRef(null);
+  const deliveryTermRef = useRef(null);
+  const currencyRef = useRef(null);
+  const preCarriageRef = useRef(null);
 
   // Step validation functions
   const validateStep1 = () => {
@@ -1872,28 +2012,48 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                     <div>
                       <Label htmlFor="company">Select Company</Label>
-                      <select
-                        id="company"
+                      <SearchableDropdown
+                        label="Company"
                         value={companyId}
-                        onChange={handleCompanyChange}
-                        required
-                        className={`block w-full rounded-lg border shadow-sm py-3 px-4 text-base bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 disabled:bg-gray-100 dark:disabled:bg-gray-800 ${
-                          validationErrors.companyId
-                            ? 'border-red-500 dark:border-red-500'
-                            : 'border-gray-300 dark:border-gray-700'
-                        }`}
-                      >
-                        <option value="" disabled>
-                          Choose Company
-                        </option>
-                        {(Array.isArray(companies) ? companies : [])
+                        options={(Array.isArray(companies) ? companies : [])
                           .filter((comp) => comp.role === 'Customer')
-                          .map((comp) => (
-                            <option key={comp.id} value={comp.id}>
-                              {comp.companyName}
-                            </option>
-                          ))}
-                      </select>
+                          .filter((comp) =>
+                            comp.companyName
+                              .toLowerCase()
+                              .includes(companySearch.toLowerCase())
+                          )
+                          .map((comp) => ({
+                            id: comp.id,
+                            name: comp.companyName,
+                          }))}
+                        onSelect={(companyId) => {
+                          setCompanyId(companyId);
+                          setCompanySearch('');
+                          const selectedParty = companies.find((c) => c.id == companyId);
+                          if (selectedParty) {
+                            setCompany({
+                              id: selectedParty.id,
+                              name: selectedParty.name,
+                              status: selectedParty.status || 'active',
+                              contactPerson: selectedParty.contactPerson || '',
+                              address: selectedParty.address || '',
+                              country: selectedParty.country || '',
+                              email: selectedParty.email || '',
+                              phone: selectedParty.phone || '',
+                            });
+                          } else {
+                            setCompany(null);
+                          }
+                        }}
+                        searchValue={companySearch}
+                        onSearchChange={setCompanySearch}
+                        isOpen={showCompanyDropdown}
+                        onToggle={() => setShowCompanyDropdown(!showCompanyDropdown)}
+                        placeholder="Choose Company"
+                        dropdownRef={companyRef}
+                        className={validationErrors.companyId ? 'border-red-500' : ''}
+                        style={validationErrors.companyId ? { borderColor: '#ef4444', borderWidth: '2px' } : {}}
+                      />
                     </div>
                     <div>
                       <Label htmlFor="contactPerson">Contact Person *</Label>
@@ -2069,24 +2229,32 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                     </div>
                     <div>
                       <Label htmlFor="containerType">Container Type *</Label>
-                      <select
-                        id="containerType"
+                      <SearchableDropdown
+                        label="Container Type"
                         value={containerType}
-                        onChange={handleContainerTypeChange}
-                        className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm py-3 px-4 text-base bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                        style={
-                          validationErrors.containerType
-                            ? { borderColor: '#ef4444', borderWidth: '2px' }
-                            : {}
-                        }
-                      >
-                        <option value="">Select Container Type</option>
-                        {containerTypes.map((config) => (
-                          <option key={config.type} value={config.type}>
-                            {config.type} (CBM: {config.cbm})
-                          </option>
-                        ))}
-                      </select>
+                        options={containerTypes
+                          .filter((config) =>
+                            config.type
+                              .toLowerCase()
+                              .includes(containerTypeSearch.toLowerCase())
+                          )
+                          .map((config) => ({
+                            id: config.type,
+                            name: `${config.type} (CBM: ${config.cbm})`,
+                          }))}
+                        onSelect={(type) => {
+                          setContainerType(type);
+                          setContainerTypeSearch('');
+                          setMaxPermissibleWeight('');
+                        }}
+                        searchValue={containerTypeSearch}
+                        onSearchChange={setContainerTypeSearch}
+                        isOpen={showContainerTypeDropdown}
+                        onToggle={() => setShowContainerTypeDropdown(!showContainerTypeDropdown)}
+                        placeholder="Select Container Type"
+                        dropdownRef={containerTypeRef}
+                        style={validationErrors.containerType ? { borderColor: '#ef4444', borderWidth: '2px' } : {}}
+                      />
                       {validationErrors.containerType && (
                         <p className="text-red-500 text-sm mt-1">
                           Container type is required
@@ -2208,18 +2376,32 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                       <div>
                         <Label htmlFor="preCarriageBy">Pre Carriage By</Label>
-                        <select
-                          id="preCarriageBy"
+                        <SearchableDropdown
+                          label="Pre Carriage Mode"
                           value={preCarriageBy}
-                          onChange={(e) => setPreCarriageBy(e.target.value)}
-                          className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm py-3 px-4 text-base bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                        >
-                          <option value="">Select Mode</option>
-                          <option value="By Road">By Road</option>
-                          <option value="By Rail">By Rail</option>
-                          <option value="By Air">By Air</option>
-                          <option value="By Sea">By Sea</option>
-                        </select>
+                          options={[
+                            { id: '', name: 'Select Mode' },
+                            { id: 'By Road', name: 'By Road' },
+                            { id: 'By Rail', name: 'By Rail' },
+                            { id: 'By Air', name: 'By Air' },
+                            { id: 'By Sea', name: 'By Sea' },
+                          ]
+                            .filter((mode) =>
+                              mode.name
+                                .toLowerCase()
+                                .includes(preCarriageSearch.toLowerCase())
+                            )}
+                          onSelect={(mode) => {
+                            setPreCarriageBy(mode);
+                            setPreCarriageSearch('');
+                          }}
+                          searchValue={preCarriageSearch}
+                          onSearchChange={setPreCarriageSearch}
+                          isOpen={showPreCarriageDropdown}
+                          onToggle={() => setShowPreCarriageDropdown(!showPreCarriageDropdown)}
+                          placeholder="Select Mode"
+                          dropdownRef={preCarriageRef}
+                        />
                       </div>
                       <div>
                         <Label htmlFor="placeOfReceipt">Place of Receipt</Label>
@@ -2318,24 +2500,32 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                     <div>
                       <Label htmlFor="paymentTerm">Select Payment Term *</Label>
-                      <select
-                        id="paymentTerm"
+                      <SearchableDropdown
+                        label="Payment Term"
                         value={paymentTerm}
-                        onChange={handlePaymentTermChange}
-                        required
-                        className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm py-3 px-4 text-base bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                        style={
-                          validationErrors.paymentTerm
-                            ? { borderColor: '#ef4444', borderWidth: '2px' }
-                            : {}
-                        }
-                      >
-                        <option value="" disabled>
-                          Choose Payment Term
-                        </option>
-                        <option value="advance">Advance</option>
-                        <option value="lc">LC (Letter of Credit)</option>
-                      </select>
+                        options={[
+                          { id: 'advance', name: 'Advance' },
+                          { id: 'lc', name: 'LC (Letter of Credit)' },
+                        ]
+                          .filter((term) =>
+                            term.name
+                              .toLowerCase()
+                              .includes(paymentTermSearch.toLowerCase())
+                          )}
+                        onSelect={(term) => {
+                          setPaymentTerm(term);
+                          setPaymentTermSearch('');
+                          setAdvancePercentage('');
+                          setBalancePaymentTerm('');
+                        }}
+                        searchValue={paymentTermSearch}
+                        onSearchChange={setPaymentTermSearch}
+                        isOpen={showPaymentTermDropdown}
+                        onToggle={() => setShowPaymentTermDropdown(!showPaymentTermDropdown)}
+                        placeholder="Choose Payment Term"
+                        dropdownRef={paymentTermRef}
+                        style={validationErrors.paymentTerm ? { borderColor: '#ef4444', borderWidth: '2px' } : {}}
+                      />
                       {validationErrors.paymentTerm && (
                         <p className="text-red-500 text-sm mt-1">
                           Payment term is required
@@ -2346,25 +2536,32 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                       <Label htmlFor="deliveryTerm">
                         Select Delivery Term *
                       </Label>
-                      <select
-                        id="deliveryTerm"
+                      <SearchableDropdown
+                        label="Delivery Term"
                         value={deliveryTerm}
-                        onChange={handleDeliveryTermChange}
-                        required
-                        className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm py-3 px-4 text-base bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                        style={
-                          validationErrors.deliveryTerm
-                            ? { borderColor: '#ef4444', borderWidth: '2px' }
-                            : {}
-                        }
-                      >
-                        <option value="" disabled>
-                          Choose Delivery Term
-                        </option>
-                        <option value="fob">FOB</option>
-                        <option value="cif">CIF</option>
-                        <option value="ddp">DDP</option>
-                      </select>
+                        options={[
+                          { id: 'fob', name: 'FOB' },
+                          { id: 'cif', name: 'CIF' },
+                          { id: 'ddp', name: 'DDP' },
+                        ]
+                          .filter((term) =>
+                            term.name
+                              .toLowerCase()
+                              .includes(deliveryTermSearch.toLowerCase())
+                          )}
+                        onSelect={(term) => {
+                          setDeliveryTerm(term);
+                          setDeliveryTermSearch('');
+                          setCharges({});
+                        }}
+                        searchValue={deliveryTermSearch}
+                        onSearchChange={setDeliveryTermSearch}
+                        isOpen={showDeliveryTermDropdown}
+                        onToggle={() => setShowDeliveryTermDropdown(!showDeliveryTermDropdown)}
+                        placeholder="Choose Delivery Term"
+                        dropdownRef={deliveryTermRef}
+                        style={validationErrors.deliveryTerm ? { borderColor: '#ef4444', borderWidth: '2px' } : {}}
+                      />
                       {validationErrors.deliveryTerm && (
                         <p className="text-red-500 text-sm mt-1">
                           Delivery term is required
@@ -2495,18 +2692,33 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                     </div>
                     <div>
                       <Label htmlFor="currency">Currency</Label>
-                      <select
-                        id="currency"
+                      <SearchableDropdown
+                        label="Currency"
                         value={currency}
-                        onChange={(e) => setCurrency(e.target.value)}
-                        className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm py-3 px-4 text-base bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                      >
-                        {currencies.map((curr) => (
-                          <option key={curr.code} value={curr.code}>
-                            {curr.code} ({curr.symbol}) - {curr.name}
-                          </option>
-                        ))}
-                      </select>
+                        options={currencies
+                          .filter((curr) =>
+                            curr.code
+                              .toLowerCase()
+                              .includes(currencySearch.toLowerCase()) ||
+                            curr.name
+                              .toLowerCase()
+                              .includes(currencySearch.toLowerCase())
+                          )
+                          .map((curr) => ({
+                            id: curr.code,
+                            name: `${curr.code} (${curr.symbol}) - ${curr.name}`,
+                          }))}
+                        onSelect={(currencyCode) => {
+                          setCurrency(currencyCode);
+                          setCurrencySearch('');
+                        }}
+                        searchValue={currencySearch}
+                        onSearchChange={setCurrencySearch}
+                        isOpen={showCurrencyDropdown}
+                        onToggle={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
+                        placeholder="Select Currency"
+                        dropdownRef={currencyRef}
+                      />
                     </div>
                   </div>
 
