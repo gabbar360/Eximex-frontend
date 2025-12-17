@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { fetchParties, deleteParty } from '../../features/partySlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -20,6 +21,8 @@ import {
   HiDocumentText,
   HiTrophy,
   HiXCircle,
+  HiEnvelope,
+  HiPhone,
 } from 'react-icons/hi2';
 import { toast } from 'react-toastify';
 import { Pagination } from 'antd';
@@ -43,6 +46,8 @@ const Cprospect = () => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [openStageDropdown, setOpenStageDropdown] = useState(null);
   const [filterRole, setFilterRole] = useState('');
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
+  const buttonRefs = useRef({});
   
   // Check if there are any Customer contacts to show Stage column
   const hasCustomers = parties && parties.some(party => party.role === 'Customer');
@@ -86,6 +91,17 @@ const Cprospect = () => {
     if (!name) return '-';
     if (name.length <= 10) return name;
     return name.substring(0, 10) + '...';
+  };
+
+  const updateDropdownPosition = (partyId) => {
+    const button = buttonRefs.current[partyId];
+    if (button) {
+      const rect = button.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY + 8,
+        right: window.innerWidth - rect.right + window.scrollX
+      });
+    }
   };
 
   const handleStageSelect = async (partyId, newStage) => {
@@ -287,7 +303,7 @@ const Cprospect = () => {
               </p>
             </div>
           ) : (
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-visible">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm" style={{position: 'relative', zIndex: 1, overflow: 'visible'}}>
               {/* Desktop Table View */}
               <div className="hidden lg:block">
                 {/* Table Header */}
@@ -505,176 +521,227 @@ const Cprospect = () => {
                 </div>
               </div>
 
-              {/* Mobile Card View */}
-              <div className="lg:hidden divide-y divide-white/20">
-                {parties.map((party) => (
-                  <div key={party.id} className="p-4">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-slate-700 shadow-md flex-shrink-0">
-                          <HiBuildingOffice2 className="w-4 h-4 text-white" />
+              {/* Tablet/Mobile Table View with Horizontal Scroll */}
+              <div className="lg:hidden">
+                <div className="relative" style={{overflow: 'visible'}}>
+                  <div className="overflow-x-auto" style={{overflowY: 'visible'}}>
+                    <div className="min-w-[800px]">
+                    {/* Table Header */}
+                    <div className="bg-gray-50 border-b border-gray-200 p-4">
+                      <div
+                        className="grid gap-2 text-sm font-semibold text-slate-700"
+                        style={{
+                          gridTemplateColumns: hasCustomers
+                            ? '1.5fr 1.8fr 1fr 1fr 1fr 0.8fr 0.8fr'
+                            : '1.5fr 1.8fr 1fr 1fr 0.8fr 0.8fr',
+                        }}
+                      >
+                        <div className="flex items-center gap-2">
+                          <HiBuildingOffice2 className="w-4 h-4 text-slate-600" />
+                          <span>Company</span>
                         </div>
-                        <h3 className="font-semibold text-slate-800" title={party.companyName}>
-                          {truncateCompanyName(party.companyName)}
-                        </h3>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3 text-sm mb-4">
-                      <div>
-                        <span className="font-medium text-slate-500 text-xs">
-                          Email:
-                        </span>
-                        <div className="text-slate-700 truncate">
-                          {party.email || '-'}
+                        <div className="flex items-center gap-2">
+                          <span>Email</span>
                         </div>
-                      </div>
-                      <div>
-                        <span className="font-medium text-slate-500 text-xs">
-                          Phone:
-                        </span>
-                        <div className="text-slate-700">
-                          {party.phone || '-'}
+                        <div className="flex items-center gap-2">
+                          <span>Phone</span>
                         </div>
-                      </div>
-                      <div>
-                        <span className="font-medium text-slate-500 text-xs">
-                          Role:
-                        </span>
-                        <div className="text-slate-700 font-medium">
-                          {party.role}
+                        <div className="flex items-center gap-2">
+                          <span>Role</span>
                         </div>
-                      </div>
-                      {party.role === 'Customer' && (
-                        <div>
-                          <span className="font-medium text-slate-500 text-xs">
-                            Stage:
-                          </span>
-                          <div className="relative stage-dropdown-container">
-                            {(() => {
-                              const stageData = getStageData(party.stage || 'NEW');
-                              return (
-                                <>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setOpenStageDropdown(
-                                        openStageDropdown === party.id ? null : party.id
-                                      );
-                                    }}
-                                    className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full border ${stageData.color} hover:opacity-80 transition-all duration-200`}
-                                  >
-                                    <stageData.icon className={`w-3 h-3 mr-2 ${stageData.iconColor}`} />
-                                    {stageData.label}
-                                    <HiChevronDown className="ml-1 w-3 h-3" />
-                                  </button>
-
-                                  {openStageDropdown === party.id && (
-                                    <div className="absolute left-0 bottom-full mb-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-[9999] backdrop-blur-sm">
-                                      {stages.map((stage) => (
-                                        <button
-                                          key={stage.value}
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleStageSelect(party.id, stage.value);
-                                          }}
-                                          className={`flex items-center gap-3 w-full px-4 py-3 text-sm transition-all duration-200 border-b border-gray-50 last:border-b-0 ${
-                                            stage.value === (party.stage || 'NEW')
-                                              ? `${stage.color} font-medium` 
-                                              : 'text-slate-700 hover:bg-gray-50'
-                                          }`}
-                                        >
-                                          <stage.icon className={`w-4 h-4 ${stage.iconColor}`} />
-                                          <span className="font-medium">{stage.label}</span>
-                                        </button>
-                                      ))}
-                                    </div>
-                                  )}
-                                </>
-                              );
-                            })()
-                            }
-                          </div>
-                        </div>
-                      )}
-                      <div>
-                        <span className="font-medium text-slate-500 text-xs">
-                          Status:
-                        </span>
-                        <div>
-                          <span
-                            className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${
-                              party.status
-                                ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
-                                : 'bg-red-50 text-red-600 border-red-200'
-                            }`}
-                          >
-                            {party.status ? 'Active' : 'Inactive'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-center pt-3 mt-3 border-t border-gray-200">
-                      <div className="relative dropdown-container">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setOpenDropdown(
-                              openDropdown === party.id ? null : party.id
-                            );
-                          }}
-                          className="p-2 rounded-lg text-slate-500 hover:bg-gray-100 transition-all duration-300"
-                        >
-                          <HiEllipsisVertical className="w-5 h-5" />
-                        </button>
-
-                        {openDropdown === party.id && (
-                          <div className="absolute right-0 bottom-full mb-2 w-52 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-[9999] backdrop-blur-sm">
-                            <Link
-                              to={`/view-party/${party.id}`}
-                              className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-all duration-200 border-b border-gray-50 last:border-b-0"
-                              onClick={() => setOpenDropdown(null)}
-                            >
-                              <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
-                                <HiEye className="w-4 h-4 text-slate-600" />
-                              </div>
-                              <span className="font-medium">
-                                View Details
-                              </span>
-                            </Link>
-                            <Link
-                              to={`/edit-contact/${party.id}`}
-                              className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-emerald-50 transition-all duration-200 border-b border-gray-50 last:border-b-0"
-                              onClick={() => setOpenDropdown(null)}
-                            >
-                              <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
-                                <HiPencil className="w-4 h-4 text-emerald-600" />
-                              </div>
-                              <span className="font-medium">
-                                Edit Contact
-                              </span>
-                            </Link>
-                            <button
-                              onClick={() => {
-                                setOpenDropdown(null);
-                                handleDeleteClick(party.id);
-                              }}
-                              className="flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 w-full text-left"
-                            >
-                              <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center">
-                                <HiTrash className="w-4 h-4 text-red-600" />
-                              </div>
-                              <span className="font-medium">
-                                Delete Contact
-                              </span>
-                            </button>
+                        {hasCustomers && (
+                          <div className="flex items-center gap-2">
+                            <span>Stage</span>
                           </div>
                         )}
+                        <div className="flex items-center gap-2">
+                          <span>Status</span>
+                        </div>
+                        <div className="flex items-center justify-end gap-2">
+                          <span>Actions</span>
+                        </div>
                       </div>
                     </div>
+                    <div className="divide-y divide-white/20">
+                      {parties.map((party) => (
+                        <div
+                          key={party.id}
+                          className="p-4 hover:bg-white/50 transition-all duration-300"
+                        >
+                          <div
+                            className="grid gap-2 items-center"
+                            style={{
+                              gridTemplateColumns: hasCustomers
+                                ? '1.5fr 1.8fr 1fr 1fr 1fr 0.8fr 0.8fr'
+                                : '1.5fr 1.8fr 1fr 1fr 0.8fr 0.8fr',
+                            }}
+                          >
+                            {/* Company */}
+                            <div className="flex items-center gap-2">
+                              <div className="p-2 rounded-lg bg-slate-700 shadow-md flex-shrink-0">
+                                <HiBuildingOffice2 className="w-4 h-4 text-white" />
+                              </div>
+                              <span
+                                className="text-slate-800 font-medium"
+                                title={party.companyName}
+                              >
+                                {truncateCompanyName(party.companyName)}
+                              </span>
+                            </div>
+
+                            {/* Email */}
+                            <div
+                              className="text-slate-700 text-sm truncate"
+                              title={party.email}
+                            >
+                              {party.email || '-'}
+                            </div>
+
+                            {/* Phone */}
+                            <div className="text-slate-700 text-sm">
+                              {party.phone || '-'}
+                            </div>
+
+                            {/* Role */}
+                            <div className="text-slate-700 text-sm font-medium">
+                              {party.role}
+                            </div>
+
+                            {/* Stage */}
+                            {hasCustomers && (
+                              <div>
+                                {party.role === 'Customer' ? (
+                                  <div className="relative stage-dropdown-container">
+                                    {(() => {
+                                      const stageData = getStageData(party.stage || 'NEW');
+                                      return (
+                                        <>
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setOpenStageDropdown(
+                                                openStageDropdown === party.id ? null : party.id
+                                              );
+                                            }}
+                                            className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full border ${stageData.color} hover:opacity-80 transition-all duration-200`}
+                                          >
+                                            <stageData.icon className={`w-3 h-3 mr-2 ${stageData.iconColor}`} />
+                                            {stageData.label}
+                                            <HiChevronDown className="ml-1 w-3 h-3" />
+                                          </button>
+
+                                          {openStageDropdown === party.id && (
+                                            <div className="absolute left-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-[99999] backdrop-blur-sm" style={{zIndex: 99999}}>
+                                              {stages.map((stage) => (
+                                                <button
+                                                  key={stage.value}
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleStageSelect(party.id, stage.value);
+                                                  }}
+                                                  className={`flex items-center gap-3 w-full px-4 py-3 text-sm transition-all duration-200 border-b border-gray-50 last:border-b-0 ${
+                                                    stage.value === (party.stage || 'NEW')
+                                                      ? `${stage.color} font-medium` 
+                                                      : 'text-slate-700 hover:bg-gray-50'
+                                                  }`}
+                                                >
+                                                  <stage.icon className={`w-4 h-4 ${stage.iconColor}`} />
+                                                  <span className="font-medium">{stage.label}</span>
+                                                </button>
+                                              ))}
+                                            </div>
+                                          )}
+                                        </>
+                                      );
+                                    })()
+                                    }
+                                  </div>
+                                ) : (
+                                  <span className="text-slate-500 text-xs">-</span>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Status */}
+                            <div>
+                              <span
+                                className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${
+                                  party.status
+                                    ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                                    : 'bg-red-50 text-red-600 border-red-200'
+                                }`}
+                              >
+                                {party.status ? 'Active' : 'Inactive'}
+                              </span>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex items-center justify-end">
+                              <div className="relative dropdown-container">
+                                <button
+                                  data-dropdown-id={party.id}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setOpenDropdown(
+                                      openDropdown === party.id ? null : party.id
+                                    );
+                                  }}
+                                  className="p-2 rounded-lg text-slate-500 hover:bg-gray-100 transition-all duration-300"
+                                >
+                                  <HiEllipsisVertical className="w-5 h-5" />
+                                </button>
+
+                                {openDropdown === party.id && (
+                                  <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-[99999] backdrop-blur-sm" style={{zIndex: 99999}}>
+                                    <Link
+                                      to={`/view-party/${party.id}`}
+                                      className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-all duration-200 border-b border-gray-50 last:border-b-0"
+                                      onClick={() => setOpenDropdown(null)}
+                                    >
+                                      <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
+                                        <HiEye className="w-4 h-4 text-slate-600" />
+                                      </div>
+                                      <span className="font-medium">
+                                        View Details
+                                      </span>
+                                    </Link>
+                                    <Link
+                                      to={`/edit-contact/${party.id}`}
+                                      className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-emerald-50 transition-all duration-200 border-b border-gray-50 last:border-b-0"
+                                      onClick={() => setOpenDropdown(null)}
+                                    >
+                                      <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                                        <HiPencil className="w-4 h-4 text-emerald-600" />
+                                      </div>
+                                      <span className="font-medium">
+                                        Edit Contact
+                                      </span>
+                                    </Link>
+                                    <button
+                                      onClick={() => {
+                                        setOpenDropdown(null);
+                                        handleDeleteClick(party.id);
+                                      }}
+                                      className="flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 w-full text-left"
+                                    >
+                                      <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center">
+                                        <HiTrash className="w-4 h-4 text-red-600" />
+                                      </div>
+                                      <span className="font-medium">
+                                        Delete Contact
+                                      </span>
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    </div>
                   </div>
-                ))}
+                </div>
               </div>
             </div>
           )}

@@ -1,6 +1,10 @@
-import React, { useRef, useEffect, useCallback, useMemo } from 'react';
+import React, { useRef, useEffect, useCallback, useMemo, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import {
+  HiChevronDown,
+  HiMagnifyingGlass,
+} from 'react-icons/hi2';
 import Label from '../form/Label';
 
 interface ProductAdded {
@@ -56,6 +60,105 @@ const ProductRow: React.FC<ProductRowProps> = ({
   const rateRef = useRef<HTMLInputElement>(null);
   const weightRef = useRef<HTMLInputElement>(null);
 
+  // Dropdown states
+  const [categorySearch, setCategorySearch] = useState('');
+  const [subcategorySearch, setSubcategorySearch] = useState('');
+  const [productSearch, setProductSearch] = useState('');
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [showSubcategoryDropdown, setShowSubcategoryDropdown] = useState(false);
+  const [showProductDropdown, setShowProductDropdown] = useState(false);
+  
+  const categoryRef = useRef(null);
+  const subcategoryRef = useRef(null);
+  const productRef = useRef(null);
+
+  // Custom Dropdown Component
+  const SearchableDropdown = ({
+    label,
+    value,
+    options,
+    onSelect,
+    searchValue,
+    onSearchChange,
+    isOpen,
+    onToggle,
+    placeholder,
+    disabled = false,
+    dropdownRef,
+    displayKey = 'name',
+    valueKey = 'id',
+  }) => {
+    const selectedOption = options.find((opt) => opt[valueKey]?.toString() === value?.toString());
+
+    return (
+      <div className="relative" ref={dropdownRef}>
+        <div
+          className={`w-full px-3 py-2 border border-gray-300 bg-white rounded-lg cursor-pointer flex items-center justify-between transition-all duration-300 shadow-sm ${
+            disabled
+              ? 'bg-gray-100 cursor-not-allowed'
+              : 'hover:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200 focus-within:border-slate-500'
+          }`}
+          onClick={() => !disabled && onToggle()}
+        >
+          <span
+            className={`text-sm ${selectedOption ? 'text-slate-900' : 'text-slate-500'}`}
+          >
+            {selectedOption ? selectedOption[displayKey] : placeholder}
+          </span>
+          <HiChevronDown
+            className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          />
+        </div>
+
+        {isOpen && !disabled && (
+          <div
+            className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl"
+            style={{ top: '100%', marginTop: '4px' }}
+          >
+            <div className="p-3 border-b border-gray-100">
+              <div className="relative">
+                <HiMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder={`Search ${label.toLowerCase()}...`}
+                  value={searchValue}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                  onClick={(e) => e.stopPropagation()}
+                  autoFocus
+                />
+              </div>
+            </div>
+            <div className="max-h-60 overflow-y-auto">
+              {options.length === 0 ? (
+                <div className="px-4 py-3 text-slate-500 text-sm text-center">
+                  No {label.toLowerCase()} found
+                </div>
+              ) : (
+                options.map((option) => (
+                  <div
+                    key={option[valueKey]}
+                    className={`px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm transition-colors duration-150 ${
+                      option[valueKey]?.toString() === value?.toString()
+                        ? 'bg-slate-100 text-slate-900 font-medium'
+                        : 'text-slate-700'
+                    }`}
+                    onClick={() => {
+                      onSelect(option[valueKey]);
+                      onToggle();
+                    }}
+                  >
+                    {option[displayKey]}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   useEffect(() => {
     if (quantityRef.current) {
       quantityRef.current.value = data.quantity || '';
@@ -67,6 +170,24 @@ const ProductRow: React.FC<ProductRowProps> = ({
       weightRef.current.value = data.quantityByWeight || '';
     }
   }, [data.productId]);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (categoryRef.current && !categoryRef.current.contains(event.target)) {
+        setShowCategoryDropdown(false);
+      }
+      if (subcategoryRef.current && !subcategoryRef.current.contains(event.target)) {
+        setShowSubcategoryDropdown(false);
+      }
+      if (productRef.current && !productRef.current.contains(event.target)) {
+        setShowProductDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const selectedCategoryData = categories.find(
     (c) => c.id.toString() === currentCategoryId
@@ -174,60 +295,100 @@ const ProductRow: React.FC<ProductRowProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div>
           <Label>Category *</Label>
-          <select
-            className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm py-2 px-3 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+          <SearchableDropdown
+            label="Category"
             value={data.categoryId || ''}
-            onChange={(e) => {
-              const newCategoryId = e.target.value;
-              onChange(idx, 'categoryId', newCategoryId);
+            options={categories
+              .filter((cat) =>
+                cat.name
+                  .toLowerCase()
+                  .includes(categorySearch.toLowerCase())
+              )
+              .map((cat) => ({
+                id: cat.id.toString(),
+                name: cat.name,
+              }))}
+            onSelect={(categoryId) => {
+              onChange(idx, 'categoryId', categoryId);
               onChange(idx, 'subcategoryId', '');
               onChange(idx, 'productId', '');
               onChange(idx, 'unit', '');
-              setSelectedCategory(newCategoryId);
+              setSelectedCategory(categoryId);
               setSelectedSubcategory('');
+              setCategorySearch('');
             }}
-            required
-          >
-            <option value="">Select Category</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id.toString()}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
+            searchValue={categorySearch}
+            onSearchChange={setCategorySearch}
+            isOpen={showCategoryDropdown}
+            onToggle={() => setShowCategoryDropdown(!showCategoryDropdown)}
+            placeholder="Select Category"
+            dropdownRef={categoryRef}
+          />
         </div>
 
         <div>
           <Label>Subcategory</Label>
-          <select
-            className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm py-2 px-3 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+          <SearchableDropdown
+            label="Subcategory"
             value={data.subcategoryId || ''}
-            onChange={(e) => {
-              onChange(idx, 'subcategoryId', e.target.value);
+            options={filteredSubcategories
+              .filter((sub) =>
+                sub.name
+                  .toLowerCase()
+                  .includes(subcategorySearch.toLowerCase())
+              )
+              .map((sub) => ({
+                id: sub.id.toString(),
+                name: sub.name,
+              }))}
+            onSelect={(subcategoryId) => {
+              onChange(idx, 'subcategoryId', subcategoryId);
               onChange(idx, 'productId', '');
               onChange(idx, 'unit', '');
-              setSelectedSubcategory(e.target.value);
+              setSelectedSubcategory(subcategoryId);
+              setSubcategorySearch('');
             }}
+            searchValue={subcategorySearch}
+            onSearchChange={setSubcategorySearch}
+            isOpen={showSubcategoryDropdown}
+            onToggle={() => setShowSubcategoryDropdown(!showSubcategoryDropdown)}
+            placeholder="Select Subcategory"
             disabled={!data.categoryId}
-          >
-            <option value="">Select Subcategory</option>
-            {filteredSubcategories.map((sub) => (
-              <option key={sub.id} value={sub.id.toString()}>
-                {sub.name}
-              </option>
-            ))}
-          </select>
+            dropdownRef={subcategoryRef}
+          />
         </div>
 
         <div>
           <Label>Product *</Label>
-          <select
-            className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm py-2 px-3 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+          <SearchableDropdown
+            label="Product"
             value={data.productId}
-            onChange={(e) => {
-              const selectedProductId = e.target.value;
+            options={filteredProducts
+              .filter((prod) => {
+                const displayName =
+                  prod.name ||
+                  prod.productName ||
+                  prod.title ||
+                  `Product ${prod.id}`;
+                return displayName
+                  .toLowerCase()
+                  .includes(productSearch.toLowerCase());
+              })
+              .map((prod) => {
+                const displayName =
+                  prod.name ||
+                  prod.productName ||
+                  prod.title ||
+                  `Product ${prod.id}`;
+                return {
+                  id: prod.id,
+                  name: displayName,
+                };
+              })}
+            onSelect={(selectedProductId) => {
               onChange(idx, 'productId', selectedProductId);
               onChange(idx, 'unit', '');
+              setProductSearch('');
 
               if (selectedProductId) {
                 const selectedProduct = products.find(
@@ -246,28 +407,14 @@ const ProductRow: React.FC<ProductRowProps> = ({
                 }
               }
             }}
+            searchValue={productSearch}
+            onSearchChange={setProductSearch}
+            isOpen={showProductDropdown}
+            onToggle={() => setShowProductDropdown(!showProductDropdown)}
+            placeholder={filteredProducts.length === 0 ? "No products found for this category" : "Choose product"}
             disabled={!data.categoryId}
-            required
-          >
-            <option value="">Choose product</option>
-            {filteredProducts.map((prod) => {
-              const displayName =
-                prod.name ||
-                prod.productName ||
-                prod.title ||
-                `Product ${prod.id}`;
-              return (
-                <option key={prod.id} value={prod.id}>
-                  {displayName}
-                </option>
-              );
-            })}
-            {filteredProducts.length === 0 && (
-              <option value="custom" disabled>
-                No products found for this category
-              </option>
-            )}
-          </select>
+            dropdownRef={productRef}
+          />
         </div>
       </div>
 
