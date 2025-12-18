@@ -670,11 +670,11 @@ const AddEditCategoryForm: React.FC = () => {
                     <button
                       type="button"
                       onClick={addSubcategoryField}
-                      className="inline-flex items-center justify-center px-3 sm:px-4 py-2 sm:py-2 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg transition-all duration-300 text-sm sm:text-base whitespace-nowrap"
+                      className="inline-flex items-center justify-center px-3 sm:px-4 py-2 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg transition-all duration-300 text-sm sm:text-base whitespace-nowrap"
                     >
-                      <HiPlus className="w-4 h-4 mr-2" />
-                      <span className="hidden xs:inline">Add Subcategory</span>
-                      <span className="xs:hidden">Add Sub</span>
+                      <HiPlus className="w-4 h-4 mr-1 sm:mr-2" />
+                      <span className="hidden sm:inline">Add Subcategory</span>
+                      <span className="sm:hidden">Add Sub</span>
                     </button>
                   </div>
 
@@ -807,28 +807,30 @@ const AddEditCategoryForm: React.FC = () => {
                 )}
 
                 {/* Buttons */}
-                <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-6 border-t border-gray-200">
                   <button
                     type="button"
                     onClick={() => navigate('/categories')}
-                    className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50 transition-all duration-300"
+                    className="px-4 sm:px-6 py-2 sm:py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50 transition-all duration-300 text-sm sm:text-base"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-xl disabled:opacity-50 shadow-lg"
+                    className="px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-xl disabled:opacity-50 shadow-lg text-sm sm:text-base"
                   >
                     {submitting ? (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 justify-center">
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        {isEditMode ? 'Updating...' : 'Creating...'}
+                        <span className="hidden sm:inline">{isEditMode ? 'Updating...' : 'Creating...'}</span>
+                        <span className="sm:hidden">{isEditMode ? 'Updating' : 'Creating'}</span>
                       </div>
                     ) : (
                       <>
-                        <HiCheckCircle className="w-5 h-5 mr-2 inline" />
-                        {isEditMode ? 'Update Category' : 'Create Category'}
+                        <HiCheckCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 inline" />
+                        <span className="hidden sm:inline">{isEditMode ? 'Update Category' : 'Create Category'}</span>
+                        <span className="sm:hidden">{isEditMode ? 'Update' : 'Create'}</span>
                       </>
                     )}
                   </button>

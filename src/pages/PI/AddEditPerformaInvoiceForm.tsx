@@ -213,22 +213,7 @@ const CONTAINER_CONFIGS: ContainerConfig[] = [
   { type: 'LCL', cbm: 0, maxWeight: 0 },
 ];
 
-// Categories and subcategories
-const categoriesStatic: Category[] = [
-  { id: 'cat1', name: 'Ceramics' },
-  { id: 'cat2', name: 'Bagasse' },
-  { id: 'cat3', name: 'Engineering' },
-  { id: 'cat4', name: 'Agri-Products' },
-];
 
-const subcategoriesStatic: Subcategory[] = [
-  { id: 'sub1', name: 'Tiles', categoryId: 'cat1' },
-  { id: 'sub2', name: 'Sanitaryware', categoryId: 'cat1' },
-  { id: 'sub3', name: 'Plates', categoryId: 'cat2' },
-  { id: 'sub4', name: 'Bowls', categoryId: 'cat2' },
-  { id: 'sub5', name: 'Machinery', categoryId: 'cat3' },
-  { id: 'sub6', name: 'Tools', categoryId: 'cat3' },
-];
 
 const CURRENCIES = [
   { code: 'USD', symbol: '$', name: 'US Dollar' },
@@ -238,19 +223,17 @@ const CURRENCIES = [
   { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
   { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar' },
 ];
+
+const deliveryTermNames = {
+  fob: 'FOB (Free On Board)',
+  cif: 'CIF (Cost, Insurance & Freight)',
+  ddp: 'DDP (Delivered Duty Paid)',
+};
+
 const containerTypes: ContainerConfig[] = CONTAINER_CONFIGS;
 const currencies: any[] = CURRENCIES;
 
-const paymentTermNames: Record<string, string> = {
-  advance: 'Advance',
-  lc: 'LC',
-  '30days': '30 Days Credit',
-};
-const deliveryTermNames: Record<string, string> = {
-  fob: 'FOB',
-  cif: 'CIF',
-  ddp: 'DDP',
-};
+
 const chargesTemplates: Record<string, any[]> = {
   fob: [
     {
@@ -459,6 +442,9 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
       if (preCarriageRef.current && !preCarriageRef.current.contains(event.target)) {
         setShowPreCarriageDropdown(false);
       }
+      if (balancePaymentTermRef.current && !balancePaymentTermRef.current.contains(event.target)) {
+        setShowBalancePaymentTermDropdown(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -566,6 +552,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   const [deliveryTermSearch, setDeliveryTermSearch] = useState('');
   const [currencySearch, setCurrencySearch] = useState('');
   const [preCarriageSearch, setPreCarriageSearch] = useState('');
+  const [balancePaymentTermSearch, setBalancePaymentTermSearch] = useState('');
   
   const [showCompanyDropdown, setShowCompanyDropdown] = useState(false);
   const [showContainerTypeDropdown, setShowContainerTypeDropdown] = useState(false);
@@ -573,6 +560,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   const [showDeliveryTermDropdown, setShowDeliveryTermDropdown] = useState(false);
   const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
   const [showPreCarriageDropdown, setShowPreCarriageDropdown] = useState(false);
+  const [showBalancePaymentTermDropdown, setShowBalancePaymentTermDropdown] = useState(false);
   
   const companyRef = useRef(null);
   const containerTypeRef = useRef(null);
@@ -580,6 +568,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   const deliveryTermRef = useRef(null);
   const currencyRef = useRef(null);
   const preCarriageRef = useRef(null);
+  const balancePaymentTermRef = useRef(null);
 
   // Step validation functions
   const validateStep1 = () => {
@@ -2592,20 +2581,32 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                             <Label htmlFor="balancePaymentTerm">
                               Balance {100 - parseInt(advancePercentage)}% Payment Term *
                             </Label>
-                            <select
-                              id="balancePaymentTerm"
+                            <SearchableDropdown
+                              label="Balance Payment Term"
                               value={balancePaymentTerm}
-                              onChange={(e) => setBalancePaymentTerm(e.target.value)}
-                              className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm py-3 px-4 text-base bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                              required
-                            >
-                              <option value="">Select balance payment term</option>
-                              <option value="AGAINST BL">AGAINST BL</option>
-                              <option value="AGAINST DOCUMENTS">AGAINST DOCUMENTS</option>
-                              <option value="ON DELIVERY">ON DELIVERY</option>
-                              <option value="BEFORE DISPATCH">BEFORE DISPATCH</option>
-                            
-                            </select>
+                              options={[
+                                { id: 'AGAINST BL', name: 'AGAINST BL' },
+                                { id: 'AGAINST DOCUMENTS', name: 'AGAINST DOCUMENTS' },
+                                { id: 'ON DELIVERY', name: 'ON DELIVERY' },
+                                { id: 'BEFORE DISPATCH', name: 'BEFORE DISPATCH' },
+                                { id: 'Balance 70% Payment Term', name: 'Balance 70% Payment Term' },
+                              ]
+                                .filter((term) =>
+                                  term.name
+                                    .toLowerCase()
+                                    .includes(balancePaymentTermSearch.toLowerCase())
+                                )}
+                              onSelect={(term) => {
+                                setBalancePaymentTerm(term);
+                                setBalancePaymentTermSearch('');
+                              }}
+                              searchValue={balancePaymentTermSearch}
+                              onSearchChange={setBalancePaymentTermSearch}
+                              isOpen={showBalancePaymentTermDropdown}
+                              onToggle={() => setShowBalancePaymentTermDropdown(!showBalancePaymentTermDropdown)}
+                              placeholder="Select balance payment term"
+                              dropdownRef={balancePaymentTermRef}
+                            />
                           </div>
                         )}
                       </div>

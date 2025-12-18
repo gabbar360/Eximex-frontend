@@ -15,6 +15,7 @@ import {
   HiCog6Tooth,
   HiBell,
   HiArrowLeft,
+  HiPencil,
 } from 'react-icons/hi2';
 import { useNavigate } from 'react-router-dom';
 import { Image } from 'antd';
@@ -127,134 +128,100 @@ export default function UserProfiles() {
                   >
                     <HiArrowLeft className="w-5 h-5" />
                   </button>
+                  <div className="p-3 rounded-lg bg-slate-700 shadow-lg">
+                    <HiUser className="w-6 h-6 text-white" />
+                  </div>
                   <div>
                     <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
-                      Profile Dashboard
+                      Profile
                     </h1>
                   </div>
                 </div>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={() => setEditingProfile(!editingProfile)}
+                    className="inline-flex items-center justify-center px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg text-sm sm:text-base"
+                  >
+                    <HiPencil className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">{editingProfile ? 'Cancel Edit' : 'Edit Profile'}</span>
+                    <span className="sm:hidden">{editingProfile ? 'Cancel' : 'Edit'}</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-4">
-            {/* Profile Section */}
-            <div>
-              {/* Profile Card */}
-              <div className="bg-white rounded-3xl shadow-xl border border-gray-200 overflow-hidden mb-4">
-                <div className="relative">
-                  <div className="h-16 bg-slate-700 flex items-center justify-center">
-                    <h2 className="text-white font-semibold text-lg">
-                      Manage Your Profile
-                    </h2>
-                  </div>
-                  <div className="absolute -bottom-16 left-8">
-                    <div className="relative">
-                      <div className="w-16 h-16 bg-white rounded-full border-4 border-white shadow-2xl flex items-center justify-center overflow-hidden">
-                        {userData?.profilePicture ? (
-                          <img
-                            src={userData.profilePicture}
-                            alt={userData.name || 'User'}
-                            className="w-full h-full object-cover"
-                            onLoad={() =>
-                              console.log(
-                                'Profile image loaded successfully:',
-                                userData.profilePicture
-                              )
-                            }
-                            onError={(e) => {
-                              console.log(
-                                'Profile image failed to load:',
-                                userData.profilePicture
-                              );
-                              console.log('Error details:', e);
-                            }}
+          {/* Profile Section */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center overflow-hidden">
+                {userData?.profilePicture ? (
+                  <img
+                    src={userData.profilePicture}
+                    alt={userData.name || 'User'}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <HiUser className="w-8 h-8 text-slate-400" />
+                )}
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-slate-800">
+                  {userData?.name || 'Loading...'}
+                </h2>
+                <p className="text-slate-600">
+                  {typeof userData?.role === 'object' && userData.role
+                    ? userData.role.displayName
+                    : userData?.role || 'N/A'}
+                </p>
+              </div>
+            </div>
+
+            {editingProfile ? (
+              <UserInfoCard
+                userData={userData}
+                onUpdate={handleUpdateUser}
+                isEditing={true}
+                onCancel={() => setEditingProfile(false)}
+              />
+            ) : (
+              <UserInfoCard
+                userData={userData}
+                onUpdate={handleUpdateUser}
+                isEditing={false}
+              />
+            )}
+          </div>
+
+          {/* Company Section */}
+          {userData?.company && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center overflow-hidden">
+                  {userData.company.logo ? (
+                    <Image
+                      src={`${import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || window.location.origin}${userData.company.logo}`}
+                      alt="Company Logo"
+                      className="w-full h-full object-contain"
+                      preview={{
+                        mask: (
+                          <EyeOutlined
+                            style={{ fontSize: '16px', color: 'white' }}
                           />
-                        ) : (
-                          <HiUser className="text-4xl text-slate-400" />
-                        )}{' '}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-20 pb-8 px-8">
-                  <div className="flex items-center justify-between mb-6">
-                    <div>
-                      <h2 className="text-3xl font-bold text-slate-800 mb-2">
-                        {userData?.name || 'Loading...'}
-                      </h2>
-                      <p className="text-lg text-slate-600">
-                        {typeof userData?.role === 'object' && userData.role
-                          ? userData.role.displayName
-                          : userData?.role || 'N/A'}
-                      </p>
-                    </div>
-
-                    <button
-                      onClick={() => setEditingProfile(!editingProfile)}
-                      className="px-6 py-3 bg-slate-700 hover:bg-slate-800 text-white rounded-xl font-semibold shadow-lg transition-all duration-300 transform hover:scale-105"
-                    >
-                      {editingProfile ? 'Cancel Edit' : 'Edit Profile'}
-                    </button>
-                  </div>
-
-                  {editingProfile ? (
-                    <UserInfoCard
-                      userData={userData}
-                      onUpdate={handleUpdateUser}
-                      isEditing={true}
-                      onCancel={() => setEditingProfile(false)}
+                        ),
+                      }}
                     />
                   ) : (
-                    <UserInfoCard
-                      userData={userData}
-                      onUpdate={handleUpdateUser}
-                      isEditing={false}
-                    />
+                    <HiBuildingOffice2 className="w-6 h-6 text-slate-600" />
                   )}
                 </div>
+                <h3 className="text-lg font-semibold text-slate-800">
+                  Company Information
+                </h3>
               </div>
-
-              {/* Company Card */}
-              {userData?.company && (
-                <div className="bg-white rounded-3xl shadow-xl border border-gray-200 p-8">
-                  <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg overflow-hidden border border-gray-200">
-                        {userData.company.logo ? (
-                          <Image
-                            src={`${import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || window.location.origin}${userData.company.logo}`}
-                            alt="Company Logo"
-                            className="w-full h-full object-contain"
-                            preview={{
-                              mask: (
-                                <EyeOutlined
-                                  style={{ fontSize: '20px', color: 'white' }}
-                                />
-                              ),
-                            }}
-                          />
-                        ) : (
-                          <HiBuildingOffice2 className="w-8 h-8 text-slate-600" />
-                        )}
-                      </div>
-                      <div>
-                        <h3 className="text-2xl font-bold text-slate-800">
-                          Company Information
-                        </h3>
-                        <p className="text-slate-600">
-                          Manage your business details and settings
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <CompanyDetailsCard companyData={userData.company} />
-                </div>
-              )}
+              <CompanyDetailsCard companyData={userData.company} />
             </div>
-          </div>
+          )}
         </div>
       </div>
     </>

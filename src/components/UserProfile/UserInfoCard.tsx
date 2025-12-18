@@ -102,18 +102,18 @@ export default function UserInfoCard({
           </div>
         </div>
 
-        <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-4 border-t border-gray-200">
           <button
             onClick={onCancel}
             type="button"
-            className="px-6 py-3 border border-gray-300 text-gray-700 rounded-2xl hover:bg-gray-50 transition-colors font-semibold"
+            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm sm:text-base"
           >
             Cancel
           </button>
           <button
             onClick={handleSaveClick}
             type="button"
-            className="px-6 py-3 bg-slate-700 hover:bg-slate-800 text-white rounded-2xl transition-all duration-300 font-semibold shadow-lg"
+            className="px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-lg transition-colors text-sm sm:text-base"
           >
             Save Changes
           </button>
@@ -123,52 +123,32 @@ export default function UserInfoCard({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-        <p className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-2">
-          Full Name
-        </p>
-        <p className="text-lg font-bold text-slate-800">
-          {userData?.name || 'N/A'}
-        </p>
-      </div>
-
-      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-        <p className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-2">
-          Email Address
-        </p>
-        <p className="text-lg font-bold text-slate-800">
-          {userData?.email || 'N/A'}
-        </p>
-      </div>
-
-      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-        <p className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-2">
-          Mobile Number
-        </p>
-        <p className="text-lg font-bold text-slate-800">
-          {userData?.mobileNum || 'N/A'}
-        </p>
-      </div>
-
-      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-        <p className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-2">
-          Role
-        </p>
-        <p className="text-lg font-bold text-slate-800">
-          {typeof userData?.role === 'object' && userData.role
-            ? userData.role.displayName
-            : userData?.role || 'N/A'}
-        </p>
-      </div>
-
-      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm md:col-span-2">
-        <p className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-2">
-          Company
-        </p>
-        <p className="text-lg font-bold text-slate-800">
-          {userData?.company?.name || 'No Company'}
-        </p>
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+        <div>
+          <p className="text-sm font-medium text-slate-500 mb-1">Full Name</p>
+          <p className="text-slate-800 font-medium">{userData?.name || 'N/A'}</p>
+        </div>
+        <div>
+          <p className="text-sm font-medium text-slate-500 mb-1">Email</p>
+          <p className="text-slate-800 font-medium">{userData?.email || 'N/A'}</p>
+        </div>
+        <div>
+          <p className="text-sm font-medium text-slate-500 mb-1">Mobile</p>
+          <p className="text-slate-800 font-medium">{userData?.mobileNum || 'N/A'}</p>
+        </div>
+        <div>
+          <p className="text-sm font-medium text-slate-500 mb-1">Role</p>
+          <p className="text-slate-800 font-medium">
+            {typeof userData?.role === 'object' && userData.role
+              ? userData.role.displayName
+              : userData?.role || 'N/A'}
+          </p>
+        </div>
+        <div className="md:col-span-2">
+          <p className="text-sm font-medium text-slate-500 mb-1">Company</p>
+          <p className="text-slate-800 font-medium">{userData?.company?.name || 'No Company'}</p>
+        </div>
       </div>
     </div>
   );

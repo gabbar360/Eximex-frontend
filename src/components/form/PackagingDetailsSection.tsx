@@ -305,7 +305,7 @@ const PackagingDetailsSection: React.FC<PackagingDetailsSectionProps> = ({
 
   return (
     <div className="mt-8">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
         <div>
           <h3 className="text-lg font-semibold text-slate-800">
             Packaging Details
@@ -318,9 +318,10 @@ const PackagingDetailsSection: React.FC<PackagingDetailsSectionProps> = ({
         <button
           type="button"
           onClick={addPackagingLevel}
-          className="px-3 py-1.5 bg-slate-700 text-white rounded-lg text-sm hover:bg-slate-800 transition-all duration-300 shadow-lg"
+          className="px-3 sm:px-4 py-2 bg-slate-700 text-white rounded-lg text-sm hover:bg-slate-800 transition-all duration-300 shadow-lg whitespace-nowrap"
         >
-          Add Level
+          <span className="hidden sm:inline">Add Level</span>
+          <span className="sm:hidden">Add</span>
         </button>
       </div>
 

@@ -219,7 +219,7 @@ const AddEditShipment = () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                    <label className="block text-sm font-semibold text-slate-700 mb-3">
                       Booking Number
                     </label>
                     <input
@@ -228,12 +228,12 @@ const AddEditShipment = () => {
                       value={shipmentData.bookingNumber}
                       onChange={handleInputChange}
                       placeholder="Enter booking number"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
+                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                    <label className="block text-sm font-semibold text-slate-700 mb-3">
                       Booking Date
                     </label>
                     <DatePicker
@@ -250,7 +250,7 @@ const AddEditShipment = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                    <label className="block text-sm font-semibold text-slate-700 mb-3">
                       Way Bill Number
                     </label>
                     <input
@@ -259,12 +259,12 @@ const AddEditShipment = () => {
                       value={shipmentData.wayBillNumber}
                       onChange={handleInputChange}
                       placeholder="Enter way bill number"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
+                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                    <label className="block text-sm font-semibold text-slate-700 mb-3">
                       Truck Number
                     </label>
                     <input
@@ -273,12 +273,12 @@ const AddEditShipment = () => {
                       value={shipmentData.truckNumber}
                       onChange={handleInputChange}
                       placeholder="Enter truck number"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
+                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                    <label className="block text-sm font-semibold text-slate-700 mb-3">
                       BL Number
                     </label>
                     <input
@@ -287,12 +287,12 @@ const AddEditShipment = () => {
                       value={shipmentData.blNumber}
                       onChange={handleInputChange}
                       placeholder="Enter BL number"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
+                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                    <label className="block text-sm font-semibold text-slate-700 mb-3">
                       Vessel/Voyage Info
                     </label>
                     <input
@@ -301,35 +301,37 @@ const AddEditShipment = () => {
                       value={shipmentData.vesselVoyageInfo}
                       onChange={handleInputChange}
                       placeholder="e.g., MSC FLORA/123456"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
+                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Submit Buttons */}
-              <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-6 border-t border-gray-200">
                 <button
                   type="button"
                   onClick={() => navigate('/orders/shipments')}
-                  className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50 transition-all duration-300"
+                  className="px-4 sm:px-6 py-2 sm:py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50 transition-all duration-300 text-sm sm:text-base"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-xl disabled:opacity-50 shadow-lg"
+                  className="px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-xl disabled:opacity-50 shadow-lg text-sm sm:text-base"
                 >
                   {saving ? (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 justify-center">
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      {isEdit ? 'Updating...' : 'Creating...'}
+                      <span className="hidden sm:inline">{isEdit ? 'Updating...' : 'Creating...'}</span>
+                      <span className="sm:hidden">{isEdit ? 'Updating' : 'Creating'}</span>
                     </div>
                   ) : (
                     <>
-                      <HiCheckCircle className="w-5 h-5 mr-2 inline" />
-                      {isEdit ? 'Update Shipment' : 'Create Shipment'}
+                      <HiCheckCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 inline" />
+                      <span className="hidden sm:inline">{isEdit ? 'Update Shipment' : 'Create Shipment'}</span>
+                      <span className="sm:hidden">{isEdit ? 'Update' : 'Create'}</span>
                     </>
                   )}
                 </button>
