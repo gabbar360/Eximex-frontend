@@ -31,17 +31,17 @@ import { toast } from 'react-toastify';
 
 const MobileMetricCard = ({ title, value, icon }: any) => {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-3 h-16">
+    <div className="dashboard-metric-card bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-2 sm:p-3 h-14 sm:h-16">
       <div className="flex items-center justify-between">
-        <div className="flex-1">
-          <p className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+        <div className="flex-1 min-w-0">
+          <p className="dashboard-metric-title text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide truncate">
             {title}
           </p>
-          <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">
+          <p className="dashboard-metric-value text-sm sm:text-lg font-bold text-gray-900 dark:text-white mt-1">
             {typeof value === 'number' ? value.toLocaleString() : value}
           </p>
         </div>
-        <div className="w-7 h-7 bg-slate-700 rounded-lg flex items-center justify-center text-white ml-2">
+        <div className="w-6 h-6 sm:w-7 sm:h-7 bg-slate-700 rounded-lg flex items-center justify-center text-white ml-1 sm:ml-2 flex-shrink-0">
           {icon}
         </div>
       </div>
@@ -50,23 +50,23 @@ const MobileMetricCard = ({ title, value, icon }: any) => {
 };
 
 const MobileChartCard = ({ title, description, icon, children, height = 250 }: any) => (
-  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-4 sm:p-6">
-    <div className="flex items-start justify-between mb-4">
-      <div className="flex items-center space-x-3">
-        <div className="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center text-white shadow-md">
+  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-3 sm:p-4 lg:p-6">
+    <div className="flex items-start justify-between mb-3 sm:mb-4">
+      <div className="flex items-center space-x-2 sm:space-x-3">
+        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-slate-700 rounded-lg flex items-center justify-center text-white shadow-md">
           {icon}
         </div>
-        <div>
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white">{title}</h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{description}</p>
+        <div className="min-w-0 flex-1">
+          <h3 className="text-sm sm:text-lg font-bold text-gray-900 dark:text-white truncate">{title}</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">{description}</p>
         </div>
       </div>
-      <div className="flex items-center space-x-1">
+      <div className="flex items-center space-x-1 flex-shrink-0">
         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
         <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Live</span>
       </div>
     </div>
-    <div style={{ height: `${height}px` }} className="w-full">
+    <div style={{ height: `${Math.max(200, height)}px` }} className="dashboard-chart-container w-full">
       {children}
     </div>
   </div>
@@ -156,7 +156,7 @@ export default function MobileOptimizedDashboard() {
 
       <div className="p-4 space-y-4">
         {/* Metrics Grid - Mobile Optimized */}
-        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:gap-4">
           <MobileMetricCard title="Contacts" value={stats.totalParties} icon={<People className="w-3 h-3" />} />
           <MobileMetricCard title="PI Invoices" value={stats.totalPiInvoices} icon={<AttachMoney className="w-3 h-3" />} />
           <MobileMetricCard title="Products" value={stats.totalProducts} icon={<Inventory className="w-3 h-3" />} />
@@ -169,7 +169,7 @@ export default function MobileOptimizedDashboard() {
         </div>
 
         {/* Mobile Charts - Two Separate Charts */}
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {/* First Mobile Chart */}
           <MobileChartCard 
             title="Core Business Metrics" 

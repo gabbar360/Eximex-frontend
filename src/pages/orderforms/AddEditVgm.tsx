@@ -1,9 +1,9 @@
 import { useDispatch, useSelector } from 'react-redux';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { fetchVgmById, createVgm, updateVgm } from '../../features/vgmSlice';
-import { HiArrowLeft, HiCheckCircle } from 'react-icons/hi2';
+import { HiArrowLeft, HiCheckCircle, HiChevronDown, HiMagnifyingGlass } from 'react-icons/hi2';
 
 import DatePicker from '../../components/form/DatePicker';
 import OrderSelector from '../../components/order/OrderSelector';
@@ -53,6 +53,118 @@ const AddEditVgm: React.FC = () => {
   });
 
   const [loading, setLoading] = useState(false);
+
+  // Dropdown states
+  const [methodSearch, setMethodSearch] = useState('');
+  const [containerTypeSearch, setContainerTypeSearch] = useState('');
+  const [showMethodDropdown, setShowMethodDropdown] = useState(false);
+  const [showContainerTypeDropdown, setShowContainerTypeDropdown] = useState(false);
+  
+  const methodRef = useRef(null);
+  const containerTypeRef = useRef(null);
+
+  // Custom Dropdown Component
+  const SearchableDropdown = ({
+    label,
+    value,
+    options,
+    onSelect,
+    searchValue,
+    onSearchChange,
+    isOpen,
+    onToggle,
+    placeholder,
+    disabled = false,
+    dropdownRef,
+    displayKey = 'name',
+    valueKey = 'id',
+    className = '',
+  }) => {
+    const selectedOption = options.find((opt) => opt[valueKey]?.toString() === value?.toString());
+
+    return (
+      <div className="relative" ref={dropdownRef}>
+        <div
+          className={`w-full px-4 py-3 border border-gray-300 bg-white rounded-lg cursor-pointer flex items-center justify-between transition-all duration-300 shadow-sm ${className} ${
+            disabled
+              ? 'bg-gray-100 cursor-not-allowed'
+              : 'hover:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200 focus-within:border-slate-500'
+          }`}
+          onClick={() => !disabled && onToggle()}
+        >
+          <span
+            className={`text-sm ${selectedOption ? 'text-slate-900' : 'text-slate-500'}`}
+          >
+            {selectedOption ? selectedOption[displayKey] : placeholder}
+          </span>
+          <HiChevronDown
+            className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          />
+        </div>
+
+        {isOpen && !disabled && (
+          <div
+            className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl"
+            style={{ top: '100%', marginTop: '4px' }}
+          >
+            <div className="p-3 border-b border-gray-100">
+              <div className="relative">
+                <HiMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder={`Search ${label.toLowerCase()}...`}
+                  value={searchValue}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                  onClick={(e) => e.stopPropagation()}
+                  autoFocus
+                />
+              </div>
+            </div>
+            <div className="max-h-60 overflow-y-auto">
+              {options.length === 0 ? (
+                <div className="px-4 py-3 text-slate-500 text-sm text-center">
+                  No {label.toLowerCase()} found
+                </div>
+              ) : (
+                options.map((option) => (
+                  <div
+                    key={option[valueKey]}
+                    className={`px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm transition-colors duration-150 ${
+                      option[valueKey]?.toString() === value?.toString()
+                        ? 'bg-slate-100 text-slate-900 font-medium'
+                        : 'text-slate-700'
+                    }`}
+                    onClick={() => {
+                      onSelect(option[valueKey]);
+                      onToggle();
+                    }}
+                  >
+                    {option[displayKey]}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (methodRef.current && !methodRef.current.contains(event.target)) {
+        setShowMethodDropdown(false);
+      }
+      if (containerTypeRef.current && !containerTypeRef.current.contains(event.target)) {
+        setShowContainerTypeDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleOrderSelect = (orderId: number, orderData: any) => {
     setSelectedOrder(orderData);
@@ -297,18 +409,29 @@ const AddEditVgm: React.FC = () => {
                 <label className="block text-sm font-medium text-slate-700 mb-2">
                   Weighing Method *
                 </label>
-                <select
+                <SearchableDropdown
+                  label="Weighing Method"
                   value={formData.method}
-                  onChange={(e) => handleInputChange('method', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
-                >
-                  <option value="METHOD_1">
-                    Method 1 - Weigh packed container
-                  </option>
-                  <option value="METHOD_2">
-                    Method 2 - Weigh contents + tare weight
-                  </option>
-                </select>
+                  options={[
+                    { id: 'METHOD_1', name: 'Method 1 - Weigh packed container' },
+                    { id: 'METHOD_2', name: 'Method 2 - Weigh contents + tare weight' },
+                  ]
+                    .filter((method) =>
+                      method.name
+                        .toLowerCase()
+                        .includes(methodSearch.toLowerCase())
+                    )}
+                  onSelect={(method) => {
+                    handleInputChange('method', method);
+                    setMethodSearch('');
+                  }}
+                  searchValue={methodSearch}
+                  onSearchChange={setMethodSearch}
+                  isOpen={showMethodDropdown}
+                  onToggle={() => setShowMethodDropdown(!showMethodDropdown)}
+                  placeholder="Select Weighing Method"
+                  dropdownRef={methodRef}
+                />
               </div>
             </div>
 
@@ -433,18 +556,31 @@ const AddEditVgm: React.FC = () => {
                 <label className="block text-sm font-medium text-slate-700 mb-2">
                   Container Type *
                 </label>
-                <select
+                <SearchableDropdown
+                  label="Container Type"
                   value={formData.containerType}
-                  onChange={(e) =>
-                    handleInputChange('containerType', e.target.value)
-                  }
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
-                >
-                  <option value="NORMAL">Normal</option>
-                  <option value="REEFER">Reefer</option>
-                  <option value="HAZARDOUS">Hazardous</option>
-                  <option value="OTHER">Other</option>
-                </select>
+                  options={[
+                    { id: 'NORMAL', name: 'Normal' },
+                    { id: 'REEFER', name: 'Reefer' },
+                    { id: 'HAZARDOUS', name: 'Hazardous' },
+                    { id: 'OTHER', name: 'Other' },
+                  ]
+                    .filter((type) =>
+                      type.name
+                        .toLowerCase()
+                        .includes(containerTypeSearch.toLowerCase())
+                    )}
+                  onSelect={(type) => {
+                    handleInputChange('containerType', type);
+                    setContainerTypeSearch('');
+                  }}
+                  searchValue={containerTypeSearch}
+                  onSearchChange={setContainerTypeSearch}
+                  isOpen={showContainerTypeDropdown}
+                  onToggle={() => setShowContainerTypeDropdown(!showContainerTypeDropdown)}
+                  placeholder="Select Container Type"
+                  dropdownRef={containerTypeRef}
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -493,28 +629,30 @@ const AddEditVgm: React.FC = () => {
             </div>
 
             {/* Submit Buttons */}
-            <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+            <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-end space-y-3 lg:space-y-0 lg:space-x-4 pt-4 lg:pt-6 border-t border-gray-200">
               <button
                 type="button"
                 onClick={() => navigate('/orders/vgm')}
-                className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50 transition-all duration-300"
+                className="px-4 py-3 lg:px-6 lg:py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50 transition-all duration-300 text-sm lg:text-base"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-xl disabled:opacity-50 shadow-lg"
+                className="px-4 py-3 lg:px-6 lg:py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-xl disabled:opacity-50 shadow-lg text-sm lg:text-base"
               >
                 {loading ? (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 justify-center">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    {isEdit ? 'Updating...' : 'Creating...'}
+                    <span className="lg:hidden">{isEdit ? 'Updating...' : 'Creating...'}</span>
+                    <span className="hidden lg:inline">{isEdit ? 'Updating...' : 'Creating...'}</span>
                   </div>
                 ) : (
                   <>
-                    <HiCheckCircle className="w-5 h-5 mr-2 inline" />
-                    {isEdit ? 'Update VGM Document' : 'Create VGM Document'}
+                    <HiCheckCircle className="w-4 h-4 lg:w-5 lg:h-5 mr-2 inline" />
+                    <span className="lg:hidden">{isEdit ? 'Update VGM' : 'Create VGM'}</span>
+                    <span className="hidden lg:inline">{isEdit ? 'Update VGM Document' : 'Create VGM Document'}</span>
                   </>
                 )}
               </button>

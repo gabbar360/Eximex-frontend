@@ -19,6 +19,7 @@ import {
   HiCube,
   HiTag,
   HiFunnel,
+  HiChevronDown,
 } from 'react-icons/hi2';
 import { Pagination } from 'antd';
 import { useDebounce } from '../../utils/useDebounce';
@@ -37,8 +38,95 @@ const Product: React.FC = () => {
   const [selectedSubCategory, setSelectedSubCategory] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [wasSearching, setWasSearching] = useState(false);
+  
+  // Dropdown states
+  const [categorySearch, setCategorySearch] = useState('');
+  const [subcategorySearch, setSubcategorySearch] = useState('');
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [showSubcategoryDropdown, setShowSubcategoryDropdown] = useState(false);
+  
+  const categoryRef = useRef(null);
+  const subcategoryRef = useRef(null);
 
   const { categories } = useSelector((state: any) => state.category);
+
+  // SearchableDropdown Component
+  const SearchableDropdown = ({ label, value, options, onSelect, searchValue, onSearchChange, isOpen, onToggle, placeholder, dropdownRef, disabled = false }) => {
+    const selectedOption = options.find(opt => opt.id?.toString() === value?.toString());
+    
+    return (
+      <div className="relative" ref={dropdownRef}>
+        <div
+          className={`w-full pl-11 pr-4 py-3 border border-gray-300 bg-white rounded-lg cursor-pointer flex items-center justify-between transition-all duration-300 shadow-sm ${
+            disabled
+              ? 'bg-gray-100 cursor-not-allowed'
+              : 'hover:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200 focus-within:border-slate-500'
+          }`}
+          onClick={() => !disabled && onToggle()}
+        >
+          <HiFunnel className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+          <span className={`text-sm ${selectedOption ? 'text-slate-900' : 'text-slate-500'}`}>
+            {selectedOption ? selectedOption.name : placeholder}
+          </span>
+          <HiChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        </div>
+        
+        {isOpen && !disabled && (
+          <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl" style={{ top: '100%', marginTop: '4px' }}>
+            <div className="p-3 border-b border-gray-100">
+              <div className="relative">
+                <HiMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder={`Search ${label.toLowerCase()}...`}
+                  value={searchValue}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                  onClick={(e) => e.stopPropagation()}
+                  autoFocus
+                />
+              </div>
+            </div>
+            <div className="max-h-60 overflow-y-auto">
+              {options.length === 0 ? (
+                <div className="px-4 py-3 text-slate-500 text-sm text-center">No {label.toLowerCase()} found</div>
+              ) : (
+                options.map((option) => (
+                  <div
+                    key={option.id}
+                    className={`px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm transition-colors duration-150 ${
+                      option.id?.toString() === value?.toString() ? 'bg-slate-100 text-slate-900 font-medium' : 'text-slate-700'
+                    }`}
+                    onClick={() => {
+                      onSelect(option.id);
+                      onToggle();
+                    }}
+                  >
+                    {option.name}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (categoryRef.current && !categoryRef.current.contains(event.target)) {
+        setShowCategoryDropdown(false);
+      }
+      if (subcategoryRef.current && !subcategoryRef.current.contains(event.target)) {
+        setShowSubcategoryDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     dispatch(
@@ -220,30 +308,54 @@ const Product: React.FC = () => {
                       />
                     </div>
 
-                    <div className="relative">
-                      <HiFunnel className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-                      <select
+                    <div className="w-full sm:w-48">
+                      <SearchableDropdown
+                        label="Category"
                         value={selectedCategory}
-                        onChange={(e) => handleCategoryChange(e.target.value)}
-                        className="pl-11 pr-4 py-3 w-full sm:w-48 rounded-lg border border-gray-300 bg-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-all duration-300 text-sm shadow-sm appearance-none"
-                      >
-                        <option value="">All Categories</option>
-                        {categories?.map((category: any) => (
-                          <option key={category.id} value={category.id}>
-                            {category.name}
-                          </option>
-                        ))}
-                      </select>
+                        options={[
+                          { id: '', name: 'All Categories' },
+                          ...(categories || [])
+                            .filter((category: any) => 
+                              category.name.toLowerCase().includes(categorySearch.toLowerCase())
+                            )
+                            .map((category: any) => ({
+                              id: category.id,
+                              name: category.name,
+                            }))
+                        ]}
+                        onSelect={(value) => {
+                          handleCategoryChange(value);
+                          setCategorySearch('');
+                        }}
+                        searchValue={categorySearch}
+                        onSearchChange={setCategorySearch}
+                        isOpen={showCategoryDropdown}
+                        onToggle={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                        placeholder="All Categories"
+                        dropdownRef={categoryRef}
+                      />
                     </div>
 
                     {selectedCategory && availableSubCategories.length > 0 && (
-                      <div className="relative">
-                        <HiFunnel className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-                        <select
+                      <div className="w-full sm:w-48">
+                        <SearchableDropdown
+                          label="Subcategory"
                           value={selectedSubCategory}
-                          onChange={(e) => {
-                            setSelectedSubCategory(e.target.value);
+                          options={[
+                            { id: '', name: 'All Subcategories' },
+                            ...availableSubCategories
+                              .filter((subCategory: any) => 
+                                subCategory.name.toLowerCase().includes(subcategorySearch.toLowerCase())
+                              )
+                              .map((subCategory: any) => ({
+                                id: subCategory.id,
+                                name: subCategory.name,
+                              }))
+                          ]}
+                          onSelect={(value) => {
+                            setSelectedSubCategory(value);
                             setCurrentPage(1);
+                            setSubcategorySearch('');
 
                             dispatch(
                               fetchProducts({
@@ -251,19 +363,17 @@ const Product: React.FC = () => {
                                 limit: pageSize,
                                 search: searchTerm,
                                 categoryId: selectedCategory || undefined,
-                                subCategoryId: e.target.value || undefined,
+                                subCategoryId: value || undefined,
                               }) as any
                             );
                           }}
-                          className="pl-11 pr-4 py-3 w-full sm:w-48 rounded-lg border border-gray-300 bg-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-all duration-300 text-sm shadow-sm appearance-none"
-                        >
-                          <option value="">All Subcategories</option>
-                          {availableSubCategories.map((subCategory: any) => (
-                            <option key={subCategory.id} value={subCategory.id}>
-                              {subCategory.name}
-                            </option>
-                          ))}
-                        </select>
+                          searchValue={subcategorySearch}
+                          onSearchChange={setSubcategorySearch}
+                          isOpen={showSubcategoryDropdown}
+                          onToggle={() => setShowSubcategoryDropdown(!showSubcategoryDropdown)}
+                          placeholder="All Subcategories"
+                          dropdownRef={subcategoryRef}
+                        />
                       </div>
                     )}
                   </div>

@@ -444,9 +444,9 @@ const AddEditPartyForm = () => {
                       <HiUser className="w-4 h-4 mr-2 text-slate-600" />
                       Contact Person
                     </label>
-                    <div className="flex gap-3">
+                    <div className="flex flex-col sm:flex-row gap-3">
                       {/* Title Dropdown */}
-                      <div className="relative w-24" ref={titleRef}>
+                      <div className="relative w-full sm:w-24" ref={titleRef}>
                         <div
                           className="w-full px-3 py-3 border border-gray-300 bg-white rounded-lg cursor-pointer flex items-center justify-between transition-all duration-300 shadow-sm hover:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200 focus-within:border-slate-500"
                           onClick={() =>
@@ -456,7 +456,8 @@ const AddEditPartyForm = () => {
                           <span
                             className={`text-sm ${values.contactPersonTitle ? 'text-slate-900' : 'text-slate-500'}`}
                           >
-                            {values.contactPersonTitle || 'Title'}
+                            <span className="hidden sm:inline">{values.contactPersonTitle || 'Title'}</span>
+                            <span className="sm:hidden">{values.contactPersonTitle || 'Select'}</span>
                           </span>
                           <HiChevronDown
                             className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${showTitleDropdown ? 'rotate-180' : ''}`}
@@ -896,28 +897,30 @@ const AddEditPartyForm = () => {
                 </div>
 
                 {/* Buttons */}
-                <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-6 border-t border-gray-200">
                   <button
                     type="button"
                     onClick={() => navigate('/contacts')}
-                    className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50 transition-all duration-300"
+                    className="px-4 sm:px-6 py-2 sm:py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50 transition-all duration-300 text-sm sm:text-base"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-xl disabled:opacity-50 shadow-lg"
+                    className="px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-xl disabled:opacity-50 shadow-lg text-sm sm:text-base"
                   >
                     {submitting ? (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 justify-center">
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        {isEditMode ? 'Updating...' : 'Creating...'}
+                        <span className="hidden sm:inline">{isEditMode ? 'Updating...' : 'Creating...'}</span>
+                        <span className="sm:hidden">{isEditMode ? 'Updating' : 'Creating'}</span>
                       </div>
                     ) : (
                       <>
-                        <HiCheckCircle className="w-5 h-5 mr-2 inline" />
-                        {isEditMode ? 'Update Contact' : 'Create Contact'}
+                        <HiCheckCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 inline" />
+                        <span className="hidden sm:inline">{isEditMode ? 'Update Contact' : 'Create Contact'}</span>
+                        <span className="sm:hidden">{isEditMode ? 'Update' : 'Create'}</span>
                       </>
                     )}
                   </button>

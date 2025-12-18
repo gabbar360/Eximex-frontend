@@ -702,6 +702,7 @@ const MenuManagement = () => {
 
         {/* Menu Table */}
         <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
           {loading ? (
             <div className="p-12 text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-slate-600 mx-auto mb-4"></div>
@@ -735,6 +736,7 @@ const MenuManagement = () => {
               loading={loading}
               rowKey="id"
               pagination={false}
+              scroll={{ x: 800 }}
               expandable={{
                 expandedRowRender,
                 rowExpandable: (record) =>
@@ -758,6 +760,7 @@ const MenuManagement = () => {
               className="menu-management-table"
             />
           )}
+          </div>
         </div>
 
         {/* Pagination */}
