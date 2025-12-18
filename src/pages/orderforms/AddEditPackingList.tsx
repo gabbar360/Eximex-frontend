@@ -11,11 +11,11 @@ import {
   createPackingList,
 } from '../../features/packingListSlice';
 
-import PageBreadCrumb from '../../components/common/PageBreadCrumb';
+
 import InputField from '../../components/form/input/InputField';
-import TextArea from '../../components/form/input/TextArea';
+
 import Label from '../../components/form/Label';
-import DatePicker from '../../components/form/DatePicker';
+
 import OrderSelector from '../../components/order/OrderSelector';
 
 const AddEditPackingList = () => {
@@ -48,6 +48,8 @@ const AddEditPackingList = () => {
         totalNetWeight: '',
         totalGrossWeight: '',
         totalMeasurement: '',
+        totalSquareMeters: '',
+        totalPallets: '',
       },
     ],
     notes: '',
@@ -55,6 +57,8 @@ const AddEditPackingList = () => {
     totalNetWeight: 0,
     totalGrossWeight: 0,
     totalVolume: 0,
+    totalSquareMeters: 0,
+    totalPallets: 0,
     totalContainers: 0,
     dateOfIssue: new Date().toISOString().split('T')[0],
   });
@@ -146,6 +150,8 @@ const AddEditPackingList = () => {
             totalNetWeight: '',
             totalGrossWeight: '',
             totalMeasurement: '',
+            totalSquareMeters: '',
+            totalPallets: '',
           })
         );
 
@@ -269,6 +275,12 @@ const AddEditPackingList = () => {
                   totalMeasurement: (
                     container.totalMeasurement || ''
                   ).toString(),
+                  totalSquareMeters: (
+                    container.totalSquareMeters || ''
+                  ).toString(),
+                  totalPallets: (
+                    container.totalPallets || ''
+                  ).toString(),
                 }))
               : [
                   {
@@ -280,6 +292,8 @@ const AddEditPackingList = () => {
                     totalNetWeight: '',
                     totalGrossWeight: '',
                     totalMeasurement: '',
+                    totalSquareMeters: '',
+                    totalPallets: '',
                   },
                 ],
           notes: rawPackingData.notes || detailedPackingData.notes || '',
@@ -295,6 +309,10 @@ const AddEditPackingList = () => {
             0,
           totalVolume:
             detailedPackingData.totalVolume || rawPackingData.totalVolume || 0,
+          totalSquareMeters:
+            detailedPackingData.totalSquareMeters || rawPackingData.totalSquareMeters || 0,
+          totalPallets:
+            detailedPackingData.totalPallets || rawPackingData.totalPallets || 0,
           totalContainers:
             detailedPackingData.totalContainers ||
             rawPackingData.totalContainers ||
@@ -324,6 +342,38 @@ const AddEditPackingList = () => {
         });
 
         const calculatedData = calculateTotals(loadedData);
+        
+        // Calculate missing totals from backend data if not present
+        if (calculatedData.totalSquareMeters === 0 && calculatedData.totalPallets === 0) {
+          let backendSquareMeters = 0;
+          let backendPallets = 0;
+          
+          // Calculate from container data
+          containerData.forEach(container => {
+            if (container.totalSquareMeters) {
+              backendSquareMeters += parseFloat(container.totalSquareMeters) || 0;
+            }
+            if (container.totalPallets) {
+              backendPallets += parseFloat(container.totalPallets) || 0;
+            }
+            
+            // If container totals not available, calculate from products
+            if (container.products) {
+              container.products.forEach(product => {
+                if (product.unit?.toLowerCase() === 'square meter' || product.unit?.toLowerCase() === 'sqm') {
+                  backendSquareMeters += parseFloat(product.packedQuantity) || 0;
+                }
+                if (product.noOfPallets) {
+                  backendPallets += parseFloat(product.noOfPallets) || 0;
+                }
+              });
+            }
+          });
+          
+          calculatedData.totalSquareMeters = backendSquareMeters;
+          calculatedData.totalPallets = backendPallets;
+        }
+        
         setPackagingList(calculatedData);
       } else {
         console.log(
@@ -356,6 +406,8 @@ const AddEditPackingList = () => {
         totalNetWeight: '',
         totalGrossWeight: '',
         totalMeasurement: '',
+        totalSquareMeters: '',
+        totalPallets: '',
       },
     ];
 
@@ -626,6 +678,8 @@ const AddEditPackingList = () => {
     let totalNetWeight = 0;
     let totalGrossWeight = 0;
     let totalVolume = 0;
+    let totalSquareMeters = 0;
+    let totalPallets = 0;
     const totalContainers = data.containers.length;
 
     const updatedContainers = data.containers.map((container) => {
@@ -633,23 +687,35 @@ const AddEditPackingList = () => {
       let containerNetWeight = 0;
       let containerGrossWeight = 0;
       let containerMeasurement = 0;
+      let containerSquareMeters = 0;
+      let containerPallets = 0;
 
       container.products.forEach((product) => {
         const boxes = parseFloat(product.noOfBoxes) || 0;
         const netWeight = parseFloat(product.netWeight) || 0;
         const grossWeight = parseFloat(product.grossWeight) || 0;
         const measurement = parseFloat(product.measurement) || 0;
+        const pallets = parseFloat(product.noOfPallets) || 0;
+        
+        // Add square meters for tiles products
+        if (product.unit?.toLowerCase() === 'square meter' || product.unit?.toLowerCase() === 'sqm') {
+          const sqm = parseFloat(product.packedQuantity) || 0;
+          containerSquareMeters += sqm;
+        }
 
         containerBoxes += boxes;
         containerNetWeight += netWeight;
         containerGrossWeight += grossWeight;
         containerMeasurement += measurement;
+        containerPallets += pallets;
       });
 
       totalBoxes += containerBoxes;
       totalNetWeight += containerNetWeight;
       totalGrossWeight += containerGrossWeight;
       totalVolume += containerMeasurement;
+      totalSquareMeters += containerSquareMeters;
+      totalPallets += containerPallets;
 
       return {
         ...container,
@@ -657,6 +723,8 @@ const AddEditPackingList = () => {
         totalNetWeight: containerNetWeight.toFixed(2),
         totalGrossWeight: containerGrossWeight.toFixed(2),
         totalMeasurement: containerMeasurement.toFixed(2),
+        totalSquareMeters: containerSquareMeters.toFixed(2),
+        totalPallets: containerPallets.toString(),
       };
     });
 
@@ -667,6 +735,8 @@ const AddEditPackingList = () => {
       totalNetWeight: parseFloat(totalNetWeight.toFixed(2)),
       totalGrossWeight: parseFloat(totalGrossWeight.toFixed(2)),
       totalVolume: parseFloat(totalVolume.toFixed(2)),
+      totalSquareMeters: parseFloat(totalSquareMeters.toFixed(2)),
+      totalPallets,
       totalContainers,
     };
   };
