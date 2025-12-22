@@ -317,13 +317,14 @@ const AddOrder = () => {
 
         {/* Form Container */}
         <div className="bg-white rounded-xl shadow-xl border border-slate-200">
-          <div className="p-8">
-            <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="p-4 sm:p-6 lg:p-8">
+            <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
               {/* PI Selection Section */}
-              <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
-                <h3 className="text-xl font-semibold text-slate-700 mb-6 flex items-center gap-3">
-                  <HiDocumentText className="w-6 h-6 text-slate-600" />
-                  Select Proforma Invoice
+              <div className="bg-slate-50 p-4 sm:p-6 rounded-lg border border-slate-200">
+                <h3 className="text-lg sm:text-xl font-semibold text-slate-700 mb-4 sm:mb-6 flex items-center gap-3">
+                  <HiDocumentText className="w-5 h-5 sm:w-6 sm:h-6 text-slate-600" />
+                  <span className="hidden sm:inline">Select Proforma Invoice</span>
+                  <span className="sm:hidden">Select PI Invoice</span>
                 </h3>
 
                 {/* PI Dropdown */}
@@ -331,35 +332,37 @@ const AddOrder = () => {
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     Select PI Invoice *
                   </label>
-                  <SearchableDropdown
-                    label="PI Invoice"
-                    value={selectedPI?.id || ''}
-                    options={piList
-                      .filter((pi) => {
-                        const searchText = `${pi.piNumber || pi.invoiceNumber} ${pi.party?.companyName || pi.customerName}`;
-                        return searchText
-                          .toLowerCase()
-                          .includes(piSearch.toLowerCase());
-                      })
-                      .map((pi) => ({
-                        id: pi.id,
-                        name: `${pi.piNumber || pi.invoiceNumber} - ${pi.party?.companyName || pi.customerName} - $${(pi.totalAmount || 0).toLocaleString()}`,
-                      }))}
-                    onSelect={(piId) => {
-                      const selected = piList.find((pi) => pi.id === piId);
-                      if (selected) {
-                        handlePISelect(selected);
-                        setPiSearch('');
-                      }
-                    }}
-                    searchValue={piSearch}
-                    onSearchChange={setPiSearch}
-                    isOpen={showPiDropdown}
-                    onToggle={() => setShowPiDropdown(!showPiDropdown)}
-                    placeholder={piLoading ? "Loading PI invoices..." : piList.length === 0 ? "No PI invoices available" : "Choose a PI Invoice..."}
-                    disabled={piLoading || piList.length === 0}
-                    dropdownRef={piRef}
-                  />
+                  <div className="w-full">
+                    <SearchableDropdown
+                      label="PI Invoice"
+                      value={selectedPI?.id || ''}
+                      options={piList
+                        .filter((pi) => {
+                          const searchText = `${pi.piNumber || pi.invoiceNumber} ${pi.party?.companyName || pi.customerName}`;
+                          return searchText
+                            .toLowerCase()
+                            .includes(piSearch.toLowerCase());
+                        })
+                        .map((pi) => ({
+                          id: pi.id,
+                          name: `${pi.piNumber || pi.invoiceNumber} - ${pi.party?.companyName || pi.customerName} - $${(pi.totalAmount || 0).toLocaleString()}`,
+                        }))}
+                      onSelect={(piId) => {
+                        const selected = piList.find((pi) => pi.id === piId);
+                        if (selected) {
+                          handlePISelect(selected);
+                          setPiSearch('');
+                        }
+                      }}
+                      searchValue={piSearch}
+                      onSearchChange={setPiSearch}
+                      isOpen={showPiDropdown}
+                      onToggle={() => setShowPiDropdown(!showPiDropdown)}
+                      placeholder={piLoading ? "Loading PI invoices..." : piList.length === 0 ? "No PI invoices available" : "Choose a PI Invoice..."}
+                      disabled={piLoading || piList.length === 0}
+                      dropdownRef={piRef}
+                    />
+                  </div>
                 </div>
 
                 {/* Selected PI Details */}
@@ -452,28 +455,30 @@ const AddOrder = () => {
               </div>
 
               {/* Submit Buttons */}
-              <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:gap-4 pt-6 border-t border-gray-200">
                 <button
                   type="button"
                   onClick={() => navigate('/orders')}
-                  className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50 transition-all duration-300"
+                  className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50 transition-all duration-300 order-2 sm:order-1"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading || !selectedPI}
-                  className="px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-xl disabled:opacity-50 shadow-lg"
+                  className="px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-xl disabled:opacity-50 shadow-lg order-1 sm:order-2"
                 >
                   {loading ? (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-center gap-2">
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Creating...
+                      <span className="hidden sm:inline">Creating...</span>
+                      <span className="sm:hidden">Creating</span>
                     </div>
                   ) : (
                     <>
                       <HiCheckCircle className="w-5 h-5 mr-2 inline" />
-                      Create Order
+                      <span className="hidden sm:inline">Create Order</span>
+                      <span className="sm:hidden">Create</span>
                     </>
                   )}
                 </button>
