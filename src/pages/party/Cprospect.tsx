@@ -64,7 +64,7 @@ const Cprospect = () => {
     return (
       <div className="relative" ref={dropdownRef}>
         <div
-          className="w-full px-3 py-2 border border-gray-300 bg-white rounded-lg cursor-pointer flex items-center justify-between transition-all duration-300 shadow-sm hover:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200 focus-within:border-slate-500"
+          className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg cursor-pointer flex items-center justify-between transition-all duration-300 shadow-sm hover:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200 focus-within:border-slate-500"
           onClick={onToggle}
         >
           <span className={`text-sm ${selectedOption ? 'text-slate-900' : 'text-slate-500'}`}>
@@ -425,7 +425,7 @@ const Cprospect = () => {
                   {parties.map((party) => (
                     <div
                       key={party.id}
-                      className="p-4 hover:bg-white/50 transition-all duration-300"
+                      className="px-4 py-2 hover:bg-white/50 transition-all duration-300"
                     >
                       <div
                         className="grid gap-2 items-center"

@@ -219,7 +219,8 @@ const TaskManagement: React.FC = () => {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <div className="relative flex-1 sm:flex-none">
+                  {/* Search Bar */}
+                  <div className="relative flex-1">
                     <HiMagnifyingGlass className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                     <input
                       type="text"
@@ -230,8 +231,8 @@ const TaskManagement: React.FC = () => {
                     />
                   </div>
 
-                  {/* Filters */}
-                  <div className="w-48">
+                  {/* Status Filter */}
+                  <div className="w-full sm:w-48">
                     <SearchableDropdown
                       label="Status"
                       value={statusFilter}
@@ -257,7 +258,8 @@ const TaskManagement: React.FC = () => {
                     />
                   </div>
 
-                  <div className="w-40">
+                  {/* Priority Filter */}
+                  <div className="w-full sm:w-40">
                     <SearchableDropdown
                       label="Priority"
                       value={priorityFilter}
@@ -281,13 +283,14 @@ const TaskManagement: React.FC = () => {
                     />
                   </div>
 
+                  {/* Add Task Button */}
                   {isAdmin && (
                     <Link
                       to="/task-management/add-task"
-                      className="inline-flex items-center justify-center px-4 sm:px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg text-sm sm:text-base whitespace-nowrap"
+                      className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg whitespace-nowrap"
                     >
-                      <HiPlus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                      Assign Task
+                      <HiPlus className="w-5 h-5 mr-2" />
+                      Add Task
                     </Link>
                   )}
                 </div>
@@ -322,7 +325,7 @@ const TaskManagement: React.FC = () => {
               <div className="overflow-x-auto">
                 <div className="min-w-[800px]">
                   <div className="bg-gray-50 border-b border-gray-200 p-4">
-                    <div className="grid grid-cols-8 gap-3 text-sm font-semibold text-slate-700">
+                    <div className="grid gap-3 text-sm font-semibold text-slate-700" style={{ gridTemplateColumns: '2fr 1fr 1.2fr 1.2fr 0.8fr 1fr 1fr 0.8fr' }}>
                       <div className="flex items-center gap-2">
                         <MdTask className="w-4 h-4 text-slate-600" />
                         <span>Task</span>
@@ -342,7 +345,7 @@ const TaskManagement: React.FC = () => {
                   <div className="divide-y divide-gray-200">
                     {tasks.map((task: any) => (
                       <div key={task.id} className="p-4 hover:bg-gray-50">
-                        <div className="grid grid-cols-8 gap-3 items-center">
+                        <div className="grid gap-3 items-center" style={{ gridTemplateColumns: '2fr 1fr 1.2fr 1.2fr 0.8fr 1fr 1fr 0.8fr' }}>
                           <div>
                             <h3 className="font-semibold text-slate-900">{task.title}</h3>
                             {task.description && (
