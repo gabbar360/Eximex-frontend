@@ -47,17 +47,17 @@ const PackingListManagement: React.FC = () => {
 
     try {
       // Find the order and get the correct packing list ID
-      const order = orders.find(o => o.id.toString() === confirmDelete);
+      const order = orders.find((o) => o.id.toString() === confirmDelete);
       const packingListId = order?.piInvoice?.packingLists?.[0]?.id;
-      
+
       console.log('Delete attempt:', {
         confirmDelete,
         foundOrder: !!order,
         orderId: order?.id,
         packingListId,
-        packingListsCount: order?.piInvoice?.packingLists?.length || 0
+        packingListsCount: order?.piInvoice?.packingLists?.length || 0,
       });
-      
+
       if (!packingListId) {
         toast.error('No packing list found to delete');
         return;
@@ -117,14 +117,11 @@ const PackingListManagement: React.FC = () => {
     }
   };
 
-
-
   // Filter orders to show only those with packing lists and match search term
   const filteredOrders = orders.filter((order: any) => {
     // Check if order has packing list - use piInvoice.packingLists instead of order.packingLists
     const hasPackingList =
-      order.piInvoice?.packingLists &&
-      order.piInvoice.packingLists.length > 0;
+      order.piInvoice?.packingLists && order.piInvoice.packingLists.length > 0;
 
     // Only show orders with packing lists
     if (!hasPackingList) return false;
@@ -251,19 +248,30 @@ const PackingListManagement: React.FC = () => {
                   const packingLists = order.piInvoice?.packingLists || [];
                   const hasPackingList = packingLists.length > 0;
 
-                  const containers = packingLists.reduce((acc: any[], pl: any) => {
-                    if (pl.notes?.containers) {
-                      return [...acc, ...pl.notes.containers];
-                    }
-                    return acc;
-                  }, []);
+                  const containers = packingLists.reduce(
+                    (acc: any[], pl: any) => {
+                      if (pl.notes?.containers) {
+                        return [...acc, ...pl.notes.containers];
+                      }
+                      return acc;
+                    },
+                    []
+                  );
 
                   const totalWeight = containers.reduce(
-                    (sum: number, container: any) =>
-                      sum +
-                      (container.totalGrossWeight ||
-                        container.grossWeight ||
-                        0),
+                    (sum: number, container: any) => {
+                      const rawWeight =
+                        container.totalGrossWeight ??
+                        container.grossWeight ??
+                        0;
+
+                      const weight =
+                        typeof rawWeight === 'string'
+                          ? parseFloat(rawWeight.replace(/[^\d.]/g, ''))
+                          : Number(rawWeight);
+
+                      return sum + (isNaN(weight) ? 0 : weight);
+                    },
                     0
                   );
 
@@ -336,7 +344,9 @@ const PackingListManagement: React.FC = () => {
                             <HiPencil className="w-4 h-4" />
                           </Link>
                           <button
-                            onClick={() => handleDeleteClick(order.id.toString())}
+                            onClick={() =>
+                              handleDeleteClick(order.id.toString())
+                            }
                             className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
                             title="Delete"
                           >
@@ -392,19 +402,30 @@ const PackingListManagement: React.FC = () => {
                       const packingLists = order.piInvoice?.packingLists || [];
                       const hasPackingList = packingLists.length > 0;
 
-                      const containers = packingLists.reduce((acc: any[], pl: any) => {
-                        if (pl.notes?.containers) {
-                          return [...acc, ...pl.notes.containers];
-                        }
-                        return acc;
-                      }, []);
+                      const containers = packingLists.reduce(
+                        (acc: any[], pl: any) => {
+                          if (pl.notes?.containers) {
+                            return [...acc, ...pl.notes.containers];
+                          }
+                          return acc;
+                        },
+                        []
+                      );
 
                       const totalWeight = containers.reduce(
-                        (sum: number, container: any) =>
-                          sum +
-                          (container.totalGrossWeight ||
-                            container.grossWeight ||
-                            0),
+                        (sum: number, container: any) => {
+                          const rawWeight =
+                            container.totalGrossWeight ??
+                            container.grossWeight ??
+                            0;
+
+                          const weight =
+                            typeof rawWeight === 'string'
+                              ? parseFloat(rawWeight.replace(/[^\d.]/g, ''))
+                              : Number(rawWeight);
+
+                          return sum + (isNaN(weight) ? 0 : weight);
+                        },
                         0
                       );
 
@@ -477,7 +498,9 @@ const PackingListManagement: React.FC = () => {
                                 <HiPencil className="w-4 h-4" />
                               </Link>
                               <button
-                                onClick={() => handleDeleteClick(order.id.toString())}
+                                onClick={() =>
+                                  handleDeleteClick(order.id.toString())
+                                }
                                 className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
                                 title="Delete"
                               >
