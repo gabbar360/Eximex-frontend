@@ -425,7 +425,7 @@ const Cprospect = () => {
                   {parties.map((party) => (
                     <div
                       key={party.id}
-                      className="px-4 py-2 hover:bg-white/50 transition-all duration-300"
+                      className="p-4 hover:bg-white/50 transition-all duration-300"
                     >
                       <div
                         className="grid gap-2 items-center"

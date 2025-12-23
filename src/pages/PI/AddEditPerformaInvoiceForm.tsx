@@ -6,6 +6,8 @@ import {
   HiChevronDown,
   HiMagnifyingGlass,
 } from 'react-icons/hi2';
+import { Steps } from 'antd';
+import { UserOutlined, ContainerOutlined, FileTextOutlined, ShoppingOutlined, CheckCircleOutlined } from '@ant-design/icons';
 
 // Extend Window interface for timeout handling
 declare global {
@@ -574,7 +576,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   const validateStep1 = () => {
     const errors: { [key: string]: boolean } = {};
 
-    if (!companyId || companyId.trim() === '') errors.companyId = true;
+    if (!companyId || companyId.toString().trim() === '') errors.companyId = true;
     if (!company?.contactPerson || company.contactPerson.trim() === '')
       errors.contactPerson = true;
     if (!company?.email || company.email.trim() === '') errors.email = true;
@@ -627,34 +629,18 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
     switch (step) {
       case 1:
         isValid = validateStep1();
-        if (!isValid) {
-          toast.error('Please fill all required fields in red.');
-          return false;
-        }
         break;
       case 2:
         isValid = validateStep2();
-        if (!isValid) {
-          toast.error('Please fill all required fields in red.');
-          return false;
-        }
         break;
       case 3:
         isValid = validateStep3();
-        if (!isValid) {
-          toast.error('Please fill all required fields in red.');
-          return false;
-        }
         break;
       case 4:
         isValid = validateStep4();
-        if (!isValid) {
-          toast.error(
-            'Please fill all required fields in red and add products.'
-          );
-          return false;
-        }
         break;
+      default:
+        isValid = true;
     }
 
     if (isValid) {
@@ -664,8 +650,10 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         setCurrentStep(step + 1);
       }
       return true;
+    } else {
+      toast.error('Please fill all required fields.');
+      return false;
     }
-    return false;
   };
 
   // Company detail handlers
@@ -888,7 +876,14 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
       }
       return `${advance}% ADVANCE`;
     }
-    return paymentTermNames[paymentTerm] || paymentTerm || 'N/A';
+    const termNames = {
+      fob: 'FOB (Free On Board)',
+      cif: 'CIF (Cost, Insurance & Freight)',
+      ddp: 'DDP (Delivered Duty Paid)',
+      lc: 'LC (Letter of Credit)',
+      advance: 'Advance'
+    };
+    return termNames[paymentTerm] || paymentTerm || 'N/A';
   };
 
   const handleDeliveryTermChange = (
@@ -1890,85 +1885,37 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         {/* Step Progress Indicator */}
         <div className="mb-8">
           <div className="bg-white rounded-lg border border-gray-200 p-8">
-            <div className="flex items-center justify-between overflow-x-auto pb-4">
-              {[1, 2, 3, 4, 5].map((step) => (
-                <div key={step} className="flex items-center flex-shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => setCurrentStep(step)}
-                    className={`w-12 h-12 rounded-lg flex items-center justify-center text-sm font-bold ${
-                      step === currentStep
-                        ? 'bg-slate-700 text-white'
-                        : step < currentStep || completedSteps.has(step)
-                          ? 'bg-green-500 text-white'
-                          : 'bg-white text-gray-600 border-2 border-gray-300'
-                    }`}
-                  >
-                    {step < currentStep || completedSteps.has(step)
-                      ? '✓'
-                      : step}
-                  </button>
-                  {step < 5 && (
-                    <div className="mx-4">
-                      <div
-                        className={`w-20 h-2 rounded-full ${
-                          step < currentStep || completedSteps.has(step)
-                            ? 'bg-green-500'
-                            : 'bg-gray-200 border border-gray-300'
-                        }`}
-                      />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-            <div className="flex justify-between mt-6 text-sm font-medium overflow-x-auto">
-              <span
-                className={
-                  currentStep === 1
-                    ? 'text-slate-700 font-bold flex-shrink-0'
-                    : 'text-gray-500 flex-shrink-0'
-                }
-              >
-                Company
-              </span>
-              <span
-                className={
-                  currentStep === 2
-                    ? 'text-slate-700 font-bold flex-shrink-0'
-                    : 'text-gray-500 flex-shrink-0'
-                }
-              >
-                Container
-              </span>
-              <span
-                className={
-                  currentStep === 3
-                    ? 'text-slate-700 font-bold flex-shrink-0'
-                    : 'text-gray-500 flex-shrink-0'
-                }
-              >
-                Terms
-              </span>
-              <span
-                className={
-                  currentStep === 4
-                    ? 'text-slate-700 font-bold flex-shrink-0'
-                    : 'text-gray-500 flex-shrink-0'
-                }
-              >
-                Products
-              </span>
-              <span
-                className={
-                  currentStep === 5
-                    ? 'text-slate-700 font-bold flex-shrink-0'
-                    : 'text-gray-500 flex-shrink-0'
-                }
-              >
-                Review
-              </span>
-            </div>
+            <Steps
+              current={currentStep - 1}
+              onChange={(step) => setCurrentStep(step + 1)}
+              items={[
+                {
+                  title: 'Company',
+                  status: currentStep > 1 || completedSteps.has(1) ? 'finish' : currentStep === 1 ? 'process' : 'wait',
+                  icon: <UserOutlined />,
+                },
+                {
+                  title: 'Container',
+                  status: currentStep > 2 || completedSteps.has(2) ? 'finish' : currentStep === 2 ? 'process' : 'wait',
+                  icon: <ContainerOutlined />,
+                },
+                {
+                  title: 'Terms',
+                  status: currentStep > 3 || completedSteps.has(3) ? 'finish' : currentStep === 3 ? 'process' : 'wait',
+                  icon: <FileTextOutlined />,
+                },
+                {
+                  title: 'Products',
+                  status: currentStep > 4 || completedSteps.has(4) ? 'finish' : currentStep === 4 ? 'process' : 'wait',
+                  icon: <ShoppingOutlined />,
+                },
+                {
+                  title: 'Review',
+                  status: currentStep > 5 || completedSteps.has(5) ? 'finish' : currentStep === 5 ? 'process' : 'wait',
+                  icon: <CheckCircleOutlined />,
+                },
+              ]}
+            />
           </div>
         </div>
 
@@ -2022,7 +1969,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                           if (selectedParty) {
                             setCompany({
                               id: selectedParty.id,
-                              name: selectedParty.name,
+                              name: selectedParty.companyName || selectedParty.name,
                               status: selectedParty.status || 'active',
                               contactPerson: selectedParty.contactPerson || '',
                               address: selectedParty.address || '',
