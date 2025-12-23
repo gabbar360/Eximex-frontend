@@ -62,7 +62,13 @@ const OrderSelector: React.FC<OrderSelectorProps> = ({
               ? 'bg-gray-100 cursor-not-allowed'
               : 'hover:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200 focus-within:border-slate-500'
           }`}
-          onClick={() => !disabled && onToggle()}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!disabled) {
+              onToggle();
+            }
+          }}
         >
           <span
             className={`text-sm ${selectedOption ? 'text-slate-900' : 'text-slate-500'}`}
@@ -76,8 +82,7 @@ const OrderSelector: React.FC<OrderSelectorProps> = ({
 
         {isOpen && !disabled && (
           <div
-            className="absolute z-50 w-full min-w-[280px] sm:min-w-full bg-white border border-gray-200 rounded-lg shadow-xl"
-            style={{ top: '100%', marginTop: '4px' }}
+            className="absolute z-[9999] w-full min-w-[280px] sm:min-w-full bg-white border border-gray-200 rounded-lg shadow-xl mt-1"
           >
             <div className="p-3 border-b border-gray-100">
               <div className="relative">
@@ -150,6 +155,8 @@ const OrderSelector: React.FC<OrderSelectorProps> = ({
         response ||
         [];
 
+      console.log('Filter type:', filterType);
+
       if (Array.isArray(ordersList) && filterType) {
         ordersList = ordersList.filter((order) => {
           switch (filterType) {
@@ -170,14 +177,17 @@ const OrderSelector: React.FC<OrderSelectorProps> = ({
               );
             case 'packingList':
               // Show orders that don't have packing lists created
-              const hasPackingList = order.piInvoice?.packingLists && 
-                order.piInvoice.packingLists.length > 0;
+              const hasPackingListArray = order.packingLists && order.packingLists.length > 0;
+              const hasPackingListId = order.packingListId;
+              const hasPiPackingLists = order.piInvoice?.packingLists && order.piInvoice.packingLists.length > 0;
+              const hasPackingList = hasPackingListArray || hasPackingListId || hasPiPackingLists;
               return !hasPackingList;
             default:
               return true;
           }
         });
       }
+
 
       setOrders(Array.isArray(ordersList) ? ordersList : []);
     } catch (error) {
@@ -189,24 +199,31 @@ const OrderSelector: React.FC<OrderSelectorProps> = ({
   };
 
   return (
-    <div>
+    <div ref={orderRef}>
       <label className="block text-sm font-medium text-gray-700 mb-1">
         Select Order *
       </label>
       <SearchableDropdown
         label="Order"
         value={selectedOrderId || ''}
-        options={orders
-          .filter((order) => {
-            const searchText = `${order.orderNumber} ${order.piNumber} ${order.buyerName}`;
-            return searchText
-              .toLowerCase()
-              .includes(orderSearch.toLowerCase());
-          })
-          .map((order) => ({
-            id: order.id,
-            name: `${order.orderNumber} - ${order.piNumber} (${order.buyerName})`,
-          }))}
+        options={(() => {
+          const filteredOptions = orders
+            .filter((order) => {
+              const buyerName = order.piInvoice?.party?.companyName || order.piInvoice?.party?.contactPerson || 'Unknown Buyer';
+              const searchText = `${order.orderNumber} ${order.piNumber} ${buyerName}`;
+              return searchText
+                .toLowerCase()
+                .includes(orderSearch.toLowerCase());
+            })
+            .map((order) => {
+              const buyerName = order.piInvoice?.party?.companyName || order.piInvoice?.party?.contactPerson || 'Unknown Buyer';
+              return {
+                id: order.id,
+                name: `${order.orderNumber} - ${order.piNumber} (${buyerName})`,
+              };
+            });
+          return filteredOptions;
+        })()}
         onSelect={(orderId) => {
           const selectedOrder = orders.find((order) => order.id === orderId);
           if (selectedOrder) {
