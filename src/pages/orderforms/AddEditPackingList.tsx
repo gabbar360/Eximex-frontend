@@ -28,15 +28,16 @@ const AddEditPackingList = () => {
   const [showToTheOrder, setShowToTheOrder] = useState(false);
 
   // Dropdown states
-  const [productNameSearch, setProductNameSearch] = useState('');
+  const [productNameSearch, setProductNameSearch] = useState({});
 
   const [sealTypeSearch, setSealTypeSearch] = useState({});
   const [showSealTypeDropdown, setShowSealTypeDropdown] = useState({});
   const sealTypeRefs = useRef({});
-  const [showProductNameDropdown, setShowProductNameDropdown] = useState(false);
+  const [showProductNameDropdown, setShowProductNameDropdown] = useState({});
 
   const sealTypeRef = useRef(null);
-  const productNameRef = useRef(null);
+  const productNameRefs = useRef({});
+  const orderSelectorRef = useRef(null);
 
   // Packaging List State
   const [packagingList, setPackagingList] = useState({
@@ -116,9 +117,13 @@ const AddEditPackingList = () => {
 
         {isOpen && !disabled && (
           <div
-            className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl"
+            className="absolute z-[9999] w-full bg-white border border-gray-200 rounded-lg shadow-xl"
             style={{ top: '100%', marginTop: '4px' }}
           >
+            {(() => {
+              console.log('SearchableDropdown rendering options:', { label, isOpen, optionsLength: options.length, options });
+              return null;
+            })()}
             <div className="p-3 border-b border-gray-100">
               <div className="relative">
                 <HiMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
@@ -166,15 +171,36 @@ const AddEditPackingList = () => {
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (sealTypeRef.current && !sealTypeRef.current.contains(event.target)) {
-        setShowSealTypeDropdown(false);
+      // Skip if click is inside OrderSelector
+      if (orderSelectorRef.current && orderSelectorRef.current.contains(event.target)) {
+        return;
       }
-      if (
-        productNameRef.current &&
-        !productNameRef.current.contains(event.target)
-      ) {
-        setShowProductNameDropdown(false);
-      }
+
+      // Check seal type dropdowns
+      Object.keys(sealTypeRefs.current).forEach((containerIndex) => {
+        if (
+          sealTypeRefs.current[containerIndex] &&
+          !sealTypeRefs.current[containerIndex].contains(event.target)
+        ) {
+          setShowSealTypeDropdown((prev) => ({
+            ...prev,
+            [containerIndex]: false,
+          }));
+        }
+      });
+
+      // Check product name dropdowns
+      Object.keys(productNameRefs.current).forEach((containerIndex) => {
+        if (
+          productNameRefs.current[containerIndex] &&
+          !productNameRefs.current[containerIndex].contains(event.target)
+        ) {
+          setShowProductNameDropdown((prev) => ({
+            ...prev,
+            [containerIndex]: false,
+          }));
+        }
+      });
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -189,7 +215,32 @@ const AddEditPackingList = () => {
     }
   }, [id]);
 
+  // Initialize dropdown states for containers
+  useEffect(() => {
+    const initialSealTypeDropdown = {};
+    const initialProductNameDropdown = {};
+    packagingList.containers.forEach((_, index) => {
+      if (!(index in showSealTypeDropdown)) {
+        initialSealTypeDropdown[index] = false;
+      }
+      if (!(index in showProductNameDropdown)) {
+        initialProductNameDropdown[index] = false;
+      }
+    });
+    if (Object.keys(initialSealTypeDropdown).length > 0) {
+      setShowSealTypeDropdown(prev => ({ ...prev, ...initialSealTypeDropdown }));
+    }
+    if (Object.keys(initialProductNameDropdown).length > 0) {
+      setShowProductNameDropdown(prev => ({ ...prev, ...initialProductNameDropdown }));
+    }
+  }, [packagingList.containers.length]);
+
+  // Add state to track if order was just selected
+  const [justSelectedOrderId, setJustSelectedOrderId] = useState(null);
+
   const handleOrderSelect = async (orderId, orderData) => {
+    console.log('Order selected:', { orderId, orderData });
+    setJustSelectedOrderId(orderId);
     setSelectedOrder(orderData);
     setOrderDetails(orderData);
 
@@ -241,8 +292,10 @@ const AddEditPackingList = () => {
 
   const fetchPIProducts = async (piId) => {
     try {
+      console.log('🔍 Fetching PI products for piId:', piId);
       const response = await dispatch(getPiInvoiceById(piId)).unwrap();
       const piDataResponse = response.data || response;
+      console.log('📦 PI Data Response:', piDataResponse);
       setPiData(piDataResponse);
 
       const products =
@@ -251,6 +304,7 @@ const AddEditPackingList = () => {
         piDataResponse.items ||
         piDataResponse.lineItems ||
         [];
+      console.log('🛍️ Extracted products:', products);
       setPiProducts(products);
 
       // Auto-create containers based on PI container count
@@ -1021,13 +1075,14 @@ const AddEditPackingList = () => {
             {/* Order Selection for new packing lists */}
             {!isEdit && (
               <div className="bg-slate-50 p-4 lg:p-8 rounded-lg border border-slate-200">
-                <div className="w-full lg:max-w-2xl">
+                <div className="w-full lg:max-w-2xl" ref={orderSelectorRef}>
                   <OrderSelector
-                    selectedOrderId={selectedOrder?.id || null}
+                    selectedOrderId={justSelectedOrderId || selectedOrder?.id || orderDetails?.id || null}
                     onOrderSelect={handleOrderSelect}
                     placeholder="Select Order for Packing List"
                     filterType="packingList"
                   />
+                 
                 </div>
               </div>
             )}
@@ -1142,49 +1197,62 @@ const AddEditPackingList = () => {
                     />
                   </div>
                   <div>
-                    <SearchableDropdown
-                      label="Seal Type"
-                      value={container.sealType}
-                      options={[
-                        { id: 'self seal', name: 'Self Seal' },
-                        { id: 'line seal', name: 'Line Seal' },
-                      ].filter((seal) =>
-                        seal.name
-                          .toLowerCase()
-                          .includes(
-                            (sealTypeSearch[containerIndex] || '').toLowerCase()
-                          )
+                    <label className="block text-sm font-semibold text-slate-700 mb-3">
+                      Seal Type
+                    </label>
+                    <div className="relative">
+                      <div
+                        className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg cursor-pointer flex items-center justify-between transition-all duration-300 shadow-sm hover:border-slate-400"
+                        onClick={() => {
+                          console.log('Direct Seal Type click for container:', containerIndex);
+                          console.log('Current showSealTypeDropdown state:', showSealTypeDropdown);
+                          setShowSealTypeDropdown((prev) => {
+                            const newState = {
+                              ...prev,
+                              [containerIndex]: !prev[containerIndex],
+                            };
+                            console.log('Setting new state:', newState);
+                            return newState;
+                          });
+                        }}
+                      >
+                        <span className="text-sm text-slate-500">
+                          {container.sealType || 'Select Seal Type'}
+                        </span>
+                        <HiChevronDown className="w-4 h-4 text-slate-400" />
+                      </div>
+                      
+                      {showSealTypeDropdown[containerIndex] && (
+                        <div className="absolute z-[9999] w-full bg-white border border-gray-200 rounded-lg shadow-xl mt-1">
+                          <div className="max-h-60 overflow-y-auto">
+                            <div
+                              className="px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm transition-colors duration-150"
+                              onClick={() => {
+                                handleContainerChange(containerIndex, 'sealType', 'self seal');
+                                setShowSealTypeDropdown((prev) => ({
+                                  ...prev,
+                                  [containerIndex]: false,
+                                }));
+                              }}
+                            >
+                              Self Seal
+                            </div>
+                            <div
+                              className="px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm transition-colors duration-150"
+                              onClick={() => {
+                                handleContainerChange(containerIndex, 'sealType', 'line seal');
+                                setShowSealTypeDropdown((prev) => ({
+                                  ...prev,
+                                  [containerIndex]: false,
+                                }));
+                              }}
+                            >
+                              Line Seal
+                            </div>
+                          </div>
+                        </div>
                       )}
-                      onSelect={(sealType) => {
-                        handleContainerChange(
-                          containerIndex,
-                          'sealType',
-                          sealType
-                        );
-                        setSealTypeSearch((prev) => ({
-                          ...prev,
-                          [containerIndex]: '',
-                        }));
-                      }}
-                      searchValue={sealTypeSearch[containerIndex] || ''}
-                      onSearchChange={(value) =>
-                        setSealTypeSearch((prev) => ({
-                          ...prev,
-                          [containerIndex]: value,
-                        }))
-                      }
-                      isOpen={showSealTypeDropdown[containerIndex] || false}
-                      onToggle={() =>
-                        setShowSealTypeDropdown((prev) => ({
-                          ...prev,
-                          [containerIndex]: !prev[containerIndex],
-                        }))
-                      }
-                      placeholder="Select Seal Type"
-                      dropdownRef={(el) =>
-                        (sealTypeRefs.current[containerIndex] = el)
-                      }
-                    />
+                    </div>
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-3">
@@ -1225,87 +1293,7 @@ const AddEditPackingList = () => {
                       )}
                     </div>
                     <div className="flex gap-2">
-                      {productForm.productData &&
-                        productForm.packedQuantity && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const qty = parseFloat(
-                                productForm.packedQuantity
-                              );
-                              const unit =
-                                productForm.productData.unit || 'Box';
-                              let boxesNeeded = 1;
-                              let netWeightKg = 0;
-                              let grossWeightKg = 0;
-                              let volumeM3 = 0;
-
-                              if (unit.toLowerCase() === 'box') {
-                                boxesNeeded = qty;
-                                const totalWeightFromPI =
-                                  productForm.productData.totalWeight || 0;
-                                const piQuantity =
-                                  productForm.productData.quantity || 1;
-                                const netWeightPerBox =
-                                  totalWeightFromPI / piQuantity;
-                                netWeightKg = qty * netWeightPerBox;
-                                const product =
-                                  productForm.productData.product ||
-                                  productForm.productData;
-                                const boxWeightGrams =
-                                  product.packagingMaterialWeight || 700;
-                                const boxWeightKg = boxWeightGrams / 1000;
-                                grossWeightKg = netWeightKg + qty * boxWeightKg;
-                              } else {
-                                const product =
-                                  productForm.productData.product ||
-                                  productForm.productData;
-                                const packagingData =
-                                  product.packagingHierarchyData
-                                    ?.dynamicFields || {};
-                                const piecesPerPack =
-                                  packagingData.PiecesPerPack || 50;
-                                const packPerBox =
-                                  packagingData.PackPerBox || 40;
-                                const unitWeight = product.unitWeight || 8;
-                                const piecesPerBox = piecesPerPack * packPerBox;
-                                boxesNeeded = Math.ceil(qty / piecesPerBox);
-                                const netWeightGrams = qty * unitWeight;
-                                netWeightKg = netWeightGrams / 1000;
-                                const boxWeightGrams =
-                                  product.packagingMaterialWeight || 700;
-                                const boxWeightKg = boxWeightGrams / 1000;
-                                grossWeightKg =
-                                  netWeightKg + boxesNeeded * boxWeightKg;
-                              }
-
-                              const product =
-                                productForm.productData.product ||
-                                productForm.productData;
-                              if (product.packagingVolume) {
-                                volumeM3 =
-                                  boxesNeeded * product.packagingVolume;
-                              } else {
-                                volumeM3 = boxesNeeded * 0.0055;
-                              }
-
-                              setProductForm((prev) => ({
-                                ...prev,
-                                noOfBoxes: boxesNeeded.toString(),
-                                netWeight: netWeightKg.toFixed(2),
-                                grossWeight: grossWeightKg.toFixed(2),
-                                measurement: volumeM3.toFixed(4),
-                                perBoxWeight:
-                                  boxesNeeded > 0
-                                    ? (netWeightKg / boxesNeeded).toFixed(2)
-                                    : '',
-                              }));
-                            }}
-                            className="text-blue-600 hover:text-blue-800 text-xs font-medium px-2 py-1 rounded border border-blue-600 hover:bg-blue-50"
-                          >
-                            🧮 Calculate
-                          </button>
-                        )}
+                   
                       <button
                         onClick={() => clearProductForm()}
                         className="flex items-center justify-center
@@ -1313,7 +1301,7 @@ const AddEditPackingList = () => {
              w-10 h-10 px-10
              rounded-xl text-sm font-medium"
                       >
-                        {editMode.isEditing ? 'Cancel Edit' : 'Clear'}
+                      Clear
                       </button>
                     </div>
                   </div>
@@ -1322,74 +1310,83 @@ const AddEditPackingList = () => {
                     {/* Row 1: Product Name, HSN Code, PI Quantity */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
                       <div>
-                        <SearchableDropdown
-                          label="Product Name"
-                          value={productForm.productName}
-                          options={piProducts
-                            .map((piProduct, idx) => {
-                              const productName =
-                                piProduct.name ||
-                                piProduct.productName ||
-                                piProduct.description ||
-                                `Product ${idx + 1}`;
-                              const quantity =
-                                piProduct.quantity || piProduct.qty || '';
-                              const unit = piProduct.unit || 'Box';
-                              const unitWeight =
-                                piProduct.product?.unitWeight || 0;
-                              const hsnCode =
-                                piProduct.category?.hsnCode ||
-                                piProduct.subcategory?.hsnCode ||
-                                '';
-                              return {
-                                id: productName,
-                                name: `${productName} (Qty: ${quantity} ${unit}, ${unitWeight}g/pc, HSN: ${hsnCode})`,
-                                productData: piProduct,
-                              };
-                            })
-                            .filter((product) =>
-                              product.name
-                                .toLowerCase()
-                                .includes(productNameSearch.toLowerCase())
-                            )}
-                          onSelect={(selectedProductName) => {
-                            const selectedProduct = piProducts.find(
-                              (p) =>
-                                (p.name || p.productName || p.description) ===
-                                selectedProductName
-                            );
-                            setProductForm((prev) => ({
-                              ...prev,
-                              productName: selectedProductName,
-                            }));
-                            if (selectedProduct) {
-                              setProductForm((prev) => ({
-                                ...prev,
-                                quantity:
-                                  selectedProduct.quantity ||
-                                  selectedProduct.qty ||
-                                  '',
-                                unit: selectedProduct.unit || 'Box',
-                                hsnCode:
-                                  selectedProduct.category?.hsnCode ||
-                                  selectedProduct.subcategory?.hsnCode ||
-                                  selectedProduct.hsCode ||
-                                  '',
-                                productData: selectedProduct,
-                                packedQuantity: '',
-                              }));
-                            }
-                            setProductNameSearch('');
-                          }}
-                          searchValue={productNameSearch}
-                          onSearchChange={setProductNameSearch}
-                          isOpen={showProductNameDropdown}
-                          onToggle={() =>
-                            setShowProductNameDropdown(!showProductNameDropdown)
-                          }
-                          placeholder="Select Product from PI"
-                          dropdownRef={productNameRef}
-                        />
+                        <label className="block text-sm font-semibold text-slate-700 mb-3">
+                          Product Name
+                        </label>
+                        <div className="relative" ref={(el) => (productNameRefs.current[containerIndex] = el)}>
+                          <div
+                            className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg cursor-pointer flex items-center justify-between transition-all duration-300 shadow-sm hover:border-slate-400"
+                            onClick={() => {
+                              console.log('Product Name dropdown toggle for container:', containerIndex);
+                              console.log('Current state:', showProductNameDropdown[containerIndex]);
+                              setShowProductNameDropdown((prev) => {
+                                const newState = {
+                                  ...prev,
+                                  [containerIndex]: !prev[containerIndex],
+                                };
+                                console.log('New state:', newState);
+                                return newState;
+                              });
+                            }}
+                          >
+                            <span className="text-sm text-slate-500">
+                              {productForm.productName || 'Select Product from PI'}
+                            </span>
+                            <HiChevronDown className="w-4 h-4 text-slate-400" />
+                          </div>
+                          
+                          {showProductNameDropdown[containerIndex] && (
+                            <div className="absolute z-[9999] w-full bg-white border border-gray-200 rounded-lg shadow-xl mt-1">
+                              <div className="max-h-60 overflow-y-auto">
+                                {(() => {
+                                  console.log('Rendering product dropdown for container:', containerIndex);
+                                  console.log('piProducts:', piProducts);
+                                  console.log('piProducts length:', piProducts.length);
+                                  return null;
+                                })()}
+                           {piProducts.map((piProduct, idx) => {
+  const productName =
+    piProduct.name || piProduct.productName || `Product ${idx + 1}`;
+  const quantity = piProduct.quantity || piProduct.qty || '';
+  const unit = piProduct.unit || 'Box';
+
+  return (
+    <div
+      key={idx}
+      className="px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm transition-colors duration-150"
+      onClick={() => {
+        const selectedProduct = piProducts.find(
+          (p) => (p.name || p.productName) === productName
+        );
+
+        setProductForm((prev) => ({
+          ...prev,
+          productName,
+          quantity: selectedProduct?.quantity || selectedProduct?.qty || '',
+          unit: selectedProduct?.unit || 'Box',
+          hsnCode:
+            selectedProduct?.category?.hsnCode ||
+            selectedProduct?.subcategory?.hsnCode ||
+            '',
+          productData: selectedProduct,
+          packedQuantity: '',
+        }));
+
+        setShowProductNameDropdown((prev) => ({
+          ...prev,
+          [containerIndex]: false,
+        }));
+      }}
+    >
+      {productName} (Qty: {quantity} {unit})
+    </div>
+  );
+})}
+
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-3">
@@ -1813,34 +1810,33 @@ const AddEditPackingList = () => {
                       </div>
                     </div>
 
-                    {/* Show Pallets field only for tiles (Square Meter unit) */}
-                    {productForm.productData &&
-                      (productForm.productData.unit?.toLowerCase() ===
-                        'square meter' ||
-                        productForm.productData.unit?.toLowerCase() ===
-                          'sqm') && (
-                        <div>
-                          <label className="block text-sm font-semibold text-slate-700 mb-3">
-                            No. of Pallets
-                          </label>
-                          <input
-                            type="number"
-                            value={productForm.noOfPallets}
-                            onChange={(e) => {
-                              setProductForm((prev) => ({
-                                ...prev,
-                                noOfPallets: e.target.value,
-                              }));
-                            }}
-                            placeholder="Enter number of pallets"
-                            step="1"
-                            className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
-                          />
-                        </div>
-                      )}
-
-                    {/* Row 3: Gross Weight, Measurement */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+                    {/* Row 3: Pallets, Gross Weight, Measurement */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+                      {/* Show Pallets field only for tiles (Square Meter unit) */}
+                      {productForm.productData &&
+                        (productForm.productData.unit?.toLowerCase() ===
+                          'square meter' ||
+                          productForm.productData.unit?.toLowerCase() ===
+                            'sqm') && (
+                          <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-3">
+                              No. of Pallets
+                            </label>
+                            <input
+                              type="number"
+                              value={productForm.noOfPallets}
+                              onChange={(e) => {
+                                setProductForm((prev) => ({
+                                  ...prev,
+                                  noOfPallets: e.target.value,
+                                }));
+                              }}
+                              placeholder="Enter number of pallets"
+                              step="1"
+                              className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
+                            />
+                          </div>
+                        )}
                       <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-3">
                           Gross Weight (kg)
