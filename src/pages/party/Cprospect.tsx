@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import { fetchParties, deleteParty } from '../../features/partySlice';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { fetchParties, deleteParty, updatePartyStage, updatePartyStageOptimistic } from '../../features/partySlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import PageMeta from '../../components/common/PageMeta';
@@ -12,9 +12,6 @@ import {
   HiMagnifyingGlass,
   HiBuildingOffice2,
   HiUsers,
-  HiExclamationTriangle,
-  HiEllipsisVertical,
-  HiChevronDown,
   HiSparkles,
   HiCheckBadge,
   HiChatBubbleLeftRight,
@@ -23,11 +20,11 @@ import {
   HiXCircle,
   HiEnvelope,
   HiPhone,
+  HiEllipsisVertical,
+  HiChevronDown,
 } from 'react-icons/hi2';
 import { toast } from 'react-toastify';
-import { Pagination } from 'antd';
 import { useDebounce } from '../../utils/useDebounce';
-import partyService from '../../service/partyService';
 
 const Cprospect = () => {
   const dispatch = useDispatch();
@@ -39,22 +36,17 @@ const Cprospect = () => {
   } = useSelector((state) => state.party || {});
   const [searchTerm, setSearchTerm] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [wasSearching, setWasSearching] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
-  const [openStageDropdown, setOpenStageDropdown] = useState(null);
   const [filterRole, setFilterRole] = useState('');
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });
-  const buttonRefs = useRef({});
   
   // Role filter dropdown states
   const [roleSearch, setRoleSearch] = useState('');
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
   const roleRef = useRef(null);
   
-  // Check if there are any Customer contacts to show Stage column
+  // Check if there are any Customer contacts
   const hasCustomers = parties && parties.some(party => party.role === 'Customer');
 
   // SearchableDropdown Component
@@ -64,7 +56,7 @@ const Cprospect = () => {
     return (
       <div className="relative" ref={dropdownRef}>
         <div
-          className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg cursor-pointer flex items-center justify-between transition-all duration-300 shadow-sm hover:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200 focus-within:border-slate-500"
+          className="w-full px-4 py-3 border border-gray-300 bg-white rounded-xl cursor-pointer flex items-center justify-between transition-all duration-300 shadow-sm hover:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200 focus-within:border-slate-500"
           onClick={onToggle}
         >
           <span className={`text-sm ${selectedOption ? 'text-slate-900' : 'text-slate-500'}`}>
@@ -74,7 +66,7 @@ const Cprospect = () => {
         </div>
         
         {isOpen && (
-          <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl" style={{ top: '100%', marginTop: '4px' }}>
+          <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-xl shadow-xl" style={{ top: '100%', marginTop: '4px' }}>
             <div className="p-3 border-b border-gray-100">
               <div className="relative">
                 <HiMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
@@ -118,103 +110,120 @@ const Cprospect = () => {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      const target = event.target;
-      if (openDropdown && !target.closest('.dropdown-container')) {
+      if (openDropdown && !event.target.closest('.dropdown-container')) {
         setOpenDropdown(null);
-      }
-      if (openStageDropdown && !target.closest('.stage-dropdown-container')) {
-        setOpenStageDropdown(null);
       }
       if (roleRef.current && !roleRef.current.contains(event.target)) {
         setShowRoleDropdown(false);
       }
     };
 
-    if (openDropdown || openStageDropdown) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
     document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [openDropdown]);
 
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [openDropdown, openStageDropdown]);
-
-  // Stage dropdown data and logic
+  // Stage data for Kanban board
   const stages = [
-    { value: 'NEW', label: 'New', color: 'bg-gray-50 text-gray-600 border-gray-200', icon: HiSparkles, iconColor: 'text-gray-500' },
-    { value: 'QUALIFIED', label: 'Qualified', color: 'bg-blue-50 text-blue-600 border-blue-200', icon: HiCheckBadge, iconColor: 'text-blue-500' },
-    { value: 'NEGOTIATION', label: 'Negotiation', color: 'bg-yellow-50 text-yellow-600 border-yellow-200', icon: HiChatBubbleLeftRight, iconColor: 'text-yellow-500' },
-    { value: 'QUOTATION_SENT', label: 'Quotation Sent', color: 'bg-purple-50 text-purple-600 border-purple-200', icon: HiDocumentText, iconColor: 'text-purple-500' },
-    { value: 'WON', label: 'Won', color: 'bg-emerald-50 text-emerald-600 border-emerald-200', icon: HiTrophy, iconColor: 'text-emerald-500' },
-    { value: 'LOST', label: 'Lost', color: 'bg-red-50 text-red-600 border-red-200', icon: HiXCircle, iconColor: 'text-red-500' },
+    {
+      id: 'NEW',
+      title: 'New Leads',
+      color: 'bg-gray-100 border-gray-300',
+      headerColor: 'bg-gray-600',
+      icon: HiSparkles,
+    },
+    {
+      id: 'QUALIFIED',
+      title: 'Qualified',
+      color: 'bg-blue-100 border-blue-300',
+      headerColor: 'bg-blue-600',
+      icon: HiCheckBadge,
+    },
+    {
+      id: 'NEGOTIATION',
+      title: 'Negotiation',
+      color: 'bg-yellow-100 border-yellow-300',
+      headerColor: 'bg-yellow-600',
+      icon: HiChatBubbleLeftRight,
+    },
+    {
+      id: 'QUOTATION_SENT',
+      title: 'Quotation Sent',
+      color: 'bg-purple-100 border-purple-300',
+      headerColor: 'bg-purple-600',
+      icon: HiDocumentText,
+    },
+    {
+      id: 'WON',
+      title: 'Won',
+      color: 'bg-emerald-100 border-emerald-300',
+      headerColor: 'bg-emerald-600',
+      icon: HiTrophy,
+    },
   ];
 
-  const getStageData = (stage) => {
-    return stages.find(s => s.value === stage) || stages[0];
-  };
+  // Memoized contacts by stage to prevent unnecessary re-renders
+  const contactsByStage = useMemo(() => {
+    return stages.reduce((acc, stage) => {
+      acc[stage.id] = parties.filter(
+        (party) => party.role === 'Customer' && (party.stage || 'NEW') === stage.id
+      );
+      return acc;
+    }, {});
+  }, [parties, stages]);
 
-  const truncateCompanyName = (name) => {
-    if (!name) return '-';
-    if (name.length <= 10) return name;
-    return name.substring(0, 10) + '...';
-  };
+  // Handle drag and drop using Redux slice with optimistic updates
+  const handleDragEnd = async (result) => {
+    const { destination, source, draggableId } = result;
 
-  const updateDropdownPosition = (partyId) => {
-    const button = buttonRefs.current[partyId];
-    if (button) {
-      const rect = button.getBoundingClientRect();
-      setDropdownPosition({
-        top: rect.bottom + window.scrollY + 8,
-        right: window.innerWidth - rect.right + window.scrollX
-      });
+    if (!destination) return;
+
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
     }
-  };
 
-  const handleStageSelect = async (partyId, newStage) => {
-    setOpenStageDropdown(null);
+    const newStage = destination.droppableId;
+    const contactId = draggableId.replace('contact-', '');
+    
+    // Optimistic update - update UI immediately
+    dispatch(updatePartyStageOptimistic({ id: contactId, stage: newStage }));
+    
     try {
-      await partyService.updatePartyStage(partyId, newStage);
+      const response = await dispatch(updatePartyStage({ id: contactId, stage: newStage })).unwrap();
       
-      // Reload current page data after stage update
+      // Show backend response message
+      const message = response?.message || 'Contact moved successfully';
+      toast.success(message);
+    } catch (error) {
+      // Revert optimistic update on error by reloading data
       dispatch(
         fetchParties({
-          page: currentPage,
-          limit: pageSize,
+          page: 1,
+          limit: 1000,
           search: searchTerm,
-          role: filterRole,
+          role: 'Customer',
         })
       );
       
-      toast.success('Stage updated successfully');
-    } catch (err) {
-      toast.error(err.message || 'Failed to update stage');
+      const errorMessage = error || 'Failed to update contact stage';
+      toast.error(errorMessage);
     }
   };
 
+  // Load data for kanban view
   useEffect(() => {
-    // Only fetch when page or pageSize changes, not searchTerm (handled by debounced search)
-    dispatch(
-      fetchParties({
-        page: currentPage,
-        limit: pageSize,
-        search: '',
-        role: filterRole,
-      })
-    );
-  }, [dispatch, currentPage, pageSize, filterRole]);
-
-  // Initial load
-  useEffect(() => {
+    // Load all customers for kanban view
     dispatch(
       fetchParties({
         page: 1,
-        limit: 10,
-        search: '',
-        role: filterRole,
+        limit: 1000,
+        search: searchTerm,
+        role: 'Customer',
       })
     );
-  }, [dispatch, filterRole]);
+  }, [dispatch, searchTerm, filterRole]);
 
   const handleDeleteClick = (id) => {
     setConfirmDelete(id);
@@ -227,13 +236,13 @@ const Cprospect = () => {
       const response = await dispatch(deleteParty(confirmDelete)).unwrap();
       setConfirmDelete(null);
 
-      // Reload current page data after deletion
+      // Reload data after deletion
       dispatch(
         fetchParties({
-          page: currentPage,
-          limit: pageSize,
+          page: 1,
+          limit: 1000,
           search: searchTerm,
-          role: filterRole,
+          role: 'Customer',
         })
       );
 
@@ -247,23 +256,15 @@ const Cprospect = () => {
 
 
 
-  const handlePageChange = (page, size) => {
-    setCurrentPage(page);
-    if (size !== pageSize) {
-      setPageSize(size);
-      setCurrentPage(1); // Reset to first page when changing page size
-    }
-  };
-
   // Debounced search function
   const { debouncedCallback: debouncedSearch } = useDebounce((value) => {
     setWasSearching(true);
     dispatch(
       fetchParties({
         page: 1,
-        limit: pageSize,
+        limit: 1000,
         search: value,
-        role: filterRole,
+        role: 'Customer',
       })
     );
   }, 500);
@@ -271,10 +272,9 @@ const Cprospect = () => {
   const handleSearch = useCallback(
     (value) => {
       setSearchTerm(value);
-      setCurrentPage(1);
       debouncedSearch(value);
     },
-    [debouncedSearch, pageSize]
+    [debouncedSearch]
   );
 
   // Restore focus after search results load
@@ -295,28 +295,28 @@ const Cprospect = () => {
       <div className="min-h-screen bg-gray-50">
         <div className="p-2 lg:p-4">
           {/* Header */}
-          <div className="mb-3">
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 lg:p-4">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div className="mb-6">
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 lg:p-6">
+              <div className="flex flex-col space-y-4 lg:space-y-0 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-lg bg-slate-700 shadow-lg">
+                  <div className="p-3 rounded-xl bg-slate-700 shadow-lg">
                     <HiUsers className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
+                    <h1 className="text-2xl lg:text-3xl font-bold text-slate-800">
                       Contacts
                     </h1>
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <div className="relative">
+                <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                  <div className="relative flex-1 sm:flex-none">
                     <HiMagnifyingGlass className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                     <input
                       ref={searchInputRef}
                       type="text"
-                      placeholder="Search prospects..."
-                      className="pl-12 pr-4 py-3 w-full sm:w-72 rounded-lg border border-gray-300 bg-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-all duration-300 text-sm placeholder-gray-500 shadow-sm"
+                      placeholder="Search contacts..."
+                      className="pl-12 pr-4 py-3 w-full sm:w-72 rounded-xl border border-gray-300 bg-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-all duration-300 text-sm placeholder-gray-500 shadow-sm"
                       value={searchTerm}
                       onChange={(e) => handleSearch(e.target.value)}
                     />
@@ -345,15 +345,16 @@ const Cprospect = () => {
                     />
                   </div>
 
-
-
-                  <Link
-                    to="/add-contact"
-                    className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg"
-                  >
-                    <HiPlus className="w-5 h-5 mr-2" />
-                    Add Contact
-                  </Link>
+                  <div className="flex gap-2 flex-shrink-0">
+                    <Link
+                      to="/add-contact"
+                      className="inline-flex items-center justify-center px-4 lg:px-6 py-3 rounded-xl font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg transition-colors whitespace-nowrap"
+                    >
+                      <HiPlus className="w-5 h-5 mr-2" />
+                      <span className="hidden sm:inline">Add Contact</span>
+                      <span className="sm:hidden">Add</span>
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
@@ -382,468 +383,167 @@ const Cprospect = () => {
               </p>
             </div>
           ) : (
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm" style={{position: 'relative', zIndex: 1, overflow: 'visible'}}>
-              {/* Desktop Table View */}
-              <div className="hidden lg:block">
-                {/* Table Header */}
-                <div className="bg-gray-50 border-b border-gray-200 p-4">
-                  <div
-                    className="grid gap-2 text-sm font-semibold text-slate-700"
-                    style={{
-                      gridTemplateColumns: hasCustomers
-                        ? '1.5fr 1.8fr 1fr 1fr 1fr 0.8fr 0.8fr'
-                        : '1.5fr 1.8fr 1fr 1fr 0.8fr 0.8fr',
-                    }}
-                  >
-                    <div className="flex items-center gap-2">
-                      <HiBuildingOffice2 className="w-4 h-4 text-slate-600" />
-                      <span>Company</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span>Email</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span>Phone</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span>Role</span>
-                    </div>
-                    {hasCustomers && (
-                      <div className="flex items-center gap-2">
-                        <span>Stage</span>
-                      </div>
-                    )}
-                    <div className="flex items-center gap-2">
-                      <span>Status</span>
-                    </div>
-                    <div className="flex items-center justify-end gap-2">
-                      <span>Actions</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="divide-y divide-white/20">
-                  {parties.map((party) => (
-                    <div
-                      key={party.id}
-                      className="p-4 hover:bg-white/50 transition-all duration-300"
-                    >
-                      <div
-                        className="grid gap-2 items-center"
-                        style={{
-                          gridTemplateColumns: hasCustomers
-                            ? '1.5fr 1.8fr 1fr 1fr 1fr 0.8fr 0.8fr'
-                            : '1.5fr 1.8fr 1fr 1fr 0.8fr 0.8fr',
-                        }}
-                      >
-                        {/* Company */}
-                        <div className="flex items-center gap-2">
-                          <div className="p-2 rounded-lg bg-slate-700 shadow-md flex-shrink-0">
-                            <HiBuildingOffice2 className="w-4 h-4 text-white" />
-                          </div>
-                          <span
-                            className="text-slate-800 font-medium"
-                            title={party.companyName}
-                          >
-                            {truncateCompanyName(party.companyName)}
-                          </span>
-                        </div>
-
-                        {/* Email */}
-                        <div
-                          className="text-slate-700 text-sm truncate"
-                          title={party.email}
-                        >
-                          {party.email || '-'}
-                        </div>
-
-                        {/* Phone */}
-                        <div className="text-slate-700 text-sm">
-                          {party.phone || '-'}
-                        </div>
-
-                        {/* Role */}
-                        <div className="text-slate-700 text-sm font-medium">
-                          {party.role}
-                        </div>
-
-                        {/* Stage */}
-                        {hasCustomers && (
-                          <div>
-                            {party.role === 'Customer' ? (
-                              <div className="relative stage-dropdown-container">
-                                {(() => {
-                                  const stageData = getStageData(party.stage || 'NEW');
-                                  return (
-                                    <>
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setOpenStageDropdown(
-                                            openStageDropdown === party.id ? null : party.id
-                                          );
-                                        }}
-                                        className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full border ${stageData.color} hover:opacity-80 transition-all duration-200`}
-                                      >
-                                        <stageData.icon className={`w-3 h-3 mr-2 ${stageData.iconColor}`} />
-                                        {stageData.label}
-                                        <HiChevronDown className="ml-1 w-3 h-3" />
-                                      </button>
-
-                                      {openStageDropdown === party.id && (
-                                        <div className="absolute left-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-[9999] backdrop-blur-sm">
-                                          {stages.map((stage) => (
-                                            <button
-                                              key={stage.value}
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleStageSelect(party.id, stage.value);
-                                              }}
-                                              className={`flex items-center gap-3 w-full px-4 py-3 text-sm transition-all duration-200 border-b border-gray-50 last:border-b-0 ${
-                                                stage.value === (party.stage || 'NEW')
-                                                  ? `${stage.color} font-medium` 
-                                                  : 'text-slate-700 hover:bg-gray-50'
-                                              }`}
-                                            >
-                                              <stage.icon className={`w-4 h-4 ${stage.iconColor}`} />
-                                              <span className="font-medium">{stage.label}</span>
-                                            </button>
-                                          ))}
-                                        </div>
-                                      )}
-                                    </>
-                                  );
-                                })()
-                                }
+            // Kanban Board View
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
+              <DragDropContext onDragEnd={handleDragEnd}>
+                <div className="flex gap-4 overflow-x-auto pb-4 min-h-[600px]">
+                  {stages.map((stage) => (
+                    <div key={stage.id} className="flex-shrink-0 w-80">
+                      <div className="bg-gray-50 rounded-xl border border-gray-200 h-full">
+                        {/* Stage Header */}
+                        <div className="bg-white border-b border-gray-200 p-4 rounded-t-xl">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
+                                <stage.icon className="w-4 h-4 text-slate-600" />
                               </div>
-                            ) : (
-                              <span className="text-slate-500 text-xs">-</span>
-                            )}
+                              <h2 className="font-semibold text-sm text-slate-800">{stage.title}</h2>
+                            </div>
+                            <span className="bg-slate-100 text-slate-700 text-xs font-medium px-2 py-1 rounded-md">
+                              {contactsByStage[stage.id]?.length || 0}
+                            </span>
                           </div>
-                        )}
-
-                        {/* Status */}
-                        <div>
-                          <span
-                            className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${
-                              party.status
-                                ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
-                                : 'bg-red-50 text-red-600 border-red-200'
-                            }`}
-                          >
-                            {party.status ? 'Active' : 'Inactive'}
-                          </span>
                         </div>
 
-                        {/* Actions */}
-                        <div className="flex items-center justify-end">
-                          <div className="relative dropdown-container">
-                            <button
-                              data-dropdown-id={party.id}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setOpenDropdown(
-                                  openDropdown === party.id ? null : party.id
-                                );
-                              }}
-                              className="p-2 rounded-lg text-slate-500 hover:bg-gray-100 transition-all duration-300"
+                        {/* Droppable Area */}
+                        <Droppable droppableId={stage.id} key={stage.id} isDropDisabled={false} isCombineEnabled={false}>
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.droppableProps}
+                              className={`p-4 min-h-[500px] transition-colors duration-200 ${
+                                snapshot.isDraggingOver ? 'bg-white/50' : ''
+                              }`}
                             >
-                              <HiEllipsisVertical className="w-5 h-5" />
-                            </button>
+                              {contactsByStage[stage.id]?.map((contact, index) => (
+                                <Draggable key={`${stage.id}-${contact.id}`} draggableId={`contact-${contact.id}`} index={index}>
+                                  {(provided, snapshot) => (
+                                    <div
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                      {...provided.dragHandleProps}
+                                      className={`bg-white rounded-xl border border-gray-200 p-4 mb-3 shadow-sm hover:shadow-md transition-all duration-200 cursor-move ${
+                                        snapshot.isDragging ? 'shadow-lg border-slate-300 bg-slate-50' : ''
+                                      }`}
+                                    >
+                                      <div className="flex items-start justify-between mb-4">
+                                        <div className="flex items-start gap-3 flex-1 min-w-0">
+                                          <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
+                                            <HiBuildingOffice2 className="w-5 h-5 text-slate-600" />
+                                          </div>
+                                          <div className="flex-1 min-w-0">
+                                            <h3 className="font-semibold text-slate-900 text-sm leading-tight truncate" title={contact.companyName}>
+                                              {contact.companyName}
+                                            </h3>
+                                            {contact.contactPersonName && (
+                                              <p className="text-xs text-slate-500 mt-1 truncate" title={contact.contactPersonName}>
+                                                {contact.contactPersonName}
+                                              </p>
+                                            )}
+                                          </div>
+                                        </div>
+                                        
+                                        <div className="relative dropdown-container flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                                          <button
+                                            onClick={(e) => {
+                                              e.preventDefault();
+                                              e.stopPropagation();
+                                              setOpenDropdown(openDropdown === contact.id ? null : contact.id);
+                                            }}
+                                            className="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors flex items-center justify-center"
+                                            style={{ pointerEvents: 'auto' }}
+                                          >
+                                            <HiEllipsisVertical className="w-4 h-4" />
+                                          </button>
 
-                            {openDropdown === party.id && (
-                              <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-[9999] backdrop-blur-sm">
-                                <Link
-                                  to={`/view-party/${party.id}`}
-                                  className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-all duration-200 border-b border-gray-50 last:border-b-0"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
-                                    <HiEye className="w-4 h-4 text-slate-600" />
+                                          {openDropdown === contact.id && (
+                                            <div className="absolute right-0 top-full mt-1 w-44 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                                              <Link
+                                                to={`/view-party/${contact.id}`}
+                                                className="flex items-center gap-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                                                onClick={() => setOpenDropdown(null)}
+                                              >
+                                                <HiEye className="w-4 h-4 text-slate-500" />
+                                                <span>View Details</span>
+                                              </Link>
+                                              <Link
+                                                to={`/edit-contact/${contact.id}`}
+                                                className="flex items-center gap-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                                                onClick={() => setOpenDropdown(null)}
+                                              >
+                                                <HiPencil className="w-4 h-4 text-slate-500" />
+                                                <span>Edit Contact</span>
+                                              </Link>
+                                              <button
+                                                onClick={() => {
+                                                  setOpenDropdown(null);
+                                                  handleDeleteClick(contact.id);
+                                                }}
+                                                className="flex items-center gap-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left transition-colors"
+                                              >
+                                                <HiTrash className="w-4 h-4" />
+                                                <span>Delete</span>
+                                              </button>
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+
+                                      <div className="space-y-3">
+                                        {contact.email && (
+                                          <div className="flex items-center gap-2 text-xs text-slate-600">
+                                            <HiEnvelope className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                                            <span className="truncate font-medium" title={contact.email}>{contact.email}</span>
+                                          </div>
+                                        )}
+                                        {contact.phone && (
+                                          <div className="flex items-center gap-2 text-xs text-slate-600">
+                                            <HiPhone className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                                            <span className="font-medium">{contact.phone}</span>
+                                          </div>
+                                        )}
+                                      </div>
+
+                                      <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
+                                        <span className="text-xs font-medium text-slate-600 bg-slate-50 px-2 py-1 rounded-md">
+                                          {contact.role}
+                                        </span>
+                                        <span
+                                          className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${
+                                            contact.status
+                                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                              : 'bg-red-50 text-red-700 border border-red-200'
+                                          }`}
+                                        >
+                                          <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                                            contact.status ? 'bg-emerald-500' : 'bg-red-500'
+                                          }`}></span>
+                                          {contact.status ? 'Active' : 'Inactive'}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  )}
+                                </Draggable>
+                              ))}
+                              {provided.placeholder}
+                              
+                              {contactsByStage[stage.id]?.length === 0 && (
+                                <div className="text-center py-12 text-slate-400">
+                                  <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
+                                    <stage.icon className="w-6 h-6 text-slate-400" />
                                   </div>
-                                  <span className="font-medium">
-                                    View Details
-                                  </span>
-                                </Link>
-                                <Link
-                                  to={`/edit-contact/${party.id}`}
-                                  className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-emerald-50 transition-all duration-200 border-b border-gray-50 last:border-b-0"
-                                  onClick={() => setOpenDropdown(null)}
-                                >
-                                  <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
-                                    <HiPencil className="w-4 h-4 text-emerald-600" />
-                                  </div>
-                                  <span className="font-medium">
-                                    Edit Contact
-                                  </span>
-                                </Link>
-                                <button
-                                  onClick={() => {
-                                    setOpenDropdown(null);
-                                    handleDeleteClick(party.id);
-                                  }}
-                                  className="flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 w-full text-left"
-                                >
-                                  <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center">
-                                    <HiTrash className="w-4 h-4 text-red-600" />
-                                  </div>
-                                  <span className="font-medium">
-                                    Delete Contact
-                                  </span>
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        </div>
+                                  <p className="text-sm font-medium">No contacts</p>
+                                  <p className="text-xs text-slate-400 mt-1">Drag cards here</p>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </Droppable>
                       </div>
                     </div>
                   ))}
                 </div>
-              </div>
-
-              {/* Tablet/Mobile Table View with Horizontal Scroll */}
-              <div className="lg:hidden">
-                <div className="relative" style={{overflow: 'visible'}}>
-                  <div className="overflow-x-auto" style={{overflowY: 'visible'}}>
-                    <div className="min-w-[800px]">
-                    {/* Table Header */}
-                    <div className="bg-gray-50 border-b border-gray-200 p-4">
-                      <div
-                        className="grid gap-2 text-sm font-semibold text-slate-700"
-                        style={{
-                          gridTemplateColumns: hasCustomers
-                            ? '1.5fr 1.8fr 1fr 1fr 1fr 0.8fr 0.8fr'
-                            : '1.5fr 1.8fr 1fr 1fr 0.8fr 0.8fr',
-                        }}
-                      >
-                        <div className="flex items-center gap-2">
-                          <HiBuildingOffice2 className="w-4 h-4 text-slate-600" />
-                          <span>Company</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span>Email</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span>Phone</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span>Role</span>
-                        </div>
-                        {hasCustomers && (
-                          <div className="flex items-center gap-2">
-                            <span>Stage</span>
-                          </div>
-                        )}
-                        <div className="flex items-center gap-2">
-                          <span>Status</span>
-                        </div>
-                        <div className="flex items-center justify-end gap-2">
-                          <span>Actions</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="divide-y divide-white/20">
-                      {parties.map((party) => (
-                        <div
-                          key={party.id}
-                          className="p-4 hover:bg-white/50 transition-all duration-300"
-                        >
-                          <div
-                            className="grid gap-2 items-center"
-                            style={{
-                              gridTemplateColumns: hasCustomers
-                                ? '1.5fr 1.8fr 1fr 1fr 1fr 0.8fr 0.8fr'
-                                : '1.5fr 1.8fr 1fr 1fr 0.8fr 0.8fr',
-                            }}
-                          >
-                            {/* Company */}
-                            <div className="flex items-center gap-2">
-                              <div className="p-2 rounded-lg bg-slate-700 shadow-md flex-shrink-0">
-                                <HiBuildingOffice2 className="w-4 h-4 text-white" />
-                              </div>
-                              <span
-                                className="text-slate-800 font-medium"
-                                title={party.companyName}
-                              >
-                                {truncateCompanyName(party.companyName)}
-                              </span>
-                            </div>
-
-                            {/* Email */}
-                            <div
-                              className="text-slate-700 text-sm truncate"
-                              title={party.email}
-                            >
-                              {party.email || '-'}
-                            </div>
-
-                            {/* Phone */}
-                            <div className="text-slate-700 text-sm">
-                              {party.phone || '-'}
-                            </div>
-
-                            {/* Role */}
-                            <div className="text-slate-700 text-sm font-medium">
-                              {party.role}
-                            </div>
-
-                            {/* Stage */}
-                            {hasCustomers && (
-                              <div>
-                                {party.role === 'Customer' ? (
-                                  <div className="relative stage-dropdown-container">
-                                    {(() => {
-                                      const stageData = getStageData(party.stage || 'NEW');
-                                      return (
-                                        <>
-                                          <button
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              setOpenStageDropdown(
-                                                openStageDropdown === party.id ? null : party.id
-                                              );
-                                            }}
-                                            className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full border ${stageData.color} hover:opacity-80 transition-all duration-200`}
-                                          >
-                                            <stageData.icon className={`w-3 h-3 mr-2 ${stageData.iconColor}`} />
-                                            {stageData.label}
-                                            <HiChevronDown className="ml-1 w-3 h-3" />
-                                          </button>
-
-                                          {openStageDropdown === party.id && (
-                                            <div className="absolute left-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-[99999] backdrop-blur-sm" style={{zIndex: 99999}}>
-                                              {stages.map((stage) => (
-                                                <button
-                                                  key={stage.value}
-                                                  onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleStageSelect(party.id, stage.value);
-                                                  }}
-                                                  className={`flex items-center gap-3 w-full px-4 py-3 text-sm transition-all duration-200 border-b border-gray-50 last:border-b-0 ${
-                                                    stage.value === (party.stage || 'NEW')
-                                                      ? `${stage.color} font-medium` 
-                                                      : 'text-slate-700 hover:bg-gray-50'
-                                                  }`}
-                                                >
-                                                  <stage.icon className={`w-4 h-4 ${stage.iconColor}`} />
-                                                  <span className="font-medium">{stage.label}</span>
-                                                </button>
-                                              ))}
-                                            </div>
-                                          )}
-                                        </>
-                                      );
-                                    })()
-                                    }
-                                  </div>
-                                ) : (
-                                  <span className="text-slate-500 text-xs">-</span>
-                                )}
-                              </div>
-                            )}
-
-                            {/* Status */}
-                            <div>
-                              <span
-                                className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${
-                                  party.status
-                                    ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
-                                    : 'bg-red-50 text-red-600 border-red-200'
-                                }`}
-                              >
-                                {party.status ? 'Active' : 'Inactive'}
-                              </span>
-                            </div>
-
-                            {/* Actions */}
-                            <div className="flex items-center justify-end">
-                              <div className="relative dropdown-container">
-                                <button
-                                  data-dropdown-id={party.id}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setOpenDropdown(
-                                      openDropdown === party.id ? null : party.id
-                                    );
-                                  }}
-                                  className="p-2 rounded-lg text-slate-500 hover:bg-gray-100 transition-all duration-300"
-                                >
-                                  <HiEllipsisVertical className="w-5 h-5" />
-                                </button>
-
-                                {openDropdown === party.id && (
-                                  <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-[99999] backdrop-blur-sm" style={{zIndex: 99999}}>
-                                    <Link
-                                      to={`/view-party/${party.id}`}
-                                      className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-all duration-200 border-b border-gray-50 last:border-b-0"
-                                      onClick={() => setOpenDropdown(null)}
-                                    >
-                                      <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
-                                        <HiEye className="w-4 h-4 text-slate-600" />
-                                      </div>
-                                      <span className="font-medium">
-                                        View Details
-                                      </span>
-                                    </Link>
-                                    <Link
-                                      to={`/edit-contact/${party.id}`}
-                                      className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-emerald-50 transition-all duration-200 border-b border-gray-50 last:border-b-0"
-                                      onClick={() => setOpenDropdown(null)}
-                                    >
-                                      <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
-                                        <HiPencil className="w-4 h-4 text-emerald-600" />
-                                      </div>
-                                      <span className="font-medium">
-                                        Edit Contact
-                                      </span>
-                                    </Link>
-                                    <button
-                                      onClick={() => {
-                                        setOpenDropdown(null);
-                                        handleDeleteClick(party.id);
-                                      }}
-                                      className="flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 w-full text-left"
-                                    >
-                                      <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center">
-                                        <HiTrash className="w-4 h-4 text-red-600" />
-                                      </div>
-                                      <span className="font-medium">
-                                        Delete Contact
-                                      </span>
-                                    </button>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Simple Pagination */}
-          {pagination && pagination.total > 0 && (
-            <div className="flex justify-center mt-6">
-              <Pagination
-                current={currentPage}
-                total={pagination.total}
-                pageSize={pageSize}
-                onChange={(page) => {
-                  setCurrentPage(page);
-                  dispatch(
-                    fetchParties({
-                      page: page,
-                      limit: pageSize,
-                      search: searchTerm,
-                      role: filterRole,
-                    })
-                  );
-                }}
-              />
+              </DragDropContext>
             </div>
           )}
         </div>
