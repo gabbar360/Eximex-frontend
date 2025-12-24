@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
@@ -11,6 +11,8 @@ import {
   HiClipboardDocumentList,
   HiExclamationTriangle,
   HiCalendarDays,
+  HiChevronDown,
+  HiMagnifyingGlass,
 } from 'react-icons/hi2';
 import { MdTask, MdDescription } from 'react-icons/md';
 import * as Yup from 'yup';
@@ -36,8 +38,96 @@ const AddEditTaskManagementForm: React.FC = () => {
   const isEditMode = Boolean(id);
   const [submitting, setSubmitting] = useState(false);
   const [task, setTask] = useState<any>({});
+  
+  // Dropdown states
+  const [typeSearch, setTypeSearch] = useState('');
+  const [assigneeSearch, setAssigneeSearch] = useState('');
+  const [prioritySearch, setPrioritySearch] = useState('');
+  const [showTypeDropdown, setShowTypeDropdown] = useState(false);
+  const [showAssigneeDropdown, setShowAssigneeDropdown] = useState(false);
+  const [showPriorityDropdown, setShowPriorityDropdown] = useState(false);
+  
+  const typeRef = useRef(null);
+  const assigneeRef = useRef(null);
+  const priorityRef = useRef(null);
 
   const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(user?.role?.name);
+
+  // SearchableDropdown Component
+  const SearchableDropdown = ({ label, value, options, onSelect, searchValue, onSearchChange, isOpen, onToggle, placeholder, dropdownRef, displayKey = 'name', valueKey = 'id' }) => {
+    const selectedOption = options.find(opt => opt[valueKey]?.toString() === value?.toString());
+    
+    return (
+      <div className="relative" ref={dropdownRef}>
+        <div
+          className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg cursor-pointer flex items-center justify-between transition-all duration-300 shadow-sm hover:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200 focus-within:border-slate-500"
+          onClick={onToggle}
+        >
+          <span className={`text-sm ${selectedOption ? 'text-slate-900' : 'text-slate-500'}`}>
+            {selectedOption ? selectedOption[displayKey] : placeholder}
+          </span>
+          <HiChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        </div>
+        
+        {isOpen && (
+          <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl" style={{ top: '100%', marginTop: '4px' }}>
+            <div className="p-3 border-b border-gray-100">
+              <div className="relative">
+                <HiMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder={`Search ${label.toLowerCase()}...`}
+                  value={searchValue}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                  onClick={(e) => e.stopPropagation()}
+                  autoFocus
+                />
+              </div>
+            </div>
+            <div className="max-h-60 overflow-y-auto">
+              {options.length === 0 ? (
+                <div className="px-4 py-3 text-slate-500 text-sm text-center">No {label.toLowerCase()} found</div>
+              ) : (
+                options.map((option) => (
+                  <div
+                    key={option[valueKey]}
+                    className={`px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm transition-colors duration-150 ${
+                      option[valueKey]?.toString() === value?.toString() ? 'bg-slate-100 text-slate-900 font-medium' : 'text-slate-700'
+                    }`}
+                    onClick={() => {
+                      onSelect(option[valueKey]);
+                      onToggle();
+                    }}
+                  >
+                    {option[displayKey]}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (typeRef.current && !typeRef.current.contains(event.target)) {
+        setShowTypeDropdown(false);
+      }
+      if (assigneeRef.current && !assigneeRef.current.contains(event.target)) {
+        setShowAssigneeDropdown(false);
+      }
+      if (priorityRef.current && !priorityRef.current.contains(event.target)) {
+        setShowPriorityDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (isAdmin) {
@@ -205,20 +295,28 @@ const AddEditTaskManagementForm: React.FC = () => {
                       <HiClipboardDocumentList className="w-4 h-4 mr-2 text-slate-600" />
                       Task Type *
                     </label>
-                    <select
-                      name="type"
+                    <SearchableDropdown
+                      label="Task Type"
                       value={values.type}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
-                    >
-                      <option value="LEAD_FOLLOW_UP">Lead Follow Up</option>
-                      <option value="QUOTATION">Quotation</option>
-                      <option value="DOCUMENTATION">Documentation</option>
-                      <option value="SHIPMENT">Shipment</option>
-                      <option value="PAYMENT">Payment</option>
-                      <option value="INTERNAL">Internal</option>
-                    </select>
+                      options={[
+                        { id: 'LEAD_FOLLOW_UP', name: 'Lead Follow Up' },
+                        { id: 'QUOTATION', name: 'Quotation' },
+                        { id: 'DOCUMENTATION', name: 'Documentation' },
+                        { id: 'SHIPMENT', name: 'Shipment' },
+                        { id: 'PAYMENT', name: 'Payment' },
+                        { id: 'INTERNAL', name: 'Internal' },
+                      ].filter(type => type.name.toLowerCase().includes(typeSearch.toLowerCase()))}
+                      onSelect={(value) => {
+                        setFieldValue('type', value);
+                        setTypeSearch('');
+                      }}
+                      searchValue={typeSearch}
+                      onSearchChange={setTypeSearch}
+                      isOpen={showTypeDropdown}
+                      onToggle={() => setShowTypeDropdown(!showTypeDropdown)}
+                      placeholder="Select Task Type"
+                      dropdownRef={typeRef}
+                    />
                     {touched.type && errors.type && (
                       <div className="text-sm text-red-500 mt-1">{errors.type}</div>
                     )}
@@ -230,20 +328,31 @@ const AddEditTaskManagementForm: React.FC = () => {
                       <HiUser className="w-4 h-4 mr-2 text-slate-600" />
                       Assign To *
                     </label>
-                    <select
-                      name="assignedTo"
+                    <SearchableDropdown
+                      label="Staff Member"
                       value={values.assignedTo}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
-                    >
-                      <option value="">Select Staff Member</option>
-                      {staffList.map((staff: any) => (
-                        <option key={staff.id} value={staff.id}>
-                          {staff.name} ({staff.email})
-                        </option>
-                      ))}
-                    </select>
+                      options={[
+                        { id: '', name: 'Select Staff Member' },
+                        ...staffList
+                          .filter((staff: any) => 
+                            `${staff.name} (${staff.email})`.toLowerCase().includes(assigneeSearch.toLowerCase())
+                          )
+                          .map((staff: any) => ({
+                            id: staff.id,
+                            name: `${staff.name} (${staff.email})`,
+                          }))
+                      ]}
+                      onSelect={(value) => {
+                        setFieldValue('assignedTo', value);
+                        setAssigneeSearch('');
+                      }}
+                      searchValue={assigneeSearch}
+                      onSearchChange={setAssigneeSearch}
+                      isOpen={showAssigneeDropdown}
+                      onToggle={() => setShowAssigneeDropdown(!showAssigneeDropdown)}
+                      placeholder="Select Staff Member"
+                      dropdownRef={assigneeRef}
+                    />
                     {touched.assignedTo && errors.assignedTo && (
                       <div className="text-sm text-red-500 mt-1">{errors.assignedTo}</div>
                     )}
@@ -255,18 +364,26 @@ const AddEditTaskManagementForm: React.FC = () => {
                       <HiExclamationTriangle className="w-4 h-4 mr-2 text-slate-600" />
                       Priority *
                     </label>
-                    <select
-                      name="priority"
+                    <SearchableDropdown
+                      label="Priority"
                       value={values.priority}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
-                    >
-                      <option value="LOW">Low</option>
-                      <option value="MEDIUM">Medium</option>
-                      <option value="HIGH">High</option>
-                      <option value="URGENT">Urgent</option>
-                    </select>
+                      options={[
+                        { id: 'LOW', name: 'Low' },
+                        { id: 'MEDIUM', name: 'Medium' },
+                        { id: 'HIGH', name: 'High' },
+                        { id: 'URGENT', name: 'Urgent' },
+                      ].filter(priority => priority.name.toLowerCase().includes(prioritySearch.toLowerCase()))}
+                      onSelect={(value) => {
+                        setFieldValue('priority', value);
+                        setPrioritySearch('');
+                      }}
+                      searchValue={prioritySearch}
+                      onSearchChange={setPrioritySearch}
+                      isOpen={showPriorityDropdown}
+                      onToggle={() => setShowPriorityDropdown(!showPriorityDropdown)}
+                      placeholder="Select Priority"
+                      dropdownRef={priorityRef}
+                    />
                     {touched.priority && errors.priority && (
                       <div className="text-sm text-red-500 mt-1">{errors.priority}</div>
                     )}

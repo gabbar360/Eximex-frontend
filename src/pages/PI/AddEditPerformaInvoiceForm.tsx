@@ -6,6 +6,8 @@ import {
   HiChevronDown,
   HiMagnifyingGlass,
 } from 'react-icons/hi2';
+import { Steps } from 'antd';
+import { UserOutlined, ContainerOutlined, FileTextOutlined, ShoppingOutlined, CheckCircleOutlined } from '@ant-design/icons';
 
 // Extend Window interface for timeout handling
 declare global {
@@ -213,22 +215,7 @@ const CONTAINER_CONFIGS: ContainerConfig[] = [
   { type: 'LCL', cbm: 0, maxWeight: 0 },
 ];
 
-// Categories and subcategories
-const categoriesStatic: Category[] = [
-  { id: 'cat1', name: 'Ceramics' },
-  { id: 'cat2', name: 'Bagasse' },
-  { id: 'cat3', name: 'Engineering' },
-  { id: 'cat4', name: 'Agri-Products' },
-];
 
-const subcategoriesStatic: Subcategory[] = [
-  { id: 'sub1', name: 'Tiles', categoryId: 'cat1' },
-  { id: 'sub2', name: 'Sanitaryware', categoryId: 'cat1' },
-  { id: 'sub3', name: 'Plates', categoryId: 'cat2' },
-  { id: 'sub4', name: 'Bowls', categoryId: 'cat2' },
-  { id: 'sub5', name: 'Machinery', categoryId: 'cat3' },
-  { id: 'sub6', name: 'Tools', categoryId: 'cat3' },
-];
 
 const CURRENCIES = [
   { code: 'USD', symbol: '$', name: 'US Dollar' },
@@ -238,19 +225,17 @@ const CURRENCIES = [
   { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
   { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar' },
 ];
+
+const deliveryTermNames = {
+  fob: 'FOB (Free On Board)',
+  cif: 'CIF (Cost, Insurance & Freight)',
+  ddp: 'DDP (Delivered Duty Paid)',
+};
+
 const containerTypes: ContainerConfig[] = CONTAINER_CONFIGS;
 const currencies: any[] = CURRENCIES;
 
-const paymentTermNames: Record<string, string> = {
-  advance: 'Advance',
-  lc: 'LC',
-  '30days': '30 Days Credit',
-};
-const deliveryTermNames: Record<string, string> = {
-  fob: 'FOB',
-  cif: 'CIF',
-  ddp: 'DDP',
-};
+
 const chargesTemplates: Record<string, any[]> = {
   fob: [
     {
@@ -459,6 +444,9 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
       if (preCarriageRef.current && !preCarriageRef.current.contains(event.target)) {
         setShowPreCarriageDropdown(false);
       }
+      if (balancePaymentTermRef.current && !balancePaymentTermRef.current.contains(event.target)) {
+        setShowBalancePaymentTermDropdown(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -566,6 +554,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   const [deliveryTermSearch, setDeliveryTermSearch] = useState('');
   const [currencySearch, setCurrencySearch] = useState('');
   const [preCarriageSearch, setPreCarriageSearch] = useState('');
+  const [balancePaymentTermSearch, setBalancePaymentTermSearch] = useState('');
   
   const [showCompanyDropdown, setShowCompanyDropdown] = useState(false);
   const [showContainerTypeDropdown, setShowContainerTypeDropdown] = useState(false);
@@ -573,6 +562,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   const [showDeliveryTermDropdown, setShowDeliveryTermDropdown] = useState(false);
   const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
   const [showPreCarriageDropdown, setShowPreCarriageDropdown] = useState(false);
+  const [showBalancePaymentTermDropdown, setShowBalancePaymentTermDropdown] = useState(false);
   
   const companyRef = useRef(null);
   const containerTypeRef = useRef(null);
@@ -580,12 +570,13 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   const deliveryTermRef = useRef(null);
   const currencyRef = useRef(null);
   const preCarriageRef = useRef(null);
+  const balancePaymentTermRef = useRef(null);
 
   // Step validation functions
   const validateStep1 = () => {
     const errors: { [key: string]: boolean } = {};
 
-    if (!companyId || companyId.trim() === '') errors.companyId = true;
+    if (!companyId || companyId.toString().trim() === '') errors.companyId = true;
     if (!company?.contactPerson || company.contactPerson.trim() === '')
       errors.contactPerson = true;
     if (!company?.email || company.email.trim() === '') errors.email = true;
@@ -638,34 +629,18 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
     switch (step) {
       case 1:
         isValid = validateStep1();
-        if (!isValid) {
-          toast.error('Please fill all required fields in red.');
-          return false;
-        }
         break;
       case 2:
         isValid = validateStep2();
-        if (!isValid) {
-          toast.error('Please fill all required fields in red.');
-          return false;
-        }
         break;
       case 3:
         isValid = validateStep3();
-        if (!isValid) {
-          toast.error('Please fill all required fields in red.');
-          return false;
-        }
         break;
       case 4:
         isValid = validateStep4();
-        if (!isValid) {
-          toast.error(
-            'Please fill all required fields in red and add products.'
-          );
-          return false;
-        }
         break;
+      default:
+        isValid = true;
     }
 
     if (isValid) {
@@ -675,8 +650,10 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         setCurrentStep(step + 1);
       }
       return true;
+    } else {
+      toast.error('Please fill all required fields.');
+      return false;
     }
-    return false;
   };
 
   // Company detail handlers
@@ -899,7 +876,14 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
       }
       return `${advance}% ADVANCE`;
     }
-    return paymentTermNames[paymentTerm] || paymentTerm || 'N/A';
+    const termNames = {
+      fob: 'FOB (Free On Board)',
+      cif: 'CIF (Cost, Insurance & Freight)',
+      ddp: 'DDP (Delivered Duty Paid)',
+      lc: 'LC (Letter of Credit)',
+      advance: 'Advance'
+    };
+    return termNames[paymentTerm] || paymentTerm || 'N/A';
   };
 
   const handleDeliveryTermChange = (
@@ -1901,85 +1885,37 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         {/* Step Progress Indicator */}
         <div className="mb-8">
           <div className="bg-white rounded-lg border border-gray-200 p-8">
-            <div className="flex items-center justify-between overflow-x-auto pb-4">
-              {[1, 2, 3, 4, 5].map((step) => (
-                <div key={step} className="flex items-center flex-shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => setCurrentStep(step)}
-                    className={`w-12 h-12 rounded-lg flex items-center justify-center text-sm font-bold ${
-                      step === currentStep
-                        ? 'bg-slate-700 text-white'
-                        : step < currentStep || completedSteps.has(step)
-                          ? 'bg-green-500 text-white'
-                          : 'bg-white text-gray-600 border-2 border-gray-300'
-                    }`}
-                  >
-                    {step < currentStep || completedSteps.has(step)
-                      ? '✓'
-                      : step}
-                  </button>
-                  {step < 5 && (
-                    <div className="mx-4">
-                      <div
-                        className={`w-20 h-2 rounded-full ${
-                          step < currentStep || completedSteps.has(step)
-                            ? 'bg-green-500'
-                            : 'bg-gray-200 border border-gray-300'
-                        }`}
-                      />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-            <div className="flex justify-between mt-6 text-sm font-medium overflow-x-auto">
-              <span
-                className={
-                  currentStep === 1
-                    ? 'text-slate-700 font-bold flex-shrink-0'
-                    : 'text-gray-500 flex-shrink-0'
-                }
-              >
-                Company
-              </span>
-              <span
-                className={
-                  currentStep === 2
-                    ? 'text-slate-700 font-bold flex-shrink-0'
-                    : 'text-gray-500 flex-shrink-0'
-                }
-              >
-                Container
-              </span>
-              <span
-                className={
-                  currentStep === 3
-                    ? 'text-slate-700 font-bold flex-shrink-0'
-                    : 'text-gray-500 flex-shrink-0'
-                }
-              >
-                Terms
-              </span>
-              <span
-                className={
-                  currentStep === 4
-                    ? 'text-slate-700 font-bold flex-shrink-0'
-                    : 'text-gray-500 flex-shrink-0'
-                }
-              >
-                Products
-              </span>
-              <span
-                className={
-                  currentStep === 5
-                    ? 'text-slate-700 font-bold flex-shrink-0'
-                    : 'text-gray-500 flex-shrink-0'
-                }
-              >
-                Review
-              </span>
-            </div>
+            <Steps
+              current={currentStep - 1}
+              onChange={(step) => setCurrentStep(step + 1)}
+              items={[
+                {
+                  title: 'Company',
+                  status: currentStep > 1 || completedSteps.has(1) ? 'finish' : currentStep === 1 ? 'process' : 'wait',
+                  icon: <UserOutlined />,
+                },
+                {
+                  title: 'Container',
+                  status: currentStep > 2 || completedSteps.has(2) ? 'finish' : currentStep === 2 ? 'process' : 'wait',
+                  icon: <ContainerOutlined />,
+                },
+                {
+                  title: 'Terms',
+                  status: currentStep > 3 || completedSteps.has(3) ? 'finish' : currentStep === 3 ? 'process' : 'wait',
+                  icon: <FileTextOutlined />,
+                },
+                {
+                  title: 'Products',
+                  status: currentStep > 4 || completedSteps.has(4) ? 'finish' : currentStep === 4 ? 'process' : 'wait',
+                  icon: <ShoppingOutlined />,
+                },
+                {
+                  title: 'Review',
+                  status: currentStep > 5 || completedSteps.has(5) ? 'finish' : currentStep === 5 ? 'process' : 'wait',
+                  icon: <CheckCircleOutlined />,
+                },
+              ]}
+            />
           </div>
         </div>
 
@@ -2033,7 +1969,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                           if (selectedParty) {
                             setCompany({
                               id: selectedParty.id,
-                              name: selectedParty.name,
+                              name: selectedParty.companyName || selectedParty.name,
                               status: selectedParty.status || 'active',
                               contactPerson: selectedParty.contactPerson || '',
                               address: selectedParty.address || '',
@@ -2592,20 +2528,32 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                             <Label htmlFor="balancePaymentTerm">
                               Balance {100 - parseInt(advancePercentage)}% Payment Term *
                             </Label>
-                            <select
-                              id="balancePaymentTerm"
+                            <SearchableDropdown
+                              label="Balance Payment Term"
                               value={balancePaymentTerm}
-                              onChange={(e) => setBalancePaymentTerm(e.target.value)}
-                              className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm py-3 px-4 text-base bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                              required
-                            >
-                              <option value="">Select balance payment term</option>
-                              <option value="AGAINST BL">AGAINST BL</option>
-                              <option value="AGAINST DOCUMENTS">AGAINST DOCUMENTS</option>
-                              <option value="ON DELIVERY">ON DELIVERY</option>
-                              <option value="BEFORE DISPATCH">BEFORE DISPATCH</option>
-                            
-                            </select>
+                              options={[
+                                { id: 'AGAINST BL', name: 'AGAINST BL' },
+                                { id: 'AGAINST DOCUMENTS', name: 'AGAINST DOCUMENTS' },
+                                { id: 'ON DELIVERY', name: 'ON DELIVERY' },
+                                { id: 'BEFORE DISPATCH', name: 'BEFORE DISPATCH' },
+                                { id: 'Balance 70% Payment Term', name: 'Balance 70% Payment Term' },
+                              ]
+                                .filter((term) =>
+                                  term.name
+                                    .toLowerCase()
+                                    .includes(balancePaymentTermSearch.toLowerCase())
+                                )}
+                              onSelect={(term) => {
+                                setBalancePaymentTerm(term);
+                                setBalancePaymentTermSearch('');
+                              }}
+                              searchValue={balancePaymentTermSearch}
+                              onSearchChange={setBalancePaymentTermSearch}
+                              isOpen={showBalancePaymentTermDropdown}
+                              onToggle={() => setShowBalancePaymentTermDropdown(!showBalancePaymentTermDropdown)}
+                              placeholder="Select balance payment term"
+                              dropdownRef={balancePaymentTermRef}
+                            />
                           </div>
                         )}
                       </div>

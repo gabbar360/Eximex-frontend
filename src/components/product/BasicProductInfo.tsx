@@ -344,7 +344,7 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
             <HiCurrencyDollar className="w-4 h-4 mr-2 text-slate-600" />
             Price
           </label>
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <Field
               type="number"
               name="price"
@@ -353,7 +353,7 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
               placeholder="Enter price"
               className="flex-1 px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
             />
-            <div className="w-24 relative" ref={currencyRef}>
+            <div className="w-full sm:w-32 relative" ref={currencyRef}>
               <div
                 className="w-full px-3 py-3 border border-gray-300 bg-white rounded-lg cursor-pointer flex items-center justify-between transition-all duration-300 shadow-sm hover:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200 focus-within:border-slate-500"
                 onClick={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
@@ -368,7 +368,7 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
 
               {showCurrencyDropdown && (
                 <div
-                  className="absolute z-50 w-40 bg-white border border-gray-200 rounded-lg shadow-xl"
+                  className="absolute z-50 w-full sm:w-40 bg-white border border-gray-200 rounded-lg shadow-xl"
                   style={{ top: '100%', marginTop: '4px', right: '0' }}
                 >
                   <div className="p-3 border-b border-gray-100">

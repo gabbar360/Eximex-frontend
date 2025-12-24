@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -11,6 +11,7 @@ import {
   HiPlus,
   HiMagnifyingGlass,
   HiSparkles,
+  HiChevronDown,
 } from 'react-icons/hi2';
 import { MdSupervisorAccount, MdTask } from 'react-icons/md';
 import { Pagination } from 'antd';
@@ -28,8 +29,90 @@ const TaskManagement: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
+  
+  // Dropdown states
+  const [statusSearch, setStatusSearch] = useState('');
+  const [prioritySearch, setPrioritySearch] = useState('');
+  const [showStatusDropdown, setShowStatusDropdown] = useState(false);
+  const [showPriorityDropdown, setShowPriorityDropdown] = useState(false);
+  
+  const statusRef = useRef(null);
+  const priorityRef = useRef(null);
 
   const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(user?.role?.name);
+
+  // SearchableDropdown Component
+  const SearchableDropdown = ({ label, value, options, onSelect, searchValue, onSearchChange, isOpen, onToggle, placeholder, dropdownRef }) => {
+    const selectedOption = options.find(opt => opt.id === value);
+    
+    return (
+      <div className="relative" ref={dropdownRef}>
+        <div
+          className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg cursor-pointer flex items-center justify-between transition-all duration-300 shadow-sm hover:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200 focus-within:border-slate-500"
+          onClick={onToggle}
+        >
+          <span className={`text-sm ${selectedOption ? 'text-slate-900' : 'text-slate-500'}`}>
+            {selectedOption ? selectedOption.name : placeholder}
+          </span>
+          <HiChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        </div>
+        
+        {isOpen && (
+          <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl" style={{ top: '100%', marginTop: '4px' }}>
+            <div className="p-3 border-b border-gray-100">
+              <div className="relative">
+                <HiMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder={`Search ${label.toLowerCase()}...`}
+                  value={searchValue}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                  onClick={(e) => e.stopPropagation()}
+                  autoFocus
+                />
+              </div>
+            </div>
+            <div className="max-h-60 overflow-y-auto">
+              {options.length === 0 ? (
+                <div className="px-4 py-3 text-slate-500 text-sm text-center">No {label.toLowerCase()} found</div>
+              ) : (
+                options.map((option) => (
+                  <div
+                    key={option.id}
+                    className={`px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm transition-colors duration-150 ${
+                      option.id === value ? 'bg-slate-100 text-slate-900 font-medium' : 'text-slate-700'
+                    }`}
+                    onClick={() => {
+                      onSelect(option.id);
+                      onToggle();
+                    }}
+                  >
+                    {option.name}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (statusRef.current && !statusRef.current.contains(event.target)) {
+        setShowStatusDropdown(false);
+      }
+      if (priorityRef.current && !priorityRef.current.contains(event.target)) {
+        setShowPriorityDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const params = {
@@ -130,13 +213,14 @@ const TaskManagement: React.FC = () => {
                   </div>
                   <div>
                     <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
-                      Task Management
+                      Task
                     </h1>
                   </div>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <div className="relative flex-1 sm:flex-none">
+                  {/* Search Bar */}
+                  <div className="relative flex-1">
                     <HiMagnifyingGlass className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                     <input
                       type="text"
@@ -147,40 +231,66 @@ const TaskManagement: React.FC = () => {
                     />
                   </div>
 
-                  {/* Filters */}
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="px-4 py-3 rounded-lg border border-gray-300 bg-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-all duration-300 text-sm shadow-sm"
-                  >
-                    <option value="">All Status</option>
-                    <option value="PENDING">Pending</option>
-                    <option value="IN_PROGRESS">In Progress</option>
-                    <option value="ON_HOLD">On Hold</option>
-                    <option value="COMPLETED">Completed</option>
-                    <option value="CANCELLED">Cancelled</option>
-                    <option value="OVERDUE">Overdue</option>
-                  </select>
+                  {/* Status Filter */}
+                  <div className="w-full sm:w-48">
+                    <SearchableDropdown
+                      label="Status"
+                      value={statusFilter}
+                      options={[
+                        { id: '', name: 'All Status' },
+                        { id: 'PENDING', name: 'Pending' },
+                        { id: 'IN_PROGRESS', name: 'In Progress' },
+                        { id: 'ON_HOLD', name: 'On Hold' },
+                        { id: 'COMPLETED', name: 'Completed' },
+                        { id: 'CANCELLED', name: 'Cancelled' },
+                        { id: 'OVERDUE', name: 'Overdue' },
+                      ].filter(status => status.name.toLowerCase().includes(statusSearch.toLowerCase()))}
+                      onSelect={(value) => {
+                        setStatusFilter(value);
+                        setStatusSearch('');
+                      }}
+                      searchValue={statusSearch}
+                      onSearchChange={setStatusSearch}
+                      isOpen={showStatusDropdown}
+                      onToggle={() => setShowStatusDropdown(!showStatusDropdown)}
+                      placeholder="All Status"
+                      dropdownRef={statusRef}
+                    />
+                  </div>
 
-                  <select
-                    value={priorityFilter}
-                    onChange={(e) => setPriorityFilter(e.target.value)}
-                    className="px-4 py-3 rounded-lg border border-gray-300 bg-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-all duration-300 text-sm shadow-sm"
-                  >
-                    <option value="">All Priority</option>
-                    <option value="LOW">Low</option>
-                    <option value="MEDIUM">Medium</option>
-                    <option value="HIGH">High</option>
-                    <option value="URGENT">Urgent</option>
-                  </select>
+                  {/* Priority Filter */}
+                  <div className="w-full sm:w-40">
+                    <SearchableDropdown
+                      label="Priority"
+                      value={priorityFilter}
+                      options={[
+                        { id: '', name: 'All Priority' },
+                        { id: 'LOW', name: 'Low' },
+                        { id: 'MEDIUM', name: 'Medium' },
+                        { id: 'HIGH', name: 'High' },
+                        { id: 'URGENT', name: 'Urgent' },
+                      ].filter(priority => priority.name.toLowerCase().includes(prioritySearch.toLowerCase()))}
+                      onSelect={(value) => {
+                        setPriorityFilter(value);
+                        setPrioritySearch('');
+                      }}
+                      searchValue={prioritySearch}
+                      onSearchChange={setPrioritySearch}
+                      isOpen={showPriorityDropdown}
+                      onToggle={() => setShowPriorityDropdown(!showPriorityDropdown)}
+                      placeholder="All Priority"
+                      dropdownRef={priorityRef}
+                    />
+                  </div>
 
+                  {/* Add Task Button */}
                   {isAdmin && (
                     <Link
                       to="/task-management/add-task"
-                      className="inline-flex items-center justify-center px-4 sm:px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg text-sm sm:text-base whitespace-nowrap"
+                      className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg whitespace-nowrap"
                     >
-                      <HiPlus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                      Assign Task
+                      <HiPlus className="w-5 h-5 mr-2" />
+                      Add Task
                     </Link>
                   )}
                 </div>
@@ -215,7 +325,7 @@ const TaskManagement: React.FC = () => {
               <div className="overflow-x-auto">
                 <div className="min-w-[800px]">
                   <div className="bg-gray-50 border-b border-gray-200 p-4">
-                    <div className="grid grid-cols-8 gap-3 text-sm font-semibold text-slate-700">
+                    <div className="grid gap-3 text-sm font-semibold text-slate-700" style={{ gridTemplateColumns: '2fr 1fr 1.2fr 1.2fr 0.8fr 1fr 1fr 0.8fr' }}>
                       <div className="flex items-center gap-2">
                         <MdTask className="w-4 h-4 text-slate-600" />
                         <span>Task</span>
@@ -235,7 +345,7 @@ const TaskManagement: React.FC = () => {
                   <div className="divide-y divide-gray-200">
                     {tasks.map((task: any) => (
                       <div key={task.id} className="p-4 hover:bg-gray-50">
-                        <div className="grid grid-cols-8 gap-3 items-center">
+                        <div className="grid gap-3 items-center" style={{ gridTemplateColumns: '2fr 1fr 1.2fr 1.2fr 0.8fr 1fr 1fr 0.8fr' }}>
                           <div>
                             <h3 className="font-semibold text-slate-900">{task.title}</h3>
                             {task.description && (

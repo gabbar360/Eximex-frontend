@@ -825,28 +825,30 @@ const AddEditProductForm = () => {
                 />
 
                 {/* Submit Buttons */}
-                <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:gap-4 pt-6 border-t border-gray-200">
                   <button
                     type="button"
                     onClick={() => navigate('/products')}
-                    className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50 transition-all duration-300"
+                    className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50 transition-all duration-300 order-2 sm:order-1"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={loading || isSubmitting}
-                    className="px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-xl disabled:opacity-50 shadow-lg"
+                    className="px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-xl disabled:opacity-50 shadow-lg order-1 sm:order-2"
                   >
                     {loading || isSubmitting ? (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-center gap-2">
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        {isEdit ? 'Updating...' : 'Creating...'}
+                        <span className="hidden sm:inline">{isEdit ? 'Updating...' : 'Creating...'}</span>
+                        <span className="sm:hidden">{isEdit ? 'Update' : 'Create'}</span>
                       </div>
                     ) : (
                       <>
                         <HiCheckCircle className="w-5 h-5 mr-2 inline" />
-                        {isEdit ? 'Update Product' : 'Create Product'}
+                        <span className="hidden sm:inline">{isEdit ? 'Update Product' : 'Create Product'}</span>
+                        <span className="sm:hidden">{isEdit ? 'Update' : 'Create'}</span>
                       </>
                     )}
                   </button>

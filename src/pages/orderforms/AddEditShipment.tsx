@@ -183,28 +183,32 @@ const AddEditShipment = () => {
 
         {/* Form Container */}
         <div className="bg-white rounded-xl shadow-xl border border-slate-200">
-          <div className="p-8">
-            <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="p-4 sm:p-6 lg:p-8">
+            <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
               {/* Order Selection for new shipments */}
               {!isEdit && (
-                <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
-                  <h3 className="text-lg font-semibold text-slate-700 mb-4">
+                <div className="bg-slate-50 p-4 sm:p-6 rounded-lg border border-slate-200">
+                  <h3 className="text-base sm:text-lg font-semibold text-slate-700 mb-3 sm:mb-4">
                     Select Order
                   </h3>
-                  <OrderSelector
-                    selectedOrderId={selectedOrder?.id || null}
-                    onOrderSelect={handleOrderSelect}
-                    placeholder="Select Order for Shipment"
-                    filterType="shipment"
-                  />
+                  <div className="w-full">
+                    <OrderSelector
+                      selectedOrderId={selectedOrder?.id || null}
+                      onOrderSelect={handleOrderSelect}
+                      placeholder="Select Order for Shipment"
+                      filterType="shipment"
+                    />
+                  </div>
                   {selectedOrder && (
-                    <div className="mt-4 p-4 bg-slate-100 rounded-lg border border-slate-300">
-                      <p className="text-sm text-slate-700">
-                        Selected:{' '}
+                    <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-slate-100 rounded-lg border border-slate-300">
+                      <p className="text-xs sm:text-sm text-slate-700 break-words">
+                        <span className="block sm:inline">Selected: </span>
                         <strong className="text-slate-800">
                           {selectedOrder.orderNumber}
-                        </strong>{' '}
-                        - {selectedOrder.piNumber} ({selectedOrder.buyerName})
+                        </strong>
+                        <span className="block sm:inline sm:ml-1">
+                          - {selectedOrder.piNumber} ({selectedOrder.buyerName})
+                        </span>
                       </p>
                     </div>
                   )}
@@ -212,14 +216,14 @@ const AddEditShipment = () => {
               )}
 
               {/* Shipment Details */}
-              <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-slate-700 border-b border-slate-200 pb-3">
+              <div className="space-y-4 sm:space-y-6">
+                <h3 className="text-lg sm:text-xl font-semibold text-slate-700 border-b border-slate-200 pb-2 sm:pb-3">
                   Shipment Details
                 </h3>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                    <label className="block text-sm font-semibold text-slate-700 mb-2 sm:mb-3">
                       Booking Number
                     </label>
                     <input
@@ -228,12 +232,12 @@ const AddEditShipment = () => {
                       value={shipmentData.bookingNumber}
                       onChange={handleInputChange}
                       placeholder="Enter booking number"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm text-sm sm:text-base"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                    <label className="block text-sm font-semibold text-slate-700 mb-2 sm:mb-3">
                       Booking Date
                     </label>
                     <DatePicker
@@ -245,12 +249,12 @@ const AddEditShipment = () => {
                         }))
                       }
                       placeholder="Select booking date"
-                      className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
+                      className="px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300 text-sm sm:text-base w-full"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                    <label className="block text-sm font-semibold text-slate-700 mb-2 sm:mb-3">
                       Way Bill Number
                     </label>
                     <input
@@ -259,12 +263,12 @@ const AddEditShipment = () => {
                       value={shipmentData.wayBillNumber}
                       onChange={handleInputChange}
                       placeholder="Enter way bill number"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm text-sm sm:text-base"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                    <label className="block text-sm font-semibold text-slate-700 mb-2 sm:mb-3">
                       Truck Number
                     </label>
                     <input
@@ -273,12 +277,12 @@ const AddEditShipment = () => {
                       value={shipmentData.truckNumber}
                       onChange={handleInputChange}
                       placeholder="Enter truck number"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm text-sm sm:text-base"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                    <label className="block text-sm font-semibold text-slate-700 mb-2 sm:mb-3">
                       BL Number
                     </label>
                     <input
@@ -287,12 +291,12 @@ const AddEditShipment = () => {
                       value={shipmentData.blNumber}
                       onChange={handleInputChange}
                       placeholder="Enter BL number"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm text-sm sm:text-base"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                    <label className="block text-sm font-semibold text-slate-700 mb-2 sm:mb-3">
                       Vessel/Voyage Info
                     </label>
                     <input
@@ -301,35 +305,37 @@ const AddEditShipment = () => {
                       value={shipmentData.vesselVoyageInfo}
                       onChange={handleInputChange}
                       placeholder="e.g., MSC FLORA/123456"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-300"
+                      className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm text-sm sm:text-base"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Submit Buttons */}
-              <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-6 border-t border-gray-200">
                 <button
                   type="button"
                   onClick={() => navigate('/orders/shipments')}
-                  className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50 transition-all duration-300"
+                  className="px-4 sm:px-6 py-2 sm:py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50 transition-all duration-300 text-sm sm:text-base"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-xl disabled:opacity-50 shadow-lg"
+                  className="px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-xl disabled:opacity-50 shadow-lg text-sm sm:text-base"
                 >
                   {saving ? (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 justify-center">
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      {isEdit ? 'Updating...' : 'Creating...'}
+                      <span className="hidden sm:inline">{isEdit ? 'Updating...' : 'Creating...'}</span>
+                      <span className="sm:hidden">{isEdit ? 'Updating' : 'Creating'}</span>
                     </div>
                   ) : (
                     <>
-                      <HiCheckCircle className="w-5 h-5 mr-2 inline" />
-                      {isEdit ? 'Update Shipment' : 'Create Shipment'}
+                      <HiCheckCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 inline" />
+                      <span className="hidden sm:inline">{isEdit ? 'Update Shipment' : 'Create Shipment'}</span>
+                      <span className="sm:hidden">{isEdit ? 'Update' : 'Create'}</span>
                     </>
                   )}
                 </button>
