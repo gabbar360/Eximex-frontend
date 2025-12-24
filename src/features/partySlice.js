@@ -61,6 +61,18 @@ export const deleteParty = createAsyncThunk(
   }
 );
 
+export const updatePartyStage = createAsyncThunk(
+  'party/updatePartyStage',
+  async ({ id, stage }, { rejectWithValue }) => {
+    try {
+      const response = await partyService.updatePartyStage(id, stage);
+      return response;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || err.message);
+    }
+  }
+);
+
 export const getAllParties = createAsyncThunk(
   'party/getAllParties',
   async (_, { rejectWithValue }) => {
@@ -119,6 +131,14 @@ const partySlice = createSlice({
       state.error = null;
       state.successMessage = null;
     },
+    updatePartyStageOptimistic(state, { payload }) {
+      const { id, stage } = payload;
+      if (Array.isArray(state.parties)) {
+        state.parties = state.parties.map((p) =>
+          p.id.toString() === id.toString() ? { ...p, stage } : p
+        );
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -174,6 +194,23 @@ const partySlice = createSlice({
         state.successMessage = payload.message;
       })
       .addCase(updateParty.rejected, (state, { payload }) => {
+        state.loading = false;
+        state.error = payload;
+      })
+      .addCase(updatePartyStage.pending, (state) => {
+        state.loading = false; // Don't show global loading for stage update
+        state.error = null;
+      })
+      .addCase(updatePartyStage.fulfilled, (state, { payload }) => {
+        state.loading = false;
+        if (Array.isArray(state.parties)) {
+          state.parties = state.parties.map((p) =>
+            p.id === payload.data.id ? payload.data : p
+          );
+        }
+        state.successMessage = payload.message;
+      })
+      .addCase(updatePartyStage.rejected, (state, { payload }) => {
         state.loading = false;
         state.error = payload;
       })
@@ -238,6 +275,6 @@ const partySlice = createSlice({
   },
 });
 
-export const { setSelectedParty, clearSelectedParty, clearMessages } =
+export const { setSelectedParty, clearSelectedParty, clearMessages, updatePartyStageOptimistic } =
   partySlice.actions;
 export default partySlice.reducer;
