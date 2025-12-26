@@ -182,7 +182,7 @@ const Cprospect = () => {
       destination.index === source.index
     ) {
       return;
-    } 
+    }  
 
     const newStage = destination.droppableId;
     const contactId = draggableId.replace('contact-', '');
