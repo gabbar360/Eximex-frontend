@@ -345,12 +345,12 @@ const Cprospect = () => {
                     />
                   </div>
 
-                  <div className="flex gap-2 flex-shrink-0">
+                  <div className="flex gap-2 flex-shrink-0 flex-1 sm:flex-none">
                     <Link
                       to="/add-contact"
-                      className="inline-flex items-center justify-center px-4 lg:px-6 py-3 rounded-xl font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg transition-colors whitespace-nowrap"
+                      className="inline-flex items-center justify-center px-3 sm:px-4 lg:px-6 py-3 w-full sm:w-auto rounded-xl font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg transition-colors whitespace-nowrap text-sm sm:text-base"
                     >
-                      <HiPlus className="w-5 h-5 mr-2" />
+                      <HiPlus className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
                       <span className="hidden sm:inline">Add Contact</span>
                       <span className="sm:hidden">Add</span>
                     </Link>
@@ -388,7 +388,7 @@ const Cprospect = () => {
               <DragDropContext onDragEnd={handleDragEnd}>
                 <div className="flex gap-4 overflow-x-auto pb-4 min-h-[600px]">
                   {stages.map((stage) => (
-                    <div key={stage.id} className="flex-shrink-0 w-80">
+                    <div key={stage.id} className="flex-shrink-0 w-57">
                       <div className="bg-gray-50 rounded-xl border border-gray-200 h-full">
                         {/* Stage Header */}
                         <div className="bg-white border-b border-gray-200 p-4 rounded-t-xl">
@@ -428,9 +428,9 @@ const Cprospect = () => {
                                     >
                                       <div className="flex items-start justify-between mb-4">
                                         <div className="flex items-start gap-3 flex-1 min-w-0">
-                                          <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
+                                          {/* <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
                                             <HiBuildingOffice2 className="w-5 h-5 text-slate-600" />
-                                          </div>
+                                          </div> */}
                                           <div className="flex-1 min-w-0">
                                             <h3 className="font-semibold text-slate-900 text-sm leading-tight truncate" title={contact.companyName}>
                                               {contact.companyName}
@@ -587,3 +587,4 @@ const Cprospect = () => {
 };
 
 export default Cprospect;
+  
