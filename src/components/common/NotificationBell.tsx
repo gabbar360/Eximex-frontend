@@ -69,8 +69,12 @@ const NotificationBell: React.FC = () => {
   };
 
   const handleNotificationClick = (notification: Notification) => {
+    // Navigate to task-management page
+    navigate('/task-management');
     // Delete notification from database
     dispatch(deleteNotification(notification.id));
+    // Close dropdown
+    setIsOpen(false);
   };
 
   const handleMarkAllAsRead = () => {
