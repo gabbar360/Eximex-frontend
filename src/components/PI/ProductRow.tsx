@@ -290,6 +290,9 @@ const ProductRow: React.FC<ProductRowProps> = ({
   useEffect(() => {
     if (packagingCalculation) {
       onChange(idx, 'packagingCalculation', packagingCalculation);
+    } else {
+      // Clear packaging calculation if not applicable
+      onChange(idx, 'packagingCalculation', null);
     }
   }, [packagingCalculation, onChange, idx]);
 
