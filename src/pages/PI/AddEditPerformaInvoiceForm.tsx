@@ -2,12 +2,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { fetchCategories } from '../../features/categorySlice';
 import { fetchProducts } from '../../features/productSlice';
-import {
-  HiChevronDown,
-  HiMagnifyingGlass,
-} from 'react-icons/hi2';
+import { HiChevronDown, HiMagnifyingGlass } from 'react-icons/hi2';
 import { Steps } from 'antd';
-import { UserOutlined, ContainerOutlined, FileTextOutlined, ShoppingOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import {
+  UserOutlined,
+  ContainerOutlined,
+  FileTextOutlined,
+  ShoppingOutlined,
+  CheckCircleOutlined,
+} from '@ant-design/icons';
 
 // Extend Window interface for timeout handling
 declare global {
@@ -120,7 +123,7 @@ type ProductAdded = {
     sqmPerBox: number;
     boxesPerPallet: number;
     calculatedFor: number;
-  };
+  } | null;
 };
 
 type ProductData = {
@@ -215,8 +218,6 @@ const CONTAINER_CONFIGS: ContainerConfig[] = [
   { type: 'LCL', cbm: 0, maxWeight: 0 },
 ];
 
-
-
 const CURRENCIES = [
   { code: 'USD', symbol: '$', name: 'US Dollar' },
   { code: 'EUR', symbol: '€', name: 'Euro' },
@@ -234,7 +235,6 @@ const deliveryTermNames = {
 
 const containerTypes: ContainerConfig[] = CONTAINER_CONFIGS;
 const currencies: any[] = CURRENCIES;
-
 
 const chargesTemplates: Record<string, any[]> = {
   fob: [
@@ -421,30 +421,43 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   const { products } = useSelector((state: any) => state.product);
   const [companies, setCompanies] = useState<Company[]>([]);
 
-
-
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (companyRef.current && !companyRef.current.contains(event.target)) {
         setShowCompanyDropdown(false);
       }
-      if (containerTypeRef.current && !containerTypeRef.current.contains(event.target)) {
+      if (
+        containerTypeRef.current &&
+        !containerTypeRef.current.contains(event.target)
+      ) {
         setShowContainerTypeDropdown(false);
       }
-      if (paymentTermRef.current && !paymentTermRef.current.contains(event.target)) {
+      if (
+        paymentTermRef.current &&
+        !paymentTermRef.current.contains(event.target)
+      ) {
         setShowPaymentTermDropdown(false);
       }
-      if (deliveryTermRef.current && !deliveryTermRef.current.contains(event.target)) {
+      if (
+        deliveryTermRef.current &&
+        !deliveryTermRef.current.contains(event.target)
+      ) {
         setShowDeliveryTermDropdown(false);
       }
       if (currencyRef.current && !currencyRef.current.contains(event.target)) {
         setShowCurrencyDropdown(false);
       }
-      if (preCarriageRef.current && !preCarriageRef.current.contains(event.target)) {
+      if (
+        preCarriageRef.current &&
+        !preCarriageRef.current.contains(event.target)
+      ) {
         setShowPreCarriageDropdown(false);
       }
-      if (balancePaymentTermRef.current && !balancePaymentTermRef.current.contains(event.target)) {
+      if (
+        balancePaymentTermRef.current &&
+        !balancePaymentTermRef.current.contains(event.target)
+      ) {
         setShowBalancePaymentTermDropdown(false);
       }
     };
@@ -471,7 +484,9 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
     className = '',
     style = {},
   }) => {
-    const selectedOption = options.find((opt) => opt[valueKey]?.toString() === value?.toString());
+    const selectedOption = options.find(
+      (opt) => opt[valueKey]?.toString() === value?.toString()
+    );
 
     return (
       <div className="relative" ref={dropdownRef}>
@@ -555,15 +570,18 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   const [currencySearch, setCurrencySearch] = useState('');
   const [preCarriageSearch, setPreCarriageSearch] = useState('');
   const [balancePaymentTermSearch, setBalancePaymentTermSearch] = useState('');
-  
+
   const [showCompanyDropdown, setShowCompanyDropdown] = useState(false);
-  const [showContainerTypeDropdown, setShowContainerTypeDropdown] = useState(false);
+  const [showContainerTypeDropdown, setShowContainerTypeDropdown] =
+    useState(false);
   const [showPaymentTermDropdown, setShowPaymentTermDropdown] = useState(false);
-  const [showDeliveryTermDropdown, setShowDeliveryTermDropdown] = useState(false);
+  const [showDeliveryTermDropdown, setShowDeliveryTermDropdown] =
+    useState(false);
   const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
   const [showPreCarriageDropdown, setShowPreCarriageDropdown] = useState(false);
-  const [showBalancePaymentTermDropdown, setShowBalancePaymentTermDropdown] = useState(false);
-  
+  const [showBalancePaymentTermDropdown, setShowBalancePaymentTermDropdown] =
+    useState(false);
+
   const companyRef = useRef(null);
   const containerTypeRef = useRef(null);
   const paymentTermRef = useRef(null);
@@ -576,7 +594,8 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   const validateStep1 = () => {
     const errors: { [key: string]: boolean } = {};
 
-    if (!companyId || companyId.toString().trim() === '') errors.companyId = true;
+    if (!companyId || companyId.toString().trim() === '')
+      errors.companyId = true;
     if (!company?.contactPerson || company.contactPerson.trim() === '')
       errors.contactPerson = true;
     if (!company?.email || company.email.trim() === '') errors.email = true;
@@ -761,32 +780,52 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
               // Set products
               if (pi.products && pi.products.length > 0) {
                 // Add products to the table
-                const productDataList = pi.products.map((p: any) => ({
-                  productId: p.productId?.toString() || '',
-                  name: p.productName,
-                  hsCode: p.hsCode || '',
-                  description: p.productDescription || '',
-                  quantity: p.quantity,
-                  rate: p.rate,
-                  unit: p.unit,
-                  total: p.total,
-                  totalWeight: p.totalWeight,
-                  categoryId: p.categoryId?.toString(),
-                  subcategoryId: p.subcategoryId?.toString(),
-                  containerNumber: p.containerNumber || 1,
-                }));
+                const productDataList = pi.products.map((p: any) => {
+                  console.log('Loading product from backend:', {
+                    productId: p.productId,
+                    productName: p.productName,
+                    packagingCalculation: p.packagingCalculation,
+                    rawProduct: p, // Log the entire product object
+                  });
+
+                  return {
+                    productId: p.productId?.toString() || '',
+                    name: p.productName,
+                    hsCode: p.hsCode || '',
+                    description: p.productDescription || '',
+                    quantity: p.quantity,
+                    rate: p.rate,
+                    unit: p.unit,
+                    total: p.total,
+                    totalWeight: p.totalWeight,
+                    categoryId: p.categoryId?.toString(),
+                    subcategoryId: p.subcategoryId?.toString(),
+                    containerNumber: p.containerNumber || 1,
+                    packagingCalculation:
+                      p.calculatedPallets &&
+                      (p.unit === 'Square Meter' ||
+                        p.unit === 'sqm' ||
+                        p.unit === 'm²')
+                        ? {
+                            totalPallets: p.calculatedPallets,
+                            totalBoxes: p.calculatedBoxes || 0,
+                            calculatedFor: p.quantity,
+                          }
+                        : null,
+                  };
+                });
 
                 setAddedProducts(productDataList);
-                
+
                 // Initialize container products for edit mode using actual container numbers
                 const containers = pi.numberOfContainers || 1;
                 const containerProds: { [key: number]: ProductData[] } = {};
-                
+
                 // Initialize all containers
                 for (let i = 1; i <= containers; i++) {
                   containerProds[i] = [];
                 }
-                
+
                 // Group products by their actual container numbers
                 productDataList.forEach((product: ProductData) => {
                   const containerNum = product.containerNumber || 1;
@@ -797,7 +836,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                     containerProds[1].push(product);
                   }
                 });
-                
+
                 setContainerProducts(containerProds);
 
                 // Keep product form empty in edit mode
@@ -881,7 +920,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
       cif: 'CIF (Cost, Insurance & Freight)',
       ddp: 'DDP (Delivered Duty Paid)',
       lc: 'LC (Letter of Credit)',
-      advance: 'Advance'
+      advance: 'Advance',
     };
     return termNames[paymentTerm] || paymentTerm || 'N/A';
   };
@@ -1117,7 +1156,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   // Initialize container products when number of containers changes
   useEffect(() => {
     if (numberOfContainers > 0) {
-      setContainerProducts(prev => {
+      setContainerProducts((prev) => {
         const updated = { ...prev };
         // Initialize containers that don't exist
         for (let i = 1; i <= numberOfContainers; i++) {
@@ -1126,7 +1165,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
           }
         }
         // Remove containers that exceed the current count
-        Object.keys(updated).forEach(key => {
+        Object.keys(updated).forEach((key) => {
           const containerNum = parseInt(key);
           if (containerNum > numberOfContainers) {
             delete updated[containerNum];
@@ -1134,7 +1173,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         });
         return updated;
       });
-      
+
       // Set selected container to 1 if it's out of range
       if (selectedContainer > numberOfContainers) {
         setSelectedContainer(1);
@@ -1155,6 +1194,27 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
     return { weight: weightLimit, volume: volumeLimit };
   };
 
+  // Helper function to get consistent CBM per pallet value
+  const getCBMPerPallet = (productId: string) => {
+    const productInfo = products.find(
+      (p) => p.id.toString() === productId.toString()
+    );
+
+    // Try multiple possible paths for CBM per pallet with consistent fallback
+    return (
+      productInfo?.packagingVolume ||
+      productInfo?.packingHierarchy?.volumes?.cbmPerPallet ||
+      productInfo?.packagingHierarchyData?.dynamicFields?.cbmPerPallet ||
+      productInfo?.cbmPerPallet ||
+      (productInfo?.packagingHierarchyData?.dynamicFields?.weightPerPallet
+        ? (productInfo.packagingHierarchyData.dynamicFields.weightPerPallet /
+            1000) *
+          0.075
+        : null) || // Estimate from weight
+      0.07 // Default fallback
+    );
+  };
+
   const getCurrentTotals = () => {
     const totalWeight = addedProducts.reduce((sum, p) => {
       if (p.totalWeight && p.totalWeight > 0) {
@@ -1172,10 +1232,52 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
       );
     }, 0);
 
-    // CBM calculation commented out as requested
-    /*
+    // CBM calculation based on pallet calculation for tiles
     const totalVolume = addedProducts.reduce((sum, p) => {
-      const product = products.find((pr) => pr.id === p.productId);
+      const product = products.find(
+        (pr) => pr.id.toString() === p.productId.toString()
+      );
+
+      // Check if this product has packaging calculation (for tiles)
+      if (p.packagingCalculation && p.packagingCalculation.totalPallets > 0) {
+        // Get CBM per pallet using consistent helper function
+        const palletCBM = getCBMPerPallet(p.productId);
+
+        console.log('CBM Calculation Debug:', {
+          productId: p.productId,
+          totalPallets: p.packagingCalculation.totalPallets,
+          palletCBM,
+        });
+
+        const totalCBM = p.packagingCalculation.totalPallets * palletCBM;
+        return sum + totalCBM;
+      }
+
+      if (product?.packagingVolume) {
+        // Calculate CBM based on quantity and packaging volume
+        let totalCBM = 0;
+
+        if (p.unit === 'box' || p.unit === 'Box') {
+          // If unit is box, multiply quantity by packaging volume per box
+          totalCBM = p.quantity * product.packagingVolume;
+        } else if (
+          p.unit === 'pcs' ||
+          p.unit === 'pieces' ||
+          p.unit === 'Pieces'
+        ) {
+          // If unit is pieces, calculate boxes first then CBM
+          const piecesPerBox = product.totalPieces || product.piecesPerBox || 1;
+          const boxes = Math.ceil(p.quantity / piecesPerBox);
+          totalCBM = boxes * product.packagingVolume;
+        } else {
+          // For other units, assume direct multiplication with packaging volume
+          totalCBM = p.quantity * product.packagingVolume;
+        }
+
+        return sum + totalCBM;
+      }
+
+      // Fallback: use legacy calculation if no packaging volume
       if (product?.packingHierarchy) {
         const breakdown = calculatePackingBreakdown(
           p.productId,
@@ -1194,82 +1296,12 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         }
         return sum + boxes * product.packingConfig.cbmPerBox;
       }
-      // Fallback: assume 0.01 CBM per unit if no config available
+
+      // Final fallback: assume 0.01 CBM per unit if no config available
       return sum + p.quantity * 0.01;
     }, 0);
-    */
 
-    return { weight: totalWeight, volume: 0 }; // Volume set to 0
-  };
-
-  const calculateRequiredContainers = () => {
-    // Container calculation simplified - always return 1
-    return 1;
-
-    /* Original container calculation commented out
-    if (!containerType || containerType === 'LCL') return 1;
-
-    const limits = getContainerLimits();
-    const totals = getCurrentTotals();
-
-    let containersNeeded = 1;
-
-    if (capacityBasis === 'weight' && limits.weight > 0) {
-      containersNeeded = Math.ceil(totals.weight / limits.weight);
-    } else if (capacityBasis === 'volume' && limits.volume > 0) {
-      containersNeeded = Math.ceil(totals.volume / limits.volume);
-    }
-
-    return Math.max(1, containersNeeded);
-    */
-  };
-
-  const validateContainerCapacity = (newProduct?: ProductData) => {
-    if (!containerType) return { valid: true, message: '', containers: 1 };
-
-    const limits = getContainerLimits();
-    const current = getCurrentTotals();
-
-    let totalWeight = current.weight;
-    let totalVolume = current.volume;
-
-    if (newProduct) {
-      totalWeight += newProduct.totalWeight || 0;
-      const product = products.find(
-        (p) => p.id.toString() === newProduct.productId.toString()
-      );
-      if (product?.packingConfig) {
-        const boxes = newProduct.quantity / product.packingConfig.unitsPerBox;
-        totalVolume += boxes * product.packingConfig.cbmPerBox;
-      }
-    }
-
-    let containersNeeded = 1;
-    let message = '';
-
-    if (capacityBasis === 'weight' && limits.weight > 0) {
-      containersNeeded = Math.ceil(totalWeight / limits.weight);
-      if (containersNeeded > 1) {
-        message = `${containersNeeded} containers needed (${totalWeight.toFixed(
-          0
-        )} KG total)`;
-      }
-    }
-
-    if (capacityBasis === 'volume' && limits.volume > 0) {
-      containersNeeded = Math.ceil(totalVolume / limits.volume);
-      if (containersNeeded > 1) {
-        message = `${containersNeeded} containers needed (${totalVolume.toFixed(
-          2
-        )} CBM total)`;
-      }
-    }
-
-    return {
-      valid: true,
-      message,
-      containers: Math.max(1, containersNeeded),
-    };
+    return { weight: totalWeight, volume: totalVolume };
   };
 
   // --- Product logic ---
@@ -1337,14 +1369,16 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
       if (editingProductIndex !== null) {
         // Update existing product in the selected container
         const containerNum = numberOfContainers > 1 ? selectedContainer : 1;
-        const updatedContainerProducts = [...(containerProducts[containerNum] || [])];
+        const updatedContainerProducts = [
+          ...(containerProducts[containerNum] || []),
+        ];
         const globalIndex = editingProductIndex;
-        
+
         // Find which container and local index this global index refers to
         let currentIndex = 0;
         let targetContainer = 1;
         let localIndex = 0;
-        
+
         for (let i = 1; i <= numberOfContainers; i++) {
           const containerProds = containerProducts[i] || [];
           if (currentIndex + containerProds.length > globalIndex) {
@@ -1354,15 +1388,17 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
           }
           currentIndex += containerProds.length;
         }
-        
-        const targetContainerProducts = [...(containerProducts[targetContainer] || [])];
+
+        const targetContainerProducts = [
+          ...(containerProducts[targetContainer] || []),
+        ];
         targetContainerProducts[localIndex] = productData;
-        
-        setContainerProducts(prev => ({
+
+        setContainerProducts((prev) => ({
           ...prev,
-          [targetContainer]: targetContainerProducts
+          [targetContainer]: targetContainerProducts,
         }));
-        
+
         // Update global addedProducts
         const allProducts: ProductData[] = [];
         for (let i = 1; i <= numberOfContainers; i++) {
@@ -1373,19 +1409,22 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
           }
         }
         setAddedProducts(allProducts);
-        
+
         setEditingProductIndex(null);
         toast.success('Product updated successfully!');
       } else {
         // Add new product to selected container
         const containerNum = numberOfContainers > 1 ? selectedContainer : 1;
-        const updatedContainerProducts = [...(containerProducts[containerNum] || []), productData];
-        
-        setContainerProducts(prev => ({
+        const updatedContainerProducts = [
+          ...(containerProducts[containerNum] || []),
+          productData,
+        ];
+
+        setContainerProducts((prev) => ({
           ...prev,
-          [containerNum]: updatedContainerProducts
+          [containerNum]: updatedContainerProducts,
         }));
-        
+
         // Update global addedProducts
         const allProducts: ProductData[] = [];
         for (let i = 1; i <= numberOfContainers; i++) {
@@ -1396,8 +1435,10 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
           }
         }
         setAddedProducts(allProducts);
-        
-        toast.success(`Product added to Container ${containerNum} successfully!`);
+
+        toast.success(
+          `Product added to Container ${containerNum} successfully!`
+        );
       }
 
       setProductsAdded([
@@ -1474,7 +1515,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
     let currentIndex = 0;
     let targetContainer = 1;
     let localIndex = 0;
-    
+
     for (let i = 1; i <= numberOfContainers; i++) {
       const containerProds = containerProducts[i] || [];
       if (currentIndex + containerProds.length > index) {
@@ -1484,16 +1525,18 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
       }
       currentIndex += containerProds.length;
     }
-    
+
     // Remove from container
-    const updatedContainerProducts = [...(containerProducts[targetContainer] || [])];
+    const updatedContainerProducts = [
+      ...(containerProducts[targetContainer] || []),
+    ];
     updatedContainerProducts.splice(localIndex, 1);
-    
-    setContainerProducts(prev => ({
+
+    setContainerProducts((prev) => ({
       ...prev,
-      [targetContainer]: updatedContainerProducts
+      [targetContainer]: updatedContainerProducts,
     }));
-    
+
     // Update global addedProducts
     const allProducts: ProductData[] = [];
     for (let i = 1; i <= numberOfContainers; i++) {
@@ -1510,7 +1553,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
     setProductsAdded((prev) => prev.filter((_, i) => i !== idx));
 
   const updateProduct = useCallback(
-    (idx: number, field: keyof ProductAdded, value: string) => {
+    (idx: number, field: keyof ProductAdded, value: string | any) => {
       setProductsAdded((prev) => {
         if (prev[idx] && prev[idx][field] === value) {
           return prev; // No change, return same reference
@@ -1891,27 +1934,52 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
               items={[
                 {
                   title: 'Company',
-                  status: currentStep > 1 || completedSteps.has(1) ? 'finish' : currentStep === 1 ? 'process' : 'wait',
+                  status:
+                    currentStep > 1 || completedSteps.has(1)
+                      ? 'finish'
+                      : currentStep === 1
+                        ? 'process'
+                        : 'wait',
                   icon: <UserOutlined />,
                 },
                 {
                   title: 'Container',
-                  status: currentStep > 2 || completedSteps.has(2) ? 'finish' : currentStep === 2 ? 'process' : 'wait',
+                  status:
+                    currentStep > 2 || completedSteps.has(2)
+                      ? 'finish'
+                      : currentStep === 2
+                        ? 'process'
+                        : 'wait',
                   icon: <ContainerOutlined />,
                 },
                 {
                   title: 'Terms',
-                  status: currentStep > 3 || completedSteps.has(3) ? 'finish' : currentStep === 3 ? 'process' : 'wait',
+                  status:
+                    currentStep > 3 || completedSteps.has(3)
+                      ? 'finish'
+                      : currentStep === 3
+                        ? 'process'
+                        : 'wait',
                   icon: <FileTextOutlined />,
                 },
                 {
                   title: 'Products',
-                  status: currentStep > 4 || completedSteps.has(4) ? 'finish' : currentStep === 4 ? 'process' : 'wait',
+                  status:
+                    currentStep > 4 || completedSteps.has(4)
+                      ? 'finish'
+                      : currentStep === 4
+                        ? 'process'
+                        : 'wait',
                   icon: <ShoppingOutlined />,
                 },
                 {
                   title: 'Review',
-                  status: currentStep > 5 || completedSteps.has(5) ? 'finish' : currentStep === 5 ? 'process' : 'wait',
+                  status:
+                    currentStep > 5 || completedSteps.has(5)
+                      ? 'finish'
+                      : currentStep === 5
+                        ? 'process'
+                        : 'wait',
                   icon: <CheckCircleOutlined />,
                 },
               ]}
@@ -1965,11 +2033,14 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                         onSelect={(companyId) => {
                           setCompanyId(companyId);
                           setCompanySearch('');
-                          const selectedParty = companies.find((c) => c.id == companyId);
+                          const selectedParty = companies.find(
+                            (c) => c.id == companyId
+                          );
                           if (selectedParty) {
                             setCompany({
                               id: selectedParty.id,
-                              name: selectedParty.companyName || selectedParty.name,
+                              name:
+                                selectedParty.companyName || selectedParty.name,
                               status: selectedParty.status || 'active',
                               contactPerson: selectedParty.contactPerson || '',
                               address: selectedParty.address || '',
@@ -1984,11 +2055,19 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                         searchValue={companySearch}
                         onSearchChange={setCompanySearch}
                         isOpen={showCompanyDropdown}
-                        onToggle={() => setShowCompanyDropdown(!showCompanyDropdown)}
+                        onToggle={() =>
+                          setShowCompanyDropdown(!showCompanyDropdown)
+                        }
                         placeholder="Choose Company"
                         dropdownRef={companyRef}
-                        className={validationErrors.companyId ? 'border-red-500' : ''}
-                        style={validationErrors.companyId ? { borderColor: '#ef4444', borderWidth: '2px' } : {}}
+                        className={
+                          validationErrors.companyId ? 'border-red-500' : ''
+                        }
+                        style={
+                          validationErrors.companyId
+                            ? { borderColor: '#ef4444', borderWidth: '2px' }
+                            : {}
+                        }
                       />
                     </div>
                     <div>
@@ -2107,7 +2186,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                       )}
                     </div>
                   </div>
-                  
+
                   {/* Consignee Display Option */}
                   <div className="mt-6">
                     <label className="inline-flex items-center space-x-2 text-gray-700 dark:text-gray-300 font-medium">
@@ -2117,7 +2196,9 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                         onChange={(e) => setShowToTheOrder(e.target.checked)}
                         className="rounded border-gray-300 text-brand-500 shadow-sm focus:ring-brand-500 dark:border-gray-700 dark:bg-gray-800"
                       />
-                      <span>Show "TO THE ORDER" in PDF instead of customer details</span>
+                      <span>
+                        Show "TO THE ORDER" in PDF instead of customer details
+                      </span>
                     </label>
                   </div>
                 </div>
@@ -2186,10 +2267,18 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                         searchValue={containerTypeSearch}
                         onSearchChange={setContainerTypeSearch}
                         isOpen={showContainerTypeDropdown}
-                        onToggle={() => setShowContainerTypeDropdown(!showContainerTypeDropdown)}
+                        onToggle={() =>
+                          setShowContainerTypeDropdown(
+                            !showContainerTypeDropdown
+                          )
+                        }
                         placeholder="Select Container Type"
                         dropdownRef={containerTypeRef}
-                        style={validationErrors.containerType ? { borderColor: '#ef4444', borderWidth: '2px' } : {}}
+                        style={
+                          validationErrors.containerType
+                            ? { borderColor: '#ef4444', borderWidth: '2px' }
+                            : {}
+                        }
                       />
                       {validationErrors.containerType && (
                         <p className="text-red-500 text-sm mt-1">
@@ -2287,7 +2376,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                               Volume
                             </div>
                             <div className="font-bold text-gray-900 dark:text-gray-100">
-                              {containerUtilization.totalVolume.toFixed(1)} CBM
+                              {containerUtilization.totalVolume.toFixed(3)} CBM
                             </div>
                           </div>
 
@@ -2300,6 +2389,16 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                             </div>
                           </div>
                         </div>
+
+                        {/* CBM Calculation Details */}
+                        {containerUtilization.totalVolume > 0 && (
+                          <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-600">
+                            <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                              Container Summary Only - Detailed CBM breakdown
+                              available in Step 4
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -2321,12 +2420,11 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                             { id: 'By Rail', name: 'By Rail' },
                             { id: 'By Air', name: 'By Air' },
                             { id: 'By Sea', name: 'By Sea' },
-                          ]
-                            .filter((mode) =>
-                              mode.name
-                                .toLowerCase()
-                                .includes(preCarriageSearch.toLowerCase())
-                            )}
+                          ].filter((mode) =>
+                            mode.name
+                              .toLowerCase()
+                              .includes(preCarriageSearch.toLowerCase())
+                          )}
                           onSelect={(mode) => {
                             setPreCarriageBy(mode);
                             setPreCarriageSearch('');
@@ -2334,7 +2432,9 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                           searchValue={preCarriageSearch}
                           onSearchChange={setPreCarriageSearch}
                           isOpen={showPreCarriageDropdown}
-                          onToggle={() => setShowPreCarriageDropdown(!showPreCarriageDropdown)}
+                          onToggle={() =>
+                            setShowPreCarriageDropdown(!showPreCarriageDropdown)
+                          }
                           placeholder="Select Mode"
                           dropdownRef={preCarriageRef}
                         />
@@ -2442,12 +2542,11 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                         options={[
                           { id: 'advance', name: 'Advance' },
                           { id: 'lc', name: 'LC (Letter of Credit)' },
-                        ]
-                          .filter((term) =>
-                            term.name
-                              .toLowerCase()
-                              .includes(paymentTermSearch.toLowerCase())
-                          )}
+                        ].filter((term) =>
+                          term.name
+                            .toLowerCase()
+                            .includes(paymentTermSearch.toLowerCase())
+                        )}
                         onSelect={(term) => {
                           setPaymentTerm(term);
                           setPaymentTermSearch('');
@@ -2457,10 +2556,16 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                         searchValue={paymentTermSearch}
                         onSearchChange={setPaymentTermSearch}
                         isOpen={showPaymentTermDropdown}
-                        onToggle={() => setShowPaymentTermDropdown(!showPaymentTermDropdown)}
+                        onToggle={() =>
+                          setShowPaymentTermDropdown(!showPaymentTermDropdown)
+                        }
                         placeholder="Choose Payment Term"
                         dropdownRef={paymentTermRef}
-                        style={validationErrors.paymentTerm ? { borderColor: '#ef4444', borderWidth: '2px' } : {}}
+                        style={
+                          validationErrors.paymentTerm
+                            ? { borderColor: '#ef4444', borderWidth: '2px' }
+                            : {}
+                        }
                       />
                       {validationErrors.paymentTerm && (
                         <p className="text-red-500 text-sm mt-1">
@@ -2479,12 +2584,11 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                           { id: 'fob', name: 'FOB' },
                           { id: 'cif', name: 'CIF' },
                           { id: 'ddp', name: 'DDP' },
-                        ]
-                          .filter((term) =>
-                            term.name
-                              .toLowerCase()
-                              .includes(deliveryTermSearch.toLowerCase())
-                          )}
+                        ].filter((term) =>
+                          term.name
+                            .toLowerCase()
+                            .includes(deliveryTermSearch.toLowerCase())
+                        )}
                         onSelect={(term) => {
                           setDeliveryTerm(term);
                           setDeliveryTermSearch('');
@@ -2493,10 +2597,16 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                         searchValue={deliveryTermSearch}
                         onSearchChange={setDeliveryTermSearch}
                         isOpen={showDeliveryTermDropdown}
-                        onToggle={() => setShowDeliveryTermDropdown(!showDeliveryTermDropdown)}
+                        onToggle={() =>
+                          setShowDeliveryTermDropdown(!showDeliveryTermDropdown)
+                        }
                         placeholder="Choose Delivery Term"
                         dropdownRef={deliveryTermRef}
-                        style={validationErrors.deliveryTerm ? { borderColor: '#ef4444', borderWidth: '2px' } : {}}
+                        style={
+                          validationErrors.deliveryTerm
+                            ? { borderColor: '#ef4444', borderWidth: '2px' }
+                            : {}
+                        }
                       />
                       {validationErrors.deliveryTerm && (
                         <p className="text-red-500 text-sm mt-1">
@@ -2505,64 +2615,87 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                       )}
                     </div>
                   </div>
-                  
+
                   {/* Payment Term Configuration */}
                   {paymentTerm === 'advance' && (
                     <div className="mt-6 space-y-4">
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         <div>
-                          <Label htmlFor="advancePercentage">Advance Percentage *</Label>
+                          <Label htmlFor="advancePercentage">
+                            Advance Percentage *
+                          </Label>
                           <Input
                             type="number"
                             id="advancePercentage"
                             value={advancePercentage}
-                            onChange={(e) => setAdvancePercentage(e.target.value)}
+                            onChange={(e) =>
+                              setAdvancePercentage(e.target.value)
+                            }
                             placeholder="Enter percentage (e.g., 30)"
                             min="1"
                             max="100"
                             required
                           />
                         </div>
-                        {advancePercentage && parseInt(advancePercentage) < 100 && (
-                          <div>
-                            <Label htmlFor="balancePaymentTerm">
-                              Balance {100 - parseInt(advancePercentage)}% Payment Term *
-                            </Label>
-                            <SearchableDropdown
-                              label="Balance Payment Term"
-                              value={balancePaymentTerm}
-                              options={[
-                                { id: 'AGAINST BL', name: 'AGAINST BL' },
-                                { id: 'AGAINST DOCUMENTS', name: 'AGAINST DOCUMENTS' },
-                                { id: 'ON DELIVERY', name: 'ON DELIVERY' },
-                                { id: 'BEFORE DISPATCH', name: 'BEFORE DISPATCH' },
-                                { id: 'Balance 70% Payment Term', name: 'Balance 70% Payment Term' },
-                              ]
-                                .filter((term) =>
+                        {advancePercentage &&
+                          parseInt(advancePercentage) < 100 && (
+                            <div>
+                              <Label htmlFor="balancePaymentTerm">
+                                Balance {100 - parseInt(advancePercentage)}%
+                                Payment Term *
+                              </Label>
+                              <SearchableDropdown
+                                label="Balance Payment Term"
+                                value={balancePaymentTerm}
+                                options={[
+                                  { id: 'AGAINST BL', name: 'AGAINST BL' },
+                                  {
+                                    id: 'AGAINST DOCUMENTS',
+                                    name: 'AGAINST DOCUMENTS',
+                                  },
+                                  { id: 'ON DELIVERY', name: 'ON DELIVERY' },
+                                  {
+                                    id: 'BEFORE DISPATCH',
+                                    name: 'BEFORE DISPATCH',
+                                  },
+                                  {
+                                    id: 'Balance 70% Payment Term',
+                                    name: 'Balance 70% Payment Term',
+                                  },
+                                ].filter((term) =>
                                   term.name
                                     .toLowerCase()
-                                    .includes(balancePaymentTermSearch.toLowerCase())
+                                    .includes(
+                                      balancePaymentTermSearch.toLowerCase()
+                                    )
                                 )}
-                              onSelect={(term) => {
-                                setBalancePaymentTerm(term);
-                                setBalancePaymentTermSearch('');
-                              }}
-                              searchValue={balancePaymentTermSearch}
-                              onSearchChange={setBalancePaymentTermSearch}
-                              isOpen={showBalancePaymentTermDropdown}
-                              onToggle={() => setShowBalancePaymentTermDropdown(!showBalancePaymentTermDropdown)}
-                              placeholder="Select balance payment term"
-                              dropdownRef={balancePaymentTermRef}
-                            />
-                          </div>
-                        )}
+                                onSelect={(term) => {
+                                  setBalancePaymentTerm(term);
+                                  setBalancePaymentTermSearch('');
+                                }}
+                                searchValue={balancePaymentTermSearch}
+                                onSearchChange={setBalancePaymentTermSearch}
+                                isOpen={showBalancePaymentTermDropdown}
+                                onToggle={() =>
+                                  setShowBalancePaymentTermDropdown(
+                                    !showBalancePaymentTermDropdown
+                                  )
+                                }
+                                placeholder="Select balance payment term"
+                                dropdownRef={balancePaymentTermRef}
+                              />
+                            </div>
+                          )}
                       </div>
-                      
+
                       {/* Live Preview */}
                       {advancePercentage && (
                         <div className="p-3 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-lg">
                           <div className="flex items-center">
-                            <FontAwesomeIcon icon={faCheck} className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-3" />
+                            <FontAwesomeIcon
+                              icon={faCheck}
+                              className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-3"
+                            />
                             <div>
                               <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
                                 Payment Terms Preview:
@@ -2576,9 +2709,9 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                       )}
                     </div>
                   )}
-                  
+
                   <div className="mt-8 space-y-6">{renderChargesFields()}</div>
-                  
+
                   {/* Notes Section */}
                   <div className="mt-8">
                     <Label htmlFor="notes">Notes (Optional)</Label>
@@ -2590,7 +2723,8 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                       className="mt-1"
                     />
                     <p className="text-sm text-gray-500 mt-1">
-                      These notes will appear in the PDF and can include special instructions, terms, or other relevant information.
+                      These notes will appear in the PDF and can include special
+                      instructions, terms, or other relevant information.
                     </p>
                   </div>
                 </div>
@@ -2644,13 +2778,14 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                         label="Currency"
                         value={currency}
                         options={currencies
-                          .filter((curr) =>
-                            curr.code
-                              .toLowerCase()
-                              .includes(currencySearch.toLowerCase()) ||
-                            curr.name
-                              .toLowerCase()
-                              .includes(currencySearch.toLowerCase())
+                          .filter(
+                            (curr) =>
+                              curr.code
+                                .toLowerCase()
+                                .includes(currencySearch.toLowerCase()) ||
+                              curr.name
+                                .toLowerCase()
+                                .includes(currencySearch.toLowerCase())
                           )
                           .map((curr) => ({
                             id: curr.code,
@@ -2663,7 +2798,9 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                         searchValue={currencySearch}
                         onSearchChange={setCurrencySearch}
                         isOpen={showCurrencyDropdown}
-                        onToggle={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
+                        onToggle={() =>
+                          setShowCurrencyDropdown(!showCurrencyDropdown)
+                        }
                         placeholder="Select Currency"
                         dropdownRef={currencyRef}
                       />
@@ -2673,35 +2810,97 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                   {/* Container Selection */}
                   {numberOfContainers > 1 && (
                     <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                      <Label className="text-blue-800 font-semibold mb-3">
+                      <Label className="text-gray-700 font-semibold mb-3">
                         Select Container for Product Addition
                       </Label>
                       <div className="flex flex-wrap gap-2">
-                        {Array.from({ length: numberOfContainers }, (_, index) => {
-                          const containerNum = index + 1;
-                          const containerProductCount = containerProducts[containerNum]?.length || 0;
-                          return (
-                            <button
-                              key={containerNum}
-                              type="button"
-                              onClick={() => setSelectedContainer(containerNum)}
-                              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                                selectedContainer === containerNum
-                                  ? 'bg-blue-600 text-white shadow-md'
-                                  : 'bg-white text-blue-600 border border-blue-300 hover:bg-blue-50'
-                              }`}
-                            >
-                              Container {containerNum}
-                              {containerProductCount > 0 && (
-                                <span className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
-                                  {containerProductCount}
-                                </span>
-                              )}
-                            </button>
-                          );
-                        })}
+                        {Array.from(
+                          { length: numberOfContainers },
+                          (_, index) => {
+                            const containerNum = index + 1;
+                            const containerProductCount =
+                              containerProducts[containerNum]?.length || 0;
+
+                            // Calculate container CBM
+                            const containerCBM = (
+                              containerProducts[containerNum] || []
+                            ).reduce((sum, prod) => {
+                              // Check if this product has packaging calculation (for tiles)
+                              if (
+                                prod.packagingCalculation &&
+                                prod.packagingCalculation.totalPallets > 0
+                              ) {
+                                // Get CBM per pallet using consistent helper function
+                                const palletCBM = getCBMPerPallet(
+                                  prod.productId
+                                );
+                                const totalCBM =
+                                  prod.packagingCalculation.totalPallets *
+                                  palletCBM;
+                                return sum + totalCBM;
+                              }
+
+                              const productInfo = products.find(
+                                (p) =>
+                                  p.id.toString() === prod.productId.toString()
+                              );
+                              if (!productInfo?.packagingVolume) return sum;
+
+                              let productCBM = 0;
+                              if (prod.unit === 'box' || prod.unit === 'Box') {
+                                productCBM =
+                                  prod.quantity * productInfo.packagingVolume;
+                              } else if (
+                                prod.unit === 'pcs' ||
+                                prod.unit === 'pieces' ||
+                                prod.unit === 'Pieces'
+                              ) {
+                                const piecesPerBox =
+                                  productInfo.totalPieces ||
+                                  productInfo.piecesPerBox ||
+                                  1;
+                                const boxes = Math.ceil(
+                                  prod.quantity / piecesPerBox
+                                );
+                                productCBM =
+                                  boxes * productInfo.packagingVolume;
+                              } else {
+                                productCBM =
+                                  prod.quantity * productInfo.packagingVolume;
+                              }
+
+                              return sum + productCBM;
+                            }, 0);
+
+                            const containerConfig = getContainerConfig();
+                            const utilizationPercent = containerConfig?.cbm
+                              ? (containerCBM / containerConfig.cbm) * 100
+                              : 0;
+
+                            return (
+                              <button
+                                key={containerNum}
+                                type="button"
+                                onClick={() =>
+                                  setSelectedContainer(containerNum)
+                                }
+                                className={`px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
+                                  selectedContainer === containerNum
+                                    ? 'bg-slate-700 text-white'
+                                    : 'bg-slate-700 text-white hover:bg-slate-800'
+                                }`}
+                              >
+                                <div className="text-center">
+                                  <div className="font-bold">
+                                    Container {containerNum}
+                                  </div>
+                                </div>
+                              </button>
+                            );
+                          }
+                        )}
                       </div>
-                      <div className="text-sm text-blue-600 mt-2">
+                      <div className="text-sm text-gray-700 mt-2">
                         Adding products to Container {selectedContainer}
                       </div>
                     </div>
@@ -2734,7 +2933,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                         e.preventDefault();
                         addProductToTable();
                       }}
-                      className="inline-flex items-center px-5 py-2 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                      className="inline-flex items-center px-5 py-2 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 "
                     >
                       <FontAwesomeIcon icon={faPlus} className="mr-2" />
                       {editingProductIndex !== null
@@ -2792,6 +2991,364 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                     calculateGrossWeight={calculateGrossWeightWrapper}
                     getCurrentTotals={getCurrentTotals}
                   />
+
+                  {/* CBM Summary Display */}
+                  {addedProducts.length > 0 && (
+                    <div className="mt-6 space-y-6">
+                      {/* Overall CBM Summary */}
+                      <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+                        <div className="bg-slate-700 px-6 py-4">
+                          <h4 className="text-lg font-semibold text-white">
+                            Overall CBM Summary
+                          </h4>
+                        </div>
+                        <div className="p-6">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="text-center">
+                              <div className="text-3xl font-bold text-slate-700 mb-1">
+                                {getCurrentTotals().volume.toFixed(3)} CBM
+                              </div>
+                              <div className="text-sm font-medium text-gray-600">
+                                Total CBM
+                              </div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-3xl font-bold text-slate-700 mb-1">
+                                {numberOfContainers}
+                              </div>
+                              <div className="text-sm font-medium text-gray-600">
+                                Containers
+                              </div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-3xl font-bold text-slate-700 mb-1">
+                                {containerType && getContainerConfig()?.cbm
+                                  ? (
+                                      (getCurrentTotals().volume /
+                                        (numberOfContainers *
+                                          getContainerConfig()?.cbm)) *
+                                      100
+                                    ).toFixed(1) + '%'
+                                  : '0%'}
+                              </div>
+                              <div className="text-sm font-medium text-gray-600">
+                                Avg Utilization
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Container-wise CBM Breakdown */}
+                      {numberOfContainers > 1 && (
+                        <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+                          <div className="bg-slate-700 px-6 py-4">
+                            <h4 className="text-lg font-semibold text-white">
+                              Container-wise CBM Breakdown
+                            </h4>
+                          </div>
+                          <div className="p-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                              {Array.from(
+                                { length: numberOfContainers },
+                                (_, index) => {
+                                  const containerNum = index + 1;
+                                  const containerProds =
+                                    containerProducts[containerNum] || [];
+
+                                  const containerCBM = containerProds.reduce(
+                                    (sum, prod) => {
+                                      // Check if this product has packaging calculation (for tiles)
+                                      if (
+                                        prod.packagingCalculation &&
+                                        prod.packagingCalculation.totalPallets >
+                                          0
+                                      ) {
+                                        // Get CBM per pallet using consistent helper function
+                                        const palletCBM = getCBMPerPallet(
+                                          prod.productId
+                                        );
+                                        const totalCBM =
+                                          prod.packagingCalculation
+                                            .totalPallets * palletCBM;
+                                        return sum + totalCBM;
+                                      }
+
+                                      const productInfo = products.find(
+                                        (p) =>
+                                          p.id.toString() ===
+                                          prod.productId.toString()
+                                      );
+                                      if (!productInfo?.packagingVolume)
+                                        return sum;
+
+                                      let productCBM = 0;
+                                      if (
+                                        prod.unit === 'box' ||
+                                        prod.unit === 'Box'
+                                      ) {
+                                        productCBM =
+                                          prod.quantity *
+                                          productInfo.packagingVolume;
+                                      } else if (
+                                        prod.unit === 'pcs' ||
+                                        prod.unit === 'pieces' ||
+                                        prod.unit === 'Pieces'
+                                      ) {
+                                        const piecesPerBox =
+                                          productInfo.totalPieces ||
+                                          productInfo.piecesPerBox ||
+                                          1;
+                                        const boxes = Math.ceil(
+                                          prod.quantity / piecesPerBox
+                                        );
+                                        productCBM =
+                                          boxes * productInfo.packagingVolume;
+                                      } else {
+                                        productCBM =
+                                          prod.quantity *
+                                          productInfo.packagingVolume;
+                                      }
+
+                                      return sum + productCBM;
+                                    },
+                                    0
+                                  );
+
+                                  const containerConfig = getContainerConfig();
+                                  const utilizationPercent =
+                                    containerConfig?.cbm
+                                      ? (containerCBM / containerConfig.cbm) *
+                                        100
+                                      : 0;
+
+                                  return (
+                                    <div
+                                      key={containerNum}
+                                      className="bg-slate-50 border border-slate-200 rounded-lg p-4"
+                                    >
+                                      <div className="text-center mb-4">
+                                        <h5 className="text-lg font-semibold text-slate-700">
+                                          Container {containerNum}
+                                        </h5>
+                                      </div>
+                                      <div className="space-y-3">
+                                        <div className="flex justify-between items-center">
+                                          <span className="text-sm font-medium text-gray-600">
+                                            Products:
+                                          </span>
+                                          <span className="text-lg font-bold text-slate-700">
+                                            {containerProds.length}
+                                          </span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                          <span className="text-sm font-medium text-gray-600">
+                                            CBM Used:
+                                          </span>
+                                          <span className="text-lg font-bold text-slate-700">
+                                            {containerCBM.toFixed(3)}
+                                          </span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                          <span className="text-sm font-medium text-gray-600">
+                                            Capacity:
+                                          </span>
+                                          <span className="text-lg font-bold text-slate-700">
+                                            {containerConfig?.cbm || 0}
+                                          </span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                          <span className="text-sm font-medium text-gray-600">
+                                            Utilization:
+                                          </span>
+                                          <span
+                                            className={`text-lg font-bold ${
+                                              utilizationPercent > 90
+                                                ? 'text-red-600'
+                                                : utilizationPercent > 70
+                                                  ? 'text-orange-600'
+                                                  : 'text-green-600'
+                                            }`}
+                                          >
+                                            {utilizationPercent.toFixed(1)}%
+                                          </span>
+                                        </div>
+                                      </div>
+
+                                      {/* Progress bar */}
+                                      <div className="mt-4">
+                                        <div className="w-full bg-gray-200 rounded-full h-3">
+                                          <div
+                                            className={`h-3 rounded-full transition-all duration-300 ${
+                                              utilizationPercent > 90
+                                                ? 'bg-red-500'
+                                                : utilizationPercent > 70
+                                                  ? 'bg-orange-500'
+                                                  : 'bg-green-500'
+                                            }`}
+                                            style={{
+                                              width: `${Math.min(utilizationPercent, 100)}%`,
+                                            }}
+                                          ></div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                }
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Detailed CBM Calculation */}
+                      <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden max-w-6xl mx-auto">
+                        <div className="bg-slate-700 px-4 sm:px-6 py-4">
+                          <h4 className="text-lg font-semibold text-white">
+                            CBM Calculation Details
+                          </h4>
+                        </div>
+                        <div className="p-4 sm:p-6">
+                          <div className="space-y-3 sm:space-y-4">
+                            {addedProducts
+                              .map((product, index) => {
+                                const productInfo = products.find(
+                                  (p) =>
+                                    p.id.toString() ===
+                                    product.productId.toString()
+                                );
+
+                                // Check if this product has packaging calculation (for tiles)
+                                if (
+                                  product.packagingCalculation &&
+                                  product.packagingCalculation.totalPallets > 0
+                                ) {
+                                  // Get CBM per pallet using consistent helper function
+                                  const palletCBM = getCBMPerPallet(
+                                    product.productId
+                                  );
+                                  const totalCBM =
+                                    product.packagingCalculation.totalPallets *
+                                    palletCBM;
+
+                                  console.log(
+                                    'CBM Calculation with packaging:',
+                                    {
+                                      productId: product.productId,
+                                      quantity: product.quantity,
+                                      unit: product.unit,
+                                      totalPallets:
+                                        product.packagingCalculation
+                                          .totalPallets,
+                                      palletCBM,
+                                      totalCBM,
+                                    }
+                                  );
+
+                                  const calculation = `${product.quantity} ${product.unit} = ${product.packagingCalculation.totalPallets} PALLETS × ${palletCBM.toFixed(6)} CBM/pallet = ${totalCBM.toFixed(3)} CBM`;
+
+                                  return (
+                                    <div
+                                      key={index}
+                                      className="bg-slate-50 border border-slate-200 rounded-lg p-3 sm:p-4"
+                                    >
+                                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-4">
+                                        <div className="flex-1 min-w-0">
+                                          <div className="font-semibold text-slate-700 text-base sm:text-lg mb-1 truncate">
+                                            {productInfo?.name ||
+                                              'Unknown Product'}
+                                            :
+                                          </div>
+                                          <div className="text-xs sm:text-sm text-gray-600 break-words">
+                                            {calculation}
+                                          </div>
+                                        </div>
+                                        <div className="text-right sm:ml-4 flex-shrink-0">
+                                          <div className="text-xl sm:text-2xl font-bold text-slate-700">
+                                            {totalCBM.toFixed(3)} CBM
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                }
+
+                                if (!productInfo?.packagingVolume) return null;
+
+                                let productCBM = 0;
+                                let calculation = '';
+
+                                if (
+                                  product.unit === 'box' ||
+                                  product.unit === 'Box'
+                                ) {
+                                  productCBM =
+                                    product.quantity *
+                                    productInfo.packagingVolume;
+                                  calculation = `${product.quantity} boxes × ${(productInfo.packagingVolume || 0).toFixed(6)} CBM/box = ${productCBM.toFixed(3)} CBM`;
+                                } else if (
+                                  product.unit === 'pcs' ||
+                                  product.unit === 'pieces' ||
+                                  product.unit === 'Pieces'
+                                ) {
+                                  const piecesPerBox =
+                                    productInfo.totalPieces ||
+                                    productInfo.piecesPerBox ||
+                                    1;
+                                  const boxes = Math.ceil(
+                                    product.quantity / piecesPerBox
+                                  );
+                                  productCBM =
+                                    boxes * productInfo.packagingVolume;
+                                  calculation = `${product.quantity} pcs = ${boxes} boxes × ${(productInfo.packagingVolume || 0).toFixed(6)} CBM/box = ${productCBM.toFixed(3)} CBM`;
+                                } else {
+                                  productCBM =
+                                    product.quantity *
+                                    productInfo.packagingVolume;
+                                  // For tiles, show pallet calculation instead of unit-based
+                                  if (
+                                    product.unit === 'Square Meter' ||
+                                    product.unit === 'sqm' ||
+                                    product.unit === 'm²'
+                                  ) {
+                                    const estimatedPallets = Math.ceil(
+                                      productCBM / productInfo.packagingVolume
+                                    ); // Estimate pallets from CBM
+                                    calculation = `${product.quantity} ${product.unit} = ${estimatedPallets} PALLETS × ${(productInfo.packagingVolume || 0).toFixed(6)} CBM/pallet = ${productCBM.toFixed(3)} CBM`;
+                                  } else {
+                                    calculation = `${product.quantity} ${product.unit} × ${(productInfo.packagingVolume || 0).toFixed(6)} CBM/unit = ${productCBM.toFixed(3)} CBM`;
+                                  }
+                                }
+
+                                return (
+                                  <div
+                                    key={index}
+                                    className="bg-slate-50 border border-slate-200 rounded-lg p-3 sm:p-4"
+                                  >
+                                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-4">
+                                      <div className="flex-1 min-w-0">
+                                        <div className="font-semibold text-slate-700 text-base sm:text-lg mb-1 truncate">
+                                          {productInfo.name}:
+                                        </div>
+                                        <div className="text-xs sm:text-sm text-gray-600 break-words">
+                                          {calculation}
+                                        </div>
+                                      </div>
+                                      <div className="text-right sm:ml-4 flex-shrink-0">
+                                        <div className="text-xl sm:text-2xl font-bold text-slate-700">
+                                          {productCBM.toFixed(3)} CBM
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })
+                              .filter(Boolean)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* PI Preview Popup */}
                   {showPIPreview && (
@@ -3134,6 +3691,9 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                                   Weight (KG)
                                 </th>
                                 <th className="px-3 py-3 text-right text-sm font-semibold">
+                                  Volume (CBM)
+                                </th>
+                                <th className="px-3 py-3 text-right text-sm font-semibold">
                                   Rate
                                 </th>
                                 <th className="px-3 py-3 text-right text-sm font-semibold">
@@ -3190,6 +3750,64 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                                       {weight.toFixed(2)}
                                     </td>
                                     <td className="px-3 py-3 text-sm text-right">
+                                      {(() => {
+                                        // Check if this product has packaging calculation (for tiles)
+                                        if (
+                                          prod.packagingCalculation &&
+                                          prod.packagingCalculation
+                                            .totalPallets > 0
+                                        ) {
+                                          // Get CBM per pallet using consistent helper function
+                                          const palletCBM = getCBMPerPallet(
+                                            prod.productId
+                                          );
+                                          const totalCBM =
+                                            prod.packagingCalculation
+                                              .totalPallets * palletCBM;
+                                          return totalCBM.toFixed(3);
+                                        }
+
+                                        const productInfo = products.find(
+                                          (p) =>
+                                            p.id.toString() ===
+                                            prod.productId.toString()
+                                        );
+                                        if (!productInfo?.packagingVolume)
+                                          return '0.000';
+
+                                        let productCBM = 0;
+                                        if (
+                                          prod.unit === 'box' ||
+                                          prod.unit === 'Box'
+                                        ) {
+                                          productCBM =
+                                            prod.quantity *
+                                            productInfo.packagingVolume;
+                                        } else if (
+                                          prod.unit === 'pcs' ||
+                                          prod.unit === 'pieces' ||
+                                          prod.unit === 'Pieces'
+                                        ) {
+                                          const piecesPerBox =
+                                            productInfo.totalPieces ||
+                                            productInfo.piecesPerBox ||
+                                            1;
+                                          const boxes = Math.ceil(
+                                            prod.quantity / piecesPerBox
+                                          );
+                                          productCBM =
+                                            boxes * productInfo.packagingVolume;
+                                        } else {
+                                          productCBM =
+                                            prod.quantity *
+                                            productInfo.packagingVolume;
+                                        }
+
+                                        return productCBM.toFixed(3);
+                                      })()}{' '}
+                                      CBM
+                                    </td>
+                                    <td className="px-3 py-3 text-sm text-right">
                                       {formatCurrency(
                                         prod.rate,
                                         currency,
@@ -3228,36 +3846,65 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                                   KG
                                 </td>
                                 <td className="text-right px-3 py-3">
-                                  Subtotal:
-                                </td>
-                                <td className="text-right px-3 py-3">
-                                  {formatCurrency(
-                                    addedProducts.reduce(
-                                      (sum, p) => sum + p.total,
-                                      0
-                                    ),
-                                    currency
-                                  )}
-                                </td>
-                              </tr>
-                              <tr className="bg-slate-50 dark:bg-slate-800 font-semibold text-slate-900 dark:text-slate-200">
-                                <td
-                                  colSpan={5}
-                                  className="text-right px-3 py-3"
-                                >
-                                  Gross Weight:
-                                </td>
-                                <td className="text-right px-3 py-3">
-                                  {calculateGrossWeightWrapper(
-                                    addedProducts
-                                  ).toFixed(2)}{' '}
-                                  KG
-                                </td>
-                                <td
-                                  colSpan={2}
-                                  className="text-center px-3 py-3 text-sm"
-                                >
-                                  (Net + Packaging)
+                                  {addedProducts
+                                    .reduce((sum, prod) => {
+                                      // Check if this product has packaging calculation (for tiles)
+                                      if (
+                                        prod.packagingCalculation &&
+                                        prod.packagingCalculation.totalPallets >
+                                          0
+                                      ) {
+                                        // Get CBM per pallet using consistent helper function
+                                        const palletCBM = getCBMPerPallet(
+                                          prod.productId
+                                        );
+                                        const totalCBM =
+                                          prod.packagingCalculation
+                                            .totalPallets * palletCBM;
+                                        return sum + totalCBM;
+                                      }
+
+                                      const productDetails = products.find(
+                                        (p) =>
+                                          p.id.toString() ===
+                                          prod.productId.toString()
+                                      );
+                                      if (!productDetails?.packagingVolume)
+                                        return sum;
+
+                                      let productCBM = 0;
+                                      if (
+                                        prod.unit === 'box' ||
+                                        prod.unit === 'Box'
+                                      ) {
+                                        productCBM =
+                                          prod.quantity *
+                                          productDetails.packagingVolume;
+                                      } else if (
+                                        prod.unit === 'pcs' ||
+                                        prod.unit === 'pieces' ||
+                                        prod.unit === 'Pieces'
+                                      ) {
+                                        const piecesPerBox =
+                                          productDetails.totalPieces ||
+                                          productDetails.piecesPerBox ||
+                                          1;
+                                        const boxes = Math.ceil(
+                                          prod.quantity / piecesPerBox
+                                        );
+                                        productCBM =
+                                          boxes *
+                                          productDetails.packagingVolume;
+                                      } else {
+                                        productCBM =
+                                          prod.quantity *
+                                          productDetails.packagingVolume;
+                                      }
+
+                                      return sum + productCBM;
+                                    }, 0)
+                                    .toFixed(3)}{' '}
+                                  CBM
                                 </td>
                               </tr>
                             </tfoot>
