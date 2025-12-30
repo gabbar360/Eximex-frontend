@@ -22,6 +22,8 @@ import {
   HiPhone,
   HiEllipsisVertical,
   HiChevronDown,
+  HiViewColumns,
+  HiListBullet,
 } from 'react-icons/hi2';
 import { toast } from 'react-toastify';
 import { useDebounce } from '../../utils/useDebounce';
@@ -41,6 +43,7 @@ const Cprospect = () => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [filterRole, setFilterRole] = useState('');
   const [confirmStageChange, setConfirmStageChange] = useState(null);
+  const [viewMode, setViewMode] = useState('kanban'); // 'kanban' or 'list'
   
   // Role filter dropdown states
   const [roleSearch, setRoleSearch] = useState('');
@@ -218,8 +221,6 @@ const Cprospect = () => {
     } catch (error) {
       // Revert optimistic update on error by reloading data
       const params = {
-        page: 1,
-        limit: 1000,
         search: searchTerm,
         role: filterRole || 'Customer',
       };
@@ -231,18 +232,14 @@ const Cprospect = () => {
     }
   };
 
-  // Load data for kanban view
+  // Load data based on view mode
   useEffect(() => {
-    // Load all customers for kanban view
-    dispatch(
-      fetchParties({
-        page: 1,
-        limit: 1000,
-        search: searchTerm,
-        role: filterRole || 'Customer',
-      })
-    );
-  }, [dispatch, searchTerm, filterRole]);
+    const params = {
+      search: searchTerm,
+      role: filterRole || 'Customer',
+    };
+    dispatch(fetchParties(params));
+  }, [dispatch, searchTerm, filterRole, viewMode]);
 
   const handleDeleteClick = (id) => {
     setConfirmDelete(id);
@@ -257,8 +254,6 @@ const Cprospect = () => {
 
       // Reload data after deletion
       const params = {
-        page: 1,
-        limit: 1000,
         search: searchTerm,
         role: filterRole || 'Customer',
       };
@@ -276,8 +271,6 @@ const Cprospect = () => {
   const { debouncedCallback: debouncedSearch } = useDebounce((value) => {
     setWasSearching(true);
     const params = {
-      page: 1,
-      limit: 1000,
       search: value,
       role: filterRole || 'Customer',
     };
@@ -338,6 +331,32 @@ const Cprospect = () => {
                   </div>
 
                   <div className="flex gap-2 flex-shrink-0 flex-1 sm:flex-none">
+                    {/* View Toggle */}
+                    <div className="flex bg-gray-100 rounded-xl p-1">
+                      <button
+                        onClick={() => setViewMode('kanban')}
+                        className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          viewMode === 'kanban'
+                            ? 'bg-white text-slate-700 shadow-sm'
+                            : 'text-slate-500 hover:text-slate-700'
+                        }`}
+                      >
+                        <HiViewColumns className="w-4 h-4 mr-1" />
+                        Kanban
+                      </button>
+                      <button
+                        onClick={() => setViewMode('list')}
+                        className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          viewMode === 'list'
+                            ? 'bg-white text-slate-700 shadow-sm'
+                            : 'text-slate-500 hover:text-slate-700'
+                        }`}
+                      >
+                        <HiListBullet className="w-4 h-4 mr-1" />
+                        List
+                      </button>
+                    </div>
+                    
                     <Link
                       to="/add-contact"
                       className="inline-flex items-center justify-center px-3 sm:px-4 lg:px-6 py-3 w-full sm:w-auto rounded-xl font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg transition-colors whitespace-nowrap text-sm sm:text-base"
@@ -374,7 +393,7 @@ const Cprospect = () => {
                   : 'Add your first contact to get started'}
               </p>
             </div>
-          ) : (
+          ) : viewMode === 'kanban' ? (
             // Kanban Board View
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-2">
               <DragDropContext onDragEnd={handleDragEnd}>
@@ -533,6 +552,124 @@ const Cprospect = () => {
                   ))}
                 </div>
               </DragDropContext>
+            </div>
+          ) : (
+            // List View
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Company</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Contact Person</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Email</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Phone</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Stage</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-4 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {parties.filter(party => party.role === 'Customer').map((contact) => {
+                      const stage = stages.find(s => s.id === (contact.stage || 'NEW'));
+                      return (
+                        <tr key={contact.id} className="hover:bg-gray-50 transition-colors" data-contact-id={contact.id}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div className="flex-shrink-0 w-10 h-10">
+                                <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
+                                  <HiBuildingOffice2 className="w-5 h-5 text-slate-600" />
+                                </div>
+                              </div>
+                              <div className="ml-4">
+                                <div className="text-sm font-semibold text-slate-900">{contact.companyName}</div>
+                                <div className="text-sm text-slate-500">{contact.role}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-slate-900">{contact.contactPersonName || '-'}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-slate-900">{contact.email || '-'}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-slate-900">{contact.phone || '-'}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              {stage && (
+                                <>
+                                  <stage.icon className="w-4 h-4 text-slate-500 mr-2" />
+                                  <span className="text-sm font-medium text-slate-700">{stage.title}</span>
+                                </>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                contact.status
+                                  ? 'bg-emerald-100 text-emerald-800'
+                                  : 'bg-red-100 text-red-800'
+                              }`}
+                            >
+                              <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                                contact.status ? 'bg-emerald-500' : 'bg-red-500'
+                              }`}></span>
+                              {contact.status ? 'Active' : 'Inactive'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <div className="relative dropdown-container">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenDropdown(openDropdown === contact.id ? null : contact.id);
+                                }}
+                                className="text-slate-400 hover:text-slate-600 p-2 rounded-lg hover:bg-slate-100 transition-colors"
+                              >
+                                <HiEllipsisVertical className="w-5 h-5" />
+                              </button>
+                              
+                              {openDropdown === contact.id && (
+                                <div className="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 w-48">
+                                  <Link
+                                    to={`/view-party/${contact.id}`}
+                                    className="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                                    onClick={() => setOpenDropdown(null)}
+                                  >
+                                    <HiEye className="w-4 h-4 text-slate-500" />
+                                    <span>View Details</span>
+                                  </Link>
+                                  <Link
+                                    to={`/edit-contact/${contact.id}`}
+                                    className="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                                    onClick={() => setOpenDropdown(null)}
+                                  >
+                                    <HiPencil className="w-4 h-4 text-slate-500" />
+                                    <span>Edit Contact</span>
+                                  </Link>
+                                  <button
+                                    onClick={() => {
+                                      setOpenDropdown(null);
+                                      handleDeleteClick(contact.id);
+                                    }}
+                                    className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left transition-colors"
+                                  >
+                                    <HiTrash className="w-4 h-4" />
+                                    <span>Delete</span>
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>

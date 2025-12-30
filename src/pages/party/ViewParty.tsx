@@ -125,7 +125,7 @@ const ViewParty = () => {
                   )}
                 </span>
                 <Link
-                  to={`/edit-customer/${party.id}`}
+                  to={`/edit-contact/${party.id}`}
                   className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-xl shadow-lg text-center text-sm sm:text-base"
                 >
                   <HiPencil className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 inline" />

@@ -148,13 +148,22 @@ const partySlice = createSlice({
       })
       .addCase(fetchParties.fulfilled, (state, { payload }) => {
         state.loading = false;
-        // Handle both direct data and nested data structure
-        const responseData = payload?.data || payload;
-        state.parties = responseData?.data || responseData || [];
+        
+        // Handle the response structure with data.data
+        let parties = [];
+        if (payload?.data?.data && Array.isArray(payload.data.data)) {
+          parties = payload.data.data;
+        } else if (payload?.data && Array.isArray(payload.data)) {
+          parties = payload.data;
+        } else if (Array.isArray(payload)) {
+          parties = payload;
+        }
+        
+        state.parties = parties;
         state.pagination = {
-          current: responseData?.pagination?.page || 1,
-          pageSize: responseData?.pagination?.limit || 10,
-          total: responseData?.pagination?.total || 0,
+          current: 1,
+          pageSize: parties.length,
+          total: parties.length,
         };
       })
       .addCase(fetchParties.rejected, (state, { payload }) => {

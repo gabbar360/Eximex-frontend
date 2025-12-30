@@ -3,32 +3,16 @@ import handleAxiosError from '../utils/handleAxiosError';
 
 export const getAllParties = async (params = {}) => {
   try {
-    // First try with pagination parameters
-    if (params.page || params.limit || params.search) {
-      const queryParams = {
-        page: parseInt(params.page) || 1,
-        limit: parseInt(params.limit) || 10,
-        search: params.search || '',
-        ...(params.role && { role: params.role }),
-        ...(params.status !== undefined && { status: params.status }),
-      };
+    const queryParams = {
+      search: params.search || '',
+      ...(params.role && { role: params.role }),
+      ...(params.status !== undefined && { status: params.status }),
+    };
 
-      const { data } = await axiosInstance.get('/get-all/parties', {
-        params: queryParams,
-      });
-      return data;
-    } else {
-      // Fallback to simple request without pagination
-      const { data } = await axiosInstance.get('/get-all/parties');
-      return {
-        data: data.data || data,
-        pagination: {
-          page: 1,
-          limit: (data.data || data).length,
-          total: (data.data || data).length,
-        },
-      };
-    }
+    const { data } = await axiosInstance.get('/get-all/parties', {
+      params: queryParams,
+    });
+    return data;
   } catch (error) {
     console.error(
       'Party service error:',
