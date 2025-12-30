@@ -40,6 +40,7 @@ const Cprospect = () => {
   const [wasSearching, setWasSearching] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [filterRole, setFilterRole] = useState('');
+  const [confirmStageChange, setConfirmStageChange] = useState(null);
   
   // Role filter dropdown states
   const [roleSearch, setRoleSearch] = useState('');
@@ -171,7 +172,7 @@ const Cprospect = () => {
     }, {});
   }, [parties, stages]);
 
-  // Handle drag and drop using Redux slice with optimistic updates
+  // Handle drag and drop with confirmation popup
   const handleDragEnd = async (result) => {
     const { destination, source, draggableId } = result;
 
@@ -186,6 +187,23 @@ const Cprospect = () => {
 
     const newStage = destination.droppableId;
     const contactId = draggableId.replace('contact-', '');
+    const contact = parties.find(p => p.id.toString() === contactId);
+    const newStageInfo = stages.find(s => s.id === newStage);
+    
+    // Show confirmation popup
+    setConfirmStageChange({
+      contactId,
+      newStage,
+      contactName: contact?.companyName || 'Unknown Contact',
+      newStageName: newStageInfo?.title || newStage
+    });
+  };
+
+  // Handle confirmed stage change
+  const handleConfirmStageChange = async () => {
+    if (!confirmStageChange) return;
+
+    const { contactId, newStage } = confirmStageChange;
     
     // Optimistic update - update UI immediately
     dispatch(updatePartyStageOptimistic({ id: contactId, stage: newStage }));
@@ -194,21 +212,22 @@ const Cprospect = () => {
       const response = await dispatch(updatePartyStage({ id: contactId, stage: newStage })).unwrap();
       
       // Show backend response message
-      const message = response?.message || 'Contact moved successfully';
+      const message = response?.message || 'Contact stage updated successfully';
       toast.success(message);
+      setConfirmStageChange(null);
     } catch (error) {
       // Revert optimistic update on error by reloading data
-      dispatch(
-        fetchParties({
-          page: 1,
-          limit: 1000,
-          search: searchTerm,
-          role: 'Customer',
-        })
-      );
+      const params = {
+        page: 1,
+        limit: 1000,
+        search: searchTerm,
+        role: filterRole || 'Customer',
+      };
+      dispatch(fetchParties(params));
       
       const errorMessage = error || 'Failed to update contact stage';
       toast.error(errorMessage);
+      setConfirmStageChange(null);
     }
   };
 
@@ -220,7 +239,7 @@ const Cprospect = () => {
         page: 1,
         limit: 1000,
         search: searchTerm,
-        role: 'Customer',
+        role: filterRole || 'Customer',
       })
     );
   }, [dispatch, searchTerm, filterRole]);
@@ -237,14 +256,13 @@ const Cprospect = () => {
       setConfirmDelete(null);
 
       // Reload data after deletion
-      dispatch(
-        fetchParties({
-          page: 1,
-          limit: 1000,
-          search: searchTerm,
-          role: 'Customer',
-        })
-      );
+      const params = {
+        page: 1,
+        limit: 1000,
+        search: searchTerm,
+        role: filterRole || 'Customer',
+      };
+      dispatch(fetchParties(params));
 
       const message = response?.message || 'Contact deleted successfully';
       toast.success(message);
@@ -254,19 +272,16 @@ const Cprospect = () => {
     }
   };
 
-
-
   // Debounced search function
   const { debouncedCallback: debouncedSearch } = useDebounce((value) => {
     setWasSearching(true);
-    dispatch(
-      fetchParties({
-        page: 1,
-        limit: 1000,
-        search: value,
-        role: 'Customer',
-      })
-    );
+    const params = {
+      page: 1,
+      limit: 1000,
+      search: value,
+      role: filterRole || 'Customer',
+    };
+    dispatch(fetchParties(params));
   }, 500);
 
   const handleSearch = useCallback(
@@ -319,29 +334,6 @@ const Cprospect = () => {
                       className="pl-12 pr-4 py-3 w-full sm:w-72 rounded-xl border border-gray-300 bg-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-all duration-300 text-sm placeholder-gray-500 shadow-sm"
                       value={searchTerm}
                       onChange={(e) => handleSearch(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="w-full sm:w-40">
-                    <SearchableDropdown
-                      label="Role"
-                      value={filterRole}
-                      options={[
-                        { id: '', name: 'All Roles' },
-                        { id: 'Customer', name: 'Customer' },
-                        { id: 'Supplier', name: 'Supplier' },
-                        { id: 'Vendor', name: 'Vendor' },
-                      ].filter(role => role.name.toLowerCase().includes(roleSearch.toLowerCase()))}
-                      onSelect={(value) => {
-                        setFilterRole(value);
-                        setRoleSearch('');
-                      }}
-                      searchValue={roleSearch}
-                      onSearchChange={setRoleSearch}
-                      isOpen={showRoleDropdown}
-                      onToggle={() => setShowRoleDropdown(!showRoleDropdown)}
-                      placeholder="All Roles"
-                      dropdownRef={roleRef}
                     />
                   </div>
 
@@ -578,10 +570,42 @@ const Cprospect = () => {
             </div>
           </div>
         )}
+
+        {/* Stage Change Confirmation Modal */}
+        {confirmStageChange && (
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-60 p-4">
+            <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-8 border border-gray-200">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-slate-600 flex items-center justify-center shadow-lg">
+                  <HiUsers className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-800 mb-2">
+                  Update Contact Stage
+                </h3>
+                <p className="text-slate-600">
+                  Are you sure you want to move <strong>"{confirmStageChange.contactName}"</strong> to <strong>{confirmStageChange.newStageName}</strong> stage?
+                </p>
+              </div>
+              <div className="flex items-center justify-center space-x-3">
+                <button
+                  onClick={() => setConfirmStageChange(null)}
+                  className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmStageChange}
+                  className="px-6 py-3 rounded-lg bg-slate-700 text-white hover:bg-slate-800 shadow-lg"
+                >
+                  Update Stage
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
 };
 
 export default Cprospect;
-  

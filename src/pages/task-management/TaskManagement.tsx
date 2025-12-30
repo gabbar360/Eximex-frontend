@@ -29,6 +29,7 @@ const TaskManagement: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
+  const [confirmStatusChange, setConfirmStatusChange] = useState<{taskId: number, newStatus: string, taskTitle: string} | null>(null);
   
   // Dropdown states
   const [statusSearch, setStatusSearch] = useState('');
@@ -149,11 +150,27 @@ const TaskManagement: React.FC = () => {
   );
 
   const handleStatusUpdate = async (taskId: number, newStatus: string) => {
+    const task = tasks.find(t => t.id === taskId);
+    setConfirmStatusChange({
+      taskId,
+      newStatus,
+      taskTitle: task?.title || 'Unknown Task'
+    });
+  };
+
+  const handleConfirmStatusChange = async () => {
+    if (!confirmStatusChange) return;
+
     try {
-      const result = await dispatch(updateTask({ taskId, taskData: { status: newStatus } })).unwrap();
-      toast.success(result.message || 'Task updated successfully');
+      const result = await dispatch(updateTask({ 
+        taskId: confirmStatusChange.taskId, 
+        taskData: { status: confirmStatusChange.newStatus } 
+      })).unwrap();
+      toast.success(result.message || 'Task status updated successfully');
+      setConfirmStatusChange(null);
     } catch (error: any) {
       toast.error(error.message || 'Failed to update task status');
+      setConfirmStatusChange(null);
     }
   };
 
@@ -463,6 +480,39 @@ const TaskManagement: React.FC = () => {
                   className="px-6 py-3 rounded-lg bg-red-600 text-white hover:bg-red-700 shadow-lg"
                 >
                   Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Status Change Confirmation Modal */}
+        {confirmStatusChange && (
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-60 p-4">
+            <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-8 border border-gray-200">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-slate-600 flex items-center justify-center shadow-lg">
+                  <MdTask className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-800 mb-2">
+                  Change Task Status
+                </h3>
+                <p className="text-slate-600">
+                  Are you sure you want to change the status of <strong>"{confirmStatusChange.taskTitle}"</strong> to <strong>{confirmStatusChange.newStatus.replace('_', ' ')}</strong>?
+                </p>
+              </div>
+              <div className="flex items-center justify-center space-x-3">
+                <button
+                  onClick={() => setConfirmStatusChange(null)}
+                  className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmStatusChange}
+                  className="px-6 py-3 rounded-lg bg-slate-700 text-white hover:bg-slate-800 shadow-lg"
+                >
+                  Change Status
                 </button>
               </div>
             </div>
