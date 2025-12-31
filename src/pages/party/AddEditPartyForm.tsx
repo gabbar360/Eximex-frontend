@@ -268,6 +268,7 @@ const AddEditPartyForm = () => {
     gstNumber: party.gstNumber || '',
     notes: party.notes || '',
     status: party.status !== undefined ? Boolean(party.status) : false,
+    stage: party.stage || 'NEW', // Default to NEW for new contacts
   });
 
   // Custom Dropdown Component
@@ -583,6 +584,30 @@ const AddEditPartyForm = () => {
                       </div>
                     )}
                   </div>
+
+                  {/* Stage - Only for Customer Role */}
+                  {values.role?.toLowerCase() === 'customer' && (
+                    <div>
+                      <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
+                        <HiChevronDown className="w-4 h-4 mr-2 text-slate-600" />
+                        Stage
+                      </label>
+                      <select
+                        name="stage"
+                        value={values.stage || 'NEW'}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
+                      >
+                        <option value="NEW">New Leads</option>
+                        <option value="QUALIFIED">Qualified</option>
+                        <option value="NEGOTIATION">Negotiation</option>
+                        <option value="QUOTATION_SENT">Quotation Sent</option>
+                        <option value="WON">Won</option>
+                        <option value="LOST">Lost</option>
+                      </select>
+                    </div>
+                  )}
 
                   {/* GST Number */}
                   <div>
