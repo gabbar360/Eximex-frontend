@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  HiEye,
   HiPencil,
   HiTrash,
   HiPlus,
@@ -260,13 +259,6 @@ const ShipmentManagement: React.FC = () => {
                         <div className="flex items-center justify-end space-x-2">
                           <Link
                             to={`/shipment/${order.id}`}
-                            className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-blue-600 transition-all duration-300"
-                            title="View/Edit"
-                          >
-                            <HiEye className="w-4 h-4" />
-                          </Link>
-                          <Link
-                            to={`/shipment/${order.id}`}
                             className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-600 transition-all duration-300"
                             title="Edit"
                           >
@@ -372,13 +364,6 @@ const ShipmentManagement: React.FC = () => {
                               </span>
                             </div>
                             <div className="flex items-center justify-end space-x-2">
-                              <Link
-                                to={`/shipment/${order.id}`}
-                                className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-blue-600 transition-all duration-300"
-                                title="View/Edit"
-                              >
-                                <HiEye className="w-4 h-4" />
-                              </Link>
                               <Link
                                 to={`/shipment/${order.id}`}
                                 className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-600 transition-all duration-300"

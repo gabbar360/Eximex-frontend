@@ -199,19 +199,6 @@ const AddEditShipment = () => {
                       filterType="shipment"
                     />
                   </div>
-                  {selectedOrder && (
-                    <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-slate-100 rounded-lg border border-slate-300">
-                      <p className="text-xs sm:text-sm text-slate-700 break-words">
-                        <span className="block sm:inline">Selected: </span>
-                        <strong className="text-slate-800">
-                          {selectedOrder.orderNumber}
-                        </strong>
-                        <span className="block sm:inline sm:ml-1">
-                          - {selectedOrder.piNumber} ({selectedOrder.buyerName})
-                        </span>
-                      </p>
-                    </div>
-                  )}
                 </div>
               )}
 
@@ -304,7 +291,7 @@ const AddEditShipment = () => {
                       name="vesselVoyageInfo"
                       value={shipmentData.vesselVoyageInfo}
                       onChange={handleInputChange}
-                      placeholder="e.g., MSC FLORA/123456"
+                      placeholder="Enter vessel/voyage info"
                       className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm text-sm sm:text-base"
                     />
                   </div>
@@ -328,14 +315,22 @@ const AddEditShipment = () => {
                   {saving ? (
                     <div className="flex items-center gap-2 justify-center">
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span className="hidden sm:inline">{isEdit ? 'Updating...' : 'Creating...'}</span>
-                      <span className="sm:hidden">{isEdit ? 'Updating' : 'Creating'}</span>
+                      <span className="hidden sm:inline">
+                        {isEdit ? 'Updating...' : 'Creating...'}
+                      </span>
+                      <span className="sm:hidden">
+                        {isEdit ? 'Updating' : 'Creating'}
+                      </span>
                     </div>
                   ) : (
                     <>
                       <HiCheckCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 inline" />
-                      <span className="hidden sm:inline">{isEdit ? 'Update Shipment' : 'Create Shipment'}</span>
-                      <span className="sm:hidden">{isEdit ? 'Update' : 'Create'}</span>
+                      <span className="hidden sm:inline">
+                        {isEdit ? 'Update Shipment' : 'Create Shipment'}
+                      </span>
+                      <span className="sm:hidden">
+                        {isEdit ? 'Update' : 'Create'}
+                      </span>
                     </>
                   )}
                 </button>

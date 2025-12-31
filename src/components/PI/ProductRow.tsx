@@ -503,7 +503,8 @@ const ProductRow: React.FC<ProductRowProps> = ({
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      {/* Unit, Quantity, and Rate per Unit in one row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div>
           <Label>Unit *</Label>
           <SearchableDropdown
@@ -611,10 +612,8 @@ const ProductRow: React.FC<ProductRowProps> = ({
             </div>
           )}
         </div>
-      </div>
 
-      {/* Quantity Input */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        {/* Quantity Input */}
         <div>
           <Label>Quantity *</Label>
           <input
@@ -634,39 +633,66 @@ const ProductRow: React.FC<ProductRowProps> = ({
             required
             className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm py-2 px-3 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
           />
+        </div>
+
+        {/* Rate per Unit */}
+        <div>
+          <Label>Rate per Unit *</Label>
+          <input
+            ref={rateRef}
+            type="number"
+            min={0}
+            step="any"
+            defaultValue={data.rate || ''}
+            onBlur={(e) => {
+              onChange(idx, 'rate', e.target.value);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                onChange(idx, 'rate', e.currentTarget.value);
+              }
+            }}
+            placeholder="Enter rate per unit"
+            required
+            className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm py-2 px-3 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+          />
+        </div>
+      </div>
+
+      {/* Weight calculation and packaging details moved below */}
+      {data.productId && data.quantity && data.unit && (
+        <div className="mb-4">
           {/* Real-time weight calculation display */}
-          {data.productId && data.quantity && data.unit && (
-            <div className="text-xs bg-slate-50 dark:bg-slate-900 p-2 rounded mt-2 border border-slate-200 dark:border-slate-700">
-              <div className="text-slate-700 dark:text-slate-300">
-                <strong>📊 Weight Calculation:</strong>
-                <br />
-                <span className="font-mono">
-                  {data.quantity} {data.unit} ={' '}
-                  <strong>{totalWeight.toFixed(3)} KG</strong>
-                </span>
-                <br />
-                <span className="text-xs opacity-75">
-                  Rate:{' '}
-                  {(() => {
-                    const packagingData =
-                      prod.packagingHierarchyData?.dynamicFields;
+          <div className="text-xs bg-slate-50 dark:bg-slate-900 p-2 rounded border border-slate-200 dark:border-slate-700">
+            <div className="text-slate-700 dark:text-slate-300">
+              <strong>📊 Weight Calculation:</strong>
+              <br />
+              <span className="font-mono">
+                {data.quantity} {data.unit} ={' '}
+                <strong>{totalWeight.toFixed(3)} KG</strong>
+              </span>
+              <br />
+              <span className="text-xs opacity-75">
+                Rate:{' '}
+                {(() => {
+                  const packagingData =
+                    prod.packagingHierarchyData?.dynamicFields;
 
-                    if (
-                      data.unit.toLowerCase() === 'pack' &&
-                      packagingData?.weightPerPack
-                    ) {
-                      const weightKg = packagingData.weightPerPack / 1000;
-                      return `${weightKg.toFixed(4)} KG per ${data.unit}`;
-                    }
+                  if (
+                    data.unit.toLowerCase() === 'pack' &&
+                    packagingData?.weightPerPack
+                  ) {
+                    const weightKg = packagingData.weightPerPack / 1000;
+                    return `${weightKg.toFixed(4)} KG per ${data.unit}`;
+                  }
 
-                    return totalWeight > 0
-                      ? `${(totalWeight / parseFloat(data.quantity || '1')).toFixed(4)} KG per ${data.unit}`
-                      : `0 KG per ${data.unit}`;
-                  })()}
-                </span>
-              </div>
+                  return totalWeight > 0
+                    ? `${(totalWeight / parseFloat(data.quantity || '1')).toFixed(4)} KG per ${data.unit}`
+                    : `0 KG per ${data.unit}`;
+                })()}
+              </span>
             </div>
-          )}
+          </div>
 
           {/* Dynamic Tiles Box/Pallet Calculation */}
           {packagingCalculation && (
@@ -694,30 +720,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
             </div>
           )}
         </div>
-
-        {/* Rate per Unit */}
-        <div>
-          <Label>Rate per Unit *</Label>
-          <input
-            ref={rateRef}
-            type="number"
-            min={0}
-            step="any"
-            defaultValue={data.rate || ''}
-            onBlur={(e) => {
-              onChange(idx, 'rate', e.target.value);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                onChange(idx, 'rate', e.currentTarget.value);
-              }
-            }}
-            placeholder="Enter rate per unit"
-            required
-            className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm py-2 px-3 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-          />
-        </div>
-      </div>
+      )}
     </div>
   );
 };
