@@ -61,6 +61,7 @@ export const deleteParty = createAsyncThunk(
   }
 );
 
+
 export const updatePartyStage = createAsyncThunk(
   'party/updatePartyStage',
   async ({ id, stage }, { rejectWithValue }) => {
@@ -131,14 +132,6 @@ const partySlice = createSlice({
       state.error = null;
       state.successMessage = null;
     },
-    updatePartyStageOptimistic(state, { payload }) {
-      const { id, stage } = payload;
-      if (Array.isArray(state.parties)) {
-        state.parties = state.parties.map((p) =>
-          p.id.toString() === id.toString() ? { ...p, stage } : p
-        );
-      }
-    },
   },
   extraReducers: (builder) => {
     builder
@@ -151,8 +144,18 @@ const partySlice = createSlice({
         
         // Handle the response structure with data.data
         let parties = [];
+        let pagination = { current: 1, pageSize: 10, total: 0 };
+        
         if (payload?.data?.data && Array.isArray(payload.data.data)) {
           parties = payload.data.data;
+          // Handle backend pagination data
+          if (payload.data.pagination) {
+            pagination = {
+              current: payload.data.pagination.currentPage || payload.data.pagination.page || 1,
+              pageSize: payload.data.pagination.limit || payload.data.pagination.pageSize || 10,
+              total: payload.data.pagination.total || payload.data.pagination.totalItems || 0,
+            };
+          }
         } else if (payload?.data && Array.isArray(payload.data)) {
           parties = payload.data;
         } else if (Array.isArray(payload)) {
@@ -160,11 +163,7 @@ const partySlice = createSlice({
         }
         
         state.parties = parties;
-        state.pagination = {
-          current: 1,
-          pageSize: parties.length,
-          total: parties.length,
-        };
+        state.pagination = pagination;
       })
       .addCase(fetchParties.rejected, (state, { payload }) => {
         state.loading = false;
@@ -207,7 +206,7 @@ const partySlice = createSlice({
         state.error = payload;
       })
       .addCase(updatePartyStage.pending, (state) => {
-        state.loading = false; // Don't show global loading for stage update
+        state.loading = false;
         state.error = null;
       })
       .addCase(updatePartyStage.fulfilled, (state, { payload }) => {
@@ -223,6 +222,7 @@ const partySlice = createSlice({
         state.loading = false;
         state.error = payload;
       })
+
       .addCase(deleteParty.pending, (state) => {
         state.loading = false; // Don't show global loading for delete
         state.error = null;
@@ -284,6 +284,6 @@ const partySlice = createSlice({
   },
 });
 
-export const { setSelectedParty, clearSelectedParty, clearMessages, updatePartyStageOptimistic } =
+export const { setSelectedParty, clearSelectedParty, clearMessages } =
   partySlice.actions;
 export default partySlice.reducer;

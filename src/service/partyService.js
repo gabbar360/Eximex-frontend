@@ -5,6 +5,8 @@ export const getAllParties = async (params = {}) => {
   try {
     const queryParams = {
       search: params.search || '',
+      page: params.page || 1,
+      limit: params.limit || 10,
       ...(params.role && { role: params.role }),
       ...(params.status !== undefined && { status: params.status }),
     };
@@ -68,6 +70,7 @@ export const deleteParty = async (id) => {
     throw handleAxiosError(error, 'party', 'delete');
   }
 };
+
 
 export const updatePartyStage = async (id, stage) => {
   try {
