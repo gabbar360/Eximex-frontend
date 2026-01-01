@@ -4,7 +4,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import { toast } from 'react-toastify';
-import { HiArrowLeft, HiCheckCircle, HiChevronDown, HiMagnifyingGlass } from 'react-icons/hi2';
+import {
+  HiArrowLeft,
+  HiCheckCircle,
+  HiChevronDown,
+  HiMagnifyingGlass,
+} from 'react-icons/hi2';
 import {
   getPurchaseOrderById,
   updatePurchaseOrder,
@@ -136,7 +141,9 @@ const AddEditPurchaseOrderForm: React.FC = () => {
     className = '',
     style = {},
   }) => {
-    const selectedOption = options.find((opt) => opt[valueKey]?.toString() === value?.toString());
+    const selectedOption = options.find(
+      (opt) => opt[valueKey]?.toString() === value?.toString()
+    );
 
     return (
       <div className="relative" ref={dropdownRef}>
@@ -208,14 +215,8 @@ const AddEditPurchaseOrderForm: React.FC = () => {
     );
   };
 
-
-
   // Redux state for categories
   const { categories } = useSelector((state: any) => state.category);
-
-
-
-
 
   const validationSchema = Yup.object().shape({
     poDate: Yup.date().required('PO date is required'),
@@ -539,6 +540,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
         items: items.map((item) => ({
           itemDescription: item.itemDescription,
           hsnSac: item.hsnSac,
+          unit: item.unit,
           quantity: item.quantity,
           rate: item.rate,
           amount: item.quantity * item.rate,
@@ -607,27 +609,30 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                     {/* Vendor Information */}
                     <div className="bg-slate-50 p-4 lg:p-6 rounded-lg border border-slate-200">
                       <h3 className="text-lg lg:text-xl font-semibold text-slate-700 mb-4 lg:mb-6">
-                        Vendor Information
+                        Supplier Information
                       </h3>
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                           <div>
                             <label className="block text-sm font-semibold text-slate-700 mb-3">
-                              Select Vendor{' '}
-                              <span className="text-red-500">*</span>
+                              Select Supplier{' '}
                             </label>
                             <SearchableDropdown
                               label=""
                               value={selectedVendor?.id?.toString() || ''}
                               options={vendors
                                 .filter((v) => v.role === 'Supplier')
-                                .filter(vendor => {
+                                .filter((vendor) => {
                                   const searchText = `${vendor.companyName || ''} - ${vendor.contactPerson || 'No Contact'}`;
-                                  return searchText.toLowerCase().includes((vendorSearch || '').toLowerCase());
+                                  return searchText
+                                    .toLowerCase()
+                                    .includes(
+                                      (vendorSearch || '').toLowerCase()
+                                    );
                                 })
-                                .map(vendor => ({
+                                .map((vendor) => ({
                                   id: vendor.id.toString(),
-                                  name: `${vendor.companyName || ''} - ${vendor.contactPerson || 'No Contact'}`
+                                  name: `${vendor.companyName || ''} - ${vendor.contactPerson || 'No Contact'}`,
                                 }))}
                               onSelect={(value) => {
                                 const vendor = vendors.find(
@@ -660,8 +665,10 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                               searchValue={vendorSearch}
                               onSearchChange={setVendorSearch}
                               isOpen={showVendorDropdown}
-                              onToggle={() => setShowVendorDropdown(!showVendorDropdown)}
-                              placeholder="Choose Vendor"
+                              onToggle={() =>
+                                setShowVendorDropdown(!showVendorDropdown)
+                              }
+                              placeholder="Choose Supplier"
                               dropdownRef={vendorRef}
                             />
                           </div>
@@ -727,8 +734,12 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                               { id: 'INR', name: 'INR (₹)' },
                               { id: 'USD', name: 'USD ($)' },
                               { id: 'EUR', name: 'EUR (€)' },
-                              { id: 'GBP', name: 'GBP (£)' }
-                            ].filter(curr => (curr.name || '').toLowerCase().includes((currencySearch || '').toLowerCase()))}
+                              { id: 'GBP', name: 'GBP (£)' },
+                            ].filter((curr) =>
+                              (curr.name || '')
+                                .toLowerCase()
+                                .includes((currencySearch || '').toLowerCase())
+                            )}
                             onSelect={(value) => {
                               setCurrency(value);
                               setCurrencySearch('');
@@ -736,7 +747,9 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                             searchValue={currencySearch}
                             onSearchChange={setCurrencySearch}
                             isOpen={showCurrencyDropdown}
-                            onToggle={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
+                            onToggle={() =>
+                              setShowCurrencyDropdown(!showCurrencyDropdown)
+                            }
                             placeholder="Select Currency"
                             dropdownRef={currencyRef}
                           />
@@ -802,7 +815,9 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                             </label>
                             <DatePicker
                               value={values.poDate}
-                              onChange={(value) => setFieldValue('poDate', value)}
+                              onChange={(value) =>
+                                setFieldValue('poDate', value)
+                              }
                               placeholder="Select PO date"
                             />
                             {touched.poDate && errors.poDate && (
@@ -862,12 +877,10 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                       </div>
                     </div>
 
-
-
                     {/* Product Addition Section */}
-                    <div className="bg-white rounded-lg border border-gray-200 p-4 lg:p-6 dark:border-gray-700 dark:bg-gray-800">
+                    <div className="bg-white rounded-lg border border-gray-200 p-4 lg:p-6 dark:border-gray-700 dark:bg-gray-800" data-section="add-product">
                       <h4 className="text-sm lg:text-base font-medium text-gray-800 dark:text-gray-200 mb-4">
-                        Add Product
+                        {editingItemKey ? 'Edit Product' : 'Add Product'}
                       </h4>
                       <div className="space-y-4 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-4 mb-4">
                         <div>
@@ -877,11 +890,22 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                           <SearchableDropdown
                             label=""
                             value={selectedCategory}
-                            options={Array.isArray(categories) ? 
-                              categories
-                                .filter(cat => (cat.name || '').toLowerCase().includes((categorySearch || '').toLowerCase()))
-                                .map(cat => ({ id: cat.id.toString(), name: cat.name || '' }))
-                              : []}
+                            options={
+                              Array.isArray(categories)
+                                ? categories
+                                    .filter((cat) =>
+                                      (cat.name || '')
+                                        .toLowerCase()
+                                        .includes(
+                                          (categorySearch || '').toLowerCase()
+                                        )
+                                    )
+                                    .map((cat) => ({
+                                      id: cat.id.toString(),
+                                      name: cat.name || '',
+                                    }))
+                                : []
+                            }
                             onSelect={(value) => {
                               setSelectedCategory(value);
                               setSelectedSubcategory('');
@@ -892,7 +916,9 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                             searchValue={categorySearch}
                             onSearchChange={setCategorySearch}
                             isOpen={showCategoryDropdown}
-                            onToggle={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                            onToggle={() =>
+                              setShowCategoryDropdown(!showCategoryDropdown)
+                            }
                             placeholder="Select Category"
                             dropdownRef={categoryRef}
                           />
@@ -905,18 +931,32 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                           <SearchableDropdown
                             label=""
                             value={selectedSubcategory}
-                            options={selectedCategory ? 
-                              (() => {
-                                const category = categories.find(
-                                  (c) => c.id.toString() === selectedCategory
-                                );
-                                return (
-                                  category?.subcategories
-                                    ?.filter(subcat => (subcat.name || '').toLowerCase().includes((subcategorySearch || '').toLowerCase()))
-                                    ?.map(subcat => ({ id: subcat.id.toString(), name: subcat.name || '' })) || []
-                                );
-                              })()
-                              : []}
+                            options={
+                              selectedCategory
+                                ? (() => {
+                                    const category = categories.find(
+                                      (c) =>
+                                        c.id.toString() === selectedCategory
+                                    );
+                                    return (
+                                      category?.subcategories
+                                        ?.filter((subcat) =>
+                                          (subcat.name || '')
+                                            .toLowerCase()
+                                            .includes(
+                                              (
+                                                subcategorySearch || ''
+                                              ).toLowerCase()
+                                            )
+                                        )
+                                        ?.map((subcat) => ({
+                                          id: subcat.id.toString(),
+                                          name: subcat.name || '',
+                                        })) || []
+                                    );
+                                  })()
+                                : []
+                            }
                             onSelect={(value) => {
                               setSelectedSubcategory(value);
                               setSelectedProduct('');
@@ -926,7 +966,11 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                             searchValue={subcategorySearch}
                             onSearchChange={setSubcategorySearch}
                             isOpen={showSubcategoryDropdown}
-                            onToggle={() => setShowSubcategoryDropdown(!showSubcategoryDropdown)}
+                            onToggle={() =>
+                              setShowSubcategoryDropdown(
+                                !showSubcategoryDropdown
+                              )
+                            }
                             placeholder="Select Subcategory"
                             dropdownRef={subcategoryRef}
                             disabled={!selectedCategory}
@@ -956,13 +1000,23 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                                     selectedSubcategory;
                                 return categoryMatch && subcategoryMatch;
                               })
-                              .filter(product => {
-                                const productName = product.name || product.productName || `Product ${product.id}`;
-                                return (productName || '').toLowerCase().includes((productSearch || '').toLowerCase());
+                              .filter((product) => {
+                                const productName =
+                                  product.name ||
+                                  product.productName ||
+                                  `Product ${product.id}`;
+                                return (productName || '')
+                                  .toLowerCase()
+                                  .includes(
+                                    (productSearch || '').toLowerCase()
+                                  );
                               })
-                              .map(product => ({
+                              .map((product) => ({
                                 id: product.id.toString(),
-                                name: product.name || product.productName || `Product ${product.id}`
+                                name:
+                                  product.name ||
+                                  product.productName ||
+                                  `Product ${product.id}`,
                               }))}
                             onSelect={(value) => {
                               setSelectedProduct(value);
@@ -992,7 +1046,9 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                             searchValue={productSearch}
                             onSearchChange={setProductSearch}
                             isOpen={showProductDropdown}
-                            onToggle={() => setShowProductDropdown(!showProductDropdown)}
+                            onToggle={() =>
+                              setShowProductDropdown(!showProductDropdown)
+                            }
                             placeholder="Choose product"
                             dropdownRef={productRef}
                             disabled={!selectedCategory}
@@ -1066,13 +1122,17 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                                 Array.from(unitSet).forEach((unit) => {
                                   availableUnits.push({
                                     id: unit,
-                                    name: unit.charAt(0).toUpperCase() + unit.slice(1),
+                                    name:
+                                      unit.charAt(0).toUpperCase() +
+                                      unit.slice(1),
                                   });
                                 });
                               }
 
-                              return availableUnits.filter(unit => 
-                                (unit.name || '').toLowerCase().includes((unitSearch || '').toLowerCase())
+                              return availableUnits.filter((unit) =>
+                                (unit.name || '')
+                                  .toLowerCase()
+                                  .includes((unitSearch || '').toLowerCase())
                               );
                             })()}
                             onSelect={(value) => {
@@ -1082,7 +1142,9 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                             searchValue={unitSearch}
                             onSearchChange={setUnitSearch}
                             isOpen={showUnitDropdown}
-                            onToggle={() => setShowUnitDropdown(!showUnitDropdown)}
+                            onToggle={() =>
+                              setShowUnitDropdown(!showUnitDropdown)
+                            }
                             placeholder="Choose unit"
                             dropdownRef={unitRef}
                             disabled={!selectedCategory}
@@ -1123,7 +1185,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                         <button
                           type="button"
                           onClick={addProductToItems}
-                          className="px-4 py-3 lg:px-6 lg:py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 inline-flex items-center justify-center gap-2 text-sm lg:text-base"
+                          className="px-4 py-3 lg:px-6 lg:py-2 bg-slate-700 text-white font-medium rounded-md  focus:outline-none focus:ring-2 focus:ring-offset-2 inline-flex items-center justify-center gap-2 text-sm lg:text-base"
                         >
                           <svg
                             className="w-4 h-4"
@@ -1245,32 +1307,50 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                                       <button
                                         type="button"
                                         onClick={() => {
+                                          // Try to find product by name/description match
                                           const product = products.find(
-                                            (p) => p.id === item.productId
+                                            (p) => p.name === item.itemDescription || 
+                                                   p.productName === item.itemDescription ||
+                                                   p.id === item.productId
                                           );
+                                          
+                                          // Set edit mode regardless of product match
+                                          setEditingItemKey(item.key!);
+                                          
                                           if (product) {
-                                            setEditingItemKey(item.key!);
                                             setSelectedCategory(
-                                              product.categoryId?.toString() ||
-                                                ''
+                                              product.categoryId?.toString() || ''
                                             );
                                             setSelectedSubcategory(
-                                              product.subcategoryId?.toString() ||
-                                                ''
+                                              product.subCategoryId?.toString() || 
+                                              product.subcategoryId?.toString() || ''
                                             );
                                             setSelectedProduct(
                                               product.id.toString()
                                             );
-                                            setSelectedUnit(item.unit || 'pcs');
-                                            setNewItemQuantity(
-                                              item.quantity.toString()
-                                            );
-                                            setNewItemRate(
-                                              item.rate.toString()
-                                            );
+                                          } else {
+                                            setSelectedCategory('');
+                                            setSelectedSubcategory('');
+                                            setSelectedProduct('');
                                           }
+                                          
+                                          setSelectedUnit(item.unit || 'pcs');
+                                          setNewItemQuantity(
+                                            item.quantity.toString()
+                                          );
+                                          setNewItemRate(
+                                            item.rate.toString()
+                                          );
+                                          
+                                          // Scroll to product addition section
+                                          setTimeout(() => {
+                                            const productSection = document.querySelector('[data-section="add-product"]');
+                                            if (productSection) {
+                                              productSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                            }
+                                          }, 100);
                                         }}
-                                        className="text-blue-600 hover:text-blue-800 focus:outline-none dark:text-blue-400 dark:hover:text-blue-300"
+                                        className="bg-slate-700 text-white p-2 rounded hover:bg-slate-800 focus:outline-none"
                                         title="Edit item"
                                       >
                                         <svg
@@ -1290,7 +1370,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                                       <button
                                         type="button"
                                         onClick={() => removeItem(item.key!)}
-                                        className="text-red-600 hover:text-red-800 focus:outline-none dark:text-red-400 dark:hover:text-red-300"
+                                        className="bg-slate-700 text-white p-2 rounded hover:bg-slate-800 focus:outline-none"
                                         title="Delete item"
                                       >
                                         <svg
@@ -1412,14 +1492,24 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                         {loading || isSubmitting ? (
                           <div className="flex items-center gap-2 justify-center">
                             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                            <span className="lg:hidden">{isEdit ? 'Updating...' : 'Creating...'}</span>
-                            <span className="hidden lg:inline">{isEdit ? 'Updating...' : 'Creating...'}</span>
+                            <span className="lg:hidden">
+                              {isEdit ? 'Updating...' : 'Creating...'}
+                            </span>
+                            <span className="hidden lg:inline">
+                              {isEdit ? 'Updating...' : 'Creating...'}
+                            </span>
                           </div>
                         ) : (
                           <>
                             <HiCheckCircle className="w-4 h-4 lg:w-5 lg:h-5 mr-2 inline" />
-                            <span className="lg:hidden">{isEdit ? 'Update PO' : 'Create PO'}</span>
-                            <span className="hidden lg:inline">{isEdit ? 'Update Purchase Order' : 'Create Purchase Order'}</span>
+                            <span className="lg:hidden">
+                              {isEdit ? 'Update PO' : 'Create PO'}
+                            </span>
+                            <span className="hidden lg:inline">
+                              {isEdit
+                                ? 'Update Purchase Order'
+                                : 'Create Purchase Order'}
+                            </span>
                           </>
                         )}
                       </button>
