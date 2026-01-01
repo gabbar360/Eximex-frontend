@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { fetchParties, deleteParty, updatePartyStage, updatePartyStageOptimistic } from '../../features/partySlice';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { fetchParties, deleteParty, updatePartyStage } from '../../features/partySlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import PageMeta from '../../components/common/PageMeta';
@@ -12,19 +11,22 @@ import {
   HiMagnifyingGlass,
   HiBuildingOffice2,
   HiUsers,
-  HiSparkles,
-  HiCheckBadge,
-  HiChatBubbleLeftRight,
-  HiDocumentText,
-  HiTrophy,
-  HiXCircle,
   HiEnvelope,
   HiPhone,
   HiEllipsisVertical,
   HiChevronDown,
+  HiSparkles,
+  HiStar,
+  HiCheckCircle,
+  HiChatBubbleLeftRight,
+  HiDocumentText,
+  HiTrophy,
+  HiXCircle,
 } from 'react-icons/hi2';
+import { MdPerson, MdBadge } from 'react-icons/md';
 import { toast } from 'react-toastify';
 import { useDebounce } from '../../utils/useDebounce';
+import { Pagination } from 'antd';
 
 const Cprospect = () => {
   const dispatch = useDispatch();
@@ -39,74 +41,23 @@ const Cprospect = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [wasSearching, setWasSearching] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
-  const [filterRole, setFilterRole] = useState('');
-  const [confirmStageChange, setConfirmStageChange] = useState(null);
-  
-  // Role filter dropdown states
-  const [roleSearch, setRoleSearch] = useState('');
-  const [showRoleDropdown, setShowRoleDropdown] = useState(false);
-  const roleRef = useRef(null);
-  
-  // Check if there are any Customer contacts
-  const hasCustomers = parties && parties.some(party => party.role === 'Customer');
+  const [stageDropdowns, setStageDropdowns] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
-  // SearchableDropdown Component
-  const SearchableDropdown = ({ label, value, options, onSelect, searchValue, onSearchChange, isOpen, onToggle, placeholder, dropdownRef }) => {
-    const selectedOption = options.find(opt => opt.id === value);
-    
-    return (
-      <div className="relative" ref={dropdownRef}>
-        <div
-          className="w-full px-4 py-3 border border-gray-300 bg-white rounded-xl cursor-pointer flex items-center justify-between transition-all duration-300 shadow-sm hover:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200 focus-within:border-slate-500"
-          onClick={onToggle}
-        >
-          <span className={`text-sm ${selectedOption ? 'text-slate-900' : 'text-slate-500'}`}>
-            {selectedOption ? selectedOption.name : placeholder}
-          </span>
-          <HiChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
-        </div>
-        
-        {isOpen && (
-          <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-xl shadow-xl" style={{ top: '100%', marginTop: '4px' }}>
-            <div className="p-3 border-b border-gray-100">
-              <div className="relative">
-                <HiMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder={`Search ${label.toLowerCase()}...`}
-                  value={searchValue}
-                  onChange={(e) => onSearchChange(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                  onClick={(e) => e.stopPropagation()}
-                  autoFocus
-                />
-              </div>
-            </div>
-            <div className="max-h-60 overflow-y-auto">
-              {options.length === 0 ? (
-                <div className="px-4 py-3 text-slate-500 text-sm text-center">No {label.toLowerCase()} found</div>
-              ) : (
-                options.map((option) => (
-                  <div
-                    key={option.id}
-                    className={`px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm transition-colors duration-150 ${
-                      option.id === value ? 'bg-slate-100 text-slate-900 font-medium' : 'text-slate-700'
-                    }`}
-                    onClick={() => {
-                      onSelect(option.id);
-                      onToggle();
-                    }}
-                  >
-                    {option.name}
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
+  // Stage options with icons
+  const stageOptions = [
+    { value: 'NEW', label: 'New Leads', icon: HiStar, color: 'text-blue-500' },
+    { value: 'QUALIFIED', label: 'Qualified', icon: HiCheckCircle, color: 'text-green-500' },
+    { value: 'NEGOTIATION', label: 'Negotiation', icon: HiChatBubbleLeftRight, color: 'text-orange-500' },
+    { value: 'QUOTATION_SENT', label: 'Quotation Sent', icon: HiDocumentText, color: 'text-purple-500' },
+    { value: 'WON', label: 'Won', icon: HiTrophy, color: 'text-emerald-500' },
+    { value: 'LOST', label: 'Lost', icon: HiXCircle, color: 'text-red-500' },
+  ];
+  
+  console.log('Stage options:', stageOptions);
+  
+
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -114,8 +65,8 @@ const Cprospect = () => {
       if (openDropdown && !event.target.closest('.dropdown-container')) {
         setOpenDropdown(null);
       }
-      if (roleRef.current && !roleRef.current.contains(event.target)) {
-        setShowRoleDropdown(false);
+      if (!event.target.closest('.stage-dropdown')) {
+        setStageDropdowns({});
       }
     };
 
@@ -123,126 +74,17 @@ const Cprospect = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [openDropdown]);
 
-  // Stage data for Kanban board
-  const stages = [
-    {
-      id: 'NEW',
-      title: 'New Leads',
-      color: 'bg-gray-100 border-gray-300',
-      headerColor: 'bg-gray-600',
-      icon: HiSparkles,
-    },
-    {
-      id: 'QUALIFIED',
-      title: 'Qualified',
-      color: 'bg-blue-100 border-blue-300',
-      headerColor: 'bg-blue-600',
-      icon: HiCheckBadge,
-    },
-    {
-      id: 'NEGOTIATION',
-      title: 'Negotiation',
-      color: 'bg-yellow-100 border-yellow-300',
-      headerColor: 'bg-yellow-600',
-      icon: HiChatBubbleLeftRight,
-    },
-    {
-      id: 'QUOTATION_SENT',
-      title: 'Quotation Sent',
-      color: 'bg-purple-100 border-purple-300',
-      headerColor: 'bg-purple-600',
-      icon: HiDocumentText,
-    },
-    {
-      id: 'WON',
-      title: 'Won',
-      color: 'bg-emerald-100 border-emerald-300',
-      headerColor: 'bg-emerald-600',
-      icon: HiTrophy,
-    },
-  ];
 
-  // Memoized contacts by stage to prevent unnecessary re-renders
-  const contactsByStage = useMemo(() => {
-    return stages.reduce((acc, stage) => {
-      acc[stage.id] = parties.filter(
-        (party) => party.role === 'Customer' && (party.stage || 'NEW') === stage.id
-      );
-      return acc;
-    }, {});
-  }, [parties, stages]);
 
-  // Handle drag and drop with confirmation popup
-  const handleDragEnd = async (result) => {
-    const { destination, source, draggableId } = result;
-
-    if (!destination) return;
-
-    if (
-      destination.droppableId === source.droppableId &&
-      destination.index === source.index
-    ) {
-      return;
-    }  
-
-    const newStage = destination.droppableId;
-    const contactId = draggableId.replace('contact-', '');
-    const contact = parties.find(p => p.id.toString() === contactId);
-    const newStageInfo = stages.find(s => s.id === newStage);
-    
-    // Show confirmation popup
-    setConfirmStageChange({
-      contactId,
-      newStage,
-      contactName: contact?.companyName || 'Unknown Contact',
-      newStageName: newStageInfo?.title || newStage
-    });
-  };
-
-  // Handle confirmed stage change
-  const handleConfirmStageChange = async () => {
-    if (!confirmStageChange) return;
-
-    const { contactId, newStage } = confirmStageChange;
-    
-    // Optimistic update - update UI immediately
-    dispatch(updatePartyStageOptimistic({ id: contactId, stage: newStage }));
-    
-    try {
-      const response = await dispatch(updatePartyStage({ id: contactId, stage: newStage })).unwrap();
-      
-      // Show backend response message
-      const message = response?.message || 'Contact stage updated successfully';
-      toast.success(message);
-      setConfirmStageChange(null);
-    } catch (error) {
-      // Revert optimistic update on error by reloading data
-      const params = {
-        page: 1,
-        limit: 1000,
-        search: searchTerm,
-        role: filterRole || 'Customer',
-      };
-      dispatch(fetchParties(params));
-      
-      const errorMessage = error || 'Failed to update contact stage';
-      toast.error(errorMessage);
-      setConfirmStageChange(null);
-    }
-  };
-
-  // Load data for kanban view
+  // Load data
   useEffect(() => {
-    // Load all customers for kanban view
-    dispatch(
-      fetchParties({
-        page: 1,
-        limit: 1000,
-        search: searchTerm,
-        role: filterRole || 'Customer',
-      })
-    );
-  }, [dispatch, searchTerm, filterRole]);
+    const params = {
+      search: searchTerm,
+      page: currentPage,
+      limit: pageSize,
+    };
+    dispatch(fetchParties(params));
+  }, [dispatch, searchTerm, currentPage, pageSize]);
 
   const handleDeleteClick = (id) => {
     setConfirmDelete(id);
@@ -255,12 +97,10 @@ const Cprospect = () => {
       const response = await dispatch(deleteParty(confirmDelete)).unwrap();
       setConfirmDelete(null);
 
-      // Reload data after deletion
       const params = {
-        page: 1,
-        limit: 1000,
         search: searchTerm,
-        role: filterRole || 'Customer',
+        page: currentPage,
+        limit: pageSize,
       };
       dispatch(fetchParties(params));
 
@@ -276,11 +116,11 @@ const Cprospect = () => {
   const { debouncedCallback: debouncedSearch } = useDebounce((value) => {
     setWasSearching(true);
     const params = {
-      page: 1,
-      limit: 1000,
       search: value,
-      role: filterRole || 'Customer',
+      page: 1,
+      limit: pageSize,
     };
+    setCurrentPage(1);
     dispatch(fetchParties(params));
   }, 500);
 
@@ -300,6 +140,16 @@ const Cprospect = () => {
     }
   }, [loading, wasSearching]);
 
+  const handleStageChange = async (contactId, newStage) => {
+    try {
+      const response = await dispatch(updatePartyStage({ id: contactId, stage: newStage })).unwrap();
+      toast.success(response?.message || 'Stage updated successfully');
+      setStageDropdowns({});
+    } catch (error) {
+      toast.error(error || 'Failed to update stage');
+    }
+  };
+
 
   return (
     <>
@@ -310,43 +160,41 @@ const Cprospect = () => {
       <div className="min-h-screen bg-gray-50">
         <div className="p-2 lg:p-4">
           {/* Header */}
-          <div className="mb-6">
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 lg:p-6">
-              <div className="flex flex-col space-y-4 lg:space-y-0 lg:flex-row lg:items-center lg:justify-between">
+          <div className="mb-3">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-3 lg:p-4">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-xl bg-slate-700 shadow-lg">
+                  <div className="p-3 rounded-lg bg-slate-700 shadow-lg">
                     <HiUsers className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h1 className="text-2xl lg:text-3xl font-bold text-slate-800">
+                    <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
                       Contacts
                     </h1>
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                <div className="flex flex-col sm:flex-row gap-3">
                   <div className="relative flex-1 sm:flex-none">
                     <HiMagnifyingGlass className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                     <input
                       ref={searchInputRef}
                       type="text"
                       placeholder="Search contacts..."
-                      className="pl-12 pr-4 py-3 w-full sm:w-72 rounded-xl border border-gray-300 bg-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-all duration-300 text-sm placeholder-gray-500 shadow-sm"
+                      className="pl-12 pr-4 py-3 w-full sm:w-72 rounded-lg border border-gray-300 bg-white focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-all duration-300 text-sm placeholder-gray-500 shadow-sm"
                       value={searchTerm}
                       onChange={(e) => handleSearch(e.target.value)}
                     />
                   </div>
 
-                  <div className="flex gap-2 flex-shrink-0 flex-1 sm:flex-none">
-                    <Link
-                      to="/add-contact"
-                      className="inline-flex items-center justify-center px-3 sm:px-4 lg:px-6 py-3 w-full sm:w-auto rounded-xl font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg transition-colors whitespace-nowrap text-sm sm:text-base"
-                    >
-                      <HiPlus className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
-                      <span className="hidden sm:inline">Add Contact</span>
-                      <span className="sm:hidden">Add</span>
-                    </Link>
-                  </div>
+                  <Link
+                    to="/add-contact"
+                    className="inline-flex items-center justify-center px-4 sm:px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg text-sm sm:text-base whitespace-nowrap"
+                  >
+                    <HiPlus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                    <span className="hidden xs:inline">Add Contact</span>
+                    <span className="xs:hidden">Add Contact</span>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -375,164 +223,215 @@ const Cprospect = () => {
               </p>
             </div>
           ) : (
-            // Kanban Board View
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-2">
-              <DragDropContext onDragEnd={handleDragEnd}>
-                <div className="flex xl:grid xl:grid-cols-5 gap-1 xl:gap-1 overflow-x-auto xl:overflow-x-visible pb-4 xl:pb-0 min-h-[500px]">
-                  {stages.map((stage) => (
-                    <div key={stage.id} className="flex-shrink-0 w-64 xl:w-auto xl:flex xl:flex-col">
-                      <div className="bg-gray-50 rounded-xl border border-gray-200 h-full">
-                        {/* Stage Header */}
-                        <div className="bg-white border-b border-gray-200 p-2 rounded-t-xl">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-1 min-w-0">
-                              <div className="w-5 h-5 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
-                                <stage.icon className="w-3 h-3 text-slate-600" />
-                              </div>
-                              <h2 className="font-semibold text-xs text-slate-800 truncate">{stage.title}</h2>
-                            </div>
-                            <span className="bg-slate-100 text-slate-700 text-xs font-medium px-1 py-0.5 rounded flex-shrink-0">
-                              {contactsByStage[stage.id]?.length || 0}
-                            </span>
-                          </div>
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr>
+                      <th className="bg-gray-50 border-b border-gray-200 p-4 text-left">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                          <HiBuildingOffice2 className="w-4 h-4 text-slate-600" />
+                          <span>Company</span>
                         </div>
+                      </th>
 
-                        {/* Droppable Area */}
-                        <Droppable droppableId={stage.id} key={stage.id} isDropDisabled={false} isCombineEnabled={false}>
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.droppableProps}
-                              className={`p-1 min-h-[450px] transition-colors duration-200 ${
-                                snapshot.isDraggingOver ? 'bg-white/50' : ''
-                              }`}
-                            >
-                              {contactsByStage[stage.id]?.map((contact, index) => (
-                                <Draggable key={`${stage.id}-${contact.id}`} draggableId={`contact-${contact.id}`} index={index}>
-                                  {(provided, snapshot) => (
-                                    <div
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                      {...provided.dragHandleProps}
-                                      className={`bg-white rounded-lg border border-gray-200 p-2 mb-1 shadow-sm hover:shadow-md transition-all duration-200 cursor-move ${
-                                        snapshot.isDragging ? 'shadow-lg border-slate-300 bg-slate-50' : ''
-                                      }`}
-                                    >
-                                      <div className="flex items-start justify-between mb-2">
-                                        <div className="flex items-start gap-1 flex-1 min-w-0">
-                                          <div className="flex-1 min-w-0">
-                                            <h3 className="font-semibold text-slate-900 text-xs leading-tight truncate" title={contact.companyName}>
-                                              {contact.companyName}
-                                            </h3>
-                                            {contact.contactPersonName && (
-                                              <p className="text-xs text-slate-500 mt-0.5 truncate" title={contact.contactPersonName}>
-                                                {contact.contactPersonName}
-                                              </p>
-                                            )}
-                                          </div>
-                                        </div>
-                                        
-                                        <div className="relative dropdown-container flex-shrink-0" onClick={(e) => e.stopPropagation()}>
-                                          <button
-                                            onClick={(e) => {
-                                              e.preventDefault();
-                                              e.stopPropagation();
-                                              setOpenDropdown(openDropdown === contact.id ? null : contact.id);
-                                            }}
-                                            className="w-5 h-5 rounded text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors flex items-center justify-center"
-                                            style={{ pointerEvents: 'auto' }}
-                                          >
-                                            <HiEllipsisVertical className="w-3 h-3" />
-                                          </button>
+                      <th className="bg-gray-50 border-b border-gray-200 p-4 text-left">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                          <HiPhone className="w-4 h-4 text-slate-600" />
+                          <span>Phone</span>
+                        </div>
+                      </th>
+                      <th className="bg-gray-50 border-b border-gray-200 p-4 text-left">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                          <MdBadge className="w-4 h-4 text-slate-600" />
+                          <span>Role</span>
+                        </div>
+                      </th>
+                      <th className="bg-gray-50 border-b border-gray-200 p-4 text-left">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                          <HiChevronDown className="w-4 h-4 text-slate-600" />
+                          <span>Stage</span>
+                        </div>
+                      </th>
+                      <th className="bg-gray-50 border-b border-gray-200 p-4 text-left">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                          <span className="w-2 h-2 rounded-full bg-slate-600"></span>
+                          <span>Status</span>
+                        </div>
+                      </th>
+                      <th className="bg-gray-50 border-b border-gray-200 p-4 text-right">
+                        <div className="flex items-center justify-end gap-2 text-sm font-semibold text-slate-700">
+                          <HiSparkles className="w-4 h-4 text-slate-600" />
+                          <span>Actions</span>
+                        </div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {parties.map((contact) => {
+                      return (
+                        <tr key={contact.id} className="hover:bg-gray-50 transition-colors" data-contact-id={contact.id}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div className="flex-shrink-0 w-10 h-10">
+                                <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
+                                  <HiBuildingOffice2 className="w-5 h-5 text-slate-600" />
+                                </div>
+                              </div>
+                              <div className="ml-4">
+                                <div className="text-sm font-semibold text-slate-900">
+                                  {contact.companyName?.length > 12 
+                                    ? `${contact.companyName.substring(0, 12)}...` 
+                                    : contact.companyName
+                                  }
+                                </div>
+                              </div>
+                            </div>
+                          </td>
 
-                                          {openDropdown === contact.id && (
-                                            <div className="absolute right-0 top-full mt-1 w-44 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
-                                              <Link
-                                                to={`/view-party/${contact.id}`}
-                                                className="flex items-center gap-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-                                                onClick={() => setOpenDropdown(null)}
-                                              >
-                                                <HiEye className="w-4 h-4 text-slate-500" />
-                                                <span>View Details</span>
-                                              </Link>
-                                              <Link
-                                                to={`/edit-contact/${contact.id}`}
-                                                className="flex items-center gap-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-                                                onClick={() => setOpenDropdown(null)}
-                                              >
-                                                <HiPencil className="w-4 h-4 text-slate-500" />
-                                                <span>Edit Contact</span>
-                                              </Link>
-                                              <button
-                                                onClick={() => {
-                                                  setOpenDropdown(null);
-                                                  handleDeleteClick(contact.id);
-                                                }}
-                                                className="flex items-center gap-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left transition-colors"
-                                              >
-                                                <HiTrash className="w-4 h-4" />
-                                                <span>Delete</span>
-                                              </button>
-                                            </div>
-                                          )}
-                                        </div>
-                                      </div>
-
-                                      <div className="space-y-1">
-                                        {contact.email && (
-                                          <div className="flex items-center gap-1 text-xs text-slate-600">
-                                            <HiEnvelope className="w-3 h-3 text-slate-400 flex-shrink-0" />
-                                            <span className="truncate font-medium" title={contact.email}>{contact.email}</span>
-                                          </div>
-                                        )}
-                                        {contact.phone && (
-                                          <div className="flex items-center gap-1 text-xs text-slate-600">
-                                            <HiPhone className="w-3 h-3 text-slate-400 flex-shrink-0" />
-                                            <span className="font-medium">{contact.phone}</span>
-                                          </div>
-                                        )}
-                                      </div>
-
-                                      <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
-                                        <span className="text-xs font-medium text-slate-600 bg-slate-50 px-1 py-0.5 rounded">
-                                          {contact.role}
-                                        </span>
-                                        <span
-                                          className={`inline-flex items-center px-1 py-0.5 rounded text-xs font-medium ${
-                                            contact.status
-                                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                              : 'bg-red-50 text-red-700 border border-red-200'
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-slate-900">{contact.phone || '-'}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
+                              {contact.role}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {contact.role?.toLowerCase() === 'customer' ? (
+                              <div className="relative stage-dropdown">
+                                <button
+                                  onClick={() => setStageDropdowns(prev => ({
+                                    ...prev,
+                                    [contact.id]: !prev[contact.id]
+                                  }))}
+                                  className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 transition-colors"
+                                >
+                                  {(() => {
+                                    const currentStage = stageOptions.find(s => s.value === (contact.stage || 'NEW'));
+                                    const IconComponent = currentStage?.icon || HiStar;
+                                    return (
+                                      <>
+                                        <IconComponent className={`w-4 h-4 ${currentStage?.color || 'text-blue-500'}`} />
+                                        <span>{currentStage?.label || 'New Leads'}</span>
+                                      </>
+                                    );
+                                  })()}
+                                  <HiChevronDown className={`w-4 h-4 transition-transform ${
+                                    stageDropdowns[contact.id] ? 'rotate-180' : ''
+                                  }`} />
+                                </button>
+                                
+                                {stageDropdowns[contact.id] && (
+                                  <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[160px]">
+                                    {stageOptions.map((stage) => {
+                                      const IconComponent = stage.icon;
+                                      return (
+                                        <button
+                                          key={stage.value}
+                                          onClick={() => handleStageChange(contact.id, stage.value)}
+                                          className={`flex items-center gap-2 w-full text-left px-3 py-2 text-sm hover:bg-slate-50 transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                                            (contact.stage || 'NEW') === stage.value
+                                              ? 'bg-slate-100 text-slate-900 font-medium'
+                                              : 'text-slate-700'
                                           }`}
                                         >
-                                          <span className={`w-1 h-1 rounded-full mr-1 ${
-                                            contact.status ? 'bg-emerald-500' : 'bg-red-500'
-                                          }`}></span>
-                                          {contact.status ? 'Active' : 'Inactive'}
-                                        </span>
-                                      </div>
-                                    </div>
-                                  )}
-                                </Draggable>
-                              ))}
-                              {provided.placeholder}
-                              
-                              {contactsByStage[stage.id]?.length === 0 && (
-                                <div className="text-center py-6 text-slate-400">
-                                  <div className="w-6 h-6 rounded-lg bg-slate-100 flex items-center justify-center mx-auto mb-2">
-                                    <stage.icon className="w-3 h-3 text-slate-400" />
+                                          <IconComponent className={`w-4 h-4 ${stage.color}`} />
+                                          <span>{stage.label}</span>
+                                        </button>
+                                      );
+                                    })}
                                   </div>
-                                  <p className="text-xs font-medium">No contacts</p>
-                                  <p className="text-xs text-slate-400 mt-0.5">Drag here</p>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="text-sm text-slate-500">-</div>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                contact.status
+                                  ? 'bg-emerald-100 text-emerald-800'
+                                  : 'bg-red-100 text-red-800'
+                              }`}
+                            >
+                              <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                                contact.status ? 'bg-emerald-500' : 'bg-red-500'
+                              }`}></span>
+                              {contact.status ? 'Active' : 'Inactive'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <div className="relative dropdown-container">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenDropdown(openDropdown === contact.id ? null : contact.id);
+                                }}
+                                className="text-slate-400 hover:text-slate-600 p-2 rounded-lg hover:bg-slate-100 transition-colors"
+                              >
+                                <HiEllipsisVertical className="w-5 h-5" />
+                              </button>
+                              
+                              {openDropdown === contact.id && (
+                                <div className="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 w-48">
+                                  <Link
+                                    to={`/view-party/${contact.id}`}
+                                    className="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                                    onClick={() => setOpenDropdown(null)}
+                                  >
+                                    <HiEye className="w-4 h-4 text-slate-500" />
+                                    <span>View Details</span>
+                                  </Link>
+                                  <Link
+                                    to={`/edit-contact/${contact.id}`}
+                                    className="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                                    onClick={() => setOpenDropdown(null)}
+                                  >
+                                    <HiPencil className="w-4 h-4 text-slate-500" />
+                                    <span>Edit Contact</span>
+                                  </Link>
+                                  <button
+                                    onClick={() => {
+                                      setOpenDropdown(null);
+                                      handleDeleteClick(contact.id);
+                                    }}
+                                    className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left transition-colors"
+                                  >
+                                    <HiTrash className="w-4 h-4" />
+                                    <span>Delete</span>
+                                  </button>
                                 </div>
                               )}
                             </div>
-                          )}
-                        </Droppable>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </DragDropContext>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Simple Pagination */}
+          {pagination?.total > 0 && (
+            <div className="flex justify-center mt-6">
+              <Pagination
+                current={currentPage}
+                total={pagination.total}
+                pageSize={pageSize}
+                onChange={(page) => {
+                  setCurrentPage(page);
+                  const params = {
+                    search: searchTerm,
+                    page: page,
+                    limit: pageSize,
+                  };
+                  dispatch(fetchParties(params));
+                }}
+              />
             </div>
           )}
         </div>
@@ -571,38 +470,7 @@ const Cprospect = () => {
           </div>
         )}
 
-        {/* Stage Change Confirmation Modal */}
-        {confirmStageChange && (
-          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-60 p-4">
-            <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-8 border border-gray-200">
-              <div className="text-center mb-6">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-slate-600 flex items-center justify-center shadow-lg">
-                  <HiUsers className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-slate-800 mb-2">
-                  Update Contact Stage
-                </h3>
-                <p className="text-slate-600">
-                  Are you sure you want to move <strong>"{confirmStageChange.contactName}"</strong> to <strong>{confirmStageChange.newStageName}</strong> stage?
-                </p>
-              </div>
-              <div className="flex items-center justify-center space-x-3">
-                <button
-                  onClick={() => setConfirmStageChange(null)}
-                  className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleConfirmStageChange}
-                  className="px-6 py-3 rounded-lg bg-slate-700 text-white hover:bg-slate-800 shadow-lg"
-                >
-                  Update Stage
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+
       </div>
     </>
   );
