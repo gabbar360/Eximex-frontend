@@ -83,6 +83,13 @@ import TaskManagement from './pages/task-management/TaskManagement';
 import AddEditTaskManagementForm from './pages/task-management/AddEditTaskManagementForm';
 import MyTasks from './pages/task-management/MyTasks';
 import Notifications from './pages/notifications/Notifications';
+import {
+  AccountingDashboard,
+  Ledger,
+  ProfitLoss,
+  BalanceSheet,
+} from './pages/accounting';
+import CombinedDashboard from './pages/CombinedDashboard';
 
 function AppContent() {
   const location = useLocation();
@@ -123,7 +130,7 @@ function AppContent() {
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
         <Route element={<AppLayout />}>
-          <Route path="/dashboard" element={<RoleBasedDashboard />} />
+          <Route path="/dashboard" element={<CombinedDashboard />} />
           {/* <Route path="/admin/dashboard" element={<Home />} /> */}
           <Route path="/profile" element={<UserProfiles />} />
           <Route path="/contacts" element={<Cprospect />} />
@@ -206,10 +213,22 @@ function AppContent() {
             element={<UserPermissionManagement />}
           />
           <Route path="/task-management" element={<TaskManagement />} />
-          <Route path="/task-management/add-task" element={<AddEditTaskManagementForm />} />
-          <Route path="/task-management/edit-task/:id" element={<AddEditTaskManagementForm />} />
+          <Route
+            path="/task-management/add-task"
+            element={<AddEditTaskManagementForm />}
+          />
+          <Route
+            path="/task-management/edit-task/:id"
+            element={<AddEditTaskManagementForm />}
+          />
           <Route path="/my-tasks" element={<MyTasks />} />
           <Route path="/notifications" element={<Notifications />} />
+
+          {/* Accounting Routes */}
+          <Route path="/accounting" element={<AccountingDashboard />} />
+          <Route path="/accounting/ledger" element={<Ledger />} />
+          <Route path="/accounting/profit-loss" element={<ProfitLoss />} />
+          <Route path="/accounting/balance-sheet" element={<BalanceSheet />} />
 
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/blank" element={<Blank />} />
@@ -296,27 +315,27 @@ export default function App() {
         <AuthProvider>
           <SocketProvider>
             <Router>
-            <SEOHead />
-            <ScrollToTop />
-            <ToastContainer
-              position="top-right"
-              autoClose={5000}
-              hideProgressBar={false}
-              newestOnTop={true}
-              closeOnClick
-              rtl={false}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-              theme="light"
-              style={{ zIndex: 9999 }}
-              toastStyle={{
-                fontSize: '14px',
-                borderRadius: '8px',
-              }}
-            />
-            <AppContent />
-          </Router>
+              <SEOHead />
+              <ScrollToTop />
+              <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={true}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+                style={{ zIndex: 9999 }}
+                toastStyle={{
+                  fontSize: '14px',
+                  borderRadius: '8px',
+                }}
+              />
+              <AppContent />
+            </Router>
           </SocketProvider>
         </AuthProvider>
       </AntdConfig>

@@ -21,6 +21,7 @@ import shipmentReducer from '../features/shipmentSlice';
 import menuReducer from '../features/menuSlice';
 import userPermissionReducer from '../features/userPermissionSlice';
 import taskManagementReducer from '../features/taskManagementSlice';
+import accountingReducer from '../features/accountingSlice';
 
 const store = configureStore({
   reducer: {
@@ -45,6 +46,7 @@ const store = configureStore({
     menu: menuReducer,
     userPermission: userPermissionReducer,
     taskManagement: taskManagementReducer,
+    accounting: accountingReducer,
   },
 });
 
