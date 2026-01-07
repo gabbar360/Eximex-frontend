@@ -173,7 +173,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
                       {formatCurrency(product.rate, currency)}
                     </td>
                     <td className="px-3 py-2 text-sm text-right font-semibold text-gray-900 dark:text-gray-100">
-                      {formatCurrency(product.total)}
+                      {formatCurrency(product.total, currency)}
                     </td>
                     <td className="px-3 py-2 text-center">
                       <div className="flex justify-center gap-2">
