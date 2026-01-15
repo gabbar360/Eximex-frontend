@@ -352,6 +352,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   const [advancePercentage, setAdvancePercentage] = useState<string>('');
   const [balancePaymentTerm, setBalancePaymentTerm] = useState<string>('');
   const [showToTheOrder, setShowToTheOrder] = useState<boolean>(false);
+  const [isSampleKit, setIsSampleKit] = useState<boolean>(false);
   const [deliveryTerm, setDeliveryTerm] = useState<string>('');
   const [charges, setCharges] = useState<Charges>({});
   const [otherCharges, setOtherCharges] = useState<any[]>([]);
@@ -739,6 +740,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
               setAdvancePercentage(pi.advancePercentage || '');
               setBalancePaymentTerm(pi.balancePaymentTerm || '');
               setShowToTheOrder(pi.showToTheOrder || false);
+              setIsSampleKit(pi.isSampleKit || false);
               setDeliveryTerm(pi.deliveryTerm || '');
 
               // Set charges
@@ -1686,6 +1688,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         advancePercentage: advancePercentage || '',
         balancePaymentTerm: balancePaymentTerm || '',
         showToTheOrder: showToTheOrder,
+        isSampleKit: isSampleKit,
         deliveryTerm: deliveryTerm || '',
         containerType: containerType || '',
         capacityBasis,
@@ -1766,6 +1769,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         advancePercentage,
         balancePaymentTerm,
         showToTheOrder,
+        isSampleKit,
         deliveryTerm,
         containerType,
         capacityBasis,
@@ -2188,8 +2192,8 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                   </div>
 
                   {/* Consignee Display Option */}
-                  <div className="mt-6">
-                    <label className="inline-flex items-center space-x-2 text-gray-700 dark:text-gray-300 font-medium">
+                  <div className="mt-6 space-y-4">
+                    <div className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 font-medium">
                       <input
                         type="checkbox"
                         checked={showToTheOrder}
@@ -2199,7 +2203,19 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                       <span>
                         Show "TO THE ORDER" in PDF instead of customer details
                       </span>
-                    </label>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 font-medium">
+                      <input
+                        type="checkbox"
+                        checked={isSampleKit}
+                        onChange={(e) => setIsSampleKit(e.target.checked)}
+                        className="rounded border-gray-300 text-brand-500 shadow-sm focus:ring-brand-500 dark:border-gray-700 dark:bg-gray-800"
+                      />
+                      <span>
+                        Sample Kit Invoice (Changes header to "SAMPLE KIT PROFORMA INVOICE")
+                      </span>
+                    </div>
                   </div>
                 </div>
               )}
