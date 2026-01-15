@@ -515,14 +515,14 @@ const AddEditProductForm = () => {
     return baseValues;
   }, [product, packagingHierarchy, trackVolume, isEdit]);
 
-  const handleSubmit = async (values, { setSubmitting }) => {
+  const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
     try {
-      setLoading(true);
       setSubmitting(true);
 
       // Validate required fields before submission
       if (!values.name || !values.categoryId) {
         toast.error('Please fill all required fields (Name and Category)');
+        setSubmitting(false);
         return;
       }
 
@@ -717,9 +717,19 @@ const AddEditProductForm = () => {
       }, 2000);
     } catch (error) {
       console.error('Product submission error:', error);
-      toast.error(error);
+      
+      // Check if it's a duplicate SKU error
+      const errorMessage = error?.response?.data?.message || error?.message || error;
+      if (typeof errorMessage === 'string' && errorMessage.toLowerCase().includes('sku')) {
+        // Set field-specific error for SKU
+        setFieldError('sku', errorMessage);
+        toast.error(errorMessage);
+      } else {
+        toast.error(errorMessage);
+      }
+      
+      // Don't reset form data on error
     } finally {
-      setLoading(false);
       setSubmitting(false);
     }
   };

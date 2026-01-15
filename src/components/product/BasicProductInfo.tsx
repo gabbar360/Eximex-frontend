@@ -317,6 +317,9 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
             placeholder="Enter SKU"
             className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
           />
+          {touched.sku && errors.sku && (
+            <div className="text-sm text-red-500 mt-1">{errors.sku}</div>
+          )}
         </div>
       </div>
 
