@@ -717,17 +717,21 @@ const AddEditProductForm = () => {
       }, 2000);
     } catch (error) {
       console.error('Product submission error:', error);
-      
+
       // Check if it's a duplicate SKU error
-      const errorMessage = error?.response?.data?.message || error?.message || error;
-      if (typeof errorMessage === 'string' && errorMessage.toLowerCase().includes('sku')) {
+      const errorMessage =
+        error?.response?.data?.message || error?.message || error;
+      if (
+        typeof errorMessage === 'string' &&
+        errorMessage.toLowerCase().includes('sku')
+      ) {
         // Set field-specific error for SKU
         setFieldError('sku', errorMessage);
         toast.error(errorMessage);
       } else {
         toast.error(errorMessage);
       }
-      
+
       // Don't reset form data on error
     } finally {
       setSubmitting(false);
@@ -851,14 +855,22 @@ const AddEditProductForm = () => {
                     {loading || isSubmitting ? (
                       <div className="flex items-center justify-center gap-2">
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        <span className="hidden sm:inline">{isEdit ? 'Updating...' : 'Creating...'}</span>
-                        <span className="sm:hidden">{isEdit ? 'Update' : 'Create'}</span>
+                        <span className="hidden sm:inline">
+                          {isEdit ? 'Updating...' : 'Creating...'}
+                        </span>
+                        <span className="sm:hidden">
+                          {isEdit ? 'Update' : 'Create'}
+                        </span>
                       </div>
                     ) : (
                       <>
                         <HiCheckCircle className="w-5 h-5 mr-2 inline" />
-                        <span className="hidden sm:inline">{isEdit ? 'Update Product' : 'Create Product'}</span>
-                        <span className="sm:hidden">{isEdit ? 'Update' : 'Create'}</span>
+                        <span className="hidden sm:inline">
+                          {isEdit ? 'Update Product' : 'Create Product'}
+                        </span>
+                        <span className="sm:hidden">
+                          {isEdit ? 'Update' : 'Create'}
+                        </span>
                       </>
                     )}
                   </button>

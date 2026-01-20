@@ -823,14 +823,22 @@ const AddEditCategoryForm: React.FC = () => {
                     {submitting ? (
                       <div className="flex items-center gap-2 justify-center">
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        <span className="hidden sm:inline">{isEditMode ? 'Updating...' : 'Creating...'}</span>
-                        <span className="sm:hidden">{isEditMode ? 'Updating' : 'Creating'}</span>
+                        <span className="hidden sm:inline">
+                          {isEditMode ? 'Updating...' : 'Creating...'}
+                        </span>
+                        <span className="sm:hidden">
+                          {isEditMode ? 'Updating' : 'Creating'}
+                        </span>
                       </div>
                     ) : (
                       <>
                         <HiCheckCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 inline" />
-                        <span className="hidden sm:inline">{isEditMode ? 'Update Category' : 'Create Category'}</span>
-                        <span className="sm:hidden">{isEditMode ? 'Update' : 'Create'}</span>
+                        <span className="hidden sm:inline">
+                          {isEditMode ? 'Update Category' : 'Create Category'}
+                        </span>
+                        <span className="sm:hidden">
+                          {isEditMode ? 'Update' : 'Create'}
+                        </span>
                       </>
                     )}
                   </button>

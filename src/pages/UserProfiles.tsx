@@ -143,8 +143,12 @@ export default function UserProfiles() {
                     className="inline-flex items-center justify-center px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg text-sm sm:text-base"
                   >
                     <HiPencil className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
-                    <span className="hidden sm:inline">{editingProfile ? 'Cancel Edit' : 'Edit Profile'}</span>
-                    <span className="sm:hidden">{editingProfile ? 'Cancel' : 'Edit'}</span>
+                    <span className="hidden sm:inline">
+                      {editingProfile ? 'Cancel Edit' : 'Edit Profile'}
+                    </span>
+                    <span className="sm:hidden">
+                      {editingProfile ? 'Cancel' : 'Edit'}
+                    </span>
                   </button>
                 </div>
               </div>

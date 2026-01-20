@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { fetchParties, deleteParty, updatePartyStage } from '../../features/partySlice';
+import {
+  fetchParties,
+  deleteParty,
+  updatePartyStage,
+} from '../../features/partySlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import PageMeta from '../../components/common/PageMeta';
@@ -48,16 +52,29 @@ const Cprospect = () => {
   // Stage options with icons
   const stageOptions = [
     { value: 'NEW', label: 'New Leads', icon: HiStar, color: 'text-blue-500' },
-    { value: 'QUALIFIED', label: 'Qualified', icon: HiCheckCircle, color: 'text-green-500' },
-    { value: 'NEGOTIATION', label: 'Negotiation', icon: HiChatBubbleLeftRight, color: 'text-orange-500' },
-    { value: 'QUOTATION_SENT', label: 'Quotation Sent', icon: HiDocumentText, color: 'text-purple-500' },
+    {
+      value: 'QUALIFIED',
+      label: 'Qualified',
+      icon: HiCheckCircle,
+      color: 'text-green-500',
+    },
+    {
+      value: 'NEGOTIATION',
+      label: 'Negotiation',
+      icon: HiChatBubbleLeftRight,
+      color: 'text-orange-500',
+    },
+    {
+      value: 'QUOTATION_SENT',
+      label: 'Quotation Sent',
+      icon: HiDocumentText,
+      color: 'text-purple-500',
+    },
     { value: 'WON', label: 'Won', icon: HiTrophy, color: 'text-emerald-500' },
     { value: 'LOST', label: 'Lost', icon: HiXCircle, color: 'text-red-500' },
   ];
-  
-  console.log('Stage options:', stageOptions);
-  
 
+  console.log('Stage options:', stageOptions);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -73,8 +90,6 @@ const Cprospect = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [openDropdown]);
-
-
 
   // Load data
   useEffect(() => {
@@ -142,14 +157,15 @@ const Cprospect = () => {
 
   const handleStageChange = async (contactId, newStage) => {
     try {
-      const response = await dispatch(updatePartyStage({ id: contactId, stage: newStage })).unwrap();
+      const response = await dispatch(
+        updatePartyStage({ id: contactId, stage: newStage })
+      ).unwrap();
       toast.success(response?.message || 'Stage updated successfully');
       setStageDropdowns({});
     } catch (error) {
       toast.error(error || 'Failed to update stage');
     }
   };
-
 
   return (
     <>
@@ -204,9 +220,7 @@ const Cprospect = () => {
           {loading ? (
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-12 text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-slate-600 mx-auto mb-4"></div>
-              <p className="text-slate-600 font-medium">
-                Loading contacts...
-              </p>
+              <p className="text-slate-600 font-medium">Loading contacts...</p>
             </div>
           ) : parties.length === 0 ? (
             <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-12 text-center">
@@ -270,7 +284,11 @@ const Cprospect = () => {
                   <tbody className="divide-y divide-gray-200">
                     {parties.map((contact) => {
                       return (
-                        <tr key={contact.id} className="hover:bg-gray-50 transition-colors" data-contact-id={contact.id}>
+                        <tr
+                          key={contact.id}
+                          className="hover:bg-gray-50 transition-colors"
+                          data-contact-id={contact.id}
+                        >
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <div className="flex-shrink-0 w-10 h-10">
@@ -280,17 +298,18 @@ const Cprospect = () => {
                               </div>
                               <div className="ml-4">
                                 <div className="text-sm font-semibold text-slate-900">
-                                  {contact.companyName?.length > 12 
-                                    ? `${contact.companyName.substring(0, 12)}...` 
-                                    : contact.companyName
-                                  }
+                                  {contact.companyName?.length > 12
+                                    ? `${contact.companyName.substring(0, 12)}...`
+                                    : contact.companyName}
                                 </div>
                               </div>
                             </div>
                           </td>
 
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-slate-900">{contact.phone || '-'}</div>
+                            <div className="text-sm text-slate-900">
+                              {contact.phone || '-'}
+                            </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
@@ -301,27 +320,41 @@ const Cprospect = () => {
                             {contact.role?.toLowerCase() === 'customer' ? (
                               <div className="relative stage-dropdown">
                                 <button
-                                  onClick={() => setStageDropdowns(prev => ({
-                                    ...prev,
-                                    [contact.id]: !prev[contact.id]
-                                  }))}
+                                  onClick={() =>
+                                    setStageDropdowns((prev) => ({
+                                      ...prev,
+                                      [contact.id]: !prev[contact.id],
+                                    }))
+                                  }
                                   className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 transition-colors"
                                 >
                                   {(() => {
-                                    const currentStage = stageOptions.find(s => s.value === (contact.stage || 'NEW'));
-                                    const IconComponent = currentStage?.icon || HiStar;
+                                    const currentStage = stageOptions.find(
+                                      (s) =>
+                                        s.value === (contact.stage || 'NEW')
+                                    );
+                                    const IconComponent =
+                                      currentStage?.icon || HiStar;
                                     return (
                                       <>
-                                        <IconComponent className={`w-4 h-4 ${currentStage?.color || 'text-blue-500'}`} />
-                                        <span>{currentStage?.label || 'New Leads'}</span>
+                                        <IconComponent
+                                          className={`w-4 h-4 ${currentStage?.color || 'text-blue-500'}`}
+                                        />
+                                        <span>
+                                          {currentStage?.label || 'New Leads'}
+                                        </span>
                                       </>
                                     );
                                   })()}
-                                  <HiChevronDown className={`w-4 h-4 transition-transform ${
-                                    stageDropdowns[contact.id] ? 'rotate-180' : ''
-                                  }`} />
+                                  <HiChevronDown
+                                    className={`w-4 h-4 transition-transform ${
+                                      stageDropdowns[contact.id]
+                                        ? 'rotate-180'
+                                        : ''
+                                    }`}
+                                  />
                                 </button>
-                                
+
                                 {stageDropdowns[contact.id] && (
                                   <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[160px]">
                                     {stageOptions.map((stage) => {
@@ -329,14 +362,22 @@ const Cprospect = () => {
                                       return (
                                         <button
                                           key={stage.value}
-                                          onClick={() => handleStageChange(contact.id, stage.value)}
+                                          onClick={() =>
+                                            handleStageChange(
+                                              contact.id,
+                                              stage.value
+                                            )
+                                          }
                                           className={`flex items-center gap-2 w-full text-left px-3 py-2 text-sm hover:bg-slate-50 transition-colors first:rounded-t-lg last:rounded-b-lg ${
-                                            (contact.stage || 'NEW') === stage.value
+                                            (contact.stage || 'NEW') ===
+                                            stage.value
                                               ? 'bg-slate-100 text-slate-900 font-medium'
                                               : 'text-slate-700'
                                           }`}
                                         >
-                                          <IconComponent className={`w-4 h-4 ${stage.color}`} />
+                                          <IconComponent
+                                            className={`w-4 h-4 ${stage.color}`}
+                                          />
                                           <span>{stage.label}</span>
                                         </button>
                                       );
@@ -356,9 +397,13 @@ const Cprospect = () => {
                                   : 'bg-red-100 text-red-800'
                               }`}
                             >
-                              <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-                                contact.status ? 'bg-emerald-500' : 'bg-red-500'
-                              }`}></span>
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                                  contact.status
+                                    ? 'bg-emerald-500'
+                                    : 'bg-red-500'
+                                }`}
+                              ></span>
                               {contact.status ? 'Active' : 'Inactive'}
                             </span>
                           </td>
@@ -367,13 +412,17 @@ const Cprospect = () => {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setOpenDropdown(openDropdown === contact.id ? null : contact.id);
+                                  setOpenDropdown(
+                                    openDropdown === contact.id
+                                      ? null
+                                      : contact.id
+                                  );
                                 }}
                                 className="text-slate-400 hover:text-slate-600 p-2 rounded-lg hover:bg-slate-100 transition-colors"
                               >
                                 <HiEllipsisVertical className="w-5 h-5" />
                               </button>
-                              
+
                               {openDropdown === contact.id && (
                                 <div className="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 w-48">
                                   <Link
@@ -469,8 +518,6 @@ const Cprospect = () => {
             </div>
           </div>
         )}
-
-
       </div>
     </>
   );

@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ComponentCard from '../../components/common/ComponentCard';
-import { fetchLedger, clearAccountingError } from '../../features/accountingSlice';
+import {
+  fetchLedger,
+  clearAccountingError,
+} from '../../features/accountingSlice';
 import { toast } from 'react-toastify';
 import { useTheme } from '../../context/ThemeContext';
 
 const Ledger = () => {
   const { theme } = useTheme();
   const dispatch = useDispatch();
-  const { ledger, loading, error } = useSelector(state => state.accounting);
+  const { ledger, loading, error } = useSelector((state) => state.accounting);
   const [filters, setFilters] = useState({
     entryType: '',
     partyName: '',
@@ -82,7 +85,10 @@ const Ledger = () => {
     }
   };
 
-  const totalAmount = (ledger || []).reduce((sum, entry) => sum + entry.amount, 0);
+  const totalAmount = (ledger || []).reduce(
+    (sum, entry) => sum + entry.amount,
+    0
+  );
 
   return (
     <div

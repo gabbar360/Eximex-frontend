@@ -5,7 +5,7 @@ export const calculateTotalWeight = (
   products: any[]
 ) => {
   if (!products || !Array.isArray(products)) return 0;
-  
+
   const product = products.find(
     (p) => p.id.toString() === productId.toString()
   );
@@ -208,7 +208,7 @@ export const calculateQuantityFromWeight = (
   products: any[]
 ) => {
   if (!products || !Array.isArray(products)) return '';
-  
+
   const product = products.find(
     (p) => p.id.toString() === productId.toString()
   );
@@ -221,8 +221,14 @@ export const calculateQuantityFromWeight = (
 };
 
 export const calculateGrossWeight = (productList: any[], products: any[]) => {
-  if (!products || !Array.isArray(products) || !productList || !Array.isArray(productList)) return 0;
-  
+  if (
+    !products ||
+    !Array.isArray(products) ||
+    !productList ||
+    !Array.isArray(productList)
+  )
+    return 0;
+
   return productList.reduce((sum, product) => {
     if (!product.productId) return sum;
 

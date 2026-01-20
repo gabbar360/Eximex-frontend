@@ -16,7 +16,10 @@ const ResetPassword: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [isValidToken, setIsValidToken] = useState<boolean | null>(null);
-  const [errors, setErrors] = useState({ newPassword: '', confirmPassword: '' });
+  const [errors, setErrors] = useState({
+    newPassword: '',
+    confirmPassword: '',
+  });
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -50,7 +53,7 @@ const ResetPassword: React.FC = () => {
 
   const validateForm = () => {
     const newErrors = { newPassword: '', confirmPassword: '' };
-    
+
     if (!formData.newPassword.trim()) {
       newErrors.newPassword = 'New password is required';
     } else if (formData.newPassword.length < 8) {
@@ -60,15 +63,16 @@ const ResetPassword: React.FC = () => {
         formData.newPassword
       )
     ) {
-      newErrors.newPassword = 'Must include uppercase, lowercase, number, and special character';
+      newErrors.newPassword =
+        'Must include uppercase, lowercase, number, and special character';
     }
-    
+
     if (!formData.confirmPassword.trim()) {
       newErrors.confirmPassword = 'Please confirm your password';
     } else if (formData.newPassword !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
-    
+
     setErrors(newErrors);
     return !newErrors.newPassword && !newErrors.confirmPassword;
   };
@@ -108,9 +112,12 @@ const ResetPassword: React.FC = () => {
       // Handle backend error response
       const errorMessage = error.message || error || 'Failed to reset password';
       toast.error(errorMessage);
-      
+
       // Check if token is invalid/expired based on backend response
-      if (errorMessage.includes('Invalid or expired') || errorMessage.includes('expired reset token')) {
+      if (
+        errorMessage.includes('Invalid or expired') ||
+        errorMessage.includes('expired reset token')
+      ) {
         setIsValidToken(false);
       }
     } finally {
@@ -199,7 +206,8 @@ const ResetPassword: React.FC = () => {
                       value={formData.newPassword}
                       onChange={(e) => {
                         handleInputChange(e);
-                        if (errors.newPassword) setErrors(prev => ({ ...prev, newPassword: '' }));
+                        if (errors.newPassword)
+                          setErrors((prev) => ({ ...prev, newPassword: '' }));
                       }}
                       onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
                       placeholder="Enter new password"
@@ -219,10 +227,13 @@ const ResetPassword: React.FC = () => {
                     </button>
                   </div>
                   {errors.newPassword && (
-                    <p className="text-red-500 text-xs mt-1">{errors.newPassword}</p>
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.newPassword}
+                    </p>
                   )}
                   <p className="text-black text-xs mt-1">
-                    Must include uppercase, lowercase, number, and special character
+                    Must include uppercase, lowercase, number, and special
+                    character
                   </p>
                 </div>
 
@@ -237,7 +248,11 @@ const ResetPassword: React.FC = () => {
                       value={formData.confirmPassword}
                       onChange={(e) => {
                         handleInputChange(e);
-                        if (errors.confirmPassword) setErrors(prev => ({ ...prev, confirmPassword: '' }));
+                        if (errors.confirmPassword)
+                          setErrors((prev) => ({
+                            ...prev,
+                            confirmPassword: '',
+                          }));
                       }}
                       onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
                       placeholder="Confirm new password"
@@ -246,7 +261,9 @@ const ResetPassword: React.FC = () => {
                     />
                     <button
                       type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                       className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-black hover:text-gray-700 transition-colors z-10 p-1"
                     >
                       {showConfirmPassword ? (
@@ -257,7 +274,9 @@ const ResetPassword: React.FC = () => {
                     </button>
                   </div>
                   {errors.confirmPassword && (
-                    <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.confirmPassword}
+                    </p>
                   )}
                 </div>
               </div>

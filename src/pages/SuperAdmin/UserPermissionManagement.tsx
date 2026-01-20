@@ -168,13 +168,14 @@ const UserPermissionManagement = () => {
 
       setPermissions(userPerms);
       setInitialPermissions(userPerms);
-      
+
       // Check if all permissions are selected
-      const allSelected = Object.values(userPerms).every(perm => 
-        perm.canView && perm.canCreate && perm.canUpdate && perm.canDelete
+      const allSelected = Object.values(userPerms).every(
+        (perm) =>
+          perm.canView && perm.canCreate && perm.canUpdate && perm.canDelete
       );
       setSelectAll(allSelected);
-      
+
       console.log('Final mapped permissions:', userPerms);
     } catch (error) {
       toast.error(error?.message || 'Failed to fetch user permissions');
@@ -199,7 +200,7 @@ const UserPermissionManagement = () => {
 
   const handleSelectAll = (checked) => {
     setSelectAll(checked);
-    
+
     // Update local state only
     const updatedPermissions = {};
     Object.keys(permissions).forEach((key) => {
@@ -210,16 +211,17 @@ const UserPermissionManagement = () => {
         canDelete: checked,
       };
     });
-    
+
     setPermissions(updatedPermissions);
   };
 
   const checkIfAllSelected = () => {
     const allPermissions = Object.values(permissions);
     if (allPermissions.length === 0) return false;
-    
-    return allPermissions.every(perm => 
-      perm.canView && perm.canCreate && perm.canUpdate && perm.canDelete
+
+    return allPermissions.every(
+      (perm) =>
+        perm.canView && perm.canCreate && perm.canUpdate && perm.canDelete
     );
   };
 
@@ -322,10 +324,15 @@ const UserPermissionManagement = () => {
             type="checkbox"
             id={`${key}_view`}
             checked={Boolean(itemPermissions.canView)}
-            onChange={(e) => handlePermissionChange(key, 'canView', e.target.checked)}
+            onChange={(e) =>
+              handlePermissionChange(key, 'canView', e.target.checked)
+            }
             className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
           />
-          <label htmlFor={`${key}_view`} className="text-sm font-medium text-slate-700 cursor-pointer">
+          <label
+            htmlFor={`${key}_view`}
+            className="text-sm font-medium text-slate-700 cursor-pointer"
+          >
             View
           </label>
         </div>
@@ -334,10 +341,15 @@ const UserPermissionManagement = () => {
             type="checkbox"
             id={`${key}_create`}
             checked={Boolean(itemPermissions.canCreate)}
-            onChange={(e) => handlePermissionChange(key, 'canCreate', e.target.checked)}
+            onChange={(e) =>
+              handlePermissionChange(key, 'canCreate', e.target.checked)
+            }
             className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2 cursor-pointer"
           />
-          <label htmlFor={`${key}_create`} className="text-sm font-medium text-slate-700 cursor-pointer">
+          <label
+            htmlFor={`${key}_create`}
+            className="text-sm font-medium text-slate-700 cursor-pointer"
+          >
             Create
           </label>
         </div>
@@ -346,10 +358,15 @@ const UserPermissionManagement = () => {
             type="checkbox"
             id={`${key}_update`}
             checked={Boolean(itemPermissions.canUpdate)}
-            onChange={(e) => handlePermissionChange(key, 'canUpdate', e.target.checked)}
+            onChange={(e) =>
+              handlePermissionChange(key, 'canUpdate', e.target.checked)
+            }
             className="w-4 h-4 text-yellow-600 bg-gray-100 border-gray-300 rounded focus:ring-yellow-500 focus:ring-2 cursor-pointer"
           />
-          <label htmlFor={`${key}_update`} className="text-sm font-medium text-slate-700 cursor-pointer">
+          <label
+            htmlFor={`${key}_update`}
+            className="text-sm font-medium text-slate-700 cursor-pointer"
+          >
             Update
           </label>
         </div>
@@ -358,10 +375,15 @@ const UserPermissionManagement = () => {
             type="checkbox"
             id={`${key}_delete`}
             checked={Boolean(itemPermissions.canDelete)}
-            onChange={(e) => handlePermissionChange(key, 'canDelete', e.target.checked)}
+            onChange={(e) =>
+              handlePermissionChange(key, 'canDelete', e.target.checked)
+            }
             className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 focus:ring-2 cursor-pointer"
           />
-          <label htmlFor={`${key}_delete`} className="text-sm font-medium text-slate-700 cursor-pointer">
+          <label
+            htmlFor={`${key}_delete`}
+            className="text-sm font-medium text-slate-700 cursor-pointer"
+          >
             Delete
           </label>
         </div>
@@ -425,8 +447,12 @@ const UserPermissionManagement = () => {
                   onChange={(e) => handleSelectAll(e.target.checked)}
                   className="w-5 h-5 text-slate-600 bg-gray-100 border-gray-300 rounded focus:ring-slate-500 focus:ring-2 cursor-pointer accent-slate-600"
                 />
-                <label htmlFor="selectAll" className="text-sm font-medium text-slate-700 cursor-pointer">
-                  Select All Permissions (Grant all permissions to all menus and submenus)
+                <label
+                  htmlFor="selectAll"
+                  className="text-sm font-medium text-slate-700 cursor-pointer"
+                >
+                  Select All Permissions (Grant all permissions to all menus and
+                  submenus)
                 </label>
               </div>
             </div>
@@ -479,47 +505,148 @@ const UserPermissionManagement = () => {
                         </td>
                         {(() => {
                           const key = `menu_${menu.id}`;
-                          const itemPermissions = permissions[key] || { canView: false, canCreate: false, canUpdate: false, canDelete: false };
+                          const itemPermissions = permissions[key] || {
+                            canView: false,
+                            canCreate: false,
+                            canUpdate: false,
+                            canDelete: false,
+                          };
                           return (
                             <>
                               <td className="px-3 py-3 text-center">
-                                <input type="checkbox" checked={Boolean(itemPermissions.canView)} onChange={(e) => handlePermissionChange(key, 'canView', e.target.checked)} className="w-4 h-4 cursor-pointer accent-slate-600" />
+                                <input
+                                  type="checkbox"
+                                  checked={Boolean(itemPermissions.canView)}
+                                  onChange={(e) =>
+                                    handlePermissionChange(
+                                      key,
+                                      'canView',
+                                      e.target.checked
+                                    )
+                                  }
+                                  className="w-4 h-4 cursor-pointer accent-slate-600"
+                                />
                               </td>
                               <td className="px-3 py-3 text-center">
-                                <input type="checkbox" checked={Boolean(itemPermissions.canCreate)} onChange={(e) => handlePermissionChange(key, 'canCreate', e.target.checked)} className="w-4 h-4 cursor-pointer accent-slate-600" />
+                                <input
+                                  type="checkbox"
+                                  checked={Boolean(itemPermissions.canCreate)}
+                                  onChange={(e) =>
+                                    handlePermissionChange(
+                                      key,
+                                      'canCreate',
+                                      e.target.checked
+                                    )
+                                  }
+                                  className="w-4 h-4 cursor-pointer accent-slate-600"
+                                />
                               </td>
                               <td className="px-3 py-3 text-center">
-                                <input type="checkbox" checked={Boolean(itemPermissions.canUpdate)} onChange={(e) => handlePermissionChange(key, 'canUpdate', e.target.checked)} className="w-4 h-4 cursor-pointer accent-slate-600" />
+                                <input
+                                  type="checkbox"
+                                  checked={Boolean(itemPermissions.canUpdate)}
+                                  onChange={(e) =>
+                                    handlePermissionChange(
+                                      key,
+                                      'canUpdate',
+                                      e.target.checked
+                                    )
+                                  }
+                                  className="w-4 h-4 cursor-pointer accent-slate-600"
+                                />
                               </td>
                               <td className="px-3 py-3 text-center">
-                                <input type="checkbox" checked={Boolean(itemPermissions.canDelete)} onChange={(e) => handlePermissionChange(key, 'canDelete', e.target.checked)} className="w-4 h-4 cursor-pointer accent-slate-600" />
+                                <input
+                                  type="checkbox"
+                                  checked={Boolean(itemPermissions.canDelete)}
+                                  onChange={(e) =>
+                                    handlePermissionChange(
+                                      key,
+                                      'canDelete',
+                                      e.target.checked
+                                    )
+                                  }
+                                  className="w-4 h-4 cursor-pointer accent-slate-600"
+                                />
                               </td>
                             </>
                           );
                         })()}
                       </tr>
                       {menu.submenus?.map((submenu) => (
-                        <tr key={submenu.id} className="hover:bg-gray-50 transition-colors">
+                        <tr
+                          key={submenu.id}
+                          className="hover:bg-gray-50 transition-colors"
+                        >
                           <td className="px-4 py-2 pl-8 text-slate-600">
                             <span className="text-gray-400 mr-2">↳</span>
                             {submenu.name}
                           </td>
                           {(() => {
                             const key = `submenu_${submenu.id}`;
-                            const itemPermissions = permissions[key] || { canView: false, canCreate: false, canUpdate: false, canDelete: false };
+                            const itemPermissions = permissions[key] || {
+                              canView: false,
+                              canCreate: false,
+                              canUpdate: false,
+                              canDelete: false,
+                            };
                             return (
                               <>
                                 <td className="px-3 py-2 text-center">
-                                  <input type="checkbox" checked={Boolean(itemPermissions.canView)} onChange={(e) => handlePermissionChange(key, 'canView', e.target.checked)} className="w-4 h-4 cursor-pointer accent-slate-600" />
+                                  <input
+                                    type="checkbox"
+                                    checked={Boolean(itemPermissions.canView)}
+                                    onChange={(e) =>
+                                      handlePermissionChange(
+                                        key,
+                                        'canView',
+                                        e.target.checked
+                                      )
+                                    }
+                                    className="w-4 h-4 cursor-pointer accent-slate-600"
+                                  />
                                 </td>
                                 <td className="px-3 py-2 text-center">
-                                  <input type="checkbox" checked={Boolean(itemPermissions.canCreate)} onChange={(e) => handlePermissionChange(key, 'canCreate', e.target.checked)} className="w-4 h-4 cursor-pointer accent-slate-600" />
+                                  <input
+                                    type="checkbox"
+                                    checked={Boolean(itemPermissions.canCreate)}
+                                    onChange={(e) =>
+                                      handlePermissionChange(
+                                        key,
+                                        'canCreate',
+                                        e.target.checked
+                                      )
+                                    }
+                                    className="w-4 h-4 cursor-pointer accent-slate-600"
+                                  />
                                 </td>
                                 <td className="px-3 py-2 text-center">
-                                  <input type="checkbox" checked={Boolean(itemPermissions.canUpdate)} onChange={(e) => handlePermissionChange(key, 'canUpdate', e.target.checked)} className="w-4 h-4 cursor-pointer accent-slate-600" />
+                                  <input
+                                    type="checkbox"
+                                    checked={Boolean(itemPermissions.canUpdate)}
+                                    onChange={(e) =>
+                                      handlePermissionChange(
+                                        key,
+                                        'canUpdate',
+                                        e.target.checked
+                                      )
+                                    }
+                                    className="w-4 h-4 cursor-pointer accent-slate-600"
+                                  />
                                 </td>
                                 <td className="px-3 py-2 text-center">
-                                  <input type="checkbox" checked={Boolean(itemPermissions.canDelete)} onChange={(e) => handlePermissionChange(key, 'canDelete', e.target.checked)} className="w-4 h-4 cursor-pointer accent-slate-600" />
+                                  <input
+                                    type="checkbox"
+                                    checked={Boolean(itemPermissions.canDelete)}
+                                    onChange={(e) =>
+                                      handlePermissionChange(
+                                        key,
+                                        'canDelete',
+                                        e.target.checked
+                                      )
+                                    }
+                                    className="w-4 h-4 cursor-pointer accent-slate-600"
+                                  />
                                 </td>
                               </>
                             );
@@ -692,36 +819,36 @@ const UserPermissionManagement = () => {
         {/* Users Table */}
         <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
-          {loading ? (
-            <div className="p-12 text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-slate-600 mx-auto mb-4"></div>
-              <p className="text-slate-600 dark:text-gray-400 font-medium">
-                Loading users...
-              </p>
-            </div>
-          ) : allUsersPermissions.length === 0 ? (
-            <div className="p-12 text-center">
-              <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-r from-slate-600 to-slate-700 flex items-center justify-center shadow-lg">
-                <HiUserGroup className="w-8 h-8 text-white" />
+            {loading ? (
+              <div className="p-12 text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-slate-600 mx-auto mb-4"></div>
+                <p className="text-slate-600 dark:text-gray-400 font-medium">
+                  Loading users...
+                </p>
               </div>
-              <h3 className="text-xl font-semibold text-slate-800 dark:text-white mb-2">
-                No users found
-              </h3>
-              <p className="text-slate-600 dark:text-gray-400">
-                No users available for permission management
-              </p>
-            </div>
-          ) : (
-            <Table
-              columns={columns}
-              dataSource={allUsersPermissions}
-              loading={loading}
-              rowKey="id"
-              pagination={false}
-              scroll={{ x: 800 }}
-              className="permission-management-table"
-            />
-          )}
+            ) : allUsersPermissions.length === 0 ? (
+              <div className="p-12 text-center">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-r from-slate-600 to-slate-700 flex items-center justify-center shadow-lg">
+                  <HiUserGroup className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-slate-800 dark:text-white mb-2">
+                  No users found
+                </h3>
+                <p className="text-slate-600 dark:text-gray-400">
+                  No users available for permission management
+                </p>
+              </div>
+            ) : (
+              <Table
+                columns={columns}
+                dataSource={allUsersPermissions}
+                loading={loading}
+                rowKey="id"
+                pagination={false}
+                scroll={{ x: 800 }}
+                className="permission-management-table"
+              />
+            )}
           </div>
         </div>
 

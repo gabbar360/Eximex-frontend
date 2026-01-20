@@ -3,7 +3,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { fetchVgmById, createVgm, updateVgm } from '../../features/vgmSlice';
-import { HiArrowLeft, HiCheckCircle, HiChevronDown, HiMagnifyingGlass } from 'react-icons/hi2';
+import {
+  HiArrowLeft,
+  HiCheckCircle,
+  HiChevronDown,
+  HiMagnifyingGlass,
+} from 'react-icons/hi2';
 
 import DatePicker from '../../components/form/DatePicker';
 import OrderSelector from '../../components/order/OrderSelector';
@@ -58,8 +63,9 @@ const AddEditVgm: React.FC = () => {
   const [methodSearch, setMethodSearch] = useState('');
   const [containerTypeSearch, setContainerTypeSearch] = useState('');
   const [showMethodDropdown, setShowMethodDropdown] = useState(false);
-  const [showContainerTypeDropdown, setShowContainerTypeDropdown] = useState(false);
-  
+  const [showContainerTypeDropdown, setShowContainerTypeDropdown] =
+    useState(false);
+
   const methodRef = useRef(null);
   const containerTypeRef = useRef(null);
 
@@ -80,7 +86,9 @@ const AddEditVgm: React.FC = () => {
     valueKey = 'id',
     className = '',
   }) => {
-    const selectedOption = options.find((opt) => opt[valueKey]?.toString() === value?.toString());
+    const selectedOption = options.find(
+      (opt) => opt[valueKey]?.toString() === value?.toString()
+    );
 
     return (
       <div className="relative" ref={dropdownRef}>
@@ -157,7 +165,10 @@ const AddEditVgm: React.FC = () => {
       if (methodRef.current && !methodRef.current.contains(event.target)) {
         setShowMethodDropdown(false);
       }
-      if (containerTypeRef.current && !containerTypeRef.current.contains(event.target)) {
+      if (
+        containerTypeRef.current &&
+        !containerTypeRef.current.contains(event.target)
+      ) {
         setShowContainerTypeDropdown(false);
       }
     };
@@ -413,14 +424,19 @@ const AddEditVgm: React.FC = () => {
                   label="Weighing Method"
                   value={formData.method}
                   options={[
-                    { id: 'METHOD_1', name: 'Method 1 - Weigh packed container' },
-                    { id: 'METHOD_2', name: 'Method 2 - Weigh contents + tare weight' },
-                  ]
-                    .filter((method) =>
-                      method.name
-                        .toLowerCase()
-                        .includes(methodSearch.toLowerCase())
-                    )}
+                    {
+                      id: 'METHOD_1',
+                      name: 'Method 1 - Weigh packed container',
+                    },
+                    {
+                      id: 'METHOD_2',
+                      name: 'Method 2 - Weigh contents + tare weight',
+                    },
+                  ].filter((method) =>
+                    method.name
+                      .toLowerCase()
+                      .includes(methodSearch.toLowerCase())
+                  )}
                   onSelect={(method) => {
                     handleInputChange('method', method);
                     setMethodSearch('');
@@ -564,12 +580,11 @@ const AddEditVgm: React.FC = () => {
                     { id: 'REEFER', name: 'Reefer' },
                     { id: 'HAZARDOUS', name: 'Hazardous' },
                     { id: 'OTHER', name: 'Other' },
-                  ]
-                    .filter((type) =>
-                      type.name
-                        .toLowerCase()
-                        .includes(containerTypeSearch.toLowerCase())
-                    )}
+                  ].filter((type) =>
+                    type.name
+                      .toLowerCase()
+                      .includes(containerTypeSearch.toLowerCase())
+                  )}
                   onSelect={(type) => {
                     handleInputChange('containerType', type);
                     setContainerTypeSearch('');
@@ -577,7 +592,9 @@ const AddEditVgm: React.FC = () => {
                   searchValue={containerTypeSearch}
                   onSearchChange={setContainerTypeSearch}
                   isOpen={showContainerTypeDropdown}
-                  onToggle={() => setShowContainerTypeDropdown(!showContainerTypeDropdown)}
+                  onToggle={() =>
+                    setShowContainerTypeDropdown(!showContainerTypeDropdown)
+                  }
                   placeholder="Select Container Type"
                   dropdownRef={containerTypeRef}
                 />
@@ -645,14 +662,22 @@ const AddEditVgm: React.FC = () => {
                 {loading ? (
                   <div className="flex items-center gap-2 justify-center">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span className="lg:hidden">{isEdit ? 'Updating...' : 'Creating...'}</span>
-                    <span className="hidden lg:inline">{isEdit ? 'Updating...' : 'Creating...'}</span>
+                    <span className="lg:hidden">
+                      {isEdit ? 'Updating...' : 'Creating...'}
+                    </span>
+                    <span className="hidden lg:inline">
+                      {isEdit ? 'Updating...' : 'Creating...'}
+                    </span>
                   </div>
                 ) : (
                   <>
                     <HiCheckCircle className="w-4 h-4 lg:w-5 lg:h-5 mr-2 inline" />
-                    <span className="lg:hidden">{isEdit ? 'Update VGM' : 'Create VGM'}</span>
-                    <span className="hidden lg:inline">{isEdit ? 'Update VGM Document' : 'Create VGM Document'}</span>
+                    <span className="lg:hidden">
+                      {isEdit ? 'Update VGM' : 'Create VGM'}
+                    </span>
+                    <span className="hidden lg:inline">
+                      {isEdit ? 'Update VGM Document' : 'Create VGM Document'}
+                    </span>
                   </>
                 )}
               </button>

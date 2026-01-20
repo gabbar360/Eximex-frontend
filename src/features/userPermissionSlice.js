@@ -97,9 +97,14 @@ export const bulkUpdateUserPermissions = createAsyncThunk(
   'userPermission/bulkUpdateUserPermissions',
   async ({ userId, enableAll }, { rejectWithValue }) => {
     try {
-      return await userPermissionService.bulkUpdateUserPermissions(userId, enableAll);
+      return await userPermissionService.bulkUpdateUserPermissions(
+        userId,
+        enableAll
+      );
     } catch (err) {
-      return rejectWithValue(err.message || 'Failed to bulk update permissions');
+      return rejectWithValue(
+        err.message || 'Failed to bulk update permissions'
+      );
     }
   }
 );

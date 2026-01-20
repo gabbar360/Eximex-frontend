@@ -878,7 +878,10 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                     </div>
 
                     {/* Product Addition Section */}
-                    <div className="bg-white rounded-lg border border-gray-200 p-4 lg:p-6 dark:border-gray-700 dark:bg-gray-800" data-section="add-product">
+                    <div
+                      className="bg-white rounded-lg border border-gray-200 p-4 lg:p-6 dark:border-gray-700 dark:bg-gray-800"
+                      data-section="add-product"
+                    >
                       <h4 className="text-sm lg:text-base font-medium text-gray-800 dark:text-gray-200 mb-4">
                         {editingItemKey ? 'Edit Product' : 'Add Product'}
                       </h4>
@@ -1309,21 +1312,25 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                                         onClick={() => {
                                           // Try to find product by name/description match
                                           const product = products.find(
-                                            (p) => p.name === item.itemDescription || 
-                                                   p.productName === item.itemDescription ||
-                                                   p.id === item.productId
+                                            (p) =>
+                                              p.name === item.itemDescription ||
+                                              p.productName ===
+                                                item.itemDescription ||
+                                              p.id === item.productId
                                           );
-                                          
+
                                           // Set edit mode regardless of product match
                                           setEditingItemKey(item.key!);
-                                          
+
                                           if (product) {
                                             setSelectedCategory(
-                                              product.categoryId?.toString() || ''
+                                              product.categoryId?.toString() ||
+                                                ''
                                             );
                                             setSelectedSubcategory(
-                                              product.subCategoryId?.toString() || 
-                                              product.subcategoryId?.toString() || ''
+                                              product.subCategoryId?.toString() ||
+                                                product.subcategoryId?.toString() ||
+                                                ''
                                             );
                                             setSelectedProduct(
                                               product.id.toString()
@@ -1333,20 +1340,24 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                                             setSelectedSubcategory('');
                                             setSelectedProduct('');
                                           }
-                                          
+
                                           setSelectedUnit(item.unit || 'pcs');
                                           setNewItemQuantity(
                                             item.quantity.toString()
                                           );
-                                          setNewItemRate(
-                                            item.rate.toString()
-                                          );
-                                          
+                                          setNewItemRate(item.rate.toString());
+
                                           // Scroll to product addition section
                                           setTimeout(() => {
-                                            const productSection = document.querySelector('[data-section="add-product"]');
+                                            const productSection =
+                                              document.querySelector(
+                                                '[data-section="add-product"]'
+                                              );
                                             if (productSection) {
-                                              productSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                              productSection.scrollIntoView({
+                                                behavior: 'smooth',
+                                                block: 'start',
+                                              });
                                             }
                                           }, 100);
                                         }}

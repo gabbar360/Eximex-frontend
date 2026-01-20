@@ -89,9 +89,12 @@ const userPermissionService = {
   // Bulk update user permissions (select all/deselect all)
   bulkUpdateUserPermissions: async (userId, enableAll) => {
     try {
-      const response = await axiosInstance.post(`/bulk-update-permissions/${userId}`, {
-        enableAll,
-      });
+      const response = await axiosInstance.post(
+        `/bulk-update-permissions/${userId}`,
+        {
+          enableAll,
+        }
+      );
       return response.data;
     } catch (error) {
       throw handleAxiosError(error, 'user permission', 'bulk update');

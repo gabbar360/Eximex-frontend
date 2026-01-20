@@ -38,22 +38,36 @@ const Product: React.FC = () => {
   const [selectedSubCategory, setSelectedSubCategory] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [wasSearching, setWasSearching] = useState(false);
-  
+
   // Dropdown states
   const [categorySearch, setCategorySearch] = useState('');
   const [subcategorySearch, setSubcategorySearch] = useState('');
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [showSubcategoryDropdown, setShowSubcategoryDropdown] = useState(false);
-  
+
   const categoryRef = useRef(null);
   const subcategoryRef = useRef(null);
 
   const { categories } = useSelector((state: any) => state.category);
 
   // SearchableDropdown Component
-  const SearchableDropdown = ({ label, value, options, onSelect, searchValue, onSearchChange, isOpen, onToggle, placeholder, dropdownRef, disabled = false }) => {
-    const selectedOption = options.find(opt => opt.id?.toString() === value?.toString());
-    
+  const SearchableDropdown = ({
+    label,
+    value,
+    options,
+    onSelect,
+    searchValue,
+    onSearchChange,
+    isOpen,
+    onToggle,
+    placeholder,
+    dropdownRef,
+    disabled = false,
+  }) => {
+    const selectedOption = options.find(
+      (opt) => opt.id?.toString() === value?.toString()
+    );
+
     return (
       <div className="relative" ref={dropdownRef}>
         <div
@@ -65,14 +79,21 @@ const Product: React.FC = () => {
           onClick={() => !disabled && onToggle()}
         >
           <HiFunnel className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-          <span className={`text-sm ${selectedOption ? 'text-slate-900' : 'text-slate-500'}`}>
+          <span
+            className={`text-sm ${selectedOption ? 'text-slate-900' : 'text-slate-500'}`}
+          >
             {selectedOption ? selectedOption.name : placeholder}
           </span>
-          <HiChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+          <HiChevronDown
+            className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          />
         </div>
-        
+
         {isOpen && !disabled && (
-          <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl" style={{ top: '100%', marginTop: '4px' }}>
+          <div
+            className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl"
+            style={{ top: '100%', marginTop: '4px' }}
+          >
             <div className="p-3 border-b border-gray-100">
               <div className="relative">
                 <HiMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
@@ -89,13 +110,17 @@ const Product: React.FC = () => {
             </div>
             <div className="max-h-60 overflow-y-auto">
               {options.length === 0 ? (
-                <div className="px-4 py-3 text-slate-500 text-sm text-center">No {label.toLowerCase()} found</div>
+                <div className="px-4 py-3 text-slate-500 text-sm text-center">
+                  No {label.toLowerCase()} found
+                </div>
               ) : (
                 options.map((option) => (
                   <div
                     key={option.id}
                     className={`px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm transition-colors duration-150 ${
-                      option.id?.toString() === value?.toString() ? 'bg-slate-100 text-slate-900 font-medium' : 'text-slate-700'
+                      option.id?.toString() === value?.toString()
+                        ? 'bg-slate-100 text-slate-900 font-medium'
+                        : 'text-slate-700'
                     }`}
                     onClick={() => {
                       onSelect(option.id);
@@ -119,7 +144,10 @@ const Product: React.FC = () => {
       if (categoryRef.current && !categoryRef.current.contains(event.target)) {
         setShowCategoryDropdown(false);
       }
-      if (subcategoryRef.current && !subcategoryRef.current.contains(event.target)) {
+      if (
+        subcategoryRef.current &&
+        !subcategoryRef.current.contains(event.target)
+      ) {
         setShowSubcategoryDropdown(false);
       }
     };
@@ -315,13 +343,15 @@ const Product: React.FC = () => {
                         options={[
                           { id: '', name: 'All Categories' },
                           ...(categories || [])
-                            .filter((category: any) => 
-                              category.name.toLowerCase().includes(categorySearch.toLowerCase())
+                            .filter((category: any) =>
+                              category.name
+                                .toLowerCase()
+                                .includes(categorySearch.toLowerCase())
                             )
                             .map((category: any) => ({
                               id: category.id,
                               name: category.name,
-                            }))
+                            })),
                         ]}
                         onSelect={(value) => {
                           handleCategoryChange(value);
@@ -330,7 +360,9 @@ const Product: React.FC = () => {
                         searchValue={categorySearch}
                         onSearchChange={setCategorySearch}
                         isOpen={showCategoryDropdown}
-                        onToggle={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                        onToggle={() =>
+                          setShowCategoryDropdown(!showCategoryDropdown)
+                        }
                         placeholder="All Categories"
                         dropdownRef={categoryRef}
                       />
@@ -344,13 +376,15 @@ const Product: React.FC = () => {
                           options={[
                             { id: '', name: 'All Subcategories' },
                             ...availableSubCategories
-                              .filter((subCategory: any) => 
-                                subCategory.name.toLowerCase().includes(subcategorySearch.toLowerCase())
+                              .filter((subCategory: any) =>
+                                subCategory.name
+                                  .toLowerCase()
+                                  .includes(subcategorySearch.toLowerCase())
                               )
                               .map((subCategory: any) => ({
                                 id: subCategory.id,
                                 name: subCategory.name,
-                              }))
+                              })),
                           ]}
                           onSelect={(value) => {
                             setSelectedSubCategory(value);
@@ -370,7 +404,9 @@ const Product: React.FC = () => {
                           searchValue={subcategorySearch}
                           onSearchChange={setSubcategorySearch}
                           isOpen={showSubcategoryDropdown}
-                          onToggle={() => setShowSubcategoryDropdown(!showSubcategoryDropdown)}
+                          onToggle={() =>
+                            setShowSubcategoryDropdown(!showSubcategoryDropdown)
+                          }
                           placeholder="All Subcategories"
                           dropdownRef={subcategoryRef}
                         />

@@ -18,10 +18,10 @@ const OnboardingModal: React.FC = () => {
     // Clear tokens
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
-    
+
     // Clear user state
     dispatch(clearUser());
-    
+
     // Navigate to signin
     navigate('/signin', { replace: true });
   };
@@ -34,9 +34,7 @@ const OnboardingModal: React.FC = () => {
           <h1 className="text-3xl font-bold text-slate-800 mb-2">
             Welcome to Eximex
           </h1>
-          <p className="text-slate-600">
-            Your account is being set up
-          </p>
+          <p className="text-slate-600">Your account is being set up</p>
         </div>
 
         {/* Main Card */}
@@ -44,22 +42,31 @@ const OnboardingModal: React.FC = () => {
           <div className="w-12 h-12 mx-auto mb-6 rounded-full bg-amber-500 flex items-center justify-center">
             <HiClock className="text-white text-xl" />
           </div>
-          
+
           <h2 className="text-xl font-semibold text-slate-800 mb-4">
             Company Assignment Pending
           </h2>
-          
+
           <p className="text-slate-600 mb-6 leading-relaxed">
-            Please wait while your administrator assigns you to a company. You will be able to access the dashboard once your company is assigned.
+            Please wait while your administrator assigns you to a company. You
+            will be able to access the dashboard once your company is assigned.
           </p>
-          
+
           <div className="flex items-center justify-center space-x-2 text-slate-500 mb-6">
             <div className="flex space-x-1">
               <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
-              <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-              <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+              <div
+                className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
+                style={{ animationDelay: '0.1s' }}
+              ></div>
+              <div
+                className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
+                style={{ animationDelay: '0.2s' }}
+              ></div>
             </div>
-            <span className="text-sm font-medium">Waiting for assignment...</span>
+            <span className="text-sm font-medium">
+              Waiting for assignment...
+            </span>
           </div>
 
           {/* Back to Sign In Button */}

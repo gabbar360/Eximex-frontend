@@ -61,7 +61,6 @@ export const deleteParty = createAsyncThunk(
   }
 );
 
-
 export const updatePartyStage = createAsyncThunk(
   'party/updatePartyStage',
   async ({ id, stage }, { rejectWithValue }) => {
@@ -141,19 +140,28 @@ const partySlice = createSlice({
       })
       .addCase(fetchParties.fulfilled, (state, { payload }) => {
         state.loading = false;
-        
+
         // Handle the response structure with data.data
         let parties = [];
         let pagination = { current: 1, pageSize: 10, total: 0 };
-        
+
         if (payload?.data?.data && Array.isArray(payload.data.data)) {
           parties = payload.data.data;
           // Handle backend pagination data
           if (payload.data.pagination) {
             pagination = {
-              current: payload.data.pagination.currentPage || payload.data.pagination.page || 1,
-              pageSize: payload.data.pagination.limit || payload.data.pagination.pageSize || 10,
-              total: payload.data.pagination.total || payload.data.pagination.totalItems || 0,
+              current:
+                payload.data.pagination.currentPage ||
+                payload.data.pagination.page ||
+                1,
+              pageSize:
+                payload.data.pagination.limit ||
+                payload.data.pagination.pageSize ||
+                10,
+              total:
+                payload.data.pagination.total ||
+                payload.data.pagination.totalItems ||
+                0,
             };
           }
         } else if (payload?.data && Array.isArray(payload.data)) {
@@ -161,7 +169,7 @@ const partySlice = createSlice({
         } else if (Array.isArray(payload)) {
           parties = payload;
         }
-        
+
         state.parties = parties;
         state.pagination = pagination;
       })

@@ -3,18 +3,17 @@ import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { getTasks, updateTask } from '../../features/taskManagementSlice';
 import PageMeta from '../../components/common/PageMeta';
-import {
-  HiMagnifyingGlass,
-  HiSparkles,
-} from 'react-icons/hi2';
+import { HiMagnifyingGlass, HiSparkles } from 'react-icons/hi2';
 import { MdTask } from 'react-icons/md';
 import { Pagination } from 'antd';
 import { useDebounce } from '../../utils/useDebounce';
 
 const MyTasks: React.FC = () => {
   const dispatch = useDispatch();
-  const { tasks, loading, pagination } = useSelector((state: any) => state.taskManagement);
-  
+  const { tasks, loading, pagination } = useSelector(
+    (state: any) => state.taskManagement
+  );
+
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -22,24 +21,28 @@ const MyTasks: React.FC = () => {
   const [priorityFilter, setPriorityFilter] = useState('');
 
   useEffect(() => {
-    dispatch(getTasks({
-      page: currentPage,
-      limit: pageSize,
-      search: '',
-      status: statusFilter,
-      priority: priorityFilter
-    }));
+    dispatch(
+      getTasks({
+        page: currentPage,
+        limit: pageSize,
+        search: '',
+        status: statusFilter,
+        priority: priorityFilter,
+      })
+    );
   }, [dispatch, currentPage, pageSize, statusFilter, priorityFilter]);
 
   const { debouncedCallback: debouncedSearch } = useDebounce(
     (value: string) => {
-      dispatch(getTasks({
-        page: 1,
-        limit: pageSize,
-        search: value,
-        status: statusFilter,
-        priority: priorityFilter
-      }));
+      dispatch(
+        getTasks({
+          page: 1,
+          limit: pageSize,
+          search: value,
+          status: statusFilter,
+          priority: priorityFilter,
+        })
+      );
     },
     500
   );
@@ -55,7 +58,9 @@ const MyTasks: React.FC = () => {
 
   const handleStatusUpdate = async (taskId: number, newStatus: string) => {
     try {
-      const result = await dispatch(updateTask({ taskId, taskData: { status: newStatus } })).unwrap();
+      const result = await dispatch(
+        updateTask({ taskId, taskData: { status: newStatus } })
+      ).unwrap();
       toast.success(result.message || 'Task updated successfully');
     } catch (error: any) {
       toast.error(error.message || 'Failed to update task status');
@@ -64,21 +69,31 @@ const MyTasks: React.FC = () => {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'URGENT': return 'bg-red-100 text-red-800';
-      case 'HIGH': return 'bg-orange-100 text-orange-800';
-      case 'MEDIUM': return 'bg-yellow-100 text-yellow-800';
-      case 'LOW': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'URGENT':
+        return 'bg-red-100 text-red-800';
+      case 'HIGH':
+        return 'bg-orange-100 text-orange-800';
+      case 'MEDIUM':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'LOW':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'COMPLETED': return 'bg-green-100 text-green-800';
-      case 'IN_PROGRESS': return 'bg-blue-100 text-blue-800';
-      case 'PENDING': return 'bg-yellow-100 text-yellow-800';
-      case 'CANCELLED': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'COMPLETED':
+        return 'bg-green-100 text-green-800';
+      case 'IN_PROGRESS':
+        return 'bg-blue-100 text-blue-800';
+      case 'PENDING':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'CANCELLED':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -193,21 +208,31 @@ const MyTasks: React.FC = () => {
                     <div key={task.id} className="p-4 hover:bg-gray-50">
                       <div className="grid grid-cols-6 gap-3 items-center">
                         <div>
-                          <h3 className="font-semibold text-slate-900">{task.title}</h3>
+                          <h3 className="font-semibold text-slate-900">
+                            {task.title}
+                          </h3>
                           {task.description && (
-                            <p className="text-sm text-slate-600 mt-1 truncate">{task.description}</p>
+                            <p className="text-sm text-slate-600 mt-1 truncate">
+                              {task.description}
+                            </p>
                           )}
                         </div>
-                        <div className="text-sm text-slate-700">{task.assigner?.name}</div>
+                        <div className="text-sm text-slate-700">
+                          {task.assigner?.name}
+                        </div>
                         <div>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(task.priority)}`}>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(task.priority)}`}
+                          >
                             {task.priority}
                           </span>
                         </div>
                         <div>
                           <select
                             value={task.status}
-                            onChange={(e) => handleStatusUpdate(task.id, e.target.value)}
+                            onChange={(e) =>
+                              handleStatusUpdate(task.id, e.target.value)
+                            }
                             className={`px-2 py-1 rounded-full text-xs font-medium border-0 ${getStatusColor(task.status)}`}
                           >
                             <option value="PENDING">Pending</option>
@@ -216,11 +241,15 @@ const MyTasks: React.FC = () => {
                           </select>
                         </div>
                         <div className="text-sm text-slate-700">
-                          {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '-'}
+                          {task.dueDate
+                            ? new Date(task.dueDate).toLocaleDateString()
+                            : '-'}
                         </div>
                         <div className="flex items-center justify-end">
                           <span className="text-xs text-slate-500">
-                            {task.status === 'COMPLETED' ? 'Task Completed' : 'Update Status'}
+                            {task.status === 'COMPLETED'
+                              ? 'Task Completed'
+                              : 'Update Status'}
                           </span>
                         </div>
                       </div>
@@ -235,39 +264,59 @@ const MyTasks: React.FC = () => {
                   <div key={task.id} className="p-4">
                     <div className="flex items-start justify-between mb-3">
                       <div>
-                        <h3 className="font-semibold text-slate-800">{task.title}</h3>
+                        <h3 className="font-semibold text-slate-800">
+                          {task.title}
+                        </h3>
                         {task.description && (
-                          <p className="text-sm text-slate-600 mt-1">{task.description}</p>
+                          <p className="text-sm text-slate-600 mt-1">
+                            {task.description}
+                          </p>
                         )}
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 text-sm mb-3">
                       <div>
-                        <span className="font-medium text-slate-500 text-xs">Assigned By:</span>
-                        <div className="text-slate-700">{task.assigner?.name}</div>
+                        <span className="font-medium text-slate-500 text-xs">
+                          Assigned By:
+                        </span>
+                        <div className="text-slate-700">
+                          {task.assigner?.name}
+                        </div>
                       </div>
                       <div>
-                        <span className="font-medium text-slate-500 text-xs">Priority:</span>
+                        <span className="font-medium text-slate-500 text-xs">
+                          Priority:
+                        </span>
                         <div>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(task.priority)}`}>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(task.priority)}`}
+                          >
                             {task.priority}
                           </span>
                         </div>
                       </div>
                       {task.dueDate && (
                         <div className="col-span-2">
-                          <span className="font-medium text-slate-500 text-xs">Due Date:</span>
-                          <div className="text-slate-700">{new Date(task.dueDate).toLocaleDateString()}</div>
+                          <span className="font-medium text-slate-500 text-xs">
+                            Due Date:
+                          </span>
+                          <div className="text-slate-700">
+                            {new Date(task.dueDate).toLocaleDateString()}
+                          </div>
                         </div>
                       )}
                     </div>
 
                     <div>
-                      <span className="font-medium text-slate-500 text-xs">Status:</span>
+                      <span className="font-medium text-slate-500 text-xs">
+                        Status:
+                      </span>
                       <select
                         value={task.status}
-                        onChange={(e) => handleStatusUpdate(task.id, e.target.value)}
+                        onChange={(e) =>
+                          handleStatusUpdate(task.id, e.target.value)
+                        }
                         className={`ml-2 px-2 py-1 rounded-full text-xs font-medium border-0 ${getStatusColor(task.status)}`}
                       >
                         <option value="PENDING">Pending</option>
@@ -290,13 +339,15 @@ const MyTasks: React.FC = () => {
                 pageSize={pageSize}
                 onChange={(page) => {
                   setCurrentPage(page);
-                  dispatch(getTasks({
-                    page: page,
-                    limit: pageSize,
-                    search: searchTerm,
-                    status: statusFilter,
-                    priority: priorityFilter
-                  }));
+                  dispatch(
+                    getTasks({
+                      page: page,
+                      limit: pageSize,
+                      search: searchTerm,
+                      status: statusFilter,
+                      priority: priorityFilter,
+                    })
+                  );
                 }}
               />
             </div>
