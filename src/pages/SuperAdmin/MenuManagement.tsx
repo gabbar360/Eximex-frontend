@@ -703,63 +703,63 @@ const MenuManagement = () => {
         {/* Menu Table */}
         <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
-          {loading ? (
-            <div className="p-12 text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-slate-600 mx-auto mb-4"></div>
-              <p className="text-slate-600 dark:text-gray-400 font-medium">
-                Loading menus...
-              </p>
-            </div>
-          ) : menus.length === 0 ? (
-            <div className="p-12 text-center">
-              <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-r from-slate-600 to-slate-700 flex items-center justify-center shadow-lg">
-                <HiBars3 className="w-8 h-8 text-white" />
+            {loading ? (
+              <div className="p-12 text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-slate-600 mx-auto mb-4"></div>
+                <p className="text-slate-600 dark:text-gray-400 font-medium">
+                  Loading menus...
+                </p>
               </div>
-              <h3 className="text-xl font-semibold text-slate-800 dark:text-white mb-2">
-                No menus found
-              </h3>
-              <p className="text-slate-600 dark:text-gray-400 mb-6">
-                Add your first menu to get started
-              </p>
-              <button
-                onClick={handleAddMenu}
-                className="inline-flex items-center px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg transition-all duration-300"
-              >
-                <HiPlus className="w-5 h-5 mr-2" />
-                Add First Menu
-              </button>
-            </div>
-          ) : (
-            <Table
-              columns={menuColumns}
-              dataSource={menus}
-              loading={loading}
-              rowKey="id"
-              pagination={false}
-              scroll={{ x: 800 }}
-              expandable={{
-                expandedRowRender,
-                rowExpandable: (record) =>
-                  record.submenus && record.submenus.length > 0,
-                expandIcon: ({ expanded, onExpand, record }) =>
-                  record.submenus && record.submenus.length > 0 ? (
-                    <button
-                      onClick={(e) => onExpand(record, e)}
-                      className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                    >
-                      {expanded ? (
-                        <MdMenuOpen className="w-4 h-4 text-slate-600" />
-                      ) : (
-                        <MdMenu className="w-4 h-4 text-slate-600" />
-                      )}
-                    </button>
-                  ) : (
-                    <span className="w-6 h-6 inline-block" />
-                  ),
-              }}
-              className="menu-management-table"
-            />
-          )}
+            ) : menus.length === 0 ? (
+              <div className="p-12 text-center">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-r from-slate-600 to-slate-700 flex items-center justify-center shadow-lg">
+                  <HiBars3 className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-slate-800 dark:text-white mb-2">
+                  No menus found
+                </h3>
+                <p className="text-slate-600 dark:text-gray-400 mb-6">
+                  Add your first menu to get started
+                </p>
+                <button
+                  onClick={handleAddMenu}
+                  className="inline-flex items-center px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 shadow-lg transition-all duration-300"
+                >
+                  <HiPlus className="w-5 h-5 mr-2" />
+                  Add First Menu
+                </button>
+              </div>
+            ) : (
+              <Table
+                columns={menuColumns}
+                dataSource={menus}
+                loading={loading}
+                rowKey="id"
+                pagination={false}
+                scroll={{ x: 800 }}
+                expandable={{
+                  expandedRowRender,
+                  rowExpandable: (record) =>
+                    record.submenus && record.submenus.length > 0,
+                  expandIcon: ({ expanded, onExpand, record }) =>
+                    record.submenus && record.submenus.length > 0 ? (
+                      <button
+                        onClick={(e) => onExpand(record, e)}
+                        className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      >
+                        {expanded ? (
+                          <MdMenuOpen className="w-4 h-4 text-slate-600" />
+                        ) : (
+                          <MdMenu className="w-4 h-4 text-slate-600" />
+                        )}
+                      </button>
+                    ) : (
+                      <span className="w-6 h-6 inline-block" />
+                    ),
+                }}
+                className="menu-management-table"
+              />
+            )}
           </div>
         </div>
 

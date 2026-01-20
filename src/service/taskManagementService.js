@@ -9,32 +9,45 @@ const taskManagementService = {
       console.log('✅ Frontend service response:', response.data);
       return response.data;
     } catch (error) {
-      console.error('❌ Frontend service error:', error.response?.data || error.message);
+      console.error(
+        '❌ Frontend service error:',
+        error.response?.data || error.message
+      );
       throw error;
     }
   },
 
   // Create task (Admin only)
   createTask: async (taskData) => {
-    const response = await axiosInstance.post('/task-management/tasks', taskData);
+    const response = await axiosInstance.post(
+      '/task-management/tasks',
+      taskData
+    );
     return response.data;
   },
 
   // Update complete task
   updateTask: async (taskId, taskData) => {
-    const response = await axiosInstance.put(`/task-management/tasks/${taskId}`, taskData);
+    const response = await axiosInstance.put(
+      `/task-management/tasks/${taskId}`,
+      taskData
+    );
     return response.data;
   },
 
   // Get task by ID
   getTaskById: async (taskId) => {
-    const response = await axiosInstance.get(`/task-management/tasks/${taskId}`);
+    const response = await axiosInstance.get(
+      `/task-management/tasks/${taskId}`
+    );
     return response.data;
   },
 
   // Delete task (Admin only)
   deleteTask: async (taskId) => {
-    const response = await axiosInstance.delete(`/task-management/tasks/${taskId}`);
+    const response = await axiosInstance.delete(
+      `/task-management/tasks/${taskId}`
+    );
     return response.data;
   },
 
@@ -42,7 +55,7 @@ const taskManagementService = {
   getStaffList: async () => {
     const response = await axiosInstance.get('/task-management/staff-list');
     return response.data;
-  }
+  },
 };
 
 export default taskManagementService;

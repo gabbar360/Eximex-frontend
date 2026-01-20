@@ -266,7 +266,8 @@ const PurchaseOrders: React.FC = () => {
                     <div
                       className="grid gap-2 text-sm font-semibold text-slate-700"
                       style={{
-                        gridTemplateColumns: '1.5fr 1.2fr 1fr 1fr 1fr 1fr 0.8fr',
+                        gridTemplateColumns:
+                          '1.5fr 1.2fr 1fr 1fr 1fr 1fr 0.8fr',
                       }}
                     >
                       <div className="flex items-center gap-2">

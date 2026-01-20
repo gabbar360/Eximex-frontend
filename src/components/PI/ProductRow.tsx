@@ -1,10 +1,13 @@
-import React, { useRef, useEffect, useCallback, useMemo, useState } from 'react';
+import React, {
+  useRef,
+  useEffect,
+  useCallback,
+  useMemo,
+  useState,
+} from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
-import {
-  HiChevronDown,
-  HiMagnifyingGlass,
-} from 'react-icons/hi2';
+import { HiChevronDown, HiMagnifyingGlass } from 'react-icons/hi2';
 import Label from '../form/Label';
 
 interface ProductAdded {
@@ -69,7 +72,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
   const [showSubcategoryDropdown, setShowSubcategoryDropdown] = useState(false);
   const [showProductDropdown, setShowProductDropdown] = useState(false);
   const [showUnitDropdown, setShowUnitDropdown] = useState(false);
-  
+
   const categoryRef = useRef(null);
   const subcategoryRef = useRef(null);
   const productRef = useRef(null);
@@ -91,7 +94,9 @@ const ProductRow: React.FC<ProductRowProps> = ({
     displayKey = 'name',
     valueKey = 'id',
   }) => {
-    const selectedOption = options.find((opt) => opt[valueKey]?.toString() === value?.toString());
+    const selectedOption = options.find(
+      (opt) => opt[valueKey]?.toString() === value?.toString()
+    );
 
     return (
       <div className="relative" ref={dropdownRef}>
@@ -180,7 +185,10 @@ const ProductRow: React.FC<ProductRowProps> = ({
       if (categoryRef.current && !categoryRef.current.contains(event.target)) {
         setShowCategoryDropdown(false);
       }
-      if (subcategoryRef.current && !subcategoryRef.current.contains(event.target)) {
+      if (
+        subcategoryRef.current &&
+        !subcategoryRef.current.contains(event.target)
+      ) {
         setShowSubcategoryDropdown(false);
       }
       if (productRef.current && !productRef.current.contains(event.target)) {
@@ -298,8 +306,6 @@ const ProductRow: React.FC<ProductRowProps> = ({
 
   return (
     <div className="border border-gray-300 dark:border-gray-700 rounded-md p-4 space-y-4 relative bg-gray-50 dark:bg-gray-800">
-   
-
       {/* Category Selection */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div>
@@ -309,9 +315,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
             value={data.categoryId || ''}
             options={categories
               .filter((cat) =>
-                cat.name
-                  .toLowerCase()
-                  .includes(categorySearch.toLowerCase())
+                cat.name.toLowerCase().includes(categorySearch.toLowerCase())
               )
               .map((cat) => ({
                 id: cat.id.toString(),
@@ -342,9 +346,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
             value={data.subcategoryId || ''}
             options={filteredSubcategories
               .filter((sub) =>
-                sub.name
-                  .toLowerCase()
-                  .includes(subcategorySearch.toLowerCase())
+                sub.name.toLowerCase().includes(subcategorySearch.toLowerCase())
               )
               .map((sub) => ({
                 id: sub.id.toString(),
@@ -360,7 +362,9 @@ const ProductRow: React.FC<ProductRowProps> = ({
             searchValue={subcategorySearch}
             onSearchChange={setSubcategorySearch}
             isOpen={showSubcategoryDropdown}
-            onToggle={() => setShowSubcategoryDropdown(!showSubcategoryDropdown)}
+            onToggle={() =>
+              setShowSubcategoryDropdown(!showSubcategoryDropdown)
+            }
             placeholder="Select Subcategory"
             disabled={!data.categoryId}
             dropdownRef={subcategoryRef}
@@ -420,7 +424,11 @@ const ProductRow: React.FC<ProductRowProps> = ({
             onSearchChange={setProductSearch}
             isOpen={showProductDropdown}
             onToggle={() => setShowProductDropdown(!showProductDropdown)}
-            placeholder={filteredProducts.length === 0 ? "No products found for this category" : "Choose product"}
+            placeholder={
+              filteredProducts.length === 0
+                ? 'No products found for this category'
+                : 'Choose product'
+            }
             disabled={!data.categoryId}
             dropdownRef={productRef}
           />

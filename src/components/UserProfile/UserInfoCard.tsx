@@ -127,15 +127,21 @@ export default function UserInfoCard({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
         <div>
           <p className="text-sm font-medium text-slate-500 mb-1">Full Name</p>
-          <p className="text-slate-800 font-medium">{userData?.name || 'N/A'}</p>
+          <p className="text-slate-800 font-medium">
+            {userData?.name || 'N/A'}
+          </p>
         </div>
         <div>
           <p className="text-sm font-medium text-slate-500 mb-1">Email</p>
-          <p className="text-slate-800 font-medium">{userData?.email || 'N/A'}</p>
+          <p className="text-slate-800 font-medium">
+            {userData?.email || 'N/A'}
+          </p>
         </div>
         <div>
           <p className="text-sm font-medium text-slate-500 mb-1">Mobile</p>
-          <p className="text-slate-800 font-medium">{userData?.mobileNum || 'N/A'}</p>
+          <p className="text-slate-800 font-medium">
+            {userData?.mobileNum || 'N/A'}
+          </p>
         </div>
         <div>
           <p className="text-sm font-medium text-slate-500 mb-1">Role</p>
@@ -147,7 +153,9 @@ export default function UserInfoCard({
         </div>
         <div className="md:col-span-2">
           <p className="text-sm font-medium text-slate-500 mb-1">Company</p>
-          <p className="text-slate-800 font-medium">{userData?.company?.name || 'No Company'}</p>
+          <p className="text-slate-800 font-medium">
+            {userData?.company?.name || 'No Company'}
+          </p>
         </div>
       </div>
     </div>

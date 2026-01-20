@@ -87,15 +87,17 @@ const notificationSlice = createSlice({
       state.unreadCount = payload;
     },
     markNotificationRead(state, { payload }) {
-      const notification = state.notifications.find(n => n.id === payload);
+      const notification = state.notifications.find((n) => n.id === payload);
       if (notification && !notification.isRead) {
         notification.isRead = true;
         state.unreadCount = Math.max(0, state.unreadCount - 1);
       }
     },
     deleteNotificationFromState(state, { payload }) {
-      state.notifications = state.notifications.filter(n => n.id !== payload);
-      const deletedNotification = state.notifications.find(n => n.id === payload);
+      state.notifications = state.notifications.filter((n) => n.id !== payload);
+      const deletedNotification = state.notifications.find(
+        (n) => n.id === payload
+      );
       if (deletedNotification && !deletedNotification.isRead) {
         state.unreadCount = Math.max(0, state.unreadCount - 1);
       }
@@ -103,7 +105,7 @@ const notificationSlice = createSlice({
     markAllRead(state) {
       state.notifications = [];
       state.unreadCount = 0;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -129,7 +131,7 @@ const notificationSlice = createSlice({
 
       // Mark as read
       .addCase(markNotificationAsRead.fulfilled, (state, { payload }) => {
-        const notification = state.notifications.find(n => n.id === payload);
+        const notification = state.notifications.find((n) => n.id === payload);
         if (notification && !notification.isRead) {
           notification.isRead = true;
           state.unreadCount = Math.max(0, state.unreadCount - 1);
@@ -138,8 +140,12 @@ const notificationSlice = createSlice({
 
       // Delete notification
       .addCase(deleteNotification.fulfilled, (state, { payload }) => {
-        const deletedNotification = state.notifications.find(n => n.id === payload);
-        state.notifications = state.notifications.filter(n => n.id !== payload);
+        const deletedNotification = state.notifications.find(
+          (n) => n.id === payload
+        );
+        state.notifications = state.notifications.filter(
+          (n) => n.id !== payload
+        );
         if (deletedNotification && !deletedNotification.isRead) {
           state.unreadCount = Math.max(0, state.unreadCount - 1);
         }
@@ -153,13 +159,13 @@ const notificationSlice = createSlice({
   },
 });
 
-export const { 
-  clearNotificationError, 
-  addNewNotification, 
+export const {
+  clearNotificationError,
+  addNewNotification,
   updateUnreadCount,
   markNotificationRead,
   deleteNotificationFromState,
-  markAllRead
+  markAllRead,
 } = notificationSlice.actions;
 
 export default notificationSlice.reducer;

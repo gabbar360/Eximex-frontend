@@ -6,7 +6,9 @@ export class NotificationSound {
   // Initialize audio context
   private static getAudioContext(): AudioContext {
     if (!this.audioContext) {
-      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      this.audioContext = new (
+        window.AudioContext || (window as any).webkitAudioContext
+      )();
     }
     return this.audioContext;
   }
@@ -15,11 +17,10 @@ export class NotificationSound {
   private static generateBeepSound(): void {
     try {
       const audioContext = this.getAudioContext();
-      
+
       // Create doorbell sound with two tones (ding-dong)
       this.playDoorbellTone(audioContext, 800, 0, 0.3); // First tone (ding)
       this.playDoorbellTone(audioContext, 600, 0.4, 0.4); // Second tone (dong)
-      
     } catch (error) {
       console.warn('Could not play notification sound:', error);
       // Fallback to system beep
@@ -28,24 +29,32 @@ export class NotificationSound {
   }
 
   // Play individual doorbell tone
-  private static playDoorbellTone(audioContext: AudioContext, frequency: number, startTime: number, duration: number): void {
+  private static playDoorbellTone(
+    audioContext: AudioContext,
+    frequency: number,
+    startTime: number,
+    duration: number
+  ): void {
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
-    
+
     // Connect nodes
     oscillator.connect(gainNode);
     gainNode.connect(audioContext.destination);
-    
+
     // Configure sound
-    oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime + startTime);
+    oscillator.frequency.setValueAtTime(
+      frequency,
+      audioContext.currentTime + startTime
+    );
     oscillator.type = 'sine';
-    
+
     // Configure volume envelope for doorbell effect
     const currentTime = audioContext.currentTime + startTime;
     gainNode.gain.setValueAtTime(0, currentTime);
     gainNode.gain.linearRampToValueAtTime(0.4, currentTime + 0.02);
     gainNode.gain.exponentialRampToValueAtTime(0.01, currentTime + duration);
-    
+
     // Play sound
     oscillator.start(currentTime);
     oscillator.stop(currentTime + duration);
@@ -55,7 +64,9 @@ export class NotificationSound {
   private static fallbackBeep(): void {
     try {
       // Create a simple beep using data URL
-      const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT');
+      const audio = new Audio(
+        'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT'
+      );
       audio.volume = 0.3;
       audio.play().catch(() => {
         // Silent fail if audio can't play
@@ -80,7 +91,7 @@ export class NotificationSound {
       if ('Notification' in window && Notification.permission === 'default') {
         await Notification.requestPermission();
       }
-      
+
       this.play();
     } catch (error) {
       console.warn('Could not play notification sound:', error);
@@ -94,7 +105,11 @@ export class NotificationSound {
 }
 
 // Browser notification with sound
-export const showBrowserNotification = (title: string, message: string, icon?: string) => {
+export const showBrowserNotification = (
+  title: string,
+  message: string,
+  icon?: string
+) => {
   if ('Notification' in window && Notification.permission === 'granted') {
     const notification = new Notification(title, {
       body: message,
@@ -102,7 +117,7 @@ export const showBrowserNotification = (title: string, message: string, icon?: s
       badge: '/favicon.ico',
       tag: 'eximex-notification',
       requireInteraction: false,
-      silent: false // This will use system notification sound
+      silent: false, // This will use system notification sound
     });
 
     // Auto close after 5 seconds

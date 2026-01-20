@@ -1,10 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { fetchOrders } from '../../features/orderSlice';
-import {
-  HiChevronDown,
-  HiMagnifyingGlass,
-} from 'react-icons/hi2';
+import { HiChevronDown, HiMagnifyingGlass } from 'react-icons/hi2';
 
 interface Order {
   id: number;
@@ -52,7 +49,9 @@ const OrderSelector: React.FC<OrderSelectorProps> = ({
     displayKey = 'name',
     valueKey = 'id',
   }) => {
-    const selectedOption = options.find((opt) => opt[valueKey]?.toString() === value?.toString());
+    const selectedOption = options.find(
+      (opt) => opt[valueKey]?.toString() === value?.toString()
+    );
 
     return (
       <div className="relative w-full" ref={dropdownRef}>
@@ -81,9 +80,7 @@ const OrderSelector: React.FC<OrderSelectorProps> = ({
         </div>
 
         {isOpen && !disabled && (
-          <div
-            className="absolute z-[9999] w-full min-w-[280px] sm:min-w-full bg-white border border-gray-200 rounded-lg shadow-xl mt-1"
-          >
+          <div className="absolute z-[9999] w-full min-w-[280px] sm:min-w-full bg-white border border-gray-200 rounded-lg shadow-xl mt-1">
             <div className="p-3 border-b border-gray-100">
               <div className="relative">
                 <HiMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
@@ -177,17 +174,20 @@ const OrderSelector: React.FC<OrderSelectorProps> = ({
               );
             case 'packingList':
               // Show orders that don't have packing lists created
-              const hasPackingListArray = order.packingLists && order.packingLists.length > 0;
+              const hasPackingListArray =
+                order.packingLists && order.packingLists.length > 0;
               const hasPackingListId = order.packingListId;
-              const hasPiPackingLists = order.piInvoice?.packingLists && order.piInvoice.packingLists.length > 0;
-              const hasPackingList = hasPackingListArray || hasPackingListId || hasPiPackingLists;
+              const hasPiPackingLists =
+                order.piInvoice?.packingLists &&
+                order.piInvoice.packingLists.length > 0;
+              const hasPackingList =
+                hasPackingListArray || hasPackingListId || hasPiPackingLists;
               return !hasPackingList;
             default:
               return true;
           }
         });
       }
-
 
       setOrders(Array.isArray(ordersList) ? ordersList : []);
     } catch (error) {
@@ -209,14 +209,20 @@ const OrderSelector: React.FC<OrderSelectorProps> = ({
         options={(() => {
           const filteredOptions = orders
             .filter((order) => {
-              const buyerName = order.piInvoice?.party?.companyName || order.piInvoice?.party?.contactPerson || 'Unknown Buyer';
+              const buyerName =
+                order.piInvoice?.party?.companyName ||
+                order.piInvoice?.party?.contactPerson ||
+                'Unknown Buyer';
               const searchText = `${order.orderNumber} ${order.piNumber} ${buyerName}`;
               return searchText
                 .toLowerCase()
                 .includes(orderSearch.toLowerCase());
             })
             .map((order) => {
-              const buyerName = order.piInvoice?.party?.companyName || order.piInvoice?.party?.contactPerson || 'Unknown Buyer';
+              const buyerName =
+                order.piInvoice?.party?.companyName ||
+                order.piInvoice?.party?.contactPerson ||
+                'Unknown Buyer';
               return {
                 id: order.id,
                 name: `${order.orderNumber} - ${order.piNumber} (${buyerName})`,

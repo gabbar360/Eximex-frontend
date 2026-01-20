@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 
 const ProfitLoss = () => {
   const dispatch = useDispatch();
-  const { profitLoss, loading } = useSelector(state => state.accounting);
+  const { profitLoss, loading } = useSelector((state) => state.accounting);
   const [dateRange, setDateRange] = useState({
     fromDate: '',
     toDate: '',
@@ -46,18 +46,12 @@ const ProfitLoss = () => {
 
   const calculateProfitMargin = () => {
     if (!profitLoss || profitLoss.revenue === 0) return 0;
-    return (
-      (profitLoss.grossProfit / profitLoss.revenue) *
-      100
-    ).toFixed(2);
+    return ((profitLoss.grossProfit / profitLoss.revenue) * 100).toFixed(2);
   };
 
   const calculateCollectionRatio = () => {
     if (!profitLoss || profitLoss.revenue === 0) return 0;
-    return (
-      (profitLoss.cashReceived / profitLoss.revenue) *
-      100
-    ).toFixed(2);
+    return ((profitLoss.cashReceived / profitLoss.revenue) * 100).toFixed(2);
   };
 
   if (loading) {

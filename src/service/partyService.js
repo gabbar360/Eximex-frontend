@@ -71,10 +71,11 @@ export const deleteParty = async (id) => {
   }
 };
 
-
 export const updatePartyStage = async (id, stage) => {
   try {
-    const response = await axiosInstance.put(`/update/party/${id}/stage`, { stage });
+    const response = await axiosInstance.put(`/update/party/${id}/stage`, {
+      stage,
+    });
     return {
       data: response.data.data,
       message: response.data.message,

@@ -64,7 +64,6 @@ const packingListService = {
     }
   },
 
-
   // ============ PACKAGING STEPS INTEGRATION ============
 
   // Create packaging steps for a product

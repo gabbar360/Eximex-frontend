@@ -31,10 +31,13 @@ const ReportsDownloads: React.FC = () => {
   }, []);
 
   const handleCommercialInvoiceDownload = async (order: any) => {
-    const hasPackingList = order.piInvoice?.packingLists && order.piInvoice.packingLists.length > 0;
-    
+    const hasPackingList =
+      order.piInvoice?.packingLists && order.piInvoice.packingLists.length > 0;
+
     if (!hasPackingList) {
-      toast.error('Packing list must be created before downloading Commercial Invoice');
+      toast.error(
+        'Packing list must be created before downloading Commercial Invoice'
+      );
       return;
     }
 
@@ -67,8 +70,9 @@ const ReportsDownloads: React.FC = () => {
   };
 
   const handleBLDraftDownload = async (order: any) => {
-    const hasPackingList = order.piInvoice?.packingLists && order.piInvoice.packingLists.length > 0;
-    
+    const hasPackingList =
+      order.piInvoice?.packingLists && order.piInvoice.packingLists.length > 0;
+
     if (!hasPackingList) {
       toast.error('Packing list must be created before downloading BL Draft');
       return;

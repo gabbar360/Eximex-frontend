@@ -19,17 +19,17 @@ export default function SignInForm() {
 
   const validateForm = () => {
     const newErrors = { email: '', password: '' };
-    
+
     if (!email.trim()) {
       newErrors.email = 'Business email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       newErrors.email = 'Please enter a valid email address';
     }
-    
+
     if (!password.trim()) {
       newErrors.password = 'Password is required';
     }
-    
+
     setErrors(newErrors);
     return !newErrors.email && !newErrors.password;
   };
@@ -38,7 +38,7 @@ export default function SignInForm() {
     if (!validateForm()) {
       return;
     }
-    
+
     setIsSubmitting(true);
     try {
       const data = await dispatch(loginUser({ email, password })).unwrap();
@@ -72,13 +72,9 @@ export default function SignInForm() {
           {/* Form Card */}
           <div className="auth-form-card bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl border border-white/20 overflow-hidden w-full">
             {/* Header */}
-            <div
-              className="bg-white p-2 sm:p-3 lg:p-4"
-            >
+            <div className="bg-white p-2 sm:p-3 lg:p-4">
               <div className="text-center">
-                <h2
-                  className="text-lg sm:text-xl lg:text-2xl font-bold mb-1 text-black"
-                >
+                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-1 text-black">
                   Sign In
                 </h2>
               </div>
@@ -118,7 +114,8 @@ export default function SignInForm() {
                     value={email}
                     onChange={(e) => {
                       setEmail(e.target.value);
-                      if (errors.email) setErrors(prev => ({ ...prev, email: '' }));
+                      if (errors.email)
+                        setErrors((prev) => ({ ...prev, email: '' }));
                     }}
                     onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
                     placeholder="Enter your business email"
@@ -139,7 +136,8 @@ export default function SignInForm() {
                       value={password}
                       onChange={(e) => {
                         setPassword(e.target.value);
-                        if (errors.password) setErrors(prev => ({ ...prev, password: '' }));
+                        if (errors.password)
+                          setErrors((prev) => ({ ...prev, password: '' }));
                       }}
                       onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
                       placeholder="Enter your password"
@@ -158,7 +156,9 @@ export default function SignInForm() {
                     </button>
                   </div>
                   {errors.password && (
-                    <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.password}
+                    </p>
                   )}
                 </div>
               </div>

@@ -41,12 +41,12 @@ const AccountingDashboard = () => {
         cashReceived: 0,
         outstandingReceivables: 0,
         fromDate: new Date().toISOString().split('T')[0],
-        toDate: new Date().toISOString().split('T')[0]
+        toDate: new Date().toISOString().split('T')[0],
       });
       setBalanceSheetData({
         accountsReceivable: 0,
         totalAssets: 0,
-        asOfDate: new Date().toISOString().split('T')[0]
+        asOfDate: new Date().toISOString().split('T')[0],
       });
       setLoading(false);
     }
@@ -56,7 +56,7 @@ const AccountingDashboard = () => {
     try {
       const [ledger, profitLoss, balanceSheet] = await Promise.all([
         accountingService.getLedger().catch(() => ({ data: [] })),
-        accountingService.getProfitLoss().catch(() => ({ 
+        accountingService.getProfitLoss().catch(() => ({
           data: {
             revenue: 0,
             expenses: 0,
@@ -65,15 +65,15 @@ const AccountingDashboard = () => {
             cashReceived: 0,
             outstandingReceivables: 0,
             fromDate: new Date().toISOString().split('T')[0],
-            toDate: new Date().toISOString().split('T')[0]
-          }
+            toDate: new Date().toISOString().split('T')[0],
+          },
         })),
-        accountingService.getBalanceSheet().catch(() => ({ 
+        accountingService.getBalanceSheet().catch(() => ({
           data: {
             accountsReceivable: 0,
             totalAssets: 0,
-            asOfDate: new Date().toISOString().split('T')[0]
-          }
+            asOfDate: new Date().toISOString().split('T')[0],
+          },
         })),
       ]);
 
@@ -91,12 +91,12 @@ const AccountingDashboard = () => {
         cashReceived: 0,
         outstandingReceivables: 0,
         fromDate: new Date().toISOString().split('T')[0],
-        toDate: new Date().toISOString().split('T')[0]
+        toDate: new Date().toISOString().split('T')[0],
       });
       setBalanceSheetData({
         accountsReceivable: 0,
         totalAssets: 0,
-        asOfDate: new Date().toISOString().split('T')[0]
+        asOfDate: new Date().toISOString().split('T')[0],
       });
     }
   };
@@ -381,10 +381,23 @@ const DashboardContent = ({
                 <tbody>
                   {ledgerData.length === 0 ? (
                     <tr>
-                      <td colSpan="5" className="py-8 text-center text-gray-500 dark:text-gray-400">
+                      <td
+                        colSpan="5"
+                        className="py-8 text-center text-gray-500 dark:text-gray-400"
+                      >
                         <div className="flex flex-col items-center">
-                          <svg className="w-12 h-12 mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          <svg
+                            className="w-12 h-12 mb-2 text-gray-300"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                            />
                           </svg>
                           <p>No accounting entries found</p>
                         </div>

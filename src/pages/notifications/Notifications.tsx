@@ -2,17 +2,35 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { getNotifications, markAllNotificationsAsRead, deleteNotification } from '../../features/notificationSlice';
+import {
+  getNotifications,
+  markAllNotificationsAsRead,
+  deleteNotification,
+} from '../../features/notificationSlice';
 import PageMeta from '../../components/common/PageMeta';
-import { HiBell, HiCheckCircle, HiTrash, HiMagnifyingGlass, HiSparkles, HiArrowLeft } from 'react-icons/hi2';
-import { MdNotifications, MdMessage, MdAccessTime, MdPerson } from 'react-icons/md';
+import {
+  HiBell,
+  HiCheckCircle,
+  HiTrash,
+  HiMagnifyingGlass,
+  HiSparkles,
+  HiArrowLeft,
+} from 'react-icons/hi2';
+import {
+  MdNotifications,
+  MdMessage,
+  MdAccessTime,
+  MdPerson,
+} from 'react-icons/md';
 import { Pagination } from 'antd';
 import { useDebounce } from '../../utils/useDebounce';
 
 const Notifications: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { notifications, loading, unreadCount, pagination } = useSelector((state: any) => state.notification);
+  const { notifications, loading, unreadCount, pagination } = useSelector(
+    (state: any) => state.notification
+  );
   const [searchTerm, setSearchTerm] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -92,8 +110,10 @@ const Notifications: React.FC = () => {
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-    
+    const diffInMinutes = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60)
+    );
+
     if (diffInMinutes < 1) return 'Just now';
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
@@ -137,7 +157,9 @@ const Notifications: React.FC = () => {
                       Notifications
                     </h1>
                     <p className="text-slate-600">
-                      {unreadCount > 0 ? `${unreadCount} unread notifications` : 'All caught up!'}
+                      {unreadCount > 0
+                        ? `${unreadCount} unread notifications`
+                        : 'All caught up!'}
                     </p>
                   </div>
                 </div>
@@ -172,7 +194,9 @@ const Notifications: React.FC = () => {
           {loading ? (
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-12 text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-slate-600 mx-auto mb-4"></div>
-              <p className="text-slate-600 font-medium">Loading notifications...</p>
+              <p className="text-slate-600 font-medium">
+                Loading notifications...
+              </p>
             </div>
           ) : filteredNotifications.length === 0 ? (
             <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-12 text-center">
@@ -183,7 +207,9 @@ const Notifications: React.FC = () => {
                 {searchTerm ? 'No notifications found' : 'No notifications yet'}
               </h3>
               <p className="text-slate-600">
-                {searchTerm ? 'Try a different search term.' : "You'll see notifications here when there's something new"}
+                {searchTerm
+                  ? 'Try a different search term.'
+                  : "You'll see notifications here when there's something new"}
               </p>
             </div>
           ) : (
@@ -220,23 +246,33 @@ const Notifications: React.FC = () => {
                     <div
                       key={notification.id}
                       className={`p-4 hover:bg-gray-50 transition-colors ${
-                        !notification.isRead ? 'bg-blue-50/50 border-l-4 border-l-blue-500' : ''
+                        !notification.isRead
+                          ? 'bg-blue-50/50 border-l-4 border-l-blue-500'
+                          : ''
                       }`}
                     >
                       <div className="grid grid-cols-6 gap-3 items-center">
                         {/* Type Column */}
                         <div className="flex items-center gap-2">
-                          <span className="text-xl">{getNotificationIcon(notification.type)}</span>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(notification.type)}`}>
+                          <span className="text-xl">
+                            {getNotificationIcon(notification.type)}
+                          </span>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(notification.type)}`}
+                          >
                             {notification.type.replace('_', ' ')}
                           </span>
                         </div>
 
                         {/* Message Column */}
                         <div className="col-span-2">
-                          <h3 className={`font-semibold text-sm mb-1 ${
-                            !notification.isRead ? 'text-gray-900' : 'text-gray-700'
-                          }`}>
+                          <h3
+                            className={`font-semibold text-sm mb-1 ${
+                              !notification.isRead
+                                ? 'text-gray-900'
+                                : 'text-gray-700'
+                            }`}
+                          >
                             {notification.title}
                           </h3>
                           <p className="text-gray-600 text-sm line-clamp-2">
@@ -280,19 +316,29 @@ const Notifications: React.FC = () => {
                   <div
                     key={notification.id}
                     className={`p-4 ${
-                      !notification.isRead ? 'bg-blue-50/50 border-l-4 border-l-blue-500' : ''
+                      !notification.isRead
+                        ? 'bg-blue-50/50 border-l-4 border-l-blue-500'
+                        : ''
                     }`}
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
-                        <span className="text-xl">{getNotificationIcon(notification.type)}</span>
+                        <span className="text-xl">
+                          {getNotificationIcon(notification.type)}
+                        </span>
                         <div>
-                          <h3 className={`font-semibold text-sm ${
-                            !notification.isRead ? 'text-gray-900' : 'text-gray-700'
-                          }`}>
+                          <h3
+                            className={`font-semibold text-sm ${
+                              !notification.isRead
+                                ? 'text-gray-900'
+                                : 'text-gray-700'
+                            }`}
+                          >
                             {notification.title}
                           </h3>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(notification.type)}`}>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(notification.type)}`}
+                          >
                             {notification.type.replace('_', ' ')}
                           </span>
                         </div>
@@ -337,7 +383,13 @@ const Notifications: React.FC = () => {
                 pageSize={pageSize}
                 onChange={(page) => {
                   setCurrentPage(page);
-                  dispatch(getNotifications({ page, limit: pageSize, search: searchTerm }));
+                  dispatch(
+                    getNotifications({
+                      page,
+                      limit: pageSize,
+                      search: searchTerm,
+                    })
+                  );
                 }}
               />
             </div>
@@ -356,7 +408,8 @@ const Notifications: React.FC = () => {
                   Delete Notification
                 </h3>
                 <p className="text-slate-600">
-                  Are you sure you want to delete this notification? This action cannot be undone.
+                  Are you sure you want to delete this notification? This action
+                  cannot be undone.
                 </p>
               </div>
               <div className="flex items-center justify-center space-x-3">
