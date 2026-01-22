@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import {
@@ -28,13 +28,29 @@ const BulkUploadProducts = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [categorySearch, setCategorySearch] = useState('');
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const fileInputRef = useRef(null);
 
   const { loading: uploading, result, error } = bulkUpload;
 
   // Get result data properly
   const uploadResult = result?.data || result;
 
-  // Filter categories based on search
+  // Sanitize user input to prevent XSS
+  const sanitizeInput = (input) => {
+    if (!input) return '';
+    return input.toString().replace(/[<>"'&]/g, (match) => {
+      const escapeMap = {
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#x27;',
+        '&': '&amp;'
+      };
+      return escapeMap[match];
+    });
+  };
+
+  // Filter categories based on search with sanitization
   const filteredCategories = useMemo(() => {
     if (!categorySearch) return categories || [];
     return (categories || []).filter((category) =>
@@ -124,12 +140,8 @@ const BulkUploadProducts = () => {
     }
 
     try {
-      console.log('Downloading template for category:', selectedCategory);
-
       const baseUrl = import.meta.env.VITE_API_BASE_URL;
       const url = `${baseUrl}/download/template?categoryId=${selectedCategory}`;
-
-      console.log('Template URL:', url);
 
       const response = await fetch(url, {
         method: 'GET',
@@ -139,16 +151,12 @@ const BulkUploadProducts = () => {
         },
       });
 
-      console.log('Response status:', response.status);
-
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Download error:', errorText);
         throw new Error(`Download failed: ${response.status}`);
       }
 
       const blob = await response.blob();
-      console.log('Blob size:', blob.size);
 
       if (blob.size === 0) {
         throw new Error('Empty file received');
@@ -158,7 +166,7 @@ const BulkUploadProducts = () => {
       const link = document.createElement('a');
       link.href = downloadUrl;
       link.download = selectedCategory
-        ? `template-${categories.find((c) => c.id == selectedCategory)?.name || 'category'}.xlsx`
+        ? `template-${categories.find((c) => c.id === selectedCategory)?.name || 'category'}.xlsx`
         : 'product-template.xlsx';
       document.body.appendChild(link);
       link.click();
@@ -167,7 +175,6 @@ const BulkUploadProducts = () => {
 
       toast.success('Excel template downloaded successfully');
     } catch (error) {
-      console.error('Template download error:', error);
       toast.error(`Failed to download template: ${error.message}`);
     }
   };
@@ -180,9 +187,10 @@ const BulkUploadProducts = () => {
   const resetUpload = () => {
     setFile(null);
     dispatch(clearBulkUploadResult());
-    // Reset file input
-    const fileInput = document.getElementById('file-upload');
-    if (fileInput) fileInput.value = '';
+    // Reset file input using ref
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   return (
@@ -204,9 +212,10 @@ const BulkUploadProducts = () => {
                   <input
                     type="text"
                     placeholder="Search and select category..."
-                    value={categorySearch}
+                    value={sanitizeInput(categorySearch)}
                     onChange={(e) => {
-                      setCategorySearch(e.target.value);
+                      const sanitizedValue = sanitizeInput(e.target.value);
+                      setCategorySearch(sanitizedValue);
                       setShowCategoryDropdown(true);
                     }}
                     onFocus={() => setShowCategoryDropdown(true)}
@@ -245,7 +254,7 @@ const BulkUploadProducts = () => {
                           className="w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors duration-150 border-b border-slate-100 last:border-b-0"
                         >
                           <span className="font-medium text-slate-900">
-                            {category.name}
+                            {sanitizeInput(category.name)}
                           </span>
                         </button>
                       ))
@@ -350,7 +359,7 @@ const BulkUploadProducts = () => {
                   <div className="mt-4 p-3 bg-slate-100 border border-slate-200 rounded-lg">
                     <p className="text-slate-800 font-medium text-sm">
                       Selected:{' '}
-                      {categories?.find((c) => c.id == selectedCategory)?.name}
+                      {categories?.find((c) => c.id === selectedCategory)?.name}
                     </p>
                     <p className="text-slate-600 text-xs mt-1">
                       Template will include packaging hierarchy fields
@@ -381,6 +390,7 @@ const BulkUploadProducts = () => {
                 </label>
                 <input
                   id="file-upload"
+                  ref={fileInputRef}
                   type="file"
                   accept=".xlsx,.xls"
                   onChange={handleFileChange}
