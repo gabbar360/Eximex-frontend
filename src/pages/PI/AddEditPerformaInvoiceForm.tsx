@@ -2204,7 +2204,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                         Show "TO THE ORDER" in PDF instead of customer details
                       </span>
                     </div>
-                    
+
                     <div className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 font-medium">
                       <input
                         type="checkbox"
@@ -2213,7 +2213,8 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                         className="rounded border-gray-300 text-brand-500 shadow-sm focus:ring-brand-500 dark:border-gray-700 dark:bg-gray-800"
                       />
                       <span>
-                        Sample Kit Invoice (Changes header to "SAMPLE KIT PROFORMA INVOICE")
+                        Sample Kit Invoice (Changes header to "SAMPLE KIT
+                        PROFORMA INVOICE")
                       </span>
                     </div>
                   </div>

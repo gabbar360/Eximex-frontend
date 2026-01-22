@@ -97,5 +97,6 @@ const accountingSlice = createSlice({
   },
 });
 
-export const { clearAccountingError, clearAccountingMessages } = accountingSlice.actions;
+export const { clearAccountingError, clearAccountingMessages } =
+  accountingSlice.actions;
 export default accountingSlice.reducer;

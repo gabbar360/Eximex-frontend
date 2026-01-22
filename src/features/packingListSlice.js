@@ -67,8 +67,6 @@ export const downloadPackingListPdf = createAsyncThunk(
   }
 );
 
-
-
 export const downloadBLDraftPdf = createAsyncThunk(
   'packingList/downloadBLDraftPdf',
   async (id, { rejectWithValue }) => {
@@ -171,8 +169,7 @@ const packingListSlice = createSlice({
       .addCase(deletePackingList.rejected, (state, { payload }) => {
         state.loading = false;
         state.error = payload;
-      })
-
+      });
   },
 });
 

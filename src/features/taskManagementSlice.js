@@ -117,7 +117,9 @@ const taskManagementSlice = createSlice({
 
       // Update complete task
       .addCase(updateTask.fulfilled, (state, { payload }) => {
-        const index = state.tasks.findIndex(task => task.id === payload.data.id);
+        const index = state.tasks.findIndex(
+          (task) => task.id === payload.data.id
+        );
         if (index !== -1) {
           state.tasks[index] = payload.data;
         }
@@ -141,7 +143,7 @@ const taskManagementSlice = createSlice({
 
       // Delete task
       .addCase(deleteTask.fulfilled, (state, { payload }) => {
-        state.tasks = state.tasks.filter(task => task.id !== payload);
+        state.tasks = state.tasks.filter((task) => task.id !== payload);
       })
 
       // Get staff list

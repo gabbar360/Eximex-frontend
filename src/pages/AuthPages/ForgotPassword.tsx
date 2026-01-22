@@ -15,13 +15,13 @@ const ForgotPassword: React.FC = () => {
 
   const validateForm = () => {
     const newErrors = { email: '' };
-    
+
     if (!email.trim()) {
       newErrors.email = 'Business email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       newErrors.email = 'Please enter a valid email address';
     }
-    
+
     setErrors(newErrors);
     return !newErrors.email;
   };
@@ -73,17 +73,20 @@ const ForgotPassword: React.FC = () => {
                   <div className="p-2 sm:p-3 lg:p-4">
                     <div className="text-center space-y-3 sm:space-y-4">
                       <p className="text-xs sm:text-sm text-black">
-                        We've sent a password reset link to <strong>{email}</strong>
+                        We've sent a password reset link to{' '}
+                        <strong>{email}</strong>
                       </p>
-                      
+
                       <div className="bg-gray-100 border border-black rounded-lg p-3 sm:p-4">
                         <p className="text-xs sm:text-sm text-black">
-                          📧 Check your email and click the reset link to set a new password.
+                          📧 Check your email and click the reset link to set a
+                          new password.
                         </p>
                       </div>
-                      
+
                       <p className="text-xs sm:text-sm text-black">
-                        The link will expire in 10 minutes. Check your spam folder if you don't see it.
+                        The link will expire in 10 minutes. Check your spam
+                        folder if you don't see it.
                       </p>
                     </div>
 
@@ -116,13 +119,9 @@ const ForgotPassword: React.FC = () => {
               {/* Form Card */}
               <div className="auth-form-card bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl overflow-hidden w-full">
                 {/* Header */}
-                <div
-                  className="bg-white p-2 sm:p-3 lg:p-4"
-                >
+                <div className="bg-white p-2 sm:p-3 lg:p-4">
                   <div className="text-center">
-                    <h2
-                      className="text-lg sm:text-xl lg:text-2xl font-bold mb-1 text-black"
-                    >
+                    <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-1 text-black">
                       Forgot Password?
                     </h2>
                     <p className="text-black text-xs sm:text-sm">
@@ -144,7 +143,8 @@ const ForgotPassword: React.FC = () => {
                         value={email}
                         onChange={(e) => {
                           setEmail(e.target.value);
-                          if (errors.email) setErrors(prev => ({ ...prev, email: '' }));
+                          if (errors.email)
+                            setErrors((prev) => ({ ...prev, email: '' }));
                         }}
                         onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
                         placeholder="Enter your registered email"
@@ -152,7 +152,9 @@ const ForgotPassword: React.FC = () => {
                         disabled={isLoading}
                       />
                       {errors.email && (
-                        <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                        <p className="text-red-500 text-xs mt-1">
+                          {errors.email}
+                        </p>
                       )}
                     </div>
 

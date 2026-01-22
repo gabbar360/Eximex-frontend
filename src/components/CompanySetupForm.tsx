@@ -202,7 +202,7 @@ export default function CompanySetupForm({
       if (isSuperAdmin) {
         // SuperAdmin API call - use FormData for file uploads
         const formData = new FormData();
-        
+
         // Add text fields
         formData.append('name', form.name);
         formData.append('email', form.email);
@@ -216,7 +216,7 @@ export default function CompanySetupForm({
         formData.append('ifscCode', form.ifsc_code);
         formData.append('bankAddress', form.bank_address);
         formData.append('swiftCode', form.swift_code);
-        
+
         // Add files if selected
         if (form.logo) {
           formData.append('logo', form.logo);

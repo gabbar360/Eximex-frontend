@@ -80,13 +80,16 @@ const PackingListManagement: React.FC = () => {
 
       // Get packing list ID from order - try multiple approaches
       let packingListId = order.piInvoice?.packingLists?.[0]?.id;
-      
+
       // If no packing list ID found, try using the PI invoice ID
       if (!packingListId) {
         packingListId = order.piInvoice?.id;
-        console.log('No packing list ID found, using PI invoice ID:', packingListId);
+        console.log(
+          'No packing list ID found, using PI invoice ID:',
+          packingListId
+        );
       }
-      
+
       // If still no ID, try using the order's PI ID
       if (!packingListId) {
         packingListId = order.piId;
@@ -98,7 +101,7 @@ const PackingListManagement: React.FC = () => {
         orderNumber: order.orderNumber,
         packingListId,
         piInvoiceId: order.piInvoice?.id,
-        packingListsCount: order.piInvoice?.packingLists?.length || 0
+        packingListsCount: order.piInvoice?.packingLists?.length || 0,
       });
 
       if (!packingListId) {
@@ -508,7 +511,9 @@ const PackingListManagement: React.FC = () => {
                                 onClick={() => handlePDFDownload(order)}
                                 className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-blue-600 transition-all duration-300"
                                 title="Download Packing List PDF"
-                                disabled={!hasPackingList && !order.piInvoice?.id}
+                                disabled={
+                                  !hasPackingList && !order.piInvoice?.id
+                                }
                               >
                                 <HiArrowDownTray className="w-4 h-4" />
                               </button>

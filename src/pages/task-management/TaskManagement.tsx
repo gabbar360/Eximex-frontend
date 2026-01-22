@@ -2,7 +2,11 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { getTasks, updateTask, deleteTask } from '../../features/taskManagementSlice';
+import {
+  getTasks,
+  updateTask,
+  deleteTask,
+} from '../../features/taskManagementSlice';
 import PageMeta from '../../components/common/PageMeta';
 import {
   HiEye,
@@ -21,45 +25,69 @@ import { useAuth } from '../../context/AuthContext';
 const TaskManagement: React.FC = () => {
   const dispatch = useDispatch();
   const { user } = useAuth();
-  const { tasks, loading, pagination } = useSelector((state: any) => state.taskManagement);
-  
+  const { tasks, loading, pagination } = useSelector(
+    (state: any) => state.taskManagement
+  );
+
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [statusFilter, setStatusFilter] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
-  const [confirmStatusChange, setConfirmStatusChange] = useState<{taskId: number, newStatus: string, taskTitle: string} | null>(null);
-  
+  const [confirmStatusChange, setConfirmStatusChange] = useState<{
+    taskId: number;
+    newStatus: string;
+    taskTitle: string;
+  } | null>(null);
+
   // Dropdown states
   const [statusSearch, setStatusSearch] = useState('');
   const [prioritySearch, setPrioritySearch] = useState('');
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
   const [showPriorityDropdown, setShowPriorityDropdown] = useState(false);
-  
+
   const statusRef = useRef(null);
   const priorityRef = useRef(null);
 
   const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(user?.role?.name);
 
   // SearchableDropdown Component
-  const SearchableDropdown = ({ label, value, options, onSelect, searchValue, onSearchChange, isOpen, onToggle, placeholder, dropdownRef }) => {
-    const selectedOption = options.find(opt => opt.id === value);
-    
+  const SearchableDropdown = ({
+    label,
+    value,
+    options,
+    onSelect,
+    searchValue,
+    onSearchChange,
+    isOpen,
+    onToggle,
+    placeholder,
+    dropdownRef,
+  }) => {
+    const selectedOption = options.find((opt) => opt.id === value);
+
     return (
       <div className="relative" ref={dropdownRef}>
         <div
           className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg cursor-pointer flex items-center justify-between transition-all duration-300 shadow-sm hover:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200 focus-within:border-slate-500"
           onClick={onToggle}
         >
-          <span className={`text-sm ${selectedOption ? 'text-slate-900' : 'text-slate-500'}`}>
+          <span
+            className={`text-sm ${selectedOption ? 'text-slate-900' : 'text-slate-500'}`}
+          >
             {selectedOption ? selectedOption.name : placeholder}
           </span>
-          <HiChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+          <HiChevronDown
+            className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          />
         </div>
-        
+
         {isOpen && (
-          <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl" style={{ top: '100%', marginTop: '4px' }}>
+          <div
+            className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl"
+            style={{ top: '100%', marginTop: '4px' }}
+          >
             <div className="p-3 border-b border-gray-100">
               <div className="relative">
                 <HiMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
@@ -76,13 +104,17 @@ const TaskManagement: React.FC = () => {
             </div>
             <div className="max-h-60 overflow-y-auto">
               {options.length === 0 ? (
-                <div className="px-4 py-3 text-slate-500 text-sm text-center">No {label.toLowerCase()} found</div>
+                <div className="px-4 py-3 text-slate-500 text-sm text-center">
+                  No {label.toLowerCase()} found
+                </div>
               ) : (
                 options.map((option) => (
                   <div
                     key={option.id}
                     className={`px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm transition-colors duration-150 ${
-                      option.id === value ? 'bg-slate-100 text-slate-900 font-medium' : 'text-slate-700'
+                      option.id === value
+                        ? 'bg-slate-100 text-slate-900 font-medium'
+                        : 'text-slate-700'
                     }`}
                     onClick={() => {
                       onSelect(option.id);
@@ -121,7 +153,7 @@ const TaskManagement: React.FC = () => {
       limit: pageSize,
       search: '',
       status: statusFilter,
-      priority: priorityFilter
+      priority: priorityFilter,
     };
     console.log('🚀 Frontend dispatching getTasks with params:', params);
     dispatch(getTasks(params));
@@ -129,13 +161,15 @@ const TaskManagement: React.FC = () => {
 
   const { debouncedCallback: debouncedSearch } = useDebounce(
     (value: string) => {
-      dispatch(getTasks({
-        page: 1,
-        limit: pageSize,
-        search: value,
-        status: statusFilter,
-        priority: priorityFilter
-      }));
+      dispatch(
+        getTasks({
+          page: 1,
+          limit: pageSize,
+          search: value,
+          status: statusFilter,
+          priority: priorityFilter,
+        })
+      );
     },
     500
   );
@@ -150,11 +184,11 @@ const TaskManagement: React.FC = () => {
   );
 
   const handleStatusUpdate = async (taskId: number, newStatus: string) => {
-    const task = tasks.find(t => t.id === taskId);
+    const task = tasks.find((t) => t.id === taskId);
     setConfirmStatusChange({
       taskId,
       newStatus,
-      taskTitle: task?.title || 'Unknown Task'
+      taskTitle: task?.title || 'Unknown Task',
     });
   };
 
@@ -162,10 +196,12 @@ const TaskManagement: React.FC = () => {
     if (!confirmStatusChange) return;
 
     try {
-      const result = await dispatch(updateTask({ 
-        taskId: confirmStatusChange.taskId, 
-        taskData: { status: confirmStatusChange.newStatus } 
-      })).unwrap();
+      const result = await dispatch(
+        updateTask({
+          taskId: confirmStatusChange.taskId,
+          taskData: { status: confirmStatusChange.newStatus },
+        })
+      ).unwrap();
       toast.success(result.message || 'Task status updated successfully');
       setConfirmStatusChange(null);
     } catch (error: any) {
@@ -192,23 +228,35 @@ const TaskManagement: React.FC = () => {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'URGENT': return 'bg-red-100 text-red-800';
-      case 'HIGH': return 'bg-orange-100 text-orange-800';
-      case 'MEDIUM': return 'bg-yellow-100 text-yellow-800';
-      case 'LOW': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'URGENT':
+        return 'bg-red-100 text-red-800';
+      case 'HIGH':
+        return 'bg-orange-100 text-orange-800';
+      case 'MEDIUM':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'LOW':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'COMPLETED': return 'bg-green-100 text-green-800';
-      case 'IN_PROGRESS': return 'bg-blue-100 text-blue-800';
-      case 'PENDING': return 'bg-yellow-100 text-yellow-800';
-      case 'ON_HOLD': return 'bg-orange-100 text-orange-800';
-      case 'CANCELLED': return 'bg-red-100 text-red-800';
-      case 'OVERDUE': return 'bg-red-200 text-red-900';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'COMPLETED':
+        return 'bg-green-100 text-green-800';
+      case 'IN_PROGRESS':
+        return 'bg-blue-100 text-blue-800';
+      case 'PENDING':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'ON_HOLD':
+        return 'bg-orange-100 text-orange-800';
+      case 'CANCELLED':
+        return 'bg-red-100 text-red-800';
+      case 'OVERDUE':
+        return 'bg-red-200 text-red-900';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -261,7 +309,11 @@ const TaskManagement: React.FC = () => {
                         { id: 'COMPLETED', name: 'Completed' },
                         { id: 'CANCELLED', name: 'Cancelled' },
                         { id: 'OVERDUE', name: 'Overdue' },
-                      ].filter(status => status.name.toLowerCase().includes(statusSearch.toLowerCase()))}
+                      ].filter((status) =>
+                        status.name
+                          .toLowerCase()
+                          .includes(statusSearch.toLowerCase())
+                      )}
                       onSelect={(value) => {
                         setStatusFilter(value);
                         setStatusSearch('');
@@ -269,7 +321,9 @@ const TaskManagement: React.FC = () => {
                       searchValue={statusSearch}
                       onSearchChange={setStatusSearch}
                       isOpen={showStatusDropdown}
-                      onToggle={() => setShowStatusDropdown(!showStatusDropdown)}
+                      onToggle={() =>
+                        setShowStatusDropdown(!showStatusDropdown)
+                      }
                       placeholder="All Status"
                       dropdownRef={statusRef}
                     />
@@ -286,7 +340,11 @@ const TaskManagement: React.FC = () => {
                         { id: 'MEDIUM', name: 'Medium' },
                         { id: 'HIGH', name: 'High' },
                         { id: 'URGENT', name: 'Urgent' },
-                      ].filter(priority => priority.name.toLowerCase().includes(prioritySearch.toLowerCase()))}
+                      ].filter((priority) =>
+                        priority.name
+                          .toLowerCase()
+                          .includes(prioritySearch.toLowerCase())
+                      )}
                       onSelect={(value) => {
                         setPriorityFilter(value);
                         setPrioritySearch('');
@@ -294,7 +352,9 @@ const TaskManagement: React.FC = () => {
                       searchValue={prioritySearch}
                       onSearchChange={setPrioritySearch}
                       isOpen={showPriorityDropdown}
-                      onToggle={() => setShowPriorityDropdown(!showPriorityDropdown)}
+                      onToggle={() =>
+                        setShowPriorityDropdown(!showPriorityDropdown)
+                      }
                       placeholder="All Priority"
                       dropdownRef={priorityRef}
                     />
@@ -332,7 +392,7 @@ const TaskManagement: React.FC = () => {
               <p className="text-slate-600 mb-6">
                 {searchTerm
                   ? 'Try adjusting your search or filters.'
-                  : isAdmin 
+                  : isAdmin
                     ? 'Start by assigning tasks to your team members.'
                     : 'No tasks have been assigned to you yet.'}
               </p>
@@ -342,7 +402,13 @@ const TaskManagement: React.FC = () => {
               <div className="overflow-x-auto">
                 <div className="min-w-[800px]">
                   <div className="bg-gray-50 border-b border-gray-200 p-4">
-                    <div className="grid gap-3 text-sm font-semibold text-slate-700" style={{ gridTemplateColumns: '2fr 1fr 1.2fr 1.2fr 0.8fr 1fr 1fr 0.8fr' }}>
+                    <div
+                      className="grid gap-3 text-sm font-semibold text-slate-700"
+                      style={{
+                        gridTemplateColumns:
+                          '2fr 1fr 1.2fr 1.2fr 0.8fr 1fr 1fr 0.8fr',
+                      }}
+                    >
                       <div className="flex items-center gap-2">
                         <MdTask className="w-4 h-4 text-slate-600" />
                         <span>Task</span>
@@ -362,11 +428,21 @@ const TaskManagement: React.FC = () => {
                   <div className="divide-y divide-gray-200">
                     {tasks.map((task: any) => (
                       <div key={task.id} className="p-4 hover:bg-gray-50">
-                        <div className="grid gap-3 items-center" style={{ gridTemplateColumns: '2fr 1fr 1.2fr 1.2fr 0.8fr 1fr 1fr 0.8fr' }}>
+                        <div
+                          className="grid gap-3 items-center"
+                          style={{
+                            gridTemplateColumns:
+                              '2fr 1fr 1.2fr 1.2fr 0.8fr 1fr 1fr 0.8fr',
+                          }}
+                        >
                           <div>
-                            <h3 className="font-semibold text-slate-900">{task.title}</h3>
+                            <h3 className="font-semibold text-slate-900">
+                              {task.title}
+                            </h3>
                             {task.description && (
-                              <p className="text-sm text-slate-600 mt-1 truncate">{task.description}</p>
+                              <p className="text-sm text-slate-600 mt-1 truncate">
+                                {task.description}
+                              </p>
                             )}
                           </div>
                           <div className="text-sm text-slate-700">
@@ -374,10 +450,16 @@ const TaskManagement: React.FC = () => {
                               {task.type?.replace('_', ' ')}
                             </span>
                           </div>
-                          <div className="text-sm text-slate-700">{task.assignee?.name}</div>
-                          <div className="text-sm text-slate-700">{task.assigner?.name}</div>
+                          <div className="text-sm text-slate-700">
+                            {task.assignee?.name}
+                          </div>
+                          <div className="text-sm text-slate-700">
+                            {task.assigner?.name}
+                          </div>
                           <div>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(task.priority)}`}>
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(task.priority)}`}
+                            >
                               {task.priority}
                             </span>
                           </div>
@@ -385,7 +467,9 @@ const TaskManagement: React.FC = () => {
                             {!isAdmin ? (
                               <select
                                 value={task.status}
-                                onChange={(e) => handleStatusUpdate(task.id, e.target.value)}
+                                onChange={(e) =>
+                                  handleStatusUpdate(task.id, e.target.value)
+                                }
                                 className={`px-2 py-1 rounded-full text-xs font-medium border-0 ${getStatusColor(task.status)}`}
                                 disabled={task.status === 'COMPLETED'}
                               >
@@ -396,13 +480,17 @@ const TaskManagement: React.FC = () => {
                                 <option value="CANCELLED">Cancelled</option>
                               </select>
                             ) : (
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}>
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}
+                              >
                                 {task.status.replace('_', ' ')}
                               </span>
                             )}
                           </div>
                           <div className="text-sm text-slate-700">
-                            {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '-'}
+                            {task.dueDate
+                              ? new Date(task.dueDate).toLocaleDateString()
+                              : '-'}
                           </div>
                           <div className="flex items-center justify-end space-x-2">
                             {isAdmin && (
@@ -440,13 +528,15 @@ const TaskManagement: React.FC = () => {
                 pageSize={pageSize}
                 onChange={(page) => {
                   setCurrentPage(page);
-                  dispatch(getTasks({
-                    page: page,
-                    limit: pageSize,
-                    search: searchTerm,
-                    status: statusFilter,
-                    priority: priorityFilter
-                  }));
+                  dispatch(
+                    getTasks({
+                      page: page,
+                      limit: pageSize,
+                      search: searchTerm,
+                      status: statusFilter,
+                      priority: priorityFilter,
+                    })
+                  );
                 }}
               />
             </div>
@@ -465,7 +555,8 @@ const TaskManagement: React.FC = () => {
                   Delete Task
                 </h3>
                 <p className="text-slate-600">
-                  Are you sure you want to delete this task? This action cannot be undone.
+                  Are you sure you want to delete this task? This action cannot
+                  be undone.
                 </p>
               </div>
               <div className="flex items-center justify-center space-x-3">
@@ -498,7 +589,12 @@ const TaskManagement: React.FC = () => {
                   Change Task Status
                 </h3>
                 <p className="text-slate-600">
-                  Are you sure you want to change the status of <strong>"{confirmStatusChange.taskTitle}"</strong> to <strong>{confirmStatusChange.newStatus.replace('_', ' ')}</strong>?
+                  Are you sure you want to change the status of{' '}
+                  <strong>"{confirmStatusChange.taskTitle}"</strong> to{' '}
+                  <strong>
+                    {confirmStatusChange.newStatus.replace('_', ' ')}
+                  </strong>
+                  ?
                 </p>
               </div>
               <div className="flex items-center justify-center space-x-3">

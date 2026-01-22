@@ -15,13 +15,17 @@ const notificationService = {
 
   // Mark notification as read
   markAsRead: async (notificationId) => {
-    const response = await axiosInstance.patch(`/notifications/${notificationId}/read`);
+    const response = await axiosInstance.patch(
+      `/notifications/${notificationId}/read`
+    );
     return response.data;
   },
 
   // Delete notification
   deleteNotification: async (notificationId) => {
-    const response = await axiosInstance.delete(`/notifications/${notificationId}`);
+    const response = await axiosInstance.delete(
+      `/notifications/${notificationId}`
+    );
     return response.data;
   },
 
@@ -29,7 +33,7 @@ const notificationService = {
   markAllAsRead: async () => {
     const response = await axiosInstance.patch('/notifications/mark-all-read');
     return response.data;
-  }
+  },
 };
 
 export default notificationService;

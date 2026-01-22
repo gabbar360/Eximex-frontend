@@ -57,7 +57,9 @@ const AllOrders: React.FC = () => {
     valueKey = 'id',
     className = '',
   }) => {
-    const selectedOption = options.find((opt) => opt[valueKey]?.toString() === value?.toString());
+    const selectedOption = options.find(
+      (opt) => opt[valueKey]?.toString() === value?.toString()
+    );
 
     return (
       <div className="relative" ref={dropdownRef}>
@@ -298,12 +300,11 @@ const AllOrders: React.FC = () => {
                         { id: 'shipped', name: 'Shipped' },
                         { id: 'delivered', name: 'Delivered' },
                         { id: 'cancelled', name: 'Cancelled' },
-                      ]
-                        .filter((status) =>
-                          status.name
-                            .toLowerCase()
-                            .includes(statusSearch.toLowerCase())
-                        )}
+                      ].filter((status) =>
+                        status.name
+                          .toLowerCase()
+                          .includes(statusSearch.toLowerCase())
+                      )}
                       onSelect={(statusValue) => {
                         setFilterStatus(statusValue);
                         setStatusSearch('');
@@ -311,7 +312,9 @@ const AllOrders: React.FC = () => {
                       searchValue={statusSearch}
                       onSearchChange={setStatusSearch}
                       isOpen={showStatusDropdown}
-                      onToggle={() => setShowStatusDropdown(!showStatusDropdown)}
+                      onToggle={() =>
+                        setShowStatusDropdown(!showStatusDropdown)
+                      }
                       placeholder="All Status"
                       dropdownRef={statusRef}
                       className="text-sm"

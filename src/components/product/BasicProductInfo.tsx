@@ -50,7 +50,7 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [showSubcategoryDropdown, setShowSubcategoryDropdown] = useState(false);
   const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
-  
+
   const categoryRef = useRef(null);
   const subcategoryRef = useRef(null);
   const currencyRef = useRef(null);
@@ -85,7 +85,10 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
       if (categoryRef.current && !categoryRef.current.contains(event.target)) {
         setShowCategoryDropdown(false);
       }
-      if (subcategoryRef.current && !subcategoryRef.current.contains(event.target)) {
+      if (
+        subcategoryRef.current &&
+        !subcategoryRef.current.contains(event.target)
+      ) {
         setShowSubcategoryDropdown(false);
       }
       if (currencyRef.current && !currencyRef.current.contains(event.target)) {
@@ -113,7 +116,9 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
     displayKey = 'name',
     valueKey = 'id',
   }) => {
-    const selectedOption = options.find((opt) => opt[valueKey]?.toString() === value?.toString());
+    const selectedOption = options.find(
+      (opt) => opt[valueKey]?.toString() === value?.toString()
+    );
 
     return (
       <div className="relative" ref={dropdownRef}>
@@ -203,16 +208,18 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
           <SearchableDropdown
             label="Category"
             value={values.categoryId || selectedCategoryId}
-            options={categories
-              ?.filter((category) =>
-                category.name
-                  .toLowerCase()
-                  .includes(categorySearch.toLowerCase())
-              )
-              .map((category) => ({
-                id: category.id,
-                name: category.name,
-              })) || []}
+            options={
+              categories
+                ?.filter((category) =>
+                  category.name
+                    .toLowerCase()
+                    .includes(categorySearch.toLowerCase())
+                )
+                .map((category) => ({
+                  id: category.id,
+                  name: category.name,
+                })) || []
+            }
             onSelect={(categoryId) => {
               if (!categories || categories.length === 0) {
                 toast.error(
@@ -220,7 +227,7 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
                 );
                 return;
               }
-              
+
               setFieldValue('categoryId', categoryId);
               setFieldValue('subCategoryId', '');
               setSelectedCategoryId(categoryId);
@@ -248,7 +255,9 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
                   ? 'No categories available - Create one first'
                   : 'Select Category'
             }
-            disabled={categoriesLoading || !categories || categories.length === 0}
+            disabled={
+              categoriesLoading || !categories || categories.length === 0
+            }
             dropdownRef={categoryRef}
           />
           {touched.categoryId && errors.categoryId && (
@@ -264,16 +273,18 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
           <SearchableDropdown
             label="Subcategory"
             value={values.subCategoryId}
-            options={subcategories
-              ?.filter((subcategory) =>
-                subcategory.name
-                  .toLowerCase()
-                  .includes(subcategorySearch.toLowerCase())
-              )
-              .map((subcategory) => ({
-                id: subcategory.id,
-                name: subcategory.name,
-              })) || []}
+            options={
+              subcategories
+                ?.filter((subcategory) =>
+                  subcategory.name
+                    .toLowerCase()
+                    .includes(subcategorySearch.toLowerCase())
+                )
+                .map((subcategory) => ({
+                  id: subcategory.id,
+                  name: subcategory.name,
+                })) || []
+            }
             onSelect={(subcategoryId) => {
               setFieldValue('subCategoryId', subcategoryId);
               setSubcategorySearch('');
@@ -281,7 +292,9 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
             searchValue={subcategorySearch}
             onSearchChange={setSubcategorySearch}
             isOpen={showSubcategoryDropdown}
-            onToggle={() => setShowSubcategoryDropdown(!showSubcategoryDropdown)}
+            onToggle={() =>
+              setShowSubcategoryDropdown(!showSubcategoryDropdown)
+            }
             placeholder="Select Subcategory"
             disabled={!values.categoryId}
             dropdownRef={subcategoryRef}

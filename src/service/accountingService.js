@@ -12,7 +12,9 @@ const getLedger = async (params = {}) => {
 
 const getProfitLoss = async (params = {}) => {
   try {
-    const { data } = await axiosInstance.get('/accounting/profit-loss', { params });
+    const { data } = await axiosInstance.get('/accounting/profit-loss', {
+      params,
+    });
     return data;
   } catch (error) {
     throw handleAxiosError(error, 'accounting', 'getProfitLoss');
@@ -21,7 +23,9 @@ const getProfitLoss = async (params = {}) => {
 
 const getBalanceSheet = async (params = {}) => {
   try {
-    const { data } = await axiosInstance.get('/accounting/balance-sheet', { params });
+    const { data } = await axiosInstance.get('/accounting/balance-sheet', {
+      params,
+    });
     return data;
   } catch (error) {
     throw handleAxiosError(error, 'accounting', 'getBalanceSheet');

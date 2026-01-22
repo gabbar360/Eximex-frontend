@@ -121,7 +121,12 @@ const AddEditPackingList = () => {
             style={{ top: '100%', marginTop: '4px' }}
           >
             {(() => {
-              console.log('SearchableDropdown rendering options:', { label, isOpen, optionsLength: options.length, options });
+              console.log('SearchableDropdown rendering options:', {
+                label,
+                isOpen,
+                optionsLength: options.length,
+                options,
+              });
               return null;
             })()}
             <div className="p-3 border-b border-gray-100">
@@ -172,7 +177,10 @@ const AddEditPackingList = () => {
   useEffect(() => {
     const handleClickOutside = (event) => {
       // Skip if click is inside OrderSelector
-      if (orderSelectorRef.current && orderSelectorRef.current.contains(event.target)) {
+      if (
+        orderSelectorRef.current &&
+        orderSelectorRef.current.contains(event.target)
+      ) {
         return;
       }
 
@@ -228,10 +236,16 @@ const AddEditPackingList = () => {
       }
     });
     if (Object.keys(initialSealTypeDropdown).length > 0) {
-      setShowSealTypeDropdown(prev => ({ ...prev, ...initialSealTypeDropdown }));
+      setShowSealTypeDropdown((prev) => ({
+        ...prev,
+        ...initialSealTypeDropdown,
+      }));
     }
     if (Object.keys(initialProductNameDropdown).length > 0) {
-      setShowProductNameDropdown(prev => ({ ...prev, ...initialProductNameDropdown }));
+      setShowProductNameDropdown((prev) => ({
+        ...prev,
+        ...initialProductNameDropdown,
+      }));
     }
   }, [packagingList.containers.length]);
 
@@ -1077,12 +1091,16 @@ const AddEditPackingList = () => {
               <div className="bg-slate-50 p-4 lg:p-8 rounded-lg border border-slate-200">
                 <div className="w-full lg:max-w-2xl" ref={orderSelectorRef}>
                   <OrderSelector
-                    selectedOrderId={justSelectedOrderId || selectedOrder?.id || orderDetails?.id || null}
+                    selectedOrderId={
+                      justSelectedOrderId ||
+                      selectedOrder?.id ||
+                      orderDetails?.id ||
+                      null
+                    }
                     onOrderSelect={handleOrderSelect}
                     placeholder="Select Order for Packing List"
                     filterType="packingList"
                   />
-                 
                 </div>
               </div>
             )}
@@ -1204,8 +1222,14 @@ const AddEditPackingList = () => {
                       <div
                         className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg cursor-pointer flex items-center justify-between transition-all duration-300 shadow-sm hover:border-slate-400"
                         onClick={() => {
-                          console.log('Direct Seal Type click for container:', containerIndex);
-                          console.log('Current showSealTypeDropdown state:', showSealTypeDropdown);
+                          console.log(
+                            'Direct Seal Type click for container:',
+                            containerIndex
+                          );
+                          console.log(
+                            'Current showSealTypeDropdown state:',
+                            showSealTypeDropdown
+                          );
                           setShowSealTypeDropdown((prev) => {
                             const newState = {
                               ...prev,
@@ -1221,14 +1245,18 @@ const AddEditPackingList = () => {
                         </span>
                         <HiChevronDown className="w-4 h-4 text-slate-400" />
                       </div>
-                      
+
                       {showSealTypeDropdown[containerIndex] && (
                         <div className="absolute z-[9999] w-full bg-white border border-gray-200 rounded-lg shadow-xl mt-1">
                           <div className="max-h-60 overflow-y-auto">
                             <div
                               className="px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm transition-colors duration-150"
                               onClick={() => {
-                                handleContainerChange(containerIndex, 'sealType', 'self seal');
+                                handleContainerChange(
+                                  containerIndex,
+                                  'sealType',
+                                  'self seal'
+                                );
                                 setShowSealTypeDropdown((prev) => ({
                                   ...prev,
                                   [containerIndex]: false,
@@ -1240,7 +1268,11 @@ const AddEditPackingList = () => {
                             <div
                               className="px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm transition-colors duration-150"
                               onClick={() => {
-                                handleContainerChange(containerIndex, 'sealType', 'line seal');
+                                handleContainerChange(
+                                  containerIndex,
+                                  'sealType',
+                                  'line seal'
+                                );
                                 setShowSealTypeDropdown((prev) => ({
                                   ...prev,
                                   [containerIndex]: false,
@@ -1293,7 +1325,6 @@ const AddEditPackingList = () => {
                       )}
                     </div>
                     <div className="flex gap-2">
-                   
                       <button
                         onClick={() => clearProductForm()}
                         className="flex items-center justify-center
@@ -1301,7 +1332,7 @@ const AddEditPackingList = () => {
              w-10 h-10 px-10
              rounded-xl text-sm font-medium"
                       >
-                      Clear
+                        Clear
                       </button>
                     </div>
                   </div>
@@ -1313,12 +1344,23 @@ const AddEditPackingList = () => {
                         <label className="block text-sm font-semibold text-slate-700 mb-3">
                           Product Name
                         </label>
-                        <div className="relative" ref={(el) => (productNameRefs.current[containerIndex] = el)}>
+                        <div
+                          className="relative"
+                          ref={(el) =>
+                            (productNameRefs.current[containerIndex] = el)
+                          }
+                        >
                           <div
                             className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg cursor-pointer flex items-center justify-between transition-all duration-300 shadow-sm hover:border-slate-400"
                             onClick={() => {
-                              console.log('Product Name dropdown toggle for container:', containerIndex);
-                              console.log('Current state:', showProductNameDropdown[containerIndex]);
+                              console.log(
+                                'Product Name dropdown toggle for container:',
+                                containerIndex
+                              );
+                              console.log(
+                                'Current state:',
+                                showProductNameDropdown[containerIndex]
+                              );
                               setShowProductNameDropdown((prev) => {
                                 const newState = {
                                   ...prev,
@@ -1330,59 +1372,75 @@ const AddEditPackingList = () => {
                             }}
                           >
                             <span className="text-sm text-slate-500">
-                              {productForm.productName || 'Select Product from PI'}
+                              {productForm.productName ||
+                                'Select Product from PI'}
                             </span>
                             <HiChevronDown className="w-4 h-4 text-slate-400" />
                           </div>
-                          
+
                           {showProductNameDropdown[containerIndex] && (
                             <div className="absolute z-[9999] w-full bg-white border border-gray-200 rounded-lg shadow-xl mt-1">
                               <div className="max-h-60 overflow-y-auto">
                                 {(() => {
-                                  console.log('Rendering product dropdown for container:', containerIndex);
+                                  console.log(
+                                    'Rendering product dropdown for container:',
+                                    containerIndex
+                                  );
                                   console.log('piProducts:', piProducts);
-                                  console.log('piProducts length:', piProducts.length);
+                                  console.log(
+                                    'piProducts length:',
+                                    piProducts.length
+                                  );
                                   return null;
                                 })()}
-                           {piProducts.map((piProduct, idx) => {
-  const productName =
-    piProduct.name || piProduct.productName || `Product ${idx + 1}`;
-  const quantity = piProduct.quantity || piProduct.qty || '';
-  const unit = piProduct.unit || 'Box';
+                                {piProducts.map((piProduct, idx) => {
+                                  const productName =
+                                    piProduct.name ||
+                                    piProduct.productName ||
+                                    `Product ${idx + 1}`;
+                                  const quantity =
+                                    piProduct.quantity || piProduct.qty || '';
+                                  const unit = piProduct.unit || 'Box';
 
-  return (
-    <div
-      key={idx}
-      className="px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm transition-colors duration-150"
-      onClick={() => {
-        const selectedProduct = piProducts.find(
-          (p) => (p.name || p.productName) === productName
-        );
+                                  return (
+                                    <div
+                                      key={idx}
+                                      className="px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm transition-colors duration-150"
+                                      onClick={() => {
+                                        const selectedProduct = piProducts.find(
+                                          (p) =>
+                                            (p.name || p.productName) ===
+                                            productName
+                                        );
 
-        setProductForm((prev) => ({
-          ...prev,
-          productName,
-          quantity: selectedProduct?.quantity || selectedProduct?.qty || '',
-          unit: selectedProduct?.unit || 'Box',
-          hsnCode:
-            selectedProduct?.category?.hsnCode ||
-            selectedProduct?.subcategory?.hsnCode ||
-            '',
-          productData: selectedProduct,
-          packedQuantity: '',
-        }));
+                                        setProductForm((prev) => ({
+                                          ...prev,
+                                          productName,
+                                          quantity:
+                                            selectedProduct?.quantity ||
+                                            selectedProduct?.qty ||
+                                            '',
+                                          unit: selectedProduct?.unit || 'Box',
+                                          hsnCode:
+                                            selectedProduct?.category
+                                              ?.hsnCode ||
+                                            selectedProduct?.subcategory
+                                              ?.hsnCode ||
+                                            '',
+                                          productData: selectedProduct,
+                                          packedQuantity: '',
+                                        }));
 
-        setShowProductNameDropdown((prev) => ({
-          ...prev,
-          [containerIndex]: false,
-        }));
-      }}
-    >
-      {productName} (Qty: {quantity} {unit})
-    </div>
-  );
-})}
-
+                                        setShowProductNameDropdown((prev) => ({
+                                          ...prev,
+                                          [containerIndex]: false,
+                                        }));
+                                      }}
+                                    >
+                                      {productName} (Qty: {quantity} {unit})
+                                    </div>
+                                  );
+                                })}
                               </div>
                             </div>
                           )}

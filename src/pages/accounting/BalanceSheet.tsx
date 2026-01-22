@@ -5,7 +5,7 @@ import { fetchBalanceSheet } from '../../features/accountingSlice';
 
 const BalanceSheet = () => {
   const dispatch = useDispatch();
-  const { balanceSheet, loading } = useSelector(state => state.accounting);
+  const { balanceSheet, loading } = useSelector((state) => state.accounting);
   const [asOfDate, setAsOfDate] = useState('');
 
   useEffect(() => {

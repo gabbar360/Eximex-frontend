@@ -2,8 +2,18 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 import { useDispatch } from 'react-redux';
-import { addNewNotification, updateUnreadCount, markNotificationRead, markAllRead, getNotifications, getUnreadCount } from '../features/notificationSlice';
-import { NotificationSound, showBrowserNotification } from '../utils/notificationSound';
+import {
+  addNewNotification,
+  updateUnreadCount,
+  markNotificationRead,
+  markAllRead,
+  getNotifications,
+  getUnreadCount,
+} from '../features/notificationSlice';
+import {
+  NotificationSound,
+  showBrowserNotification,
+} from '../utils/notificationSound';
 
 interface Notification {
   id: number;
@@ -49,25 +59,23 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   useEffect(() => {
     const accessToken = localStorage.getItem('accessToken');
 
-    
     // Request notification permission
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission();
     }
-    
+
     if (user && (token || accessToken)) {
       const socketToken = token || accessToken;
       const socketUrl = import.meta.env.VITE_SOCKET_URL;
 
-      
       const newSocket = io(socketUrl, {
         auth: {
-          token: socketToken
+          token: socketToken,
         },
         transports: ['polling', 'websocket'],
         forceNew: true,
         reconnection: true,
-        timeout: 20000
+        timeout: 20000,
       });
 
       newSocket.on('connect', () => {
@@ -80,10 +88,10 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
 
       newSocket.on('new_notification', (notification: Notification) => {
         dispatch(addNewNotification(notification));
-        
+
         // Play notification sound
         NotificationSound.play();
-        
+
         // Show browser notification
         showBrowserNotification(
           notification.title,
@@ -124,12 +132,10 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     socket,
     isConnected,
     markAsRead,
-    markAllAsRead
+    markAllAsRead,
   };
 
   return (
-    <SocketContext.Provider value={value}>
-      {children}
-    </SocketContext.Provider>
+    <SocketContext.Provider value={value}>{children}</SocketContext.Provider>
   );
 };

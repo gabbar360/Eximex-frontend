@@ -3,7 +3,13 @@ import { HiBell, HiCheck, HiCheckCircle } from 'react-icons/hi2';
 import { useSocket } from '../../context/SocketContext';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { getNotifications, getUnreadCount, markNotificationAsRead, markAllNotificationsAsRead, deleteNotification } from '../../features/notificationSlice';
+import {
+  getNotifications,
+  getUnreadCount,
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+  deleteNotification,
+} from '../../features/notificationSlice';
 import { NotificationSound } from '../../utils/notificationSound';
 
 interface Notification {
@@ -24,12 +30,12 @@ const NotificationBell: React.FC = () => {
   const { markAsRead, markAllAsRead } = useSocket();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { notifications, unreadCount, loading } = useSelector((state: any) => state.notification);
+  const { notifications, unreadCount, loading } = useSelector(
+    (state: any) => state.notification
+  );
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  
 
-  
   // Fetch initial notifications and unread count
   useEffect(() => {
     dispatch(getNotifications({ limit: 20 }));
@@ -43,11 +49,12 @@ const NotificationBell: React.FC = () => {
     }
   }, [unreadCount]);
 
-
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
@@ -106,8 +113,10 @@ const NotificationBell: React.FC = () => {
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-    
+    const diffInMinutes = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60)
+    );
+
     if (diffInMinutes < 1) return 'Just now';
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
@@ -121,7 +130,9 @@ const NotificationBell: React.FC = () => {
         onClick={handleBellClick}
         className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors duration-200"
       >
-        <HiBell className={`w-6 h-6 ${unreadCount > 0 ? 'animate-bounce' : ''}`} />
+        <HiBell
+          className={`w-6 h-6 ${unreadCount > 0 ? 'animate-bounce' : ''}`}
+        />
         {unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium animate-pulse">
             {unreadCount > 99 ? '99+' : unreadCount}
@@ -131,19 +142,26 @@ const NotificationBell: React.FC = () => {
 
       {/* Notification Dropdown */}
       {isOpen && (
-        <div className={`${
-            window.innerWidth < 1024 ? 'fixed inset-x-4 top-16' : 'absolute right-0 mt-2'
-          } w-auto sm:w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-hidden`}>
+        <div
+          className={`${
+            window.innerWidth < 1024
+              ? 'fixed inset-x-4 top-16'
+              : 'absolute right-0 mt-2'
+          } w-auto sm:w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 max-h-96 overflow-hidden`}
+        >
           {/* Header */}
           <div className="px-3 sm:px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Notifications</h3>
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
+              Notifications
+            </h3>
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllAsRead}
                 className="text-xs sm:text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 flex items-center gap-1 px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
               >
                 <HiCheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">Clear All</span> ({unreadCount})
+                <span className="hidden sm:inline">Clear All</span> (
+                {unreadCount})
               </button>
             )}
           </div>
@@ -153,7 +171,9 @@ const NotificationBell: React.FC = () => {
             {loading ? (
               <div className="p-4 text-center">
                 <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600 mx-auto"></div>
-                <p className="text-sm text-gray-500 mt-2">Loading notifications...</p>
+                <p className="text-sm text-gray-500 mt-2">
+                  Loading notifications...
+                </p>
               </div>
             ) : notifications.length === 0 ? (
               <div className="p-6 text-center">
@@ -175,9 +195,13 @@ const NotificationBell: React.FC = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <h4 className={`text-xs sm:text-sm font-medium ${
-                          !notification.isRead ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'
-                        }`}>
+                        <h4
+                          className={`text-xs sm:text-sm font-medium ${
+                            !notification.isRead
+                              ? 'text-gray-900 dark:text-white'
+                              : 'text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
                           {notification.title}
                         </h4>
                         {!notification.isRead && (
@@ -207,7 +231,7 @@ const NotificationBell: React.FC = () => {
           {/* Footer */}
           <div className="px-3 sm:px-4 py-3 border-t border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
-              <button 
+              <button
                 onClick={handleViewAllNotifications}
                 className="text-xs sm:text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
               >

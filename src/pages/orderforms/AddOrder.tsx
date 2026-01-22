@@ -52,7 +52,9 @@ const AddOrder = () => {
     displayKey = 'name',
     valueKey = 'id',
   }) => {
-    const selectedOption = options.find((opt) => opt[valueKey]?.toString() === value?.toString());
+    const selectedOption = options.find(
+      (opt) => opt[valueKey]?.toString() === value?.toString()
+    );
 
     return (
       <div className="relative" ref={dropdownRef}>
@@ -323,7 +325,9 @@ const AddOrder = () => {
               <div className="bg-slate-50 p-4 sm:p-6 rounded-lg border border-slate-200">
                 <h3 className="text-lg sm:text-xl font-semibold text-slate-700 mb-4 sm:mb-6 flex items-center gap-3">
                   <HiDocumentText className="w-5 h-5 sm:w-6 sm:h-6 text-slate-600" />
-                  <span className="hidden sm:inline">Select Proforma Invoice</span>
+                  <span className="hidden sm:inline">
+                    Select Proforma Invoice
+                  </span>
                   <span className="sm:hidden">Select PI Invoice</span>
                 </h3>
 
@@ -358,7 +362,13 @@ const AddOrder = () => {
                       onSearchChange={setPiSearch}
                       isOpen={showPiDropdown}
                       onToggle={() => setShowPiDropdown(!showPiDropdown)}
-                      placeholder={piLoading ? "Loading PI invoices..." : piList.length === 0 ? "No PI invoices available" : "Choose a PI Invoice..."}
+                      placeholder={
+                        piLoading
+                          ? 'Loading PI invoices...'
+                          : piList.length === 0
+                            ? 'No PI invoices available'
+                            : 'Choose a PI Invoice...'
+                      }
                       disabled={piLoading || piList.length === 0}
                       dropdownRef={piRef}
                     />
