@@ -15,7 +15,6 @@ import {
 } from 'react-icons/hi2';
 import {
   bulkUploadProducts,
-  downloadTemplate,
   clearBulkUploadResult,
 } from '../../features/productSlice';
 import { getAllCategories } from '../../features/categorySlice';
@@ -29,11 +28,7 @@ const BulkUploadProducts = () => {
   const [categorySearch, setCategorySearch] = useState('');
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
 
-  const { loading: uploading, result, error } = bulkUpload;
-
-  // Get result data properly
-  const uploadResult = result?.data || result;
-
+  const { loading: uploading, result } = bulkUpload;
   // Filter categories based on search
   const filteredCategories = useMemo(() => {
     if (!categorySearch) return categories || [];

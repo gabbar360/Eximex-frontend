@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import ComponentCard from '../../components/common/ComponentCard';
 import accountingService from '../../service/accountingService';
-import { toast } from 'react-toastify';
 import { Ledger, ProfitLoss, BalanceSheet } from './index';
 
 const AccountingDashboard = () => {
@@ -180,7 +178,6 @@ const DashboardContent = ({
   ledgerData,
   profitLossData,
   balanceSheetData,
-  loading,
   fetchAccountingData,
   formatCurrency,
   formatDate,

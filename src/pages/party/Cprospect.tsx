@@ -15,7 +15,6 @@ import {
   HiMagnifyingGlass,
   HiBuildingOffice2,
   HiUsers,
-  HiEnvelope,
   HiPhone,
   HiEllipsisVertical,
   HiChevronDown,
@@ -27,7 +26,7 @@ import {
   HiTrophy,
   HiXCircle,
 } from 'react-icons/hi2';
-import { MdPerson, MdBadge } from 'react-icons/md';
+import { MdBadge } from 'react-icons/md';
 import { toast } from 'react-toastify';
 import { useDebounce } from '../../utils/useDebounce';
 import { Pagination } from 'antd';
@@ -37,9 +36,8 @@ const Cprospect = () => {
   const {
     parties = [],
     loading = false,
-    error = null,
     pagination = {},
-  } = useSelector((state) => state.party || {});
+  } = useSelector((state: any) => state.party || {});
   const [searchTerm, setSearchTerm] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(null);
   const searchInputRef = useRef<HTMLInputElement>(null);

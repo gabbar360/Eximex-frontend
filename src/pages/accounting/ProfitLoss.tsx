@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ComponentCard from '../../components/common/ComponentCard';
 import { fetchProfitLoss } from '../../features/accountingSlice';
-import { toast } from 'react-toastify';
 
 const ProfitLoss = () => {
   const dispatch = useDispatch();

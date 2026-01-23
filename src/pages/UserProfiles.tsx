@@ -1,19 +1,12 @@
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch} from 'react-redux';
 import { useState, useEffect } from 'react';
-import PageBreadcrumb from '../components/common/PageBreadCrumb';
-import UserMetaCard from '../components/UserProfile/UserMetaCard';
 import UserInfoCard from '../components/UserProfile/UserInfoCard';
-import UserAddressCard from '../components/UserProfile/UserAddressCard';
 import CompanyDetailsCard from '../components/UserProfile/CompanyDetailsCard';
 import PageMeta from '../components/common/PageMeta';
 import { fetchCurrentUser, updateUser } from '../features/userSlice';
 import {
   HiUser,
-  HiShieldCheck,
   HiBuildingOffice2,
-  HiChartBar,
-  HiCog6Tooth,
-  HiBell,
   HiArrowLeft,
   HiPencil,
 } from 'react-icons/hi2';

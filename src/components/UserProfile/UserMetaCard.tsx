@@ -46,7 +46,7 @@ export default function UserMetaCard({
   userData,
   onUpdate,
 }: UserMetaCardProps) {
-  const { isOpen, openModal, closeModal } = useModal();
+  const { isOpen, closeModal } = useModal();
   const [formData, setFormData] = useState({
     name: '',
     email: '',

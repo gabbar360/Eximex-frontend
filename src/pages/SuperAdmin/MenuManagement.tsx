@@ -24,7 +24,6 @@ import {
   deleteSubmenu,
   clearError,
 } from '../../features/menuSlice';
-import axiosInstance from '../../utils/axiosInstance';
 import { useDebounce } from '../../utils/useDebounce';
 
 const MenuManagement = () => {

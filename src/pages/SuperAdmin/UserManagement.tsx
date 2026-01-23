@@ -12,7 +12,6 @@ import {
   HiPlus,
   HiPencil,
   HiTrash,
-  HiEye,
   HiArrowLeft,
   HiCheckCircle,
   HiUsers,

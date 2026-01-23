@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import {
   getAllRoles,
@@ -12,20 +11,17 @@ import {
   HiPlus,
   HiPencil,
   HiTrash,
-  HiEye,
   HiArrowLeft,
   HiCheckCircle,
   HiUserGroup,
 } from 'react-icons/hi';
 import { HiMagnifyingGlass } from 'react-icons/hi2';
 import { Pagination } from 'antd';
-import axiosInstance from '../../utils/axiosInstance';
 import { useDebounce } from '../../utils/useDebounce';
 
 const RoleManagement: React.FC = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const { roles, loading, error, pagination } = useSelector(
+  const { roles, loading, pagination } = useSelector(
     (state: any) => state.role
   );
 

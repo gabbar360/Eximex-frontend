@@ -4,20 +4,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUsers,
   faBuilding,
-  faDatabase,
-  faShield,
-  faChartLine,
-  faCog,
   faUserShield,
   faServer,
   faLock,
-  faHistory,
-  faExclamationTriangle,
   faCheckCircle,
-  faArrowRight,
   faRefresh,
 } from '@fortawesome/free-solid-svg-icons';
-import { useNavigate } from 'react-router-dom';
 import { getSuperAdminDashboardStats } from '../features/userSlice';
 import { toast } from 'react-toastify';
 import {
@@ -49,7 +41,7 @@ interface DashboardStats {
 }
 
 const SuperAdminOverview: React.FC = () => {
-  const navigate = useNavigate();
+
   const dispatch = useDispatch();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -70,48 +62,6 @@ const SuperAdminOverview: React.FC = () => {
   useEffect(() => {
     fetchStats();
   }, [dispatch]);
-
-  const quickActions = [
-    {
-      title: 'User Management',
-      description: 'Manage users and assign companies',
-      icon: faUsers,
-      path: '/super-admin/users',
-      color: 'blue',
-      features: [
-        'Create users',
-        'Assign companies',
-        'Manage roles',
-        'User permissions',
-      ],
-    },
-    {
-      title: 'Company Management',
-      description: 'Create and manage companies',
-      icon: faBuilding,
-      path: '/super-admin/companies',
-      color: 'green',
-      features: [
-        'Create companies',
-        'View company stats',
-        'Manage settings',
-        'Monitor activity',
-      ],
-    },
-    {
-      title: 'Role Management',
-      description: 'Manage system roles and permissions',
-      icon: faUserShield,
-      path: '/super-admin/roles',
-      color: 'purple',
-      features: [
-        'Create roles',
-        'Set permissions',
-        'Role assignment',
-        'Access control',
-      ],
-    },
-  ];
 
   const systemFeatures = [
     {

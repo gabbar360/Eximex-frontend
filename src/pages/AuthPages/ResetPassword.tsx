@@ -1,4 +1,4 @@
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { resetPassword } from '../../features/authSlice';
@@ -34,17 +34,6 @@ const ResetPassword: React.FC = () => {
       setIsValidToken(false);
     }
   }, [searchParams]);
-
-  const validateToken = async (tokenToValidate) => {
-    try {
-      // You can add a token validation API call here if needed
-      // For now, we'll assume token is valid and let the reset call handle validation
-      setIsValidToken(true);
-    } catch (error) {
-      setIsValidToken(false);
-      // Remove static toast, let backend handle error messages
-    }
-  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

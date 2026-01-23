@@ -5,7 +5,6 @@ import { toast } from 'react-toastify';
 import { fetchCategories, deleteCategory } from '../../features/categorySlice';
 import PageMeta from '../../components/common/PageMeta';
 import {
-  HiEye,
   HiPencil,
   HiTrash,
   HiPlus,
@@ -14,14 +13,11 @@ import {
 } from 'react-icons/hi2';
 import {
   MdCategory,
-  MdInventory,
   MdViewList,
   MdDescription,
 } from 'react-icons/md';
 import {
   FaLayerGroup,
-  FaBoxes,
-  FaIndustry,
   FaBarcode,
   FaCubes,
 } from 'react-icons/fa';

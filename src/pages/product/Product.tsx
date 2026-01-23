@@ -11,7 +11,6 @@ import { toast } from 'react-toastify';
 import { fetchProducts, deleteProduct } from '../../features/productSlice';
 import { getAllCategories } from '../../features/categorySlice';
 import {
-  HiEye,
   HiPencil,
   HiTrash,
   HiPlus,
@@ -27,7 +26,7 @@ import SEOHead from '../../components/common/SEOHead';
 
 const Product: React.FC = () => {
   const dispatch = useDispatch();
-  const { products, loading, error, pagination } = useSelector(
+  const { products, loading, pagination } = useSelector(
     (state: any) => state.product
   );
   const [searchTerm, setSearchTerm] = useState('');
@@ -265,27 +264,6 @@ const Product: React.FC = () => {
       }) as any
     );
   };
-  const getProductTypeLabel = (type: string) => {
-    const types: Record<string, string> = {
-      tiles: 'Tiles',
-      bagasse: 'Bagasse',
-      fabric: 'Fabric',
-      generic: 'Generic',
-    };
-    return types[type] || type;
-  };
-
-  const getUnitLabel = (unit: string) => {
-    const units: Record<string, string> = {
-      sqm: 'Square Meter',
-      kg: 'Kilogram',
-      pcs: 'Pieces',
-      box: 'Box',
-      cbm: 'Cubic Meter',
-    };
-    return units[unit] || unit;
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex justify-center items-center bg-gray-50">

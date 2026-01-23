@@ -19,8 +19,6 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-import { handleAxiosError } from './handleAxiosError.js';
-
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {

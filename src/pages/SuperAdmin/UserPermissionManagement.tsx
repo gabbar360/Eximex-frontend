@@ -2,16 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Table,
-  Switch,
-  Button,
-  Select,
-  message,
-  Space,
-  Card,
-  Collapse,
   Pagination,
 } from 'antd';
-import { EditOutlined, UserOutlined } from '@ant-design/icons';
 import { toast } from 'react-toastify';
 import {
   HiShieldCheck,
@@ -24,25 +16,20 @@ import {
   HiArrowLeft,
   HiCheckCircle,
 } from 'react-icons/hi2';
-import { MdSecurity, MdAdminPanelSettings } from 'react-icons/md';
+import { MdAdminPanelSettings } from 'react-icons/md';
 import {
   fetchAllUsersWithPermissions,
   fetchUserPermissions,
   updateUserPermissions,
-  bulkUpdateUserPermissions,
   clearError,
 } from '../../features/userPermissionSlice';
 import { deleteUser } from '../../features/userManagementSlice';
 import { fetchMenus } from '../../features/menuSlice';
-import axiosInstance from '../../utils/axiosInstance';
 import { useDebounce } from '../../utils/useDebounce';
-
-const { Option } = Select;
-const { Panel } = Collapse;
 
 const UserPermissionManagement = () => {
   const dispatch = useDispatch();
-  const { allUsersPermissions, userPermissions, loading, error, pagination } =
+  const { allUsersPermissions, loading, error, pagination } =
     useSelector((state) => state.userPermission);
   const { menus } = useSelector((state) => state.menu);
 

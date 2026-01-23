@@ -9,7 +9,6 @@ import {
 } from '../../features/taskManagementSlice';
 import PageMeta from '../../components/common/PageMeta';
 import {
-  HiEye,
   HiPencil,
   HiTrash,
   HiPlus,

@@ -5,7 +5,6 @@ import {
   faArrowLeft,
   faCheck,
   faCheckCircle,
-  faTimes,
   faEnvelope,
   faDownload,
   faFileInvoiceDollar,
@@ -13,9 +12,6 @@ import {
   faShippingFast,
   faBoxes,
   faCalculator,
-  faEdit,
-  faPrint,
-  faShare,
 } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 

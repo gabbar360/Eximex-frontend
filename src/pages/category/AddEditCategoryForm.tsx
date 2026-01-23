@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { useSelector } from 'react-redux';
 import {
   createCategory,
   getCategoryById,
@@ -8,7 +7,6 @@ import {
   getAllCategories,
 } from '../../features/categorySlice';
 import {
-  createPackagingHierarchy,
   fetchPackagingHierarchy,
 } from '../../features/packagingSlice';
 import { useDispatch } from 'react-redux';
@@ -19,33 +17,18 @@ import {
   HiArrowLeft,
   HiCheckCircle,
   HiPlus,
-  HiTrash,
-  HiSparkles,
-  HiClipboardDocumentList,
-  HiCubeTransparent,
-  HiRectangleStack,
-  HiDocumentDuplicate,
-  HiBeaker,
-  HiCog6Tooth,
-  HiShieldCheck,
-  HiAcademicCap,
-  HiChartBarSquare,
+  HiTrash
 } from 'react-icons/hi2';
 import {
   MdCategory,
-  MdInventory,
   MdDescription,
-  MdQrCode2,
-  MdPrecisionManufacturing,
 } from 'react-icons/md';
 import {
-  FaBoxes,
   FaCubes,
   FaLayerGroup,
-  FaIndustry,
   FaBarcode,
 } from 'react-icons/fa';
-import { BiCategory, BiPackage } from 'react-icons/bi';
+import {  BiPackage } from 'react-icons/bi';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
 
@@ -81,14 +64,6 @@ interface PackagingLevel {
   quantity?: number;
 }
 
-interface FormValues {
-  name: string;
-  hsn_code: string;
-  desc: string;
-  parent_id: string;
-  primary_unit: string;
-  secondary_unit: string;
-}
 
 // Unit Dropdown Component
 const UnitDropdown: React.FC<{
@@ -237,7 +212,6 @@ const AddEditCategoryForm: React.FC = () => {
   const dispatch = useDispatch();
   const { id } = useParams<{ id: string }>();
   const isEditMode = Boolean(id);
-  const user = useSelector((state: any) => state.user.user);
 
   const [loading, setLoading] = useState(isEditMode);
   const [submitting, setSubmitting] = useState(false);

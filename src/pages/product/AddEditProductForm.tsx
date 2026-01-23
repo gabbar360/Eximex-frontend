@@ -1,4 +1,4 @@
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Formik, Form } from 'formik';
@@ -13,7 +13,7 @@ import {
   updateProduct,
   addProduct,
 } from '../../features/productSlice';
-import { HiArrowLeft, HiCheckCircle, HiCube } from 'react-icons/hi2';
+import { HiArrowLeft, HiCheckCircle } from 'react-icons/hi2';
 
 import BasicProductInfo from '../../components/product/BasicProductInfo';
 import PackagingDetails from '../../components/product/PackagingDetails';
