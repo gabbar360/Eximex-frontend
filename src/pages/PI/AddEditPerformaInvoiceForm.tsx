@@ -1355,7 +1355,17 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         productId: currentProduct.productId,
         name: productName,
         productName: productName,
-        hsCode: product?.hsCode || 'N/A',
+        hsCode: (() => {
+          // Match PDF template HS Code logic exactly
+          if (product?.hsCode && product.hsCode !== 'N/A') return product.hsCode;
+          if (product?.hsnCode && product.hsnCode !== 'N/A') return product.hsnCode;
+          const category = categories.find(c => c.id.toString() === (currentProduct.categoryId || selectedCategory)?.toString());
+          if (category?.hsnCode) return category.hsnCode;
+          if (product?.category?.hsnCode) return product.category.hsnCode;
+          if (product?.hsCode) return product.hsCode;
+          if (product?.hsnCode) return product.hsnCode;
+          return 'N/A';
+        })(),
         description: product?.description || 'No description available',
         quantity: quantity,
         rate: rate,
@@ -3753,9 +3763,17 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                                       {productName}
                                     </td>
                                     <td className="px-3 py-3 text-sm">
-                                      {prod.hsCode ||
-                                        productInfo?.hsCode ||
-                                        'N/A'}
+                                      {(() => {
+                                        // Match PDF template HS Code logic exactly
+                                        if (productInfo?.hsCode && productInfo.hsCode !== 'N/A') return productInfo.hsCode;
+                                        if (productInfo?.hsnCode && productInfo.hsnCode !== 'N/A') return productInfo.hsnCode;
+                                        const category = categories.find(c => c.id.toString() === prod.categoryId?.toString());
+                                        if (category?.hsnCode) return category.hsnCode;
+                                        if (productInfo?.category?.hsnCode) return productInfo.category.hsnCode;
+                                        if (productInfo?.hsCode) return productInfo.hsCode;
+                                        if (productInfo?.hsnCode) return productInfo.hsnCode;
+                                        return 'N/A';
+                                      })()} 
                                     </td>
                                     <td className="px-3 py-3 text-sm text-right font-medium">
                                       {prod.quantity}
