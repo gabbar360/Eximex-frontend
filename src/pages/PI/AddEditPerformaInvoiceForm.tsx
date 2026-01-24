@@ -2675,7 +2675,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                                 label="Balance Payment Term"
                                 value={balancePaymentTerm}
                                 options={[
-                                  { id: 'AGAINST BL', name: 'AGAINST BL' },
+                                  { id: 'AGAINST SCAN BL', name: 'AGAINST SCAN BL' },
                                   {
                                     id: 'AGAINST DOCUMENTS',
                                     name: 'AGAINST DOCUMENTS',
