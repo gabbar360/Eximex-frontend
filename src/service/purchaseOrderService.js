@@ -76,12 +76,8 @@ class PurchaseOrderService {
 
   // Create purchase order
   async createPurchaseOrder(data) {
-    try {
-      const response = await axiosInstance.post('/purchase-order', data);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await axiosInstance.post('/purchase-order', data);
+    return response.data;
   }
 
   // Get all purchase orders
@@ -110,12 +106,8 @@ class PurchaseOrderService {
 
   // Update purchase order
   async updatePurchaseOrder(id, data) {
-    try {
-      const response = await axiosInstance.put(`/purchase-order/${id}`, data);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await axiosInstance.put(`/purchase-order/${id}`, data);
+    return response.data;
   }
 
   // Delete purchase order

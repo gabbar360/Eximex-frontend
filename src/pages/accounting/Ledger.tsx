@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ComponentCard from '../../components/common/ComponentCard';
 import {
@@ -17,13 +17,13 @@ const Ledger = () => {
     dateTo: '',
   });
 
+  const fetchLedgerData = useCallback(async () => {
+    dispatch(fetchLedger(filters));
+  }, [dispatch, filters]);
+
   useEffect(() => {
     fetchLedgerData();
-  }, []);
-
-  const fetchLedgerData = async () => {
-    dispatch(fetchLedger(filters));
-  };
+  }, [fetchLedgerData]);
 
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }));

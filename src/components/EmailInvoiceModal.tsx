@@ -32,7 +32,7 @@ const EmailInvoiceModal: React.FC<EmailInvoiceModalProps> = ({
       await dispatch(emailInvoice(invoiceId, email)).unwrap();
       toast.success('Invoice sent successfully');
       onClose();
-    } catch (error) {
+    } catch {
       toast.error('Failed to send invoice');
     } finally {
       setLoading(false);

@@ -11,19 +11,19 @@ import {
 } from 'react-icons/hi2';
 
 interface BasicProductInfoProps {
-  values: any;
-  errors: any;
-  touched: any;
-  setFieldValue: (field: string, value: any) => void;
-  categories: any[];
-  subcategories: any[];
+  values: Record<string, unknown>;
+  errors: Record<string, unknown>;
+  touched: Record<string, unknown>;
+  setFieldValue: (field: string, value: Record<string, unknown>) => void;
+  categories: Record<string, unknown>[];
+  subcategories: Record<string, unknown>[];
   categoriesLoading: boolean;
   selectedCategoryId: string;
   setSelectedCategoryId: (id: string) => void;
   loadSubcategories: (categoryId: string) => void;
   fetchCategoryDetails: (categoryId: string) => void;
-  setSubcategories: (subcategories: any[]) => void;
-  setPackagingHierarchy: (hierarchy: any[]) => void;
+  setSubcategories: (subcategories: Record<string, unknown>[]) => void;
+  setPackagingHierarchy: (hierarchy: Record<string, unknown>[]) => void;
   setTrackVolume: (track: boolean) => void;
 }
 
@@ -65,7 +65,7 @@ const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
       );
       const data = await response.json();
       return Object.keys(data.rates).map((code) => ({ code, name: code }));
-    } catch (error) {
+    } catch {
       return [];
     }
   };

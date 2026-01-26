@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
@@ -14,7 +14,6 @@ import {
   getPurchaseOrderById,
   updatePurchaseOrder,
   createPurchaseOrder,
-  getFormData,
 } from '../../features/purchaseOrderSlice';
 import { fetchProducts } from '../../features/productSlice';
 import { getAllParties } from '../../features/partySlice';
@@ -81,7 +80,9 @@ const AddEditPurchaseOrderForm: React.FC = () => {
   });
 
   // Redux state
-  const { parties } = useSelector((state: any) => state.party);
+  const { parties } = useSelector((state: {
+    party: { parties: Vendor[] };
+  }) => state.party);
 
   // Company and vendor data
   const [company, setCompany] = useState<Company | null>(null);
@@ -216,14 +217,24 @@ const AddEditPurchaseOrderForm: React.FC = () => {
   };
 
   // Redux state for categories
-  const { categories } = useSelector((state: any) => state.category);
+  const { categories } = useSelector((state: {
+    category: { categories: Record<string, unknown>[] };
+  }) => state.category);
+
+  const calculateTotals = useCallback(() => {
+    const subTotal = items.reduce((sum, item) => sum + (item.amount || 0), 0);
+    const cgst = subTotal * (cgstRate / 100);
+    const sgst = subTotal * (sgstRate / 100);
+    const total = subTotal + cgst + sgst;
+    setTotals({ subTotal, cgst, sgst, total });
+  }, [items, cgstRate, sgstRate]);
 
   const validationSchema = Yup.object().shape({
     poDate: Yup.date().required('PO date is required'),
     supplierName: Yup.string().required('Supplier name is required'),
   });
 
-  const [formData, setFormData] = useState(null);
+  const [formData, setFormData] = useState<Record<string, unknown> | null>(null);
 
   const getInitialValues = () => ({
     poNumber: formData?.poNumber || '',
@@ -274,9 +285,9 @@ const AddEditPurchaseOrderForm: React.FC = () => {
         if (productsData.length === 0) {
           toast.warning('No products available. Please add products first.');
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Error loading products:', error);
-        toast.error(`Failed to load products: ${error.message || error}`);
+        toast.error(`Failed to load products: ${(error as Error).message || error}`);
         setProducts([]);
       }
 
@@ -285,9 +296,9 @@ const AddEditPurchaseOrderForm: React.FC = () => {
         console.log('Fetching parties...');
         const partiesResponse = await dispatch(getAllParties()).unwrap();
         console.log('Parties response:', partiesResponse);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Error loading parties:', error);
-        toast.error(`Failed to load suppliers: ${error.message || error}`);
+        toast.error(`Failed to load suppliers: ${(error as Error).message || error}`);
       }
 
       try {
@@ -308,16 +319,16 @@ const AddEditPurchaseOrderForm: React.FC = () => {
 
           // Vendor selection will be handled by the separate useEffect
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Error loading PO data:', error);
-        toast.error(`Failed to load purchase order: ${error.message || error}`);
+        toast.error(`Failed to load purchase order: ${(error as Error).message || error}`);
       } finally {
         setLoading(false);
       }
     };
 
     loadData();
-  }, [id, isEdit, dispatch]);
+  }, [id, isEdit, dispatch, calculateTotals]);
 
   // Update suppliers when parties data changes
   useEffect(() => {
@@ -350,17 +361,17 @@ const AddEditPurchaseOrderForm: React.FC = () => {
 
   useEffect(() => {
     calculateTotals();
-  }, [items]);
+  }, [items, calculateTotals]);
 
-  const addNewItem = () => {
-    const newItem: PoItem = {
-      key: Date.now().toString(),
-      itemDescription: '',
-      quantity: 0,
-      rate: 0,
-    };
-    setItems([...items, newItem]);
-  };
+  // const addNewItem = () => {
+  //   const newItem: PoItem = {
+  //     key: Date.now().toString(),
+  //     itemDescription: '',
+  //     quantity: 0,
+  //     rate: 0,
+  //   };
+  //   setItems([...items, newItem]);
+  // };
 
   const addProductToItems = () => {
     if (
@@ -432,68 +443,60 @@ const AddEditPurchaseOrderForm: React.FC = () => {
     setItems(items.filter((item) => item.key !== key));
   };
 
-  const updateItem = (key: string, field: string, value: any) => {
-    setItems(
-      items.map((item) => {
-        if (item.key === key) {
-          const updatedItem = { ...item, [field]: value };
-          if (field === 'quantity' || field === 'rate') {
-            updatedItem.amount = updatedItem.quantity * updatedItem.rate;
-          }
-          return updatedItem;
-        }
-        return item;
-      })
-    );
-  };
+  // const updateItem = (key: string, field: string, value: any) => {
+  //   setItems(
+  //     items.map((item) => {
+  //       if (item.key === key) {
+  //         const updatedItem = { ...item, [field]: value };
+  //         if (field === 'quantity' || field === 'rate') {
+  //           updatedItem.amount = updatedItem.quantity * updatedItem.rate;
+  //         }
+  //         return updatedItem;
+  //       }
+  //       return item;
+  //     })
+  //   );
+  // };
 
-  const handleProductSelect = (key: string, productId: string) => {
-    const product = products.find((p) => p.id.toString() === productId);
-    if (product) {
-      setItems(
-        items.map((item) => {
-          if (item.key === key) {
-            return {
-              ...item,
-              productId: product.id,
-              itemDescription: product.name,
-              hsnSac: product.category?.hsnCode || '',
-              rate: product.price || 0,
-              amount: item.quantity * (product.price || 0),
-            };
-          }
-          return item;
-        })
-      );
-    }
-  };
+  // const handleProductSelect = (key: string, productId: string) => {
+  //   const product = products.find((p) => p.id.toString() === productId);
+  //   if (product) {
+  //     setItems(
+  //       items.map((item) => {
+  //         if (item.key === key) {
+  //           return {
+  //             ...item,
+  //             productId: product.id,
+  //             itemDescription: product.name,
+  //             hsnSac: product.category?.hsnCode || '',
+  //             rate: product.price || 0,
+  //             amount: item.quantity * (product.price || 0),
+  //           };
+  //         }
+  //         return item;
+  //       })
+  //     );
+  //   }
+  // };
 
   const getCurrencySymbol = () => {
     const symbols = { INR: '₹', USD: '$', EUR: '€', GBP: '£' };
     return symbols[currency] || '₹';
   };
 
-  const calculateTotals = () => {
-    const subTotal = items.reduce((sum, item) => sum + (item.amount || 0), 0);
-    const cgst = subTotal * (cgstRate / 100);
-    const sgst = subTotal * (sgstRate / 100);
-    const total = subTotal + cgst + sgst;
-    setTotals({ subTotal, cgst, sgst, total });
-  };
+  // const handleCompanyFieldChange = (field: keyof Company, value: string) => {
+  //   if (company) {
+  //     setCompany((prev) => (prev ? { ...prev, [field]: value } : null));
+  //   }
+  // };
 
-  const handleCompanyFieldChange = (field: keyof Company, value: string) => {
-    if (company) {
-      setCompany((prev) => (prev ? { ...prev, [field]: value } : null));
-    }
-  };
+  // const handleVendorFieldChange = (field: keyof Vendor, value: string) => {
+  //   if (selectedVendor) {
+  //     setSelectedVendor((prev) => (prev ? { ...prev, [field]: value } : null));
+  //   }
+  // };
 
-  const handleVendorFieldChange = (field: keyof Vendor, value: string) => {
-    if (selectedVendor) {
-      setSelectedVendor((prev) => (prev ? { ...prev, [field]: value } : null));
-    }
-  };
-
-  const handleSubmit = async (values: any, { setSubmitting }) => {
+  const handleSubmit = async (values: Record<string, unknown>, { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }) => {
     if (items.length === 0) {
       toast.error('Please add at least one item');
       setSubmitting(false);
@@ -557,11 +560,11 @@ const AddEditPurchaseOrderForm: React.FC = () => {
       }
 
       navigate('/purchase-orders');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Purchase Order Save Error:', error);
 
       // Error is already the message string from Redux
-      toast.error(error);
+      toast.error(error as string);
     } finally {
       setLoading(false);
       setSubmitting(false);
@@ -1077,7 +1080,7 @@ const AddEditPurchaseOrderForm: React.FC = () => {
 
                               if (packagingHierarchy.length > 0) {
                                 packagingHierarchy.forEach(
-                                  (level, levelIdx) => {
+                                  (level) => {
                                     availableUnits.push({
                                       id: level.from,
                                       name: level.from,

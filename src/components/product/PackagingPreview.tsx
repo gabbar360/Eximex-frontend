@@ -2,11 +2,11 @@ import React, { useEffect } from 'react';
 import { HiEye, HiScale, HiCube } from 'react-icons/hi2';
 
 interface PackagingPreviewProps {
-  values: any;
-  packagingHierarchy: any[];
+  values: Record<string, unknown>;
+  packagingHierarchy: Record<string, unknown>[];
   convertToKg: (weight: number, unit: string) => number;
   convertFromKg: (weight: number, unit: string) => number;
-  setFieldValue: (field: string, value: any) => void;
+  setFieldValue: (field: string, value: unknown) => void;
 }
 
 const PackagingPreview: React.FC<PackagingPreviewProps> = ({
@@ -51,7 +51,7 @@ const PackagingPreview: React.FC<PackagingPreviewProps> = ({
     }
 
     // Calculate weights for each packaging level
-    packagingHierarchy.forEach((level, index) => {
+    packagingHierarchy.forEach((level) => {
       const quantityField = `${level.from}Per${level.to}`;
       const quantity = parseFloat(values[quantityField]) || 0;
       const weightField = `weightPer${level.to}`;
@@ -104,14 +104,8 @@ const PackagingPreview: React.FC<PackagingPreviewProps> = ({
       }
     }
   }, [
-    values.unitWeight,
-    values.weightUnitType,
-    values.packagingMaterialWeight,
-    values.packagingMaterialWeightUnit,
-    values.unitWeightUnit,
-    values['Square MeterPerBox'],
-    ...packagingHierarchy.map((level) => values[`${level.from}Per${level.to}`]),
-    packagingHierarchy.length,
+    packagingHierarchy,
+    values,
     setFieldValue,
     convertToKg,
     convertFromKg,
@@ -216,7 +210,7 @@ const PackagingPreview: React.FC<PackagingPreviewProps> = ({
                   })()}
 
                   {/* All packaging level weights */}
-                  {packagingHierarchy.map((level, index) => {
+                  {packagingHierarchy.map((level) => {
                     const weightFieldName = `weightPer${level.to}`;
                     const weightValue = values[weightFieldName];
 

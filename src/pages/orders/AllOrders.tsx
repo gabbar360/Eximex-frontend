@@ -20,12 +20,11 @@ import {
 } from 'react-icons/hi2';
 import { toast } from 'react-toastify';
 import { fetchOrders, deleteOrder } from '../../features/orderSlice';
-import { useDebounce } from '../../utils/useDebounce';
 
 const AllOrders: React.FC = () => {
   const dispatch = useDispatch();
   const { orders = [], loading = false } = useSelector(
-    (state: any) => state.order || {}
+    (state: { order?: { orders: Record<string, unknown>[]; loading: boolean } }) => state.order || {}
   );
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -131,14 +130,14 @@ const AllOrders: React.FC = () => {
     dispatch(fetchOrders());
   }, [dispatch]);
 
-  const { debouncedCallback: debouncedSearch } = useDebounce(
-    (value: string) => {
-      // Only trigger search if there's actual search logic needed
-      // For now, just filtering is handled in filteredOrders
-      console.log('Searching for:', value);
-    },
-    500
-  );
+  // const debouncedSearch = useDebounce(
+  //   (value: string) => {
+  //     // Only trigger search if there's actual search logic needed
+  //     // For now, just filtering is handled in filteredOrders
+  //     console.log('Searching for:', value);
+  //   },
+  //   500
+  // );
 
   const handleSearch = useCallback((value: string) => {
     setSearchTerm(value);
@@ -151,9 +150,9 @@ const AllOrders: React.FC = () => {
       await dispatch(deleteOrder(id)).unwrap();
       toast.success('Order deleted successfully');
       setConfirmDelete(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.log('Delete error:', error);
-      toast.error(error || 'Failed to delete order');
+      toast.error(error as string || 'Failed to delete order');
     }
   };
 
@@ -178,7 +177,13 @@ const AllOrders: React.FC = () => {
     };
   }, [openDropdown]);
 
-  const filteredOrders = orders.filter((order: any) => {
+  const filteredOrders = orders.filter((order: {
+    orderNumber?: string;
+    piInvoice?: {
+      party?: { companyName?: string };
+    };
+    orderStatus?: string;
+  }) => {
     if (!order) return false;
 
     const matchesSearch =

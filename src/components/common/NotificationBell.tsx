@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { HiBell, HiCheck, HiCheckCircle } from 'react-icons/hi2';
+import { HiBell, HiCheckCircle } from 'react-icons/hi2';
 import { useSocket } from '../../context/SocketContext';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
   getNotifications,
   getUnreadCount,
-  markNotificationAsRead,
   markAllNotificationsAsRead,
   deleteNotification,
 } from '../../features/notificationSlice';
@@ -17,7 +16,7 @@ interface Notification {
   type: string;
   title: string;
   message: string;
-  data?: any;
+  data?: Record<string, unknown>;
   isRead: boolean;
   createdAt: string;
   sender?: {
@@ -27,11 +26,11 @@ interface Notification {
 }
 
 const NotificationBell: React.FC = () => {
-  const { markAsRead, markAllAsRead } = useSocket();
+  const { markAllAsRead } = useSocket();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { notifications, unreadCount, loading } = useSelector(
-    (state: any) => state.notification
+    (state: Record<string, unknown>) => state.notification
   );
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);

@@ -18,7 +18,7 @@ interface HistoryItem {
   piInvoiceId: number;
   action: string;
   description: string;
-  changeData: any;
+  changeData: Record<string, unknown>;
   statusBefore: string;
   statusAfter: string;
   changedFields: string[];
@@ -65,7 +65,7 @@ const PIHistory: React.FC = () => {
     if (id) {
       fetchHistory();
     }
-  }, [id]);
+  }, [id, dispatch]);
 
   // Format date
   const formatDate = (dateString: string) => {
@@ -78,19 +78,7 @@ const PIHistory: React.FC = () => {
     });
   };
 
-  // Get action color
-  const getActionColor = (action: string) => {
-    switch (action) {
-      case 'CREATE':
-        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500';
-      case 'UPDATE':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-500';
-      case 'DELETE':
-        return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-500';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-500';
-    }
-  };
+
 
   return (
     <div className="min-h-screen bg-gray-50">

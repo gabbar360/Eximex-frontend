@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import { HiEye, HiEyeOff } from 'react-icons/hi';
 import { loginUser } from '../../features/authSlice';
 import { setUser } from '../../features/userSlice';

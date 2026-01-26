@@ -54,60 +54,40 @@ const packingListService = {
 
   // Download packing list PDF
   downloadPDF: async (id) => {
-    try {
-      const response = await axiosInstance.get(`/packing-lists/${id}/pdf`, {
-        responseType: 'blob',
-      });
-      return response;
-    } catch (error) {
-      throw error;
-    }
+    const response = await axiosInstance.get(`/packing-lists/${id}/pdf`, {
+      responseType: 'blob',
+    });
+    return response;
   },
 
   // ============ PACKAGING STEPS INTEGRATION ============
 
   // Create packaging steps for a product
   createPackagingSteps: async (data) => {
-    try {
-      const response = await axiosInstance.post('/packaging-steps', data);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await axiosInstance.post('/packaging-steps', data);
+    return response.data;
   },
 
   // Update a packaging step
   updatePackagingStep: async (stepId, data) => {
-    try {
-      const response = await axiosInstance.put(
-        `/packaging-steps/${stepId}`,
-        data
-      );
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await axiosInstance.put(
+      `/packaging-steps/${stepId}`,
+      data
+    );
+    return response.data;
   },
 
   // Delete a packaging step
   deletePackagingStep: async (stepId) => {
-    try {
-      const response = await axiosInstance.delete(`/packaging-steps/${stepId}`);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await axiosInstance.delete(`/packaging-steps/${stepId}`);
+    return response.data;
   },
   // Download BL draft PDF
   downloadBLDraftPDF: async (id) => {
-    try {
-      const response = await axiosInstance.get(`/orders/${id}/bl-draft-pdf`, {
-        responseType: 'blob',
-      });
-      return response;
-    } catch (error) {
-      throw error;
-    }
+    const response = await axiosInstance.get(`/orders/${id}/bl-draft-pdf`, {
+      responseType: 'blob',
+    });
+    return response;
   },
 };
 

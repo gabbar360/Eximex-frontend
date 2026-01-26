@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux';
 
 const LayoutContent: React.FC = () => {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
-  const user = useSelector((state: any) => state.user.user);
+  const user = useSelector((state: Record<string, unknown>) => state.user.user);
   const isProfileComplete =
     user?.companyId || user?.role?.name === 'SUPER_ADMIN';
 

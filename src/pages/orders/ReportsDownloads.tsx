@@ -15,11 +15,11 @@ import axiosInstance from '../../utils/axiosInstance';
 const ReportsDownloads: React.FC = () => {
   const dispatch = useDispatch();
   const { orders = [], loading = false } = useSelector(
-    (state: any) => state.order || {}
+    (state: { order: { orders: Record<string, unknown>[]; loading: boolean } }) => state.order || {}
   );
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const pageSize = 10;
 
   useEffect(() => {
     dispatch(fetchOrders());
@@ -30,7 +30,7 @@ const ReportsDownloads: React.FC = () => {
     setCurrentPage(1);
   }, []);
 
-  const handleCommercialInvoiceDownload = async (order: any) => {
+  const handleCommercialInvoiceDownload = async (order: Record<string, unknown>) => {
     const hasPackingList =
       order.piInvoice?.packingLists && order.piInvoice.packingLists.length > 0;
 
@@ -69,7 +69,7 @@ const ReportsDownloads: React.FC = () => {
     }
   };
 
-  const handleBLDraftDownload = async (order: any) => {
+  const handleBLDraftDownload = async (order: Record<string, unknown>) => {
     const hasPackingList =
       order.piInvoice?.packingLists && order.piInvoice.packingLists.length > 0;
 
@@ -103,7 +103,7 @@ const ReportsDownloads: React.FC = () => {
     }
   };
 
-  const filteredOrders = orders.filter((order: any) => {
+  const filteredOrders = orders.filter((order: Record<string, unknown>) => {
     return (
       order.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.piInvoice?.party?.companyName
@@ -201,7 +201,7 @@ const ReportsDownloads: React.FC = () => {
                   </div>
                 </div>
                 <div className="divide-y divide-white/20">
-                  {paginatedOrders.map((order: any) => {
+                  {paginatedOrders.map((order: Record<string, unknown>) => {
                     return (
                       <div
                         key={order.id}

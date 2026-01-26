@@ -26,7 +26,7 @@ import { Pagination } from 'antd';
 import { useDebounce } from '../../utils/useDebounce';
 
 const CategoryRow: React.FC<{
-  category: any;
+  category: Record<string, unknown>;
   level: number;
   expandedCategories: string[];
   toggleExpand: (id: string) => void;
@@ -49,17 +49,17 @@ const CategoryRow: React.FC<{
         : 'bg-gray-100 dark:bg-gray-700/30';
 
   const filteredSubcategories =
-    category.subcategories?.filter((sub: any) => {
+    (category.subcategories as Record<string, unknown>[])?.filter((sub: Record<string, unknown>) => {
       const matchesSub =
-        sub.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        sub.hsn_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        sub.desc?.toLowerCase().includes(searchTerm.toLowerCase());
+        (sub.name as string).toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (sub.hsn_code as string)?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (sub.desc as string)?.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const hasMatchingChildren = sub.subcategories?.some(
-        (child: any) =>
-          child.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          child.hsn_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          child.desc?.toLowerCase().includes(searchTerm.toLowerCase())
+      const hasMatchingChildren = (sub.subcategories as Record<string, unknown>[])?.some(
+        (child: Record<string, unknown>) =>
+          (child.name as string).toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (child.hsn_code as string)?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (child.desc as string)?.toLowerCase().includes(searchTerm.toLowerCase())
       );
 
       return matchesSub || hasMatchingChildren;
@@ -77,50 +77,50 @@ const CategoryRow: React.FC<{
             <BiCategory className="w-4 h-4 text-slate-600 flex-shrink-0" />
             <span
               className="text-slate-800 font-medium truncate"
-              title={category.name}
+              title={(category.name as string)}
             >
               {level > 0 && '↳ '}
-              {category.name}
+              {(category.name as string)}
             </span>
           </div>
 
           {/* HSN Code Column */}
           <div className="text-slate-700 text-sm">
-            {category.useParentHsnCode ? (
+            {(category.useParentHsnCode as boolean) ? (
               <span className="italic text-slate-500">(Parent's HSN)</span>
             ) : (
-              category.hsn_code || category.hsnCode || '-'
+              (category.hsn_code as string) || (category.hsnCode as string) || '-'
             )}
           </div>
 
           {/* Description Column */}
           <div
             className="text-slate-700 text-sm truncate"
-            title={category.description || category.desc}
+            title={(category.description as string) || (category.desc as string)}
           >
-            {category.description || category.desc || '-'}
+            {(category.description as string) || (category.desc as string) || '-'}
           </div>
 
           {/* Primary Unit Column */}
           <div className="text-slate-700 text-sm">
-            {category.primary_unit || category.primaryUnit || '-'}
+            {(category.primary_unit as string) || (category.primaryUnit as string) || '-'}
           </div>
 
           {/* Secondary Unit Column */}
           <div className="text-slate-700 text-sm">
-            {category.secondary_unit || category.secondaryUnit || '-'}
+            {(category.secondary_unit as string) || (category.secondaryUnit as string) || '-'}
           </div>
 
           {/* Subcategories Column */}
           <div className="text-slate-700 text-sm">
             {filteredSubcategories.length > 0 ? (
               <button
-                onClick={() => toggleExpand(category.id)}
+                onClick={() => toggleExpand((category.id as string))}
                 className="text-slate-600 hover:text-slate-800 font-medium flex items-center gap-1"
               >
                 <span>{filteredSubcategories.length}</span>
                 <span>
-                  {expandedCategories.includes(category.id) ? '▼' : '►'}
+                  {expandedCategories.includes((category.id as string)) ? '▼' : '►'}
                 </span>
               </button>
             ) : (
@@ -131,13 +131,13 @@ const CategoryRow: React.FC<{
           {/* Actions Column */}
           <div className="flex items-center justify-end space-x-2">
             <Link
-              to={`/edit-category/${category.id}`}
+              to={`/edit-category/${(category.id as string)}`}
               className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-600 transition-all duration-300"
             >
               <HiPencil className="w-4 h-4" />
             </Link>
             <button
-              onClick={() => handleDeleteClick(category.id)}
+              onClick={() => handleDeleteClick((category.id as string))}
               className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
             >
               <HiTrash className="w-4 h-4" />
@@ -145,10 +145,10 @@ const CategoryRow: React.FC<{
           </div>
         </div>
       </div>
-      {expandedCategories.includes(category.id) &&
-        filteredSubcategories.map((subcategory: any) => (
+      {expandedCategories.includes((category.id as string)) &&
+        filteredSubcategories.map((subcategory: Record<string, unknown>) => (
           <CategoryRow
-            key={subcategory.id}
+            key={(subcategory.id as string)}
             category={subcategory}
             level={level + 1}
             expandedCategories={expandedCategories}
@@ -163,24 +163,20 @@ const CategoryRow: React.FC<{
 
 const Category: React.FC = () => {
   const dispatch = useDispatch();
-  const { categories, loading, error, pagination } = useSelector(
-    (state: any) => state.category
+  const { categories, loading, pagination } = useSelector(
+    (state: {
+      category: {
+        categories: Record<string, unknown>[];
+        loading: boolean;
+        pagination: { total: number };
+      };
+    }) => state.category
   );
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-
-  useEffect(() => {
-    dispatch(
-      fetchCategories({
-        page: currentPage,
-        limit: pageSize,
-        search: '',
-      }) as any
-    );
-  }, [dispatch, currentPage, pageSize]);
+  const pageSize = 10;
 
   useEffect(() => {
     dispatch(
@@ -188,7 +184,7 @@ const Category: React.FC = () => {
         page: 1,
         limit: 10,
         search: '',
-      }) as any
+      }) as unknown as Record<string, unknown>
     );
   }, [dispatch]);
 
@@ -199,7 +195,7 @@ const Category: React.FC = () => {
           page: 1,
           limit: pageSize,
           search: value,
-        }) as any
+        }) as unknown as Record<string, unknown>
       );
     },
     500
@@ -211,7 +207,7 @@ const Category: React.FC = () => {
       setCurrentPage(1);
       debouncedSearch(value);
     },
-    [debouncedSearch, pageSize]
+    [debouncedSearch]
   );
 
   const handleDeleteClick = (id: string) => {
@@ -223,7 +219,7 @@ const Category: React.FC = () => {
 
     try {
       const result = await dispatch(
-        deleteCategory(confirmDelete) as any
+        deleteCategory(confirmDelete) as unknown as Record<string, unknown>
       ).unwrap();
       setConfirmDelete(null);
 
@@ -232,12 +228,12 @@ const Category: React.FC = () => {
           page: currentPage,
           limit: pageSize,
           search: searchTerm,
-        }) as any
+        }) as unknown as Record<string, unknown>
       );
 
       toast.success(result.message);
-    } catch (error: any) {
-      toast.error(error);
+    } catch (error: unknown) {
+      toast.error(error as string);
     }
   };
 
@@ -249,8 +245,8 @@ const Category: React.FC = () => {
     );
   };
 
-  const filteredCategories =
-    categories?.filter((category: any) => !category.parent_id) || [];
+  // const filteredCategories =
+  //   categories?.filter((category: any) => !category.parent_id) || [];
 
   return (
     <>
@@ -367,9 +363,9 @@ const Category: React.FC = () => {
                   </div>
                 </div>
                 <div className="divide-y divide-white/20">
-                  {categories.map((category: any) => (
+                  {categories.map((category: Record<string, unknown>) => (
                     <CategoryRow
-                      key={category.id}
+                      key={(category.id as string)}
                       category={category}
                       level={0}
                       expandedCategories={expandedCategories}
@@ -419,9 +415,9 @@ const Category: React.FC = () => {
                       </div>
                     </div>
                     <div className="divide-y divide-white/20">
-                      {categories.map((category: any) => (
+                      {categories.map((category: Record<string, unknown>) => (
                         <CategoryRow
-                          key={category.id}
+                          key={(category.id as string)}
                           category={category}
                           level={0}
                           expandedCategories={expandedCategories}
@@ -451,7 +447,7 @@ const Category: React.FC = () => {
                       page: page,
                       limit: pageSize,
                       search: searchTerm,
-                    }) as any
+                    }) as unknown as Record<string, unknown>
                   );
                 }}
               />

@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useFormikContext } from 'formik';
 
 interface PackagingCalculationsProps {
-  packagingHierarchy: any[];
+  packagingHierarchy: Record<string, unknown>[];
   trackVolume: boolean;
   convertToKg: (weight: number, unit: string) => number;
   convertFromKg: (weight: number, unit: string) => number;
@@ -10,7 +10,7 @@ interface PackagingCalculationsProps {
 
 const PackagingCalculations: React.FC<PackagingCalculationsProps> = React.memo(
   ({ packagingHierarchy, trackVolume, convertToKg, convertFromKg }) => {
-    const { values, setFieldValue } = useFormikContext<any>();
+    const { values, setFieldValue } = useFormikContext<Record<string, unknown>>();
 
     useEffect(() => {
       if (!packagingHierarchy.length) return;
@@ -159,7 +159,7 @@ const PackagingCalculations: React.FC<PackagingCalculationsProps> = React.memo(
           setFieldValue(baseFieldName, weightPerBaseUnit.toFixed(2));
 
           // Calculate weights for each packaging level
-          packagingHierarchy.forEach((level, index) => {
+          packagingHierarchy.forEach((level) => {
             const quantityField = `${level.from}Per${level.to}`;
             const quantity = parseInt(values[quantityField]) || 1;
             cumulativeMultiplier *= quantity;
@@ -223,14 +223,8 @@ const PackagingCalculations: React.FC<PackagingCalculationsProps> = React.memo(
       values.volumeLength,
       values.volumeWidth,
       values.volumeHeight,
-      ...packagingHierarchy.map(
-        (level) => values[`${level.from}Per${level.to}`]
-      ),
       packagingHierarchy.length,
       trackVolume,
-      setFieldValue,
-      convertToKg,
-      convertFromKg,
     ]);
 
     return null;

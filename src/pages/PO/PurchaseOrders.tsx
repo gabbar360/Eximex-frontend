@@ -1,9 +1,8 @@
-import { useDispatch, useSelector } from 'react-redux';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import PageMeta from '../../components/common/PageMeta';
 import {
-  HiEye,
   HiPencil,
   HiTrash,
   HiPlus,
@@ -16,9 +15,7 @@ import {
   HiCurrencyDollar,
   HiBuildingOffice2,
   HiCalendar,
-  HiCreditCard,
   HiArrowDownTray,
-  HiEnvelope,
 } from 'react-icons/hi2';
 import {
   fetchPurchaseOrders,
@@ -26,18 +23,16 @@ import {
   downloadPurchaseOrderPDF,
 } from '../../features/purchaseOrderSlice';
 import { toast } from 'react-toastify';
-import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
 const PurchaseOrders: React.FC = () => {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [purchaseOrders, setPurchaseOrders] = useState([]);
+  const [purchaseOrders, setPurchaseOrders] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [downloadingPdf, setDownloadingPdf] = useState<string | null>(null);
 
-  const loadPurchaseOrders = async () => {
+  const loadPurchaseOrders = useCallback(async () => {
     setLoading(true);
     try {
       const response = await dispatch(fetchPurchaseOrders()).unwrap();
@@ -57,22 +52,20 @@ const PurchaseOrders: React.FC = () => {
 
       console.log('Processed Purchase Orders Data:', purchaseOrdersData);
       setPurchaseOrders(purchaseOrdersData);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching purchase orders:', error);
-      toast.error(error);
+      toast.error(error as string);
       setPurchaseOrders([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [dispatch]);
 
   useEffect(() => {
     loadPurchaseOrders();
-  }, []);
+  }, [loadPurchaseOrders]);
 
-  const handleDeleteClick = (id: string) => {
-    setConfirmDelete(id);
-  };
+
 
   const handleConfirmDelete = async () => {
     if (!confirmDelete) return;
@@ -84,8 +77,8 @@ const PurchaseOrders: React.FC = () => {
       toast.success(result.message || 'Purchase order deleted successfully');
       setConfirmDelete(null);
       loadPurchaseOrders();
-    } catch (error: any) {
-      toast.error(error);
+    } catch (error: unknown) {
+      toast.error(error as string);
     }
   };
 
@@ -106,9 +99,9 @@ const PurchaseOrders: React.FC = () => {
       window.URL.revokeObjectURL(url);
 
       toast.success('PDF downloaded successfully');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error downloading PDF:', error);
-      toast.error(error);
+      toast.error(error as string);
     } finally {
       setDownloadingPdf(null);
     }
@@ -116,32 +109,15 @@ const PurchaseOrders: React.FC = () => {
 
   const filteredPurchaseOrders = Array.isArray(purchaseOrders)
     ? purchaseOrders.filter(
-        (po: any) =>
-          po?.poNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          po?.vendorName?.toLowerCase().includes(searchTerm.toLowerCase())
+        (po: Record<string, unknown>) =>
+          ((po?.poNumber as string)?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          ((po?.vendorName as string)?.toLowerCase().includes(searchTerm.toLowerCase()))
       )
     : [];
 
-  const getStatusColor = (status: string) => {
-    const colors = {
-      draft: 'bg-gray-100 text-gray-800',
-      pending: 'bg-yellow-100 text-yellow-800',
-      approved: 'bg-green-100 text-green-800',
-      rejected: 'bg-red-100 text-red-800',
-      cancelled: 'bg-gray-100 text-gray-800',
-      completed: 'bg-blue-100 text-blue-800',
-    };
-    return colors[status] || 'bg-gray-100 text-gray-800';
-  };
 
-  const getTypeColor = (type: string) => {
-    const colors = {
-      import: 'bg-blue-100 text-blue-800',
-      export: 'bg-green-100 text-green-800',
-      domestic: 'bg-orange-100 text-orange-800',
-    };
-    return colors[type] || 'bg-gray-100 text-gray-800';
-  };
+
+
 
   const handleSearch = useCallback((value: string) => {
     setSearchTerm(value);
@@ -301,13 +277,13 @@ const PurchaseOrders: React.FC = () => {
                     </div>
                   </div>
                   <div className="divide-y divide-white/20">
-                    {filteredPurchaseOrders.map((po: any) => {
-                      const statusConfig = getStatusConfig(po.status);
+                    {filteredPurchaseOrders.map((po: Record<string, unknown>) => {
+                      const statusConfig = getStatusConfig((po.status as string));
                       const StatusIcon = statusConfig.icon;
 
                       return (
                         <div
-                          key={po.id}
+                          key={(po.id as string)}
                           className="p-4 hover:bg-white/50 transition-all duration-300"
                         >
                           <div
@@ -322,24 +298,24 @@ const PurchaseOrders: React.FC = () => {
                               <HiDocumentText className="w-4 h-4 text-slate-600 flex-shrink-0" />
                               <span
                                 className="text-slate-800 font-medium truncate"
-                                title={po.poNumber}
+                                title={(po.poNumber as string)}
                               >
-                                {po.poNumber}
+                                {(po.poNumber as string)}
                               </span>
                             </div>
 
                             {/* Supplier */}
                             <div
                               className="text-slate-700 text-sm truncate"
-                              title={po.vendorName}
+                              title={(po.vendorName as string)}
                             >
-                              {po.vendorName || '-'}
+                              {(po.vendorName as string) || '-'}
                             </div>
 
                             {/* Date */}
                             <div className="text-slate-700 text-sm">
-                              {po.poDate
-                                ? new Date(po.poDate).toLocaleDateString(
+                              {(po.poDate as string)
+                                ? new Date((po.poDate as string)).toLocaleDateString(
                                     'en-US',
                                     {
                                       month: 'short',
@@ -356,8 +332,8 @@ const PurchaseOrders: React.FC = () => {
                                 className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${statusConfig.bg} ${statusConfig.color} ${statusConfig.border}`}
                               >
                                 <StatusIcon className="w-3 h-3 mr-1" />
-                                {po.status?.charAt(0).toUpperCase() +
-                                  po.status?.slice(1) || 'Draft'}
+                                {((po.status as string)?.charAt(0).toUpperCase() +
+                                  (po.status as string)?.slice(1)) || 'Draft'}
                               </span>
                             </div>
 
@@ -370,12 +346,12 @@ const PurchaseOrders: React.FC = () => {
 
                             {/* Amount */}
                             <div className="text-slate-700 text-sm font-medium">
-                              {po.totalAmount && po.currency
+                              {(po.totalAmount as number) && (po.currency as string)
                                 ? new Intl.NumberFormat('en-US', {
                                     style: 'currency',
-                                    currency: po.currency,
+                                    currency: (po.currency as string),
                                     maximumFractionDigits: 0,
-                                  }).format(po.totalAmount)
+                                  }).format((po.totalAmount as number))
                                 : '-'}
                             </div>
 
@@ -383,27 +359,27 @@ const PurchaseOrders: React.FC = () => {
                             <div className="flex items-center justify-end space-x-2">
                               <button
                                 onClick={async () =>
-                                  await handleDownload(po.id, po.poNumber)
+                                  await handleDownload((po.id as string), (po.poNumber as string))
                                 }
-                                disabled={downloadingPdf === po.id}
+                                disabled={downloadingPdf === (po.id as string)}
                                 className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-blue-600 transition-all duration-300"
                                 title="Download PDF"
                               >
-                                {downloadingPdf === po.id ? (
+                                {downloadingPdf === (po.id as string) ? (
                                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-300 border-t-blue-600"></div>
                                 ) : (
                                   <HiArrowDownTray className="w-4 h-4" />
                                 )}
                               </button>
                               <Link
-                                to={`/purchase-orders/edit/${po.id}`}
+                                to={`/purchase-orders/edit/${(po.id as string)}`}
                                 className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-600 transition-all duration-300"
                                 title="Edit"
                               >
                                 <HiPencil className="w-4 h-4" />
                               </Link>
                               <button
-                                onClick={() => setConfirmDelete(po.id)}
+                                onClick={() => setConfirmDelete((po.id as string))}
                                 className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
                                 title="Delete"
                               >

@@ -19,8 +19,8 @@ interface ProductData {
 
 interface ProductTableProps {
   addedProducts: ProductData[];
-  categories: any[];
-  products: any[];
+  categories: Record<string, unknown>[];
+  products: Record<string, unknown>[];
   currency: string;
   editingProductIndex: number | null;
   onEditProduct: (index: number) => void;

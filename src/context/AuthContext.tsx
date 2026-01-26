@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect } from 'react';
+import React, { createContext, useContext } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { loginUser, logoutUser } from '../features/authSlice';
 import { clearUser } from '../features/userSlice';
@@ -11,7 +11,7 @@ interface User {
     id: number;
     name: 'SUPER_ADMIN' | 'ADMIN' | 'STAFF';
     displayName: string;
-    permissions: any;
+    permissions: Record<string, unknown>;
   };
   companyId: number;
   profilePicture?: string;
@@ -24,7 +24,7 @@ interface User {
   };
 }
 
-const getPermissions = (role: any) => {
+const getPermissions = (role: Record<string, unknown>) => {
   const roleName = role?.name || role;
   return {
     canManageStaff: ['ADMIN', 'SUPER_ADMIN'].includes(roleName),
@@ -43,13 +43,13 @@ const AuthContext = createContext<{
   };
   login: (credentials: { email: string; password: string }) => Promise<void>;
   logout: () => void;
-}>({} as any);
+} | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const dispatch = useDispatch();
-  const user = useSelector((state: any) => state.user.user);
+  const user = useSelector((state: Record<string, unknown>) => state.user.user);
 
   const isAuthenticated = !!user;
   const permissions = user
@@ -61,11 +61,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       };
 
   const login = async (credentials: { email: string; password: string }) => {
-    try {
-      const response = await dispatch(loginUser(credentials)).unwrap();
-    } catch (error) {
-      throw error;
-    }
+    await dispatch(loginUser(credentials)).unwrap();
   };
 
   const logout = async () => {

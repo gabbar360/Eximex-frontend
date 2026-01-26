@@ -22,11 +22,10 @@ const PackingListManagement: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { orders = [], loading = false } = useSelector(
-    (state: any) => state.order || {}
+    (state: { order?: { orders: Record<string, unknown>[]; loading: boolean } }) => state.order || {}
   );
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   useEffect(() => {
@@ -68,13 +67,13 @@ const PackingListManagement: React.FC = () => {
       setConfirmDelete(null);
       // Refresh orders data without page reload
       dispatch(fetchOrders());
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.log('Delete packing list error:', error);
-      toast.error(error || 'Failed to delete packing list');
+      toast.error(error as string || 'Failed to delete packing list');
     }
   };
 
-  const handlePDFDownload = async (order: any) => {
+  const handlePDFDownload = async (order: Record<string, unknown>) => {
     try {
       toast.info('Preparing PDF download...', { autoClose: 2000 });
 
@@ -141,7 +140,7 @@ const PackingListManagement: React.FC = () => {
   };
 
   // Filter orders to show only those with packing lists and match search term
-  const filteredOrders = orders.filter((order: any) => {
+  const filteredOrders = orders.filter((order: Record<string, unknown>) => {
     // Check if order has packing list - use piInvoice.packingLists instead of order.packingLists
     const hasPackingList =
       order.piInvoice?.packingLists && order.piInvoice.packingLists.length > 0;
@@ -159,8 +158,8 @@ const PackingListManagement: React.FC = () => {
   });
 
   // Pagination
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
+  const startIndex = (currentPage - 1) * 10;
+  const endIndex = startIndex + 10;
   const paginatedOrders = filteredOrders.slice(startIndex, endIndex);
 
   if (loading) {
@@ -267,12 +266,12 @@ const PackingListManagement: React.FC = () => {
                 </div>
               </div>
               <div className="divide-y divide-white/20">
-                {paginatedOrders.map((order: any) => {
+                {paginatedOrders.map((order: Record<string, unknown>) => {
                   const packingLists = order.piInvoice?.packingLists || [];
                   const hasPackingList = packingLists.length > 0;
 
                   const containers = packingLists.reduce(
-                    (acc: any[], pl: any) => {
+                    (acc: Record<string, unknown>[], pl: Record<string, unknown>) => {
                       if (pl.notes?.containers) {
                         return [...acc, ...pl.notes.containers];
                       }
@@ -282,7 +281,7 @@ const PackingListManagement: React.FC = () => {
                   );
 
                   const totalWeight = containers.reduce(
-                    (sum: number, container: any) => {
+                    (sum: number, container: Record<string, unknown>) => {
                       const rawWeight =
                         container.totalGrossWeight ??
                         container.grossWeight ??
@@ -422,12 +421,12 @@ const PackingListManagement: React.FC = () => {
                     </div>
                   </div>
                   <div className="divide-y divide-white/20">
-                    {paginatedOrders.map((order: any) => {
+                    {paginatedOrders.map((order: Record<string, unknown>) => {
                       const packingLists = order.piInvoice?.packingLists || [];
                       const hasPackingList = packingLists.length > 0;
 
                       const containers = packingLists.reduce(
-                        (acc: any[], pl: any) => {
+                        (acc: Record<string, unknown>[], pl: Record<string, unknown>) => {
                           if (pl.notes?.containers) {
                             return [...acc, ...pl.notes.containers];
                           }
@@ -437,7 +436,7 @@ const PackingListManagement: React.FC = () => {
                       );
 
                       const totalWeight = containers.reduce(
-                        (sum: number, container: any) => {
+                        (sum: number, container: Record<string, unknown>) => {
                           const rawWeight =
                             container.totalGrossWeight ??
                             container.grossWeight ??
@@ -551,7 +550,7 @@ const PackingListManagement: React.FC = () => {
             <Pagination
               current={currentPage}
               total={filteredOrders.length}
-              pageSize={pageSize}
+              pageSize={10}
               onChange={(page) => setCurrentPage(page)}
             />
           </div>

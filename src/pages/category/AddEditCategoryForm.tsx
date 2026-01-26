@@ -17,7 +17,8 @@ import {
   HiArrowLeft,
   HiCheckCircle,
   HiPlus,
-  HiTrash
+  HiTrash,
+  HiDocumentText
 } from 'react-icons/hi2';
 import {
   MdCategory,
@@ -33,36 +34,6 @@ import * as Yup from 'yup';
 import { Formik } from 'formik';
 
 // TypeScript interfaces
-interface Category {
-  id?: string;
-  name: string;
-  hsn_code: string;
-  description: string;
-  parent_id?: string;
-  primary_unit?: string;
-  secondary_unit?: string;
-  hsnCode?: string;
-  parentId?: string;
-  other_ItemCategory?: Subcategory[];
-  packagingHierarchy?: PackagingLevel[];
-}
-
-interface Subcategory {
-  id?: string;
-  name: string;
-  hsn_code: string;
-  desc: string;
-  useParentHsnCode: boolean;
-  hsnCode?: string;
-  description?: string;
-}
-
-interface PackagingLevel {
-  parentUnitId: string;
-  childUnitId: string;
-  conversionQuantity: number;
-  quantity?: number;
-}
 
 
 // Unit Dropdown Component
@@ -216,108 +187,90 @@ const AddEditCategoryForm: React.FC = () => {
   const [loading, setLoading] = useState(isEditMode);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [category, setCategory] = useState<any>({});
-  const [parentCategories, setParentCategories] = useState<any[]>([]);
-  const [subcategories, setSubcategories] = useState([
+  const [category, setCategory] = useState<Record<string, unknown>>({});
+  const [subcategories, setSubcategories] = useState<Record<string, unknown>[]>([
     { name: '', hsn_code: '', desc: '', useParentHsnCode: false },
   ]);
-  const [packagingLevels, setPackagingLevels] = useState([]);
+  const [packagingLevels, setPackagingLevels] = useState<Record<string, unknown>[]>([]);
 
-  useEffect(() => {
-    const fetchParentCategories = async () => {
-      try {
-        const data = await dispatch(getAllCategories()).unwrap();
-        // Filter out categories that could create circular references
-        const filteredCategories = isEditMode
-          ? (data.data || data).filter((cat: any) => cat.id !== id)
-          : data.data || data;
-        setParentCategories(filteredCategories || []);
-      } catch (err: any) {
-        console.error('Failed to fetch parent categories:', err);
+  const fetchCategory = React.useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await dispatch(getCategoryById(id)).unwrap();
+      const data = (response as Record<string, unknown>).data || response;
+      console.log('Category data:', data);
+
+      setCategory({
+        id: data.id,
+        name: data.name,
+        hsn_code: data.hsnCode || data.hsn_code,
+        description: data.description,
+        parent_id: data.parentId,
+        primary_unit: data.primary_unit,
+        secondary_unit: data.secondary_unit,
+      });
+
+      if (data?.other_ItemCategory && data.other_ItemCategory.length > 0) {
+        const formattedSubcategories = data.other_ItemCategory.map(
+          (sub: Record<string, unknown>) => ({
+            id: sub.id,
+            name: sub.name || '',
+            hsn_code: sub.hsnCode || sub.hsn_code || '',
+            desc: sub.description || '',
+            useParentHsnCode: sub.useParentHsnCode || false,
+          })
+        );
+        setSubcategories(formattedSubcategories);
       }
-    };
 
-    fetchParentCategories();
-
-    if (isEditMode && id) {
-      const fetchCategory = async () => {
+      if (data.packagingHierarchy && data.packagingHierarchy.length > 0) {
+        setPackagingLevels(
+          data.packagingHierarchy.map((level: Record<string, unknown>) => ({
+            parentUnitId: level.parentUnitId,
+            childUnitId: level.childUnitId,
+            conversionQuantity: level.conversionQuantity,
+          }))
+        );
+      } else {
         try {
-          setLoading(true);
-          const response = await dispatch(getCategoryById(id)).unwrap();
-          const data = response.data || response;
-          console.log('Category data:', data); // Debug log to see the structure
-
-          // Map API response fields to our state
-          setCategory({
-            id: data.id,
-            name: data.name,
-            hsn_code: data.hsnCode || data.hsn_code,
-            description: data.description,
-            parent_id: data.parentId,
-            primary_unit: data.primary_unit,
-            secondary_unit: data.secondary_unit,
-          });
-
-          // If there are subcategories, load them
-          if (data?.other_ItemCategory && data.other_ItemCategory.length > 0) {
-            const formattedSubcategories = data.other_ItemCategory.map(
-              (sub: any) => ({
-                id: sub.id, // Keep existing ID for updates
-                name: sub.name || '',
-                hsn_code: sub.hsnCode || sub.hsn_code || '',
-                desc: sub.description || '',
-                useParentHsnCode: sub.useParentHsnCode || false,
-              })
-            );
-            setSubcategories(formattedSubcategories);
-          }
-
-          // Load packaging hierarchy if exists in the category data
-          if (data.packagingHierarchy && data.packagingHierarchy.length > 0) {
+          const packagingResponse = await dispatch(
+            fetchPackagingHierarchy(id)
+          ).unwrap();
+          if (
+            packagingResponse.success &&
+            packagingResponse.data.length > 0
+          ) {
             setPackagingLevels(
-              data.packagingHierarchy.map((level: any) => ({
+              packagingResponse.data.map((level: Record<string, unknown>) => ({
                 parentUnitId: level.parentUnitId,
                 childUnitId: level.childUnitId,
-                conversionQuantity: level.conversionQuantity,
+                conversionQuantity:
+                  level.quantity || level.conversionQuantity,
               }))
             );
-          } else {
-            // Fallback to separate API call if not included in category data
-            try {
-              const packagingResponse = await dispatch(
-                fetchPackagingHierarchy(id)
-              ).unwrap();
-              if (
-                packagingResponse.success &&
-                packagingResponse.data.length > 0
-              ) {
-                setPackagingLevels(
-                  packagingResponse.data.map((level: any) => ({
-                    parentUnitId: level.parentUnitId,
-                    childUnitId: level.childUnitId,
-                    conversionQuantity:
-                      level.quantity || level.conversionQuantity,
-                  }))
-                );
-              }
-            } catch (packagingError) {
-              console.log(
-                'No packaging hierarchy found or error loading it:',
-                packagingError
-              );
-              // This is not a critical error, so we don't show it to the user
-            }
           }
-        } catch (err: any) {
-          setError(err);
-          toast.error(err);
-        } finally {
-          setLoading(false);
+        } catch (packagingError) {
+          console.log(
+            'No packaging hierarchy found or error loading it:',
+            packagingError
+          );
         }
-      };
+      }
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }, [dispatch, id]);
+
+  useEffect(() => {
+    dispatch(getAllCategories());
+    if (isEditMode && id) {
       fetchCategory();
     }
-  }, [id, isEditMode]);
+  }, [dispatch, id, isEditMode, fetchCategory]);
 
   const addSubcategoryField = () => {
     setSubcategories([
@@ -336,14 +289,14 @@ const AddEditCategoryForm: React.FC = () => {
     updatedSubcategories.splice(index, 1);
     setSubcategories(updatedSubcategories);
   };
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = async (values: Record<string, unknown>) => {
     setSubmitting(true);
     try {
       if (isEditMode) {
         // Filter valid packaging levels and ensure conversionQuantity is set
         const validPackagingLevels = packagingLevels
-          .filter((level: any) => level.parentUnitId && level.childUnitId)
-          .map((level: any) => ({
+          .filter((level: Record<string, unknown>) => level.parentUnitId && level.childUnitId)
+          .map((level: Record<string, unknown>) => ({
             ...level,
             conversionQuantity: level.conversionQuantity || 1, // Default to 1 if not set
           }));
@@ -386,8 +339,8 @@ const AddEditCategoryForm: React.FC = () => {
 
         // Filter valid packaging levels and ensure conversionQuantity is set
         const validPackagingLevels = packagingLevels
-          .filter((level: any) => level.parentUnitId && level.childUnitId)
-          .map((level: any) => ({
+          .filter((level: Record<string, unknown>) => level.parentUnitId && level.childUnitId)
+          .map((level: Record<string, unknown>) => ({
             ...level,
             conversionQuantity: level.conversionQuantity || 1, // Default to 1 if not set
           }));
@@ -421,15 +374,19 @@ const AddEditCategoryForm: React.FC = () => {
       }
 
       setTimeout(() => navigate('/categories'), 1500);
-    } catch (err: any) {
-      toast.error(err);
-      if (err.response && err.response.status === 401) {
-        toast.error('Session expired. Please log in again.');
-        setTimeout(() => {
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
-          navigate('/login');
-        }, 2000);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      toast.error(errorMessage);
+      if (err && typeof err === 'object' && 'response' in err) {
+        const response = (err as { response: { status: number } }).response;
+        if (response && response.status === 401) {
+          toast.error('Session expired. Please log in again.');
+          setTimeout(() => {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            navigate('/login');
+          }, 2000);
+        }
       }
     } finally {
       setSubmitting(false);

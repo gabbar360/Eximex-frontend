@@ -25,12 +25,18 @@ const TaskManagement: React.FC = () => {
   const dispatch = useDispatch();
   const { user } = useAuth();
   const { tasks, loading, pagination } = useSelector(
-    (state: any) => state.taskManagement
+    (state: {
+      taskManagement: {
+        tasks: Record<string, unknown>[];
+        loading: boolean;
+        pagination: Record<string, unknown>;
+      };
+    }) => state.taskManagement
   );
 
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize] = useState(10);
   const [statusFilter, setStatusFilter] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
@@ -179,15 +185,15 @@ const TaskManagement: React.FC = () => {
       setCurrentPage(1);
       debouncedSearch(value);
     },
-    [debouncedSearch, pageSize, statusFilter, priorityFilter]
+    [debouncedSearch]
   );
 
   const handleStatusUpdate = async (taskId: number, newStatus: string) => {
-    const task = tasks.find((t) => t.id === taskId);
+    const task = tasks.find((t: Record<string, unknown>) => (t.id as number) === taskId);
     setConfirmStatusChange({
       taskId,
       newStatus,
-      taskTitle: task?.title || 'Unknown Task',
+      taskTitle: (task?.title as string) || 'Unknown Task',
     });
   };
 
@@ -203,8 +209,8 @@ const TaskManagement: React.FC = () => {
       ).unwrap();
       toast.success(result.message || 'Task status updated successfully');
       setConfirmStatusChange(null);
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update task status');
+    } catch (error: unknown) {
+      toast.error((error as Error).message || 'Failed to update task status');
       setConfirmStatusChange(null);
     }
   };
@@ -220,8 +226,8 @@ const TaskManagement: React.FC = () => {
       await dispatch(deleteTask(confirmDelete));
       setConfirmDelete(null);
       toast.success('Task deleted successfully');
-    } catch (error) {
-      toast.error('Failed to delete task');
+    } catch (error: unknown) {
+      toast.error((error as Error).message || 'Failed to delete task');
     }
   };
 
@@ -425,7 +431,7 @@ const TaskManagement: React.FC = () => {
                     </div>
                   </div>
                   <div className="divide-y divide-gray-200">
-                    {tasks.map((task: any) => (
+                    {tasks.map((task: { id: number; title: string; description?: string; type?: string; assignee?: { name: string }; assigner?: { name: string }; priority: string; status: string; dueDate?: string }) => (
                       <div key={task.id} className="p-4 hover:bg-gray-50">
                         <div
                           className="grid gap-3 items-center"

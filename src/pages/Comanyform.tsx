@@ -5,12 +5,12 @@ import { HiClock, HiArrowLeft } from 'react-icons/hi2';
 import { clearUser } from '../features/userSlice';
 
 const OnboardingModal: React.FC = () => {
-  const user = useSelector((state: any) => state.user.user);
+  const user = useSelector((state: Record<string, unknown>) => (state.user as { user: Record<string, unknown> }).user);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   // Redirect SUPER_ADMIN to dashboard
-  if (user?.role?.name === 'SUPER_ADMIN') {
+  if ((user as { role?: { name: string } })?.role?.name === 'SUPER_ADMIN') {
     return <Navigate to="/dashboard" replace />;
   }
 

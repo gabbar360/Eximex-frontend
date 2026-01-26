@@ -37,15 +37,15 @@ const Cprospect = () => {
     parties = [],
     loading = false,
     pagination = {},
-  } = useSelector((state: any) => state.party || {});
+  } = useSelector((state: { party: { parties: Record<string, unknown>[]; loading: boolean; pagination: Record<string, unknown> } }) => state.party || {});
   const [searchTerm, setSearchTerm] = useState('');
-  const [confirmDelete, setConfirmDelete] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [wasSearching, setWasSearching] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState(null);
-  const [stageDropdowns, setStageDropdowns] = useState({});
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [stageDropdowns, setStageDropdowns] = useState<Record<string, boolean>>({});
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const pageSize = 10;
 
   // Stage options with icons
   const stageOptions = [
@@ -76,7 +76,7 @@ const Cprospect = () => {
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = (event: MouseEvent) => {
       if (openDropdown && !event.target.closest('.dropdown-container')) {
         setOpenDropdown(null);
       }
@@ -99,7 +99,7 @@ const Cprospect = () => {
     dispatch(fetchParties(params));
   }, [dispatch, searchTerm, currentPage, pageSize]);
 
-  const handleDeleteClick = (id) => {
+  const handleDeleteClick = (id: string) => {
     setConfirmDelete(id);
   };
 
@@ -126,7 +126,7 @@ const Cprospect = () => {
   };
 
   // Debounced search function
-  const { debouncedCallback: debouncedSearch } = useDebounce((value) => {
+  const { debouncedCallback: debouncedSearch } = useDebounce((value: string) => {
     setWasSearching(true);
     const params = {
       search: value,
@@ -138,7 +138,7 @@ const Cprospect = () => {
   }, 500);
 
   const handleSearch = useCallback(
-    (value) => {
+    (value: string) => {
       setSearchTerm(value);
       debouncedSearch(value);
     },
@@ -153,7 +153,7 @@ const Cprospect = () => {
     }
   }, [loading, wasSearching]);
 
-  const handleStageChange = async (contactId, newStage) => {
+  const handleStageChange = async (contactId: string, newStage: string) => {
     try {
       const response = await dispatch(
         updatePartyStage({ id: contactId, stage: newStage })

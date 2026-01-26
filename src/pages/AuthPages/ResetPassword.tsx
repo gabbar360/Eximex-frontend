@@ -97,9 +97,9 @@ const ResetPassword: React.FC = () => {
           },
         });
       }, 2000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Handle backend error response
-      const errorMessage = error.message || error || 'Failed to reset password';
+      const errorMessage = (error as Record<string, unknown>)?.message || error || 'Failed to reset password';
       toast.error(errorMessage);
 
       // Check if token is invalid/expired based on backend response

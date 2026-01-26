@@ -2,12 +2,12 @@ export const calculateTotalWeight = (
   productId: string,
   quantity: string,
   unit: string,
-  products: any[]
+  products: Record<string, unknown>[]
 ) => {
   if (!products || !Array.isArray(products)) return 0;
 
   const product = products.find(
-    (p) => p.id.toString() === productId.toString()
+    (p) => (p.id as string).toString() === productId.toString()
   );
   if (!quantity || !product) return 0;
 
@@ -20,44 +20,44 @@ export const calculateTotalWeight = (
   }
 
   // Get packaging hierarchy data from product
-  const packagingData = product.packagingHierarchyData?.dynamicFields;
+  const packagingData = ((product.packagingHierarchyData as Record<string, unknown>)?.dynamicFields as Record<string, unknown>);
 
   // Use the stored weight values from packagingHierarchyData - check units before converting
-  const weightPerPiecesUnit = packagingData?.weightPerPiecesUnit || 'g';
-  const weightPerPackageUnit = packagingData?.weightPerPackageUnit || 'g';
-  const weightPerBoxUnit = packagingData?.weightPerBoxUnit || 'kg';
-  const weightPerPalletUnit = packagingData?.weightPerPalletUnit || 'kg';
+  const weightPerPiecesUnit = (packagingData?.weightPerPiecesUnit as string) || 'g';
+  const weightPerPackageUnit = (packagingData?.weightPerPackageUnit as string) || 'g';
+  const weightPerBoxUnit = (packagingData?.weightPerBoxUnit as string) || 'kg';
+  const weightPerPalletUnit = (packagingData?.weightPerPalletUnit as string) || 'kg';
 
-  const weightPerPieces = packagingData?.weightPerPieces
+  const weightPerPieces = (packagingData?.weightPerPieces as number)
     ? weightPerPiecesUnit === 'kg'
-      ? packagingData.weightPerPieces
-      : packagingData.weightPerPieces / 1000
+      ? (packagingData.weightPerPieces as number)
+      : (packagingData.weightPerPieces as number) / 1000
     : 0;
-  const weightPerPackage = packagingData?.weightPerPackage
+  const weightPerPackage = (packagingData?.weightPerPackage as number)
     ? weightPerPackageUnit === 'kg'
-      ? packagingData.weightPerPackage
-      : packagingData.weightPerPackage / 1000
-    : packagingData?.weightPerPack
-      ? packagingData.weightPerPack / 1000 // Convert grams to kg
+      ? (packagingData.weightPerPackage as number)
+      : (packagingData.weightPerPackage as number) / 1000
+    : (packagingData?.weightPerPack as number)
+      ? (packagingData.weightPerPack as number) / 1000 // Convert grams to kg
       : 0;
-  const weightPerBox = packagingData?.weightPerBox
+  const weightPerBox = (packagingData?.weightPerBox as number)
     ? weightPerBoxUnit === 'kg'
-      ? packagingData.weightPerBox
-      : packagingData.weightPerBox / 1000
+      ? (packagingData.weightPerBox as number)
+      : (packagingData.weightPerBox as number) / 1000
     : 0;
-  const weightPerPallet = packagingData?.weightPerPallet
+  const weightPerPallet = (packagingData?.weightPerPallet as number)
     ? weightPerPalletUnit === 'kg'
-      ? packagingData.weightPerPallet
-      : packagingData.weightPerPallet / 1000
+      ? (packagingData.weightPerPallet as number)
+      : (packagingData.weightPerPallet as number) / 1000
     : 0;
 
   // Get packaging conversion factors
   const piecesPerPackage =
-    packagingData?.PiecesPerPack || packagingData?.PiecesPerPackage || 1;
+    (packagingData?.PiecesPerPack as number) || (packagingData?.PiecesPerPackage as number) || 1;
   const packagePerBox =
-    packagingData?.PackPerBox || packagingData?.PackagePerBox || 1;
+    (packagingData?.PackPerBox as number) || (packagingData?.PackagePerBox as number) || 1;
   const boxPerPallet =
-    packagingData?.BoxPerPallet || packagingData?.boxesPerPallet || 1;
+    (packagingData?.BoxPerPallet as number) || (packagingData?.boxesPerPallet as number) || 1;
 
   // Calculate weight based on selected unit using stored values
   switch (unit.toLowerCase()) {
@@ -205,22 +205,22 @@ export const calculateTotalWeight = (
 export const calculateQuantityFromWeight = (
   productId: string,
   weightKg: string,
-  products: any[]
+  products: Record<string, unknown>[]
 ) => {
   if (!products || !Array.isArray(products)) return '';
 
   const product = products.find(
-    (p) => p.id.toString() === productId.toString()
+    (p) => (p.id as string).toString() === productId.toString()
   );
-  if (!product?.packingConfig || !weightKg) return '';
+  if (!(product?.packingConfig as Record<string, unknown>) || !weightKg) return '';
 
   const weight = parseFloat(weightKg);
-  const boxes = weight / product.packingConfig.weightPerBox;
-  const totalUnits = boxes * product.packingConfig.unitsPerBox;
+  const boxes = weight / ((product.packingConfig as Record<string, unknown>).weightPerBox as number);
+  const totalUnits = boxes * ((product.packingConfig as Record<string, unknown>).unitsPerBox as number);
   return totalUnits.toFixed(2);
 };
 
-export const calculateGrossWeight = (productList: any[], products: any[]) => {
+export const calculateGrossWeight = (productList: Record<string, unknown>[], products: Record<string, unknown>[]) => {
   if (
     !products ||
     !Array.isArray(products) ||
@@ -230,21 +230,21 @@ export const calculateGrossWeight = (productList: any[], products: any[]) => {
     return 0;
 
   return productList.reduce((sum, product) => {
-    if (!product.productId) return sum;
+    if (!(product.productId as string)) return sum;
 
     // Get net weight
     const netWeight =
-      product.totalWeight ||
+      (product.totalWeight as number) ||
       calculateTotalWeight(
-        product.productId,
-        product.quantity.toString(),
-        product.unit,
+        (product.productId as string),
+        (product.quantity as number).toString(),
+        (product.unit as string),
         products
       );
 
     // Get product data for packaging weight
     const prod = products.find(
-      (p) => p.id.toString() === product.productId.toString()
+      (p: Record<string, unknown>) => (p.id as string).toString() === (product.productId as string).toString()
     );
 
     if (!prod) return sum + netWeight;
@@ -254,8 +254,8 @@ export const calculateGrossWeight = (productList: any[], products: any[]) => {
     const packagingData = prod.packagingHierarchyData?.dynamicFields;
 
     // Get packaging material weight from product data
-    const packagingMaterialWeight = prod.packagingMaterialWeight || 0;
-    const packagingUnit = prod.packagingMaterialWeightUnit || 'g';
+    const packagingMaterialWeight = (prod.packagingMaterialWeight as number) || 0;
+    const packagingUnit = (prod.packagingMaterialWeightUnit as string) || 'g';
 
     if (packagingMaterialWeight > 0) {
       // Convert packaging weight to KG if needed
@@ -267,28 +267,28 @@ export const calculateGrossWeight = (productList: any[], products: any[]) => {
       // Calculate how many boxes based on unit and quantity
       let boxes = 0;
 
-      if (product.unit.toLowerCase() === 'box') {
-        boxes = product.quantity;
+      if ((product.unit as string).toLowerCase() === 'box') {
+        boxes = (product.quantity as number);
       } else if (
-        product.unit.toLowerCase() === 'pcs' ||
-        product.unit.toLowerCase() === 'pieces'
+        (product.unit as string).toLowerCase() === 'pcs' ||
+        (product.unit as string).toLowerCase() === 'pieces'
       ) {
         const piecesPerPack =
           packagingData?.PiecesPerPack || packagingData?.PiecesPerPackage || 1;
         const packPerBox =
           packagingData?.PackPerBox || packagingData?.PackagePerBox || 1;
-        boxes = Math.ceil(product.quantity / (piecesPerPack * packPerBox));
+        boxes = Math.ceil((product.quantity as number) / (piecesPerPack * packPerBox));
       } else if (
-        product.unit.toLowerCase() === 'pack' ||
-        product.unit.toLowerCase() === 'package'
+        (product.unit as string).toLowerCase() === 'pack' ||
+        (product.unit as string).toLowerCase() === 'package'
       ) {
         const packPerBox =
-          packagingData?.PackPerBox || packagingData?.PackagePerBox || 1;
-        boxes = Math.ceil(product.quantity / packPerBox);
-      } else if (product.unit.toLowerCase() === 'pallet') {
+          (packagingData?.PackPerBox as number) || (packagingData?.PackagePerBox as number) || 1;
+        boxes = Math.ceil((product.quantity as number) / packPerBox);
+      } else if ((product.unit as string).toLowerCase() === 'pallet') {
         // For pallets, calculate packaging weight directly based on number of pallets
         // Don't convert to boxes for packaging calculation
-        const pallets = product.quantity;
+        const pallets = (product.quantity as number);
 
         // If packaging weight is per pallet (usually in kg for pallets)
         if (packagingUnit === 'kg') {
@@ -300,16 +300,16 @@ export const calculateGrossWeight = (productList: any[], products: any[]) => {
 
         return sum + netWeight + packagingWeight;
       } else if (
-        product.unit.toLowerCase() === 'square meter' ||
-        product.unit.toLowerCase() === 'sqm' ||
-        product.unit.toLowerCase() === 'm²'
+        (product.unit as string).toLowerCase() === 'square meter' ||
+        (product.unit as string).toLowerCase() === 'sqm' ||
+        (product.unit as string).toLowerCase() === 'm²'
       ) {
         // For square meter units, calculate pallets from packaging data
-        const sqmPerBox = packagingData?.sqmPerBox || 0.72; // Default from your example
+        const sqmPerBox = (packagingData?.sqmPerBox as number) || 0.72; // Default from your example
         const boxesPerPallet =
-          packagingData?.BoxPerPallet || packagingData?.boxesPerPallet || 30;
+          (packagingData?.BoxPerPallet as number) || (packagingData?.boxesPerPallet as number) || 30;
 
-        const totalBoxes = Math.ceil(product.quantity / sqmPerBox);
+        const totalBoxes = Math.ceil((product.quantity as number) / sqmPerBox);
         const totalPallets = Math.ceil(totalBoxes / boxesPerPallet);
 
         // Calculate packaging weight based on pallets
@@ -321,7 +321,7 @@ export const calculateGrossWeight = (productList: any[], products: any[]) => {
 
         return sum + netWeight + packagingWeight;
       } else {
-        boxes = product.quantity;
+        boxes = (product.quantity as number);
       }
 
       // Use packaging weight per box for other units

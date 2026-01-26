@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useSelector } from 'react-redux';
 import API_URL from '../../utils/config';
@@ -12,12 +12,11 @@ const SetPassword: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [token, setToken] = useState<string | null>(null);
-  const [userInfo, setUserInfo] = useState<any>(null);
+  const [userInfo, setUserInfo] = useState<Record<string, unknown> | null>(null);
   const [isValidToken, setIsValidToken] = useState<boolean | null>(null);
 
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const user = useSelector((state: any) => state.user.user);
+  const user = useSelector((state: Record<string, unknown>) => state.user.user);
 
   // Show warning if user is logged in but allow them to continue
   const [showLoggedInWarning, setShowLoggedInWarning] = useState(false);
@@ -33,17 +32,6 @@ const SetPassword: React.FC = () => {
     localStorage.removeItem('refreshToken');
     window.location.reload();
   };
-
-  useEffect(() => {
-    const tokenFromUrl = searchParams.get('token');
-    if (tokenFromUrl) {
-      setToken(tokenFromUrl);
-      validateToken(tokenFromUrl);
-    } else {
-      setIsValidToken(false);
-      toast.error('Invalid invitation link');
-    }
-  }, [searchParams]);
 
   const validateToken = async (token: string) => {
     try {
@@ -63,12 +51,23 @@ const SetPassword: React.FC = () => {
         setIsValidToken(false);
         toast.error(data.message || 'Invalid or expired invitation link');
       }
-    } catch (error: any) {
-      console.error('❌ Token validation error:', error);
+    } catch {
+      console.error('❌ Token validation error');
       setIsValidToken(false);
       toast.error('Invalid or expired invitation link');
     }
   };
+
+  useEffect(() => {
+    const tokenFromUrl = searchParams.get('token');
+    if (tokenFromUrl) {
+      setToken(tokenFromUrl);
+      validateToken(tokenFromUrl);
+    } else {
+      setIsValidToken(false);
+      toast.error('Invalid invitation link');
+    }
+  }, [searchParams]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -97,8 +96,7 @@ const SetPassword: React.FC = () => {
 
     setIsLoading(true);
     try {
-      // Use fetch instead of axiosInstance to avoid auth headers
-      const response = await fetch(`${API_URL}/invitation/set-password`, {
+      await fetch(`${API_URL}/invitation/set-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -109,28 +107,7 @@ const SetPassword: React.FC = () => {
         }),
       });
 
-      const data = await response.json();
 
-      if (response.ok) {
-        toast.success(data.message || 'Password set successfully!');
-
-        // Clear any existing tokens to ensure fresh login
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-
-        setTimeout(() => {
-          navigate('/signin', {
-            state: {
-              message:
-                'Password set successfully! Please sign in with your new password.',
-            },
-          });
-        }, 2000);
-      } else {
-        toast.error(data.message || 'Failed to set password');
-      }
-    } catch (error: any) {
-      toast.error('Failed to set password');
     } finally {
       setIsLoading(false);
     }

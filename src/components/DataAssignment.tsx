@@ -1,5 +1,5 @@
-import { useDispatch, useSelector } from 'react-redux';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useDispatch } from 'react-redux';
 import {
   getCompanyStaff,
   getAssignableData,
@@ -47,24 +47,24 @@ const DataAssignment: React.FC<{
     if (isOpen) {
       fetchStaff();
     }
-  }, [isOpen]);
+  }, [isOpen, fetchStaff]);
 
   useEffect(() => {
     if (selectedFromUser && entityType) {
       fetchAssignableData();
     }
-  }, [selectedFromUser, entityType]);
+  }, [selectedFromUser, entityType, fetchAssignableData]);
 
-  const fetchStaff = async () => {
+  const fetchStaff = useCallback(async () => {
     try {
       const data = await dispatch(getCompanyStaff()).unwrap();
       setStaff(data.data || []);
     } catch (error) {
-      toast.error(error.message);
+      toast.error((error as Error).message);
     }
-  };
+  }, [dispatch]);
 
-  const fetchAssignableData = async () => {
+  const fetchAssignableData = useCallback(async () => {
     if (!selectedFromUser) return;
 
     try {
@@ -77,9 +77,9 @@ const DataAssignment: React.FC<{
       setAssignableData(data.data || []);
       setSelectedItems([]);
     } catch (error) {
-      toast.error(error.message);
+      toast.error((error as Error).message);
     }
-  };
+  }, [dispatch, selectedFromUser, entityType]);
 
   const handleAssign = async () => {
     if (!selectedFromUser || !selectedToUser || selectedItems.length === 0) {
@@ -102,7 +102,7 @@ const DataAssignment: React.FC<{
       fetchAssignableData();
       setSelectedItems([]);
     } catch (error) {
-      toast.error(error.message);
+      toast.error((error as Error).message);
     } finally {
       setLoading(false);
     }

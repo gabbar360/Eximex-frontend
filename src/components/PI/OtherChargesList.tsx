@@ -4,8 +4,8 @@ import { faPlus, faTimes } from '@fortawesome/free-solid-svg-icons';
 import Label from '../form/Label';
 
 interface OtherChargesListProps {
-  value: any[];
-  onChange: (list: any[]) => void;
+  value: Record<string, unknown>[];
+  onChange: (list: Record<string, unknown>[]) => void;
 }
 
 const OtherChargesList: React.FC<OtherChargesListProps> = ({

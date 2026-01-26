@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faUsers,
-  faBuilding,
+  // faUsers,
+  // faBuilding,
   faUserShield,
-  faServer,
-  faLock,
-  faCheckCircle,
+  // faServer,
+  // faLock,
+  // faCheckCircle,
   faRefresh,
 } from '@fortawesome/free-solid-svg-icons';
 import { getSuperAdminDashboardStats } from '../features/userSlice';
@@ -46,7 +46,7 @@ const SuperAdminOverview: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       setLoading(true);
       const response = await dispatch(getSuperAdminDashboardStats()).unwrap();
@@ -57,58 +57,58 @@ const SuperAdminOverview: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [dispatch]);
 
   useEffect(() => {
     fetchStats();
-  }, [dispatch]);
+  }, [fetchStats]);
 
-  const systemFeatures = [
-    {
-      category: 'User Management',
-      icon: faUsers,
-      features: [
-        'View all system users across companies',
-        'Block/unblock user accounts',
-        'Reset user passwords',
-        'Manage user roles and permissions',
-        'Monitor user activity and login history',
-      ],
-    },
-    {
-      category: 'Company Management',
-      icon: faBuilding,
-      features: [
-        'View all registered companies',
-        'Monitor company statistics',
-        'Manage company settings',
-        'Track company usage and activity',
-        'Handle subscription management',
-      ],
-    },
-    {
-      category: 'Database Operations',
-      icon: faServer,
-      features: [
-        'Access all database tables',
-        'Export data in various formats',
-        'Monitor database performance',
-        'Manage data integrity',
-        'Perform system maintenance',
-      ],
-    },
-    {
-      category: 'Security & Monitoring',
-      icon: faLock,
-      features: [
-        'Monitor system security logs',
-        'Track suspicious activities',
-        'Manage API access keys',
-        'Configure security policies',
-        'Generate security reports',
-      ],
-    },
-  ];
+  // const systemFeatures = [
+  //   {
+  //     category: 'User Management',
+  //     icon: faUsers,
+  //     features: [
+  //       'View all system users across companies',
+  //       'Block/unblock user accounts',
+  //       'Reset user passwords',
+  //       'Manage user roles and permissions',
+  //       'Monitor user activity and login history',
+  //     ],
+  //   },
+  //   {
+  //     category: 'Company Management',
+  //     icon: faBuilding,
+  //     features: [
+  //       'View all registered companies',
+  //       'Monitor company statistics',
+  //       'Manage company settings',
+  //       'Track company usage and activity',
+  //       'Handle subscription management',
+  //     ],
+  //   },
+  //   {
+  //     category: 'Database Operations',
+  //     icon: faServer,
+  //     features: [
+  //       'Access all database tables',
+  //       'Export data in various formats',
+  //       'Monitor database performance',
+  //       'Manage data integrity',
+  //       'Perform system maintenance',
+  //     ],
+  //   },
+  //   {
+  //     category: 'Security & Monitoring',
+  //     icon: faLock,
+  //     features: [
+  //       'Monitor system security logs',
+  //       'Track suspicious activities',
+  //       'Manage API access keys',
+  //       'Configure security policies',
+  //       'Generate security reports',
+  //     ],
+  //   },
+  // ];
 
   // Generate chart data using useMemo for performance
   const generateChartData = (value: number, multipliers: number[]) => {
@@ -210,40 +210,40 @@ const SuperAdminOverview: React.FC = () => {
     [stats]
   );
 
-  const FeatureSection = ({
-    feature,
-  }: {
-    feature: (typeof systemFeatures)[0];
-  }) => (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-      <div className="flex items-center mb-4">
-        <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700 mr-4">
-          <FontAwesomeIcon
-            icon={feature.icon}
-            className="text-xl text-gray-600 dark:text-gray-400"
-          />
-        </div>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-          {feature.category}
-        </h3>
-      </div>
-
-      <ul className="space-y-2">
-        {feature.features.map((item, index) => (
-          <li
-            key={index}
-            className="flex items-start text-sm text-gray-600 dark:text-gray-400"
-          >
-            <FontAwesomeIcon
-              icon={faCheckCircle}
-              className="mr-2 mt-0.5 text-green-500 flex-shrink-0"
-            />
-            {item}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+  // const FeatureSection = ({
+  //   feature,
+  // }: {
+  //   feature: (typeof systemFeatures)[0];
+  // }) => (
+  //   <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+  //     <div className="flex items-center mb-4">
+  //       <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700 mr-4">
+  //         <FontAwesomeIcon
+  //           icon={feature.icon}
+  //           className="text-xl text-gray-600 dark:text-gray-400"
+  //         />
+  //       </div>
+  //       <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+  //         {feature.category}
+  //       </h3>
+  //     </div>
+  //
+  //     <ul className="space-y-2">
+  //       {feature.features.map((item, index) => (
+  //         <li
+  //           key={index}
+  //           className="flex items-start text-sm text-gray-600 dark:text-gray-400"
+  //         >
+  //           <FontAwesomeIcon
+  //             icon={faCheckCircle}
+  //             className="mr-2 mt-0.5 text-green-500 flex-shrink-0"
+  //           />
+  //           {item}
+  //         </li>
+  //       ))}
+  //     </ul>
+  //   </div>
+  // );
 
   return (
     <div className="p-3 sm:p-6 bg-gray-50 dark:bg-gray-900 min-h-screen max-w-full overflow-x-hidden">

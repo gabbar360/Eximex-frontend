@@ -4,7 +4,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowLeft,
   faCheck,
-  faCheckCircle,
 } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
@@ -19,7 +18,7 @@ const ConfirmOrder: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [piData, setPiData] = useState<any>(null);
+  const [piData, setPiData] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
   const [paymentReceived, setPaymentReceived] = useState<boolean | null>(null);
   const [paymentAmount, setPaymentAmount] = useState<string>('');
@@ -40,7 +39,7 @@ const ConfirmOrder: React.FC = () => {
     };
 
     if (id) fetchPIDetails();
-  }, [id]);
+  }, [id, dispatch]);
 
   const handleConfirmOrder = async () => {
     try {
@@ -61,7 +60,7 @@ const ConfirmOrder: React.FC = () => {
               },
             })
           ).unwrap();
-        } catch (backendError) {
+        } catch {
           try {
             await dispatch(
               updatePiInvoice({
@@ -72,7 +71,7 @@ const ConfirmOrder: React.FC = () => {
                 },
               })
             ).unwrap();
-          } catch (fallbackError) {
+          } catch {
             toast.error('Failed to update amount in backend');
           }
         }
@@ -93,7 +92,7 @@ const ConfirmOrder: React.FC = () => {
           paymentReceived,
         },
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error confirming order:', error);
       const errorMessage =
         error?.response?.data?.message ||

@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Label from './Label';
-import Select from './Select';
-import Input from './input/InputField';
 import { fetchAllPackagingUnits } from '../../features/packagingSlice';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
@@ -151,7 +149,7 @@ const PackagingDetailsSection: React.FC<PackagingDetailsSectionProps> = ({
         setLoading(true);
         const response = await dispatch(fetchAllPackagingUnits()).unwrap();
         setPackagingUnits(response.data || response || []);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Failed to fetch packaging units:', error);
         toast.error('Failed to load packaging units');
       } finally {
@@ -160,7 +158,7 @@ const PackagingDetailsSection: React.FC<PackagingDetailsSectionProps> = ({
     };
 
     fetchPackagingUnits();
-  }, []);
+  }, [dispatch]);
 
   const addPackagingLevel = () => {
     // Find primary unit ID if it's the first level
@@ -291,7 +289,7 @@ const PackagingDetailsSection: React.FC<PackagingDetailsSectionProps> = ({
     return packagingUnits;
   };
 
-  const getAvailableChildUnits = (levelIndex: number) => {
+  const getAvailableChildUnits = () => {
     return packagingUnits;
   };
 
@@ -370,7 +368,7 @@ const PackagingDetailsSection: React.FC<PackagingDetailsSectionProps> = ({
               onChange={(value) =>
                 updatePackagingLevel(index, 'childUnitId', value)
               }
-              options={getAvailableChildUnits(index)}
+              options={getAvailableChildUnits()}
               placeholder="Select child unit"
             />
           </div>

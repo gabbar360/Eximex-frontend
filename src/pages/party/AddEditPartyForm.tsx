@@ -32,7 +32,7 @@ const fetchCurrencies = async () => {
     );
     const data = await response.json();
     return Object.keys(data.rates).map((code) => ({ code, name: code }));
-  } catch (error) {
+  } catch {
     return [];
   }
 };
@@ -169,8 +169,8 @@ const AddEditPartyForm = () => {
           setLoading(true);
           const response = await dispatch(getPartyById(Number(id))).unwrap();
           setParty(response.data || response);
-        } catch (err) {
-          toast.error(err.message);
+        } catch {
+          toast.error((err as Error).message);
           if (err.response?.status === 401) {
             setTimeout(() => navigate('/login'), 2000);
           }

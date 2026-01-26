@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -16,7 +16,6 @@ import {
   MdInventory,
   MdShoppingCart,
   MdSupervisorAccount,
-  MdAnalytics,
   MdAccountCircle,
   MdLogout,
   MdKeyboardArrowDown,
@@ -31,7 +30,7 @@ import {
   HiOutlineScale,
   HiOutlineChartBarSquare,
 } from 'react-icons/hi2';
-import { GridIcon, HorizontaLDots, ChevronDownIcon } from '../icons';
+import { GridIcon } from '../icons';
 import { useSidebar } from '../context/SidebarContext';
 import { useAuth } from '../hooks/useAuth';
 import { useSelector, useDispatch } from 'react-redux';
@@ -53,7 +52,7 @@ type NavItem = {
 };
 
 // Convert sidebar menu from backend to NavItem format
-const convertSidebarMenuToNavItems = (sidebarMenu: any[]): NavItem[] => {
+const convertSidebarMenuToNavItems = (sidebarMenu: Record<string, unknown>[]): NavItem[] => {
   if (!sidebarMenu || sidebarMenu.length === 0) {
     return [];
   }
@@ -146,15 +145,14 @@ const Sidebar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const currentUser = useSelector((state: any) => state.user.user);
-  const { sidebarMenu } = useSelector((state: any) => state.userPermission);
+  const currentUser = useSelector((state: Record<string, unknown>) => state.user.user);
+  const { sidebarMenu } = useSelector((state: Record<string, unknown>) => state.userPermission);
   const { theme } = useTheme();
 
   const userRole = currentUser?.role?.name || null;
   const isSuperAdmin = userRole === 'SUPER_ADMIN';
-  const hasNoRole = !currentUser?.role;
 
   // Use permission-based menu for regular users, static menu for super admin
   const navItems = isSuperAdmin
@@ -164,46 +162,12 @@ const Sidebar: React.FC = () => {
   const [openSubmenu, setOpenSubmenu] = useState<{ index: number } | null>(
     null
   );
-  const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>(
-    {}
-  );
-  const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // Fetch user sidebar menu for regular users
   useEffect(() => {
     if (currentUser && !isSuperAdmin) {
-      console.log(
-        '🔄 Fetching sidebar menu for user:',
-        currentUser.id,
-        'Role:',
-        userRole
-      );
-      dispatch(fetchUserSidebarMenu())
-        .then((result) => {
-          console.log('✅ Sidebar menu fetch result:', result);
-        })
-        .catch((error) => {
-          console.error('❌ Sidebar menu fetch error:', error);
-        });
+      dispatch(fetchUserSidebarMenu());
     }
-  }, [dispatch, currentUser, isSuperAdmin, userRole]);
-
-  // Debug log for sidebar menu
-  useEffect(() => {
-    console.log('📋 Current sidebar menu state:', sidebarMenu);
-    console.log('👤 Current user:', currentUser);
-    console.log('🔑 Is Super Admin:', isSuperAdmin);
-    console.log('📊 Nav items count:', navItems.length);
-    console.log('🗺 Converted nav items:', navItems);
-    navItems.forEach((item, index) => {
-      console.log(`Menu ${index}:`, item.name, 'Path:', item.path);
-      if (item.subItems) {
-        item.subItems.forEach((sub, subIndex) => {
-          console.log(`  Submenu ${subIndex}:`, sub.name, 'Path:', sub.path);
-        });
-      }
-    });
-  }, [sidebarMenu, currentUser, isSuperAdmin, navItems]);
+  }, [dispatch, currentUser, isSuperAdmin]);
 
   const handleLogout = async () => {
     setIsLoading(true);
@@ -228,26 +192,7 @@ const Sidebar: React.FC = () => {
         });
       }
     });
-  }, [location.pathname]);
-
-  useEffect(() => {
-    // Calculate heights for all submenus
-    const timeoutId = setTimeout(() => {
-      navItems.forEach((nav, index) => {
-        if (nav.subItems) {
-          const key = `main-${index}`;
-          if (subMenuRefs.current[key]) {
-            setSubMenuHeight((prevHeights) => ({
-              ...prevHeights,
-              [key]: subMenuRefs.current[key]?.scrollHeight || 0,
-            }));
-          }
-        }
-      });
-    }, 100);
-
-    return () => clearTimeout(timeoutId);
-  }, [isExpanded, isHovered, isMobileOpen]);
+  }, [location.pathname, isActive]);
 
   const handleSubmenuToggle = (index: number) => {
     setOpenSubmenu((prevOpenSubmenu) => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ComponentCard from '../../components/common/ComponentCard';
 import { fetchBalanceSheet } from '../../features/accountingSlice';
@@ -8,16 +8,16 @@ const BalanceSheet = () => {
   const { balanceSheet, loading } = useSelector((state) => state.accounting);
   const [asOfDate, setAsOfDate] = useState('');
 
-  useEffect(() => {
-    fetchBalanceSheetData();
-  }, []);
-
-  const fetchBalanceSheetData = async () => {
+  const fetchBalanceSheetData = useCallback(async () => {
     const params = asOfDate ? { asOfDate } : {};
     dispatch(fetchBalanceSheet(params));
-  };
+  }, [dispatch, asOfDate]);
 
-  const handleDateChange = (value) => {
+  useEffect(() => {
+    fetchBalanceSheetData();
+  }, [fetchBalanceSheetData]);
+
+  const handleDateChange = (value: string) => {
     setAsOfDate(value);
   };
 
@@ -25,7 +25,7 @@ const BalanceSheet = () => {
     fetchBalanceSheetData();
   };
 
-  const formatCurrency = (amount) => {
+  const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
@@ -33,7 +33,7 @@ const BalanceSheet = () => {
     }).format(amount);
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-IN', {
       year: 'numeric',
       month: 'long',
@@ -230,73 +230,8 @@ const BalanceSheet = () => {
               desc="Financial obligations and owner's equity"
             >
               <div className="space-y-4">
-                <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
-                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                    Current Liabilities
-                  </h4>
-
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg opacity-50">
-                      <div>
-                        <span className="font-medium text-gray-700 dark:text-gray-300">
-                          Accounts Payable
-                        </span>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          Outstanding supplier payments
-                        </div>
-                      </div>
-                      <span className="font-semibold text-gray-900 dark:text-white">
-                        {formatCurrency(0)}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg opacity-50">
-                      <div>
-                        <span className="font-medium text-gray-700 dark:text-gray-300">
-                          Short-term Loans
-                        </span>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          Bank loans and credit facilities
-                        </div>
-                      </div>
-                      <span className="font-semibold text-gray-900 dark:text-white">
-                        {formatCurrency(0)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
-                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                    Owner's Equity
-                  </h4>
-
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center p-3 bg-slate-700 rounded-lg">
-                      <div>
-                        <span className="font-medium text-white">
-                          Retained Earnings
-                        </span>
-                        <div className="text-sm text-white">
-                          Accumulated profits
-                        </div>
-                      </div>
-                      <span className="font-semibold text-white">
-                        {formatCurrency(balanceSheet.totalAssets)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-slate-700 p-4 rounded-lg">
-                  <div className="flex justify-between items-center">
-                    <span className="text-lg font-semibold text-white">
-                      Total Liabilities & Equity
-                    </span>
-                    <span className="text-lg font-bold text-white">
-                      {formatCurrency(balanceSheet.totalAssets)}
-                    </span>
-                  </div>
+                <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+                  Liabilities & Equity data not available
                 </div>
               </div>
             </ComponentCard>

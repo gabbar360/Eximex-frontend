@@ -18,9 +18,6 @@ import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
 import {
   getPiInvoiceById,
-  updatePiStatus,
-  updatePiInvoice,
-  updatePiAmount,
   downloadPiInvoicePdf,
 } from '../../features/piSlice';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
@@ -29,14 +26,9 @@ const PIDetails: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [piData, setPiData] = useState<any>(null);
+  const [piData, setPiData] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
   const [downloadingPdf, setDownloadingPdf] = useState(false);
-  const [showPayment, setShowPayment] = useState(false);
-  const [paymentReceived, setPaymentReceived] = useState<boolean | null>(null);
-  const [paymentAmount, setPaymentAmount] = useState<string>('');
-  const [showConfirmationMessage, setShowConfirmationMessage] = useState(false);
-  const [confirmationData, setConfirmationData] = useState<any>(null);
 
   useEffect(() => {
     const fetchPIDetails = async () => {
@@ -53,81 +45,9 @@ const PIDetails: React.FC = () => {
     };
 
     if (id) fetchPIDetails();
-  }, [id]);
+  }, [id, dispatch]);
 
-  const handlePaymentSubmit = async () => {
-    try {
-      if (paymentReceived && paymentAmount) {
-        const payment = parseFloat(paymentAmount);
-        const currentTotal = piData.totalAmount || piData.total || 0;
-        const updatedTotalAmount = currentTotal - payment;
 
-        const updatedData = {
-          ...piData,
-          totalAmount: updatedTotalAmount,
-          total: updatedTotalAmount,
-        };
-
-        setPiData(updatedData);
-
-        try {
-          await dispatch(
-            updatePiAmount({
-              id,
-              amountData: {
-                totalAmount: updatedTotalAmount,
-                advanceAmount: payment,
-              },
-            })
-          ).unwrap();
-        } catch (backendError) {
-          try {
-            await dispatch(
-              updatePiInvoice({
-                id,
-                piData: {
-                  totalAmount: updatedTotalAmount,
-                  advanceAmount: payment,
-                },
-              })
-            ).unwrap();
-          } catch (fallbackError) {
-            toast.error('Failed to update amount in backend');
-          }
-        }
-
-        toast.success(`Payment of $${paymentAmount} confirmed successfully`);
-      } else {
-        toast.success('Order confirmed successfully');
-      }
-
-      await dispatch(updatePiStatus({ id, status: 'confirmed' })).unwrap();
-      setPiData((prev) => ({ ...prev, status: 'confirmed' }));
-
-      setConfirmationData({
-        piNumber: piData.piNumber,
-        companyName: piData.party?.companyName,
-        totalAmount: formattedAmount,
-        paymentReceived,
-      });
-      setShowConfirmationMessage(true);
-
-      setTimeout(() => {
-        setShowConfirmationMessage(false);
-      }, 5000);
-
-      setShowPayment(false);
-      setPaymentReceived(null);
-      setPaymentAmount('');
-    } catch (error: any) {
-      console.error('Error confirming order:', error);
-      const errorMessage =
-        error?.response?.data?.message ||
-        error?.message ||
-        'Failed to confirm order';
-      toast.error(errorMessage);
-    }
-  };
 
   if (loading) {
     return (
@@ -157,18 +77,10 @@ const PIDetails: React.FC = () => {
     ddp: 'DDP',
   };
 
-  const formattedDate = new Date(
-    piData.invoiceDate || piData.date || new Date()
-  ).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-
-  const currentTotalAmount = piData.totalAmount || piData.total || 0;
+  const currentTotalAmount = (piData as Record<string, unknown>)?.totalAmount as number || (piData as Record<string, unknown>)?.total as number || 0;
   const formattedAmount = new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: piData.currency || 'USD',
+    currency: ((piData as Record<string, unknown>)?.currency as string) || 'USD',
   }).format(currentTotalAmount);
 
   return (
@@ -195,7 +107,7 @@ const PIDetails: React.FC = () => {
               </div>
               <div>
                 <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
-                  {piData.piNumber || piData.invoiceNumber || 'PI Invoice'}
+                  {((piData as Record<string, unknown>)?.piNumber as string) || ((piData as Record<string, unknown>)?.invoiceNumber as string) || 'PI Invoice'}
                 </h1>
               </div>
             </div>
@@ -285,7 +197,7 @@ const PIDetails: React.FC = () => {
                   Company Name
                 </span>
                 <span className="text-sm font-bold text-gray-900">
-                  {piData.party?.companyName || piData.company?.name || 'N/A'}
+                  {((piData as Record<string, unknown>)?.party as Record<string, unknown>)?.companyName as string || ((piData as Record<string, unknown>)?.company as Record<string, unknown>)?.name as string || 'N/A'}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -301,7 +213,13 @@ const PIDetails: React.FC = () => {
                   Invoice Date
                 </span>
                 <span className="text-sm font-bold text-gray-900">
-                  {formattedDate}
+                  {new Date(
+                    ((piData as Record<string, unknown>)?.invoiceDate as string) || ((piData as Record<string, unknown>)?.date as string) || new Date().toISOString()
+                  ).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -309,7 +227,7 @@ const PIDetails: React.FC = () => {
                   Currency
                 </span>
                 <span className="text-sm font-bold text-gray-900">
-                  {piData.currency || 'USD'}
+                  {((piData as Record<string, unknown>)?.currency as string) || 'USD'}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -317,7 +235,7 @@ const PIDetails: React.FC = () => {
                   Contact Person
                 </span>
                 <span className="text-sm font-bold text-gray-900">
-                  {piData.contactPerson || 'N/A'}
+                  {((piData as Record<string, unknown>)?.contactPerson as string) || 'N/A'}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -326,17 +244,16 @@ const PIDetails: React.FC = () => {
                 </span>
                 <span
                   className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${
-                    piData.status === 'pending'
+                    ((piData as Record<string, unknown>)?.status as string) === 'pending'
                       ? 'bg-amber-50 text-amber-700 border-amber-200'
-                      : piData.status === 'confirmed'
+                      : ((piData as Record<string, unknown>)?.status as string) === 'confirmed'
                         ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                        : piData.status === 'draft'
+                        : ((piData as Record<string, unknown>)?.status as string) === 'draft'
                           ? 'bg-slate-50 text-slate-700 border-slate-200'
                           : 'bg-gray-50 text-gray-700 border-gray-200'
                   }`}
                 >
-                  {piData.status?.charAt(0).toUpperCase() +
-                    piData.status?.slice(1)}
+                  {((((piData as Record<string, unknown>)?.status as string) || '').charAt(0).toUpperCase() + (((piData as Record<string, unknown>)?.status as string) || '').slice(1))}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -344,7 +261,7 @@ const PIDetails: React.FC = () => {
                   Email Address
                 </span>
                 <span className="text-sm font-bold text-slate-600 hover:text-slate-800 cursor-pointer">
-                  {piData.email || 'N/A'}
+                  {((piData as Record<string, unknown>)?.email as string) || 'N/A'}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -352,7 +269,7 @@ const PIDetails: React.FC = () => {
                   Phone Number
                 </span>
                 <span className="text-sm font-bold text-gray-900">
-                  {piData.phone || 'N/A'}
+                  {((piData as Record<string, unknown>)?.phone as string) || 'N/A'}
                 </span>
               </div>
               <div className="flex items-start justify-between p-3 bg-gray-50 rounded-lg">
@@ -360,7 +277,7 @@ const PIDetails: React.FC = () => {
                   Business Address
                 </span>
                 <span className="text-sm font-bold text-gray-900 text-right max-w-xs">
-                  {piData.address || 'N/A'}
+                  {((piData as Record<string, unknown>)?.address as string) || 'N/A'}
                 </span>
               </div>
             </div>
@@ -556,7 +473,7 @@ const PIDetails: React.FC = () => {
           <div className="p-4">
             {/* Mobile Card View */}
             <div className="block lg:hidden space-y-4">
-              {piData.products?.map((product: any, index: number) => (
+              {piData.products?.map((product: Record<string, unknown>, index: number) => (
                 <div
                   key={product.id}
                   className="bg-gray-50 rounded-lg p-5 border border-gray-200 hover:bg-gray-100 transition-colors duration-200"
@@ -647,7 +564,7 @@ const PIDetails: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {piData.products?.map((product: any, index: number) => (
+                  {piData.products?.map((product: Record<string, unknown>, index: number) => (
                     <tr
                       key={product.id}
                       className="hover:bg-gray-50 transition-colors duration-150"
