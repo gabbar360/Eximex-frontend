@@ -14,7 +14,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 interface SimpleOrderCardProps {
-  order: any;
+  order: Record<string, unknown>;
   onDelete: (id: string) => void;
 }
 

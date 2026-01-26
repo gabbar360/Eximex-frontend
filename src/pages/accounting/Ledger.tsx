@@ -1,17 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ComponentCard from '../../components/common/ComponentCard';
 import {
   fetchLedger,
-  clearAccountingError,
 } from '../../features/accountingSlice';
-import { toast } from 'react-toastify';
 import { useTheme } from '../../context/ThemeContext';
 
 const Ledger = () => {
   const { theme } = useTheme();
   const dispatch = useDispatch();
-  const { ledger, loading, error } = useSelector((state) => state.accounting);
+  const { ledger, loading } = useSelector((state) => state.accounting);
   const [filters, setFilters] = useState({
     entryType: '',
     partyName: '',
@@ -19,13 +17,13 @@ const Ledger = () => {
     dateTo: '',
   });
 
+  const fetchLedgerData = useCallback(async () => {
+    dispatch(fetchLedger(filters));
+  }, [dispatch, filters]);
+
   useEffect(() => {
     fetchLedgerData();
-  }, []);
-
-  const fetchLedgerData = async () => {
-    dispatch(fetchLedger(filters));
-  };
+  }, [fetchLedgerData]);
 
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }));

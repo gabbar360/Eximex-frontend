@@ -11,7 +11,6 @@ import { toast } from 'react-toastify';
 import { fetchProducts, deleteProduct } from '../../features/productSlice';
 import { getAllCategories } from '../../features/categorySlice';
 import {
-  HiEye,
   HiPencil,
   HiTrash,
   HiPlus,
@@ -27,12 +26,18 @@ import SEOHead from '../../components/common/SEOHead';
 
 const Product: React.FC = () => {
   const dispatch = useDispatch();
-  const { products, loading, error, pagination } = useSelector(
-    (state: any) => state.product
+  const { products, loading, pagination } = useSelector(
+    (state: {
+      product: {
+        products: Record<string, unknown>[];
+        loading: boolean;
+        pagination: { total: number };
+      };
+    }) => state.product
   );
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const pageSize = 10;
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedSubCategory, setSelectedSubCategory] = useState('');
@@ -48,7 +53,9 @@ const Product: React.FC = () => {
   const categoryRef = useRef(null);
   const subcategoryRef = useRef(null);
 
-  const { categories } = useSelector((state: any) => state.category);
+  const { categories } = useSelector((state: {
+    category: { categories: Record<string, unknown>[] };
+  }) => state.category);
 
   // SearchableDropdown Component
   const SearchableDropdown = ({
@@ -140,7 +147,7 @@ const Product: React.FC = () => {
 
   // Close dropdowns when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = (event: MouseEvent) => {
       if (categoryRef.current && !categoryRef.current.contains(event.target)) {
         setShowCategoryDropdown(false);
       }
@@ -159,25 +166,12 @@ const Product: React.FC = () => {
   useEffect(() => {
     dispatch(
       fetchProducts({
-        page: currentPage,
-        limit: pageSize,
-        search: '',
-        categoryId: selectedCategory || undefined,
-        subCategoryId: selectedSubCategory || undefined,
-      }) as any
-    );
-    dispatch(getAllCategories() as any);
-  }, [dispatch, currentPage, pageSize, selectedCategory, selectedSubCategory]);
-
-  // Initial load
-  useEffect(() => {
-    dispatch(
-      fetchProducts({
         page: 1,
         limit: 10,
         search: '',
-      }) as any
+      }) as unknown as Record<string, unknown>
     );
+    dispatch(getAllCategories() as unknown as Record<string, unknown>);
   }, [dispatch]);
 
   const { debouncedCallback: debouncedSearch } = useDebounce(
@@ -190,7 +184,7 @@ const Product: React.FC = () => {
           search: value,
           categoryId: selectedCategory || undefined,
           subCategoryId: selectedSubCategory || undefined,
-        }) as any
+        }) as unknown as Record<string, unknown>
       );
     },
     500
@@ -202,7 +196,7 @@ const Product: React.FC = () => {
       setCurrentPage(1);
       debouncedSearch(value);
     },
-    [debouncedSearch, pageSize, selectedCategory, selectedSubCategory]
+    [debouncedSearch]
   );
 
   // Restore focus after search results load
@@ -222,7 +216,7 @@ const Product: React.FC = () => {
 
     try {
       const result = await dispatch(
-        deleteProduct(confirmDelete) as any
+        deleteProduct(confirmDelete) as unknown as Record<string, unknown>
       ).unwrap();
       setConfirmDelete(null);
 
@@ -233,19 +227,19 @@ const Product: React.FC = () => {
           search: searchTerm,
           categoryId: selectedCategory || undefined,
           subCategoryId: selectedSubCategory || undefined,
-        }) as any
+        }) as unknown as Record<string, unknown>
       );
 
       toast.success(result.message);
-    } catch (error: any) {
-      toast.error(error);
+    } catch (error: unknown) {
+      toast.error(error as string);
     }
   };
 
   const availableSubCategories = useMemo(() => {
     if (!selectedCategory || !categories) return [];
     const category = categories.find(
-      (cat: any) => cat.id.toString() === selectedCategory
+      (cat: { id: number; subcategories?: Record<string, unknown>[] }) => cat.id.toString() === selectedCategory
     );
     return category?.subcategories || [];
   }, [selectedCategory, categories]);
@@ -262,30 +256,9 @@ const Product: React.FC = () => {
         search: searchTerm,
         categoryId: categoryId || undefined,
         subCategoryId: undefined,
-      }) as any
+      }) as unknown as Record<string, unknown>
     );
   };
-  const getProductTypeLabel = (type: string) => {
-    const types: Record<string, string> = {
-      tiles: 'Tiles',
-      bagasse: 'Bagasse',
-      fabric: 'Fabric',
-      generic: 'Generic',
-    };
-    return types[type] || type;
-  };
-
-  const getUnitLabel = (unit: string) => {
-    const units: Record<string, string> = {
-      sqm: 'Square Meter',
-      kg: 'Kilogram',
-      pcs: 'Pieces',
-      box: 'Box',
-      cbm: 'Cubic Meter',
-    };
-    return units[unit] || unit;
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex justify-center items-center bg-gray-50">
@@ -343,12 +316,12 @@ const Product: React.FC = () => {
                         options={[
                           { id: '', name: 'All Categories' },
                           ...(categories || [])
-                            .filter((category: any) =>
+                            .filter((category: { name: string }) =>
                               category.name
                                 .toLowerCase()
                                 .includes(categorySearch.toLowerCase())
                             )
-                            .map((category: any) => ({
+                            .map((category: { id: number; name: string }) => ({
                               id: category.id,
                               name: category.name,
                             })),
@@ -376,12 +349,12 @@ const Product: React.FC = () => {
                           options={[
                             { id: '', name: 'All Subcategories' },
                             ...availableSubCategories
-                              .filter((subCategory: any) =>
+                              .filter((subCategory: { name: string }) =>
                                 subCategory.name
                                   .toLowerCase()
                                   .includes(subcategorySearch.toLowerCase())
                               )
-                              .map((subCategory: any) => ({
+                              .map((subCategory: { id: number; name: string }) => ({
                                 id: subCategory.id,
                                 name: subCategory.name,
                               })),
@@ -398,7 +371,7 @@ const Product: React.FC = () => {
                                 search: searchTerm,
                                 categoryId: selectedCategory || undefined,
                                 subCategoryId: value || undefined,
-                              }) as any
+                              }) as unknown as Record<string, unknown>
                             );
                           }}
                           searchValue={subcategorySearch}
@@ -493,7 +466,7 @@ const Product: React.FC = () => {
                   </div>
                 </div>
                 <div className="divide-y divide-white/20">
-                  {products.map((product: any) => (
+                  {products.map((product: Record<string, unknown>) => (
                     <div
                       key={product.id}
                       className="p-4 hover:bg-white/50 transition-all duration-300"
@@ -602,7 +575,7 @@ const Product: React.FC = () => {
                       </div>
                     </div>
                     <div className="divide-y divide-white/20">
-                      {products.map((product: any) => (
+                      {products.map((product: Record<string, unknown>) => (
                         <div
                           key={product.id}
                           className="p-4 hover:bg-white/50 transition-all duration-300"
@@ -693,7 +666,7 @@ const Product: React.FC = () => {
                       search: searchTerm,
                       categoryId: selectedCategory || undefined,
                       subCategoryId: selectedSubCategory || undefined,
-                    }) as any
+                    }) as unknown as Record<string, unknown>
                   );
                 }}
               />

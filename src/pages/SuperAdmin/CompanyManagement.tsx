@@ -14,14 +14,14 @@ import CompanySetupForm from '../../components/CompanySetupForm';
 import { useDebounce } from '../../utils/useDebounce';
 
 const CompanyManagement: React.FC = () => {
-  const [companies, setCompanies] = useState([]);
+  const [companies, setCompanies] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [editingCompany, setEditingCompany] = useState(null);
-  const [confirmDelete, setConfirmDelete] = useState(null);
+  const [editingCompany, setEditingCompany] = useState<Record<string, unknown> | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<Record<string, unknown> | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const pageSize = 10;
   const [pagination, setPagination] = useState({
     total: 0,
     page: 1,
@@ -29,19 +29,7 @@ const CompanyManagement: React.FC = () => {
     totalPages: 0,
   });
 
-  useEffect(() => {
-    fetchCompanies();
-  }, [currentPage, pageSize]);
-
-  const { debouncedCallback: debouncedSearch } = useDebounce(
-    (value: string) => {
-      setCurrentPage(1);
-      fetchCompanies(1, pageSize, value);
-    },
-    500
-  );
-
-  const fetchCompanies = async (
+  const fetchCompanies = React.useCallback(async (
     page = currentPage,
     limit = pageSize,
     search = searchTerm
@@ -55,13 +43,24 @@ const CompanyManagement: React.FC = () => {
       if (response.data.data.pagination) {
         setPagination(response.data.data.pagination);
       }
-    } catch (error) {
-      console.error('Failed to fetch companies:', error);
+    } catch {
       toast.error('Failed to fetch companies');
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, pageSize, searchTerm]);
+
+  useEffect(() => {
+    fetchCompanies();
+  }, [fetchCompanies]);
+
+  const { debouncedCallback: debouncedSearch } = useDebounce(
+    (value: string) => {
+      setCurrentPage(1);
+      fetchCompanies(1, pageSize, value);
+    },
+    500
+  );
 
   const handleFormClose = () => {
     setEditingCompany(null);
@@ -77,12 +76,12 @@ const CompanyManagement: React.FC = () => {
     [debouncedSearch]
   );
 
-  const handleEdit = (company: any) => {
+  const handleEdit = (company: Record<string, unknown>) => {
     setEditingCompany(company);
     setShowForm(true);
   };
 
-  const handleDeleteClick = (company: any) => {
+  const handleDeleteClick = (company: Record<string, unknown>) => {
     setConfirmDelete(company);
   };
 
@@ -95,10 +94,8 @@ const CompanyManagement: React.FC = () => {
         toast.success('Company deleted successfully');
         fetchCompanies();
         setConfirmDelete(null);
-      } catch (error: any) {
-        toast.error(
-          error.response?.data?.message || 'Failed to delete company'
-        );
+      } catch {
+        toast.error('Failed to delete company');
       }
     }
   };
@@ -200,7 +197,7 @@ const CompanyManagement: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {companies.map((company: any) => (
+                  {companies.map((company: Record<string, unknown>) => (
                     <tr key={company.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">

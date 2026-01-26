@@ -2,16 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Table,
-  Switch,
-  Button,
-  Select,
-  message,
-  Space,
-  Card,
-  Collapse,
   Pagination,
 } from 'antd';
-import { EditOutlined, UserOutlined } from '@ant-design/icons';
 import { toast } from 'react-toastify';
 import {
   HiShieldCheck,
@@ -24,35 +16,29 @@ import {
   HiArrowLeft,
   HiCheckCircle,
 } from 'react-icons/hi2';
-import { MdSecurity, MdAdminPanelSettings } from 'react-icons/md';
+import { MdAdminPanelSettings } from 'react-icons/md';
 import {
   fetchAllUsersWithPermissions,
   fetchUserPermissions,
   updateUserPermissions,
-  bulkUpdateUserPermissions,
   clearError,
 } from '../../features/userPermissionSlice';
 import { deleteUser } from '../../features/userManagementSlice';
 import { fetchMenus } from '../../features/menuSlice';
-import axiosInstance from '../../utils/axiosInstance';
 import { useDebounce } from '../../utils/useDebounce';
-
-const { Option } = Select;
-const { Panel } = Collapse;
 
 const UserPermissionManagement = () => {
   const dispatch = useDispatch();
-  const { allUsersPermissions, userPermissions, loading, error, pagination } =
+  const { allUsersPermissions, loading, error, pagination } =
     useSelector((state) => state.userPermission);
   const { menus } = useSelector((state) => state.menu);
 
   const [showForm, setShowForm] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [permissions, setPermissions] = useState({});
-  const [initialPermissions, setInitialPermissions] = useState({});
+
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [selectAll, setSelectAll] = useState(false);
 
@@ -60,12 +46,12 @@ const UserPermissionManagement = () => {
     dispatch(
       fetchAllUsersWithPermissions({
         page: currentPage,
-        limit: pageSize,
+        limit: 10,
         search: '',
       })
     );
     dispatch(fetchMenus());
-  }, [dispatch, currentPage, pageSize]);
+  }, [dispatch, currentPage]);
 
   // Initial load
   useEffect(() => {
@@ -83,7 +69,7 @@ const UserPermissionManagement = () => {
       dispatch(
         fetchAllUsersWithPermissions({
           page: 1,
-          limit: pageSize,
+          limit: 10,
           search: value,
         })
       );
@@ -167,7 +153,6 @@ const UserPermissionManagement = () => {
       }
 
       setPermissions(userPerms);
-      setInitialPermissions(userPerms);
 
       // Check if all permissions are selected
       const allSelected = Object.values(userPerms).every(
@@ -215,7 +200,7 @@ const UserPermissionManagement = () => {
     setPermissions(updatedPermissions);
   };
 
-  const checkIfAllSelected = () => {
+  const checkIfAllSelected = useCallback(() => {
     const allPermissions = Object.values(permissions);
     if (allPermissions.length === 0) return false;
 
@@ -223,11 +208,11 @@ const UserPermissionManagement = () => {
       (perm) =>
         perm.canView && perm.canCreate && perm.canUpdate && perm.canDelete
     );
-  };
+  }, [permissions]);
 
   useEffect(() => {
     setSelectAll(checkIfAllSelected());
-  }, [permissions]);
+  }, [permissions, checkIfAllSelected]);
 
   const handleSavePermissions = async () => {
     try {
@@ -263,12 +248,11 @@ const UserPermissionManagement = () => {
       toast.success(response?.data?.message || response?.message);
       setShowForm(false);
       setPermissions({});
-      setInitialPermissions({});
       setSelectedUser(null);
       dispatch(
         fetchAllUsersWithPermissions({
           page: currentPage,
-          limit: pageSize,
+          limit: 10,
           search: searchTerm,
         })
       );
@@ -290,7 +274,7 @@ const UserPermissionManagement = () => {
         dispatch(
           fetchAllUsersWithPermissions({
             page: currentPage,
-            limit: pageSize,
+            limit: 10,
             search: searchTerm,
           })
         );
@@ -302,94 +286,12 @@ const UserPermissionManagement = () => {
 
   const resetForm = () => {
     setPermissions({});
-    setInitialPermissions({});
     setSelectedUser(null);
     setSelectAll(false);
     setShowForm(false);
   };
 
-  const renderPermissionControls = (item, keyPrefix) => {
-    const key = `${keyPrefix}_${item.id}`;
-    const itemPermissions = permissions[key] || {
-      canView: false,
-      canCreate: false,
-      canUpdate: false,
-      canDelete: false,
-    };
 
-    return (
-      <div className="grid grid-cols-4 gap-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-        <div className="flex items-center gap-3">
-          <input
-            type="checkbox"
-            id={`${key}_view`}
-            checked={Boolean(itemPermissions.canView)}
-            onChange={(e) =>
-              handlePermissionChange(key, 'canView', e.target.checked)
-            }
-            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
-          />
-          <label
-            htmlFor={`${key}_view`}
-            className="text-sm font-medium text-slate-700 cursor-pointer"
-          >
-            View
-          </label>
-        </div>
-        <div className="flex items-center gap-3">
-          <input
-            type="checkbox"
-            id={`${key}_create`}
-            checked={Boolean(itemPermissions.canCreate)}
-            onChange={(e) =>
-              handlePermissionChange(key, 'canCreate', e.target.checked)
-            }
-            className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2 cursor-pointer"
-          />
-          <label
-            htmlFor={`${key}_create`}
-            className="text-sm font-medium text-slate-700 cursor-pointer"
-          >
-            Create
-          </label>
-        </div>
-        <div className="flex items-center gap-3">
-          <input
-            type="checkbox"
-            id={`${key}_update`}
-            checked={Boolean(itemPermissions.canUpdate)}
-            onChange={(e) =>
-              handlePermissionChange(key, 'canUpdate', e.target.checked)
-            }
-            className="w-4 h-4 text-yellow-600 bg-gray-100 border-gray-300 rounded focus:ring-yellow-500 focus:ring-2 cursor-pointer"
-          />
-          <label
-            htmlFor={`${key}_update`}
-            className="text-sm font-medium text-slate-700 cursor-pointer"
-          >
-            Update
-          </label>
-        </div>
-        <div className="flex items-center gap-3">
-          <input
-            type="checkbox"
-            id={`${key}_delete`}
-            checked={Boolean(itemPermissions.canDelete)}
-            onChange={(e) =>
-              handlePermissionChange(key, 'canDelete', e.target.checked)
-            }
-            className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 focus:ring-2 cursor-pointer"
-          />
-          <label
-            htmlFor={`${key}_delete`}
-            className="text-sm font-medium text-slate-700 cursor-pointer"
-          >
-            Delete
-          </label>
-        </div>
-      </div>
-    );
-  };
 
   if (showForm) {
     return (
@@ -858,13 +760,13 @@ const UserPermissionManagement = () => {
             <Pagination
               current={currentPage}
               total={pagination.total}
-              pageSize={pageSize}
+              pageSize={10}
               onChange={(page) => {
                 setCurrentPage(page);
                 dispatch(
                   fetchAllUsersWithPermissions({
                     page: page,
-                    limit: pageSize,
+                    limit: 10,
                     search: searchTerm,
                   })
                 );

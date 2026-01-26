@@ -258,7 +258,7 @@ const authSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(verifyToken.fulfilled, (state, { payload }) => {
+      .addCase(verifyToken.fulfilled, (state) => {
         state.loading = false;
         state.isAuthenticated = true;
       })
@@ -278,9 +278,8 @@ const authSlice = createSlice({
           state.refreshToken = payload.data.refreshToken;
         }
       })
-      .addCase(refreshToken.rejected, (state, { payload }) => {
+      .addCase(refreshToken.rejected, (state) => {
         state.loading = false;
-        state.error = payload;
         state.user = null;
         state.token = null;
         state.refreshToken = null;

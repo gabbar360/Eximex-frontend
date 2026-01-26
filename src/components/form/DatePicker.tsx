@@ -9,8 +9,6 @@ interface DatePickerProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
-  name?: string;
-  required?: boolean;
 }
 
 const DatePicker: React.FC<DatePickerProps> = ({
@@ -19,8 +17,6 @@ const DatePicker: React.FC<DatePickerProps> = ({
   placeholder = 'Select date',
   disabled = false,
   className = '',
-  name,
-  required = false,
 }) => {
   const handleChange = (date: Dayjs | null) => {
     if (onChange) {

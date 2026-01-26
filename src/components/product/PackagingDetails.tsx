@@ -3,9 +3,9 @@ import { Field } from 'formik';
 import { HiCube, HiScale, HiRectangleGroup } from 'react-icons/hi2';
 
 interface PackagingDetailsProps {
-  values: any;
-  setFieldValue: (field: string, value: any) => void;
-  packagingHierarchy: any[];
+  values: Record<string, unknown>;
+  setFieldValue: (field: string, value: unknown) => void;
+  packagingHierarchy: Record<string, unknown>[];
   trackVolume: boolean;
   loadingCategory: boolean;
 }

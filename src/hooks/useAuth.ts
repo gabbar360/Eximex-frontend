@@ -7,7 +7,7 @@ import { logoutUser, getCurrentUser } from '../features/authSlice';
 export const useAuth = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useSelector((state: any) => state.user);
+  const { user, isAuthenticated } = useSelector((state: Record<string, unknown>) => state.user);
 
   const logout = async () => {
     try {

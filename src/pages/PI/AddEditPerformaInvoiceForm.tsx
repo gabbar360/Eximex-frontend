@@ -20,7 +20,6 @@ declare global {
     rateTimeout: NodeJS.Timeout;
   }
 }
-import { createPortal } from 'react-dom';
 import { useNavigate, useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -38,11 +37,9 @@ import 'react-toastify/dist/ReactToastify.css';
 import Form from '../../components/form/Form';
 import Label from '../../components/form/Label';
 import Input from '../../components/form/input/InputField';
-import PageBreadcrumb from '../../components/common/PageBreadCrumb';
-import PageMeta from '../../components/common/PageMeta';
 import TextArea from '../../components/form/input/TextArea';
 
-import { fetchParties, getAllParties } from '../../features/partySlice';
+import { getAllParties } from '../../features/partySlice';
 import {
   createPiInvoice,
   updatePiInvoice,
@@ -71,42 +68,6 @@ type Company = {
   country: string;
   email: string;
   phone: string;
-};
-
-type Product = {
-  id: string;
-  name: string;
-  hsCode: string;
-  description: string;
-  weightPerUnitKg: number;
-  packingBoxWeightKg: number;
-  units: string[];
-  categoryId?: string;
-  subcategoryId?: string;
-  packingConfig?: {
-    weightPerBox: number;
-    unitsPerBox: number;
-    cbmPerBox: number;
-  };
-  packingHierarchy?: {
-    primaryUnit: string;
-    secondaryUnit: string;
-    packagingUnit: string;
-    conversionRates: {
-      piecesPerBox: number;
-      boxesPerPallet: number;
-      palletsPerContainer: number;
-    };
-    weights: {
-      weightPerPiece: number;
-      weightPerBox: number;
-      weightPerPallet: number;
-    };
-    volumes: {
-      cbmPerBox: number;
-      cbmPerPallet: number;
-    };
-  };
 };
 
 type ProductAdded = {
@@ -167,13 +128,6 @@ type PIData = {
   notes?: string;
 };
 
-type PI = {
-  piNumber: string;
-  date: string;
-  status: string;
-  data: PIData;
-};
-
 type ContainerConfig = {
   type: string;
   cbm: number;
@@ -197,17 +151,6 @@ type ContainerUtilization = {
   volumeUtilization: number;
   recommendedContainers: number;
   limitingFactor: 'weight' | 'volume';
-};
-
-type Category = {
-  id: string;
-  name: string;
-};
-
-type Subcategory = {
-  id: string;
-  name: string;
-  categoryId: string;
 };
 
 // Container static configurations
@@ -3961,12 +3904,12 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                         </h4>
                         <div className="text-gray-700 dark:text-gray-300 space-y-2">
                           {(() => {
-                            let subtotal = addedProducts.reduce(
+                            const subtotal = addedProducts.reduce(
                               (sum, p) => sum + p.total,
                               0
                             );
                             let chargesTotal = 0;
-                            let chargesList = [];
+                            const chargesList = [];
 
                             if (
                               deliveryTerm === 'fob' &&
@@ -4098,7 +4041,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                         </h4>
                         <div className="text-3xl font-bold text-slate-700 dark:text-slate-400">
                           {(() => {
-                            let subtotal = addedProducts.reduce(
+                            const subtotal = addedProducts.reduce(
                               (sum, p) => sum + p.total,
                               0
                             );

@@ -1,5 +1,5 @@
-import { useDispatch, useSelector } from 'react-redux';
-import React, { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { HiCheckCircle, HiArrowLeft } from 'react-icons/hi';
 import { toast } from 'react-toastify';
@@ -9,12 +9,7 @@ import {
   updateShipment,
   getShipmentByOrderId,
 } from '../../features/shipmentSlice';
-
-import PageBreadCrumb from '../../components/common/PageBreadCrumb';
-import InputField from '../../components/form/input/InputField';
 import OrderSelector from '../../components/order/OrderSelector';
-
-import Label from '../../components/form/Label';
 import DatePicker from '../../components/form/DatePicker';
 
 const AddEditShipment = () => {
@@ -36,20 +31,7 @@ const AddEditShipment = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [shipmentId, setShipmentId] = useState(null);
 
-  useEffect(() => {
-    if (id && id !== 'create') {
-      fetchOrderDetails();
-    } else {
-      setLoading(false);
-    }
-  }, [id]);
-
-  const handleOrderSelect = (orderId, orderData) => {
-    setSelectedOrder(orderData);
-    setOrderData(orderData);
-  };
-
-  const fetchOrderDetails = async () => {
+  const fetchOrderDetails = useCallback(async () => {
     if (!id || id === 'create') {
       setLoading(false);
       return;
@@ -82,7 +64,7 @@ const AddEditShipment = () => {
             blNumber: shipment.blNumber || '',
           });
         }
-      } catch (shipmentError) {
+      } catch (error) {
         // No existing shipment found, that's okay
         console.log('No existing shipment found');
       }
@@ -92,6 +74,19 @@ const AddEditShipment = () => {
     } finally {
       setLoading(false);
     }
+  }, [dispatch, id, navigate]);
+
+  useEffect(() => {
+    if (id && id !== 'create') {
+      fetchOrderDetails();
+    } else {
+      setLoading(false);
+    }
+  }, [id, fetchOrderDetails]);
+
+  const handleOrderSelect = (orderId, orderData) => {
+    setSelectedOrder(orderData);
+    setOrderData(orderData);
   };
 
   const handleInputChange = (e) => {

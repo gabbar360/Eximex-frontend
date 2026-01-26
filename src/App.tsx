@@ -3,7 +3,6 @@ import {
   Routes,
   Route,
   Navigate,
-  useLocation,
 } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { ToastContainer } from 'react-toastify';
@@ -15,7 +14,7 @@ import { SocketProvider } from './context/SocketContext';
 import SEOHead from './components/common/SEOHead';
 
 import SignIn from './pages/AuthPages/SignIn';
-import SignUp from './pages/AuthPages/SignUp';
+
 import ForgotPassword from './pages/AuthPages/ForgotPassword';
 import ResetPassword from './pages/AuthPages/ResetPassword';
 import SetPassword from './pages/AuthPages/SetPassword';
@@ -71,7 +70,7 @@ import ShipmentManagement from './pages/orders/ShipmentManagement';
 import PackingListManagement from './pages/orders/PackingListManagement';
 import VgmManagement from './pages/orders/VgmManagement';
 import ReportsDownloads from './pages/orders/ReportsDownloads';
-import RoleBasedDashboard from './components/RoleBasedDashboard';
+
 import RoleManagement from './pages/SuperAdmin/RoleManagement';
 import UserManagement from './pages/SuperAdmin/UserManagement';
 import MenuManagement from './pages/SuperAdmin/MenuManagement';
@@ -92,8 +91,7 @@ import {
 import CombinedDashboard from './pages/CombinedDashboard';
 
 function AppContent() {
-  const location = useLocation();
-  const user = useSelector((state) => state.user.user);
+  const user = useSelector((state: Record<string, unknown>) => state.user.user);
 
   return (
     <Routes>
@@ -249,7 +247,6 @@ function AppContent() {
 export default function App() {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
-  const user = useSelector((state) => state.user.user);
 
   useEffect(() => {
     const loadBasicDetails = async () => {

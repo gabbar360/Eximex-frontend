@@ -64,48 +64,32 @@ const productService = {
 
   // Get product by ID
   getProductById: async (id) => {
-    try {
-      const { data } = await axiosInstance.get(`/get/product/${id}`);
-      return data;
-    } catch (error) {
-      throw error;
-    }
+    const { data } = await axiosInstance.get(`/get/product/${id}`);
+    return data;
   },
 
   // Create product
   createProduct: async (productData) => {
-    try {
-      const response = await axiosInstance.post('/create/product', productData);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await axiosInstance.post('/create/product', productData);
+    return response.data;
   },
 
   // Update product
   updateProduct: async (id, productData) => {
-    try {
-      const response = await axiosInstance.put(
-        `/update/product/${id}`,
-        productData
-      );
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await axiosInstance.put(
+      `/update/product/${id}`,
+      productData
+    );
+    return response.data;
   },
 
   // Delete product
   deleteProduct: async (id) => {
-    try {
-      const response = await axiosInstance.delete(`/delete/product/${id}`);
-      return {
-        id,
-        message: response.data.message,
-      };
-    } catch (error) {
-      throw error;
-    }
+    const response = await axiosInstance.delete(`/delete/product/${id}`);
+    return {
+      id,
+      message: response.data.message,
+    };
   },
 
   // Get product stats
@@ -120,32 +104,24 @@ const productService = {
 
   // Bulk upload products
   bulkUpload: async (formData) => {
-    try {
-      const response = await axiosInstance.post(
-        '/bulk-upload/products',
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await axiosInstance.post(
+      '/bulk-upload/products',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return response.data;
   },
 
   // Download template
   downloadTemplate: async () => {
-    try {
-      const response = await axiosInstance.get('/download/template', {
-        responseType: 'blob',
-      });
-      return response;
-    } catch (error) {
-      throw error;
-    }
+    const response = await axiosInstance.get('/download/template', {
+      responseType: 'blob',
+    });
+    return response;
   },
 };
 

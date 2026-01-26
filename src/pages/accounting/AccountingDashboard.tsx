@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import ComponentCard from '../../components/common/ComponentCard';
 import accountingService from '../../service/accountingService';
-import { toast } from 'react-toastify';
 import { Ledger, ProfitLoss, BalanceSheet } from './index';
 
 const AccountingDashboard = () => {
@@ -11,12 +9,8 @@ const AccountingDashboard = () => {
   const [profitLossData, setProfitLossData] = useState(null);
   const [balanceSheetData, setBalanceSheetData] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  // Get current user from Redux store
   const currentUser = useSelector((state) => state.user.user);
   const userRole = currentUser?.role?.name;
-
-  // Define roles that can access accounting data
   const allowedRoles = ['SUPER_ADMIN', 'ADMIN', 'ACCOUNTANT', 'MANAGER'];
   const hasAccess = allowedRoles.includes(userRole);
 
@@ -54,6 +48,7 @@ const AccountingDashboard = () => {
 
   const fetchAccountingData = async () => {
     try {
+      setLoading(true);
       const [ledger, profitLoss, balanceSheet] = await Promise.all([
         accountingService.getLedger().catch(() => ({ data: [] })),
         accountingService.getProfitLoss().catch(() => ({
@@ -81,6 +76,7 @@ const AccountingDashboard = () => {
       setProfitLossData(profitLoss.data);
       setBalanceSheetData(balanceSheet.data);
     } catch (error) {
+      console.error('Error fetching accounting data:', error);
       // Set default empty data on error
       setLedgerData([]);
       setProfitLossData({
@@ -98,6 +94,8 @@ const AccountingDashboard = () => {
         totalAssets: 0,
         asOfDate: new Date().toISOString().split('T')[0],
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -180,7 +178,6 @@ const DashboardContent = ({
   ledgerData,
   profitLossData,
   balanceSheetData,
-  loading,
   fetchAccountingData,
   formatCurrency,
   formatDate,

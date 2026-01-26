@@ -48,15 +48,11 @@ export const createParty = async (party) => {
 };
 
 export const updateParty = async (id, party) => {
-  try {
-    const response = await axiosInstance.put(`/update/party/${id}`, party);
-    return {
-      data: response.data.data,
-      message: response.data.message,
-    };
-  } catch (error) {
-    throw error;
-  }
+  const response = await axiosInstance.put(`/update/party/${id}`, party);
+  return {
+    data: response.data.data,
+    message: response.data.message,
+  };
 };
 
 export const deleteParty = async (id) => {

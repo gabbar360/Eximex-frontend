@@ -1,16 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  MdTrendingUp,
-  MdTrendingDown,
   MdShoppingCart,
   MdPeople,
   MdAttachMoney,
   MdInventory,
-  MdMoreVert,
-  MdDownload,
-  MdFullscreen,
-  MdPrint,
   MdRefresh,
 } from 'react-icons/md';
 
@@ -32,9 +26,7 @@ import { fetchParties } from '../../features/partySlice';
 import { fetchPiInvoices } from '../../features/piSlice';
 import { getShipments } from '../../features/shipmentSlice';
 import { fetchPackingLists } from '../../features/packingListSlice';
-import { fetchVgmDocuments } from '../../features/vgmSlice';
 import { fetchPurchaseOrders } from '../../features/purchaseOrderSlice';
-import { toast } from 'react-toastify';
 
 // ---------------------- Metric Card ---------------------------
 const MetricCard = ({ title, value, icon }) => {
@@ -115,16 +107,14 @@ export default function UserDashboard() {
   const { purchaseOrders = [] } = useSelector((s) => s.purchaseOrder);
 
   useEffect(() => {
-    // Dispatch all slices individually - each handles its own errors
     dispatch(fetchOrders());
     dispatch(fetchProducts());
     dispatch(fetchParties());
     dispatch(fetchPiInvoices());
     dispatch(getShipments({}));
     dispatch(fetchPackingLists());
-    // dispatch(fetchVgmDocuments()); // Temporarily disabled due to 500 error
     dispatch(fetchPurchaseOrders());
-  }, []); // Empty dependency array to run only once
+  }, [dispatch]);
 
   // ----------------------- Stats ----------------------------
   const stats = useMemo(

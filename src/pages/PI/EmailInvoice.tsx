@@ -16,7 +16,7 @@ const EmailInvoice: React.FC = () => {
   const dispatch = useDispatch();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
-  const [piData, setPiData] = useState<any>(null);
+  const [piData, setPiData] = useState<Record<string, unknown> | null>(null);
 
   useEffect(() => {
     const fetchPIDetails = async () => {
@@ -47,9 +47,9 @@ const EmailInvoice: React.FC = () => {
       // await dispatch(emailInvoice(id, email)).unwrap();
       toast.success('Invoice sent successfully');
       navigate(-1);
-    } catch (error) {
-      toast.error('Failed to send invoice');
-    } finally {
+      } catch {
+        toast.error('Failed to send invoice');
+      } finally {
       setLoading(false);
     }
   };

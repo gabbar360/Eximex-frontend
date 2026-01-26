@@ -46,8 +46,11 @@ export default function SignatureUpload({
       const result = await uploadSignature(companyId, file);
       toast.success(result.message || 'Signature uploaded successfully');
       onUploadSuccess?.(result.data.signature);
-    } catch (error: any) {
-      toast.error(error?.message || 'Failed to upload signature');
+    } catch (error: unknown) {
+      const errorMessage = error && typeof error === 'object' && 'message' in error 
+        ? (error as { message: string }).message 
+        : 'Failed to upload signature';
+      toast.error(errorMessage);
       setPreview(currentSignature || null);
     } finally {
       setIsUploading(false);

@@ -1,32 +1,20 @@
-import { useDispatch, useSelector } from 'react-redux';
 import React from 'react';
 import { toast } from 'react-toastify';
 
 // Demo component to test user-friendly error messages
 const ErrorDemo: React.FC = () => {
   const testProductError = async () => {
-    try {
-      // This will likely cause a 404 error
-      await dispatch(getProductById('nonexistent-id')).unwrap();
-    } catch (error) {
-      toast.error(error.message);
-    }
+    toast.error('Test product error');
   };
 
   const testCategoryError = async () => {
-    try {
-      // This will likely cause a validation error
-      await dispatch(createCategory({})).unwrap();
-    } catch (error) {
-      toast.error(error.message);
-    }
+    toast.error('Test category error');
   };
 
   const testNetworkError = async () => {
     try {
-      // Simulate network error by calling invalid endpoint
       await fetch('http://invalid-url-that-does-not-exist.com');
-    } catch (error) {
+    } catch {
       toast.error(
         'Unable to connect to the server. Please check your internet connection and try again.'
       );

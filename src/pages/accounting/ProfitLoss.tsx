@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ComponentCard from '../../components/common/ComponentCard';
 import { fetchProfitLoss } from '../../features/accountingSlice';
-import { toast } from 'react-toastify';
 
 const ProfitLoss = () => {
   const dispatch = useDispatch();
@@ -12,13 +11,13 @@ const ProfitLoss = () => {
     toDate: '',
   });
 
+  const fetchProfitLossData = useCallback(async () => {
+    dispatch(fetchProfitLoss(dateRange));
+  }, [dispatch, dateRange]);
+
   useEffect(() => {
     fetchProfitLossData();
-  }, []);
-
-  const fetchProfitLossData = async () => {
-    dispatch(fetchProfitLoss(dateRange));
-  };
+  }, [fetchProfitLossData]);
 
   const handleDateRangeChange = (key, value) => {
     setDateRange((prev) => ({ ...prev, [key]: value }));

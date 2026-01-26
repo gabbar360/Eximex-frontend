@@ -1,19 +1,12 @@
-import { useDispatch, useSelector } from 'react-redux';
-import { useState, useEffect } from 'react';
-import PageBreadcrumb from '../components/common/PageBreadCrumb';
-import UserMetaCard from '../components/UserProfile/UserMetaCard';
+import { useDispatch} from 'react-redux';
+import { useState, useEffect, useCallback } from 'react';
 import UserInfoCard from '../components/UserProfile/UserInfoCard';
-import UserAddressCard from '../components/UserProfile/UserAddressCard';
 import CompanyDetailsCard from '../components/UserProfile/CompanyDetailsCard';
 import PageMeta from '../components/common/PageMeta';
 import { fetchCurrentUser, updateUser } from '../features/userSlice';
 import {
   HiUser,
-  HiShieldCheck,
   HiBuildingOffice2,
-  HiChartBar,
-  HiCog6Tooth,
-  HiBell,
   HiArrowLeft,
   HiPencil,
 } from 'react-icons/hi2';
@@ -49,7 +42,7 @@ export default function UserProfiles() {
   const [error, setError] = useState<string | null>(null);
   const [editingProfile, setEditingProfile] = useState(false);
 
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     try {
       setLoading(true);
       const result = await dispatch(fetchCurrentUser()).unwrap();
@@ -61,7 +54,7 @@ export default function UserProfiles() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [dispatch]);
 
   const handleUpdateUser = async (updatedData: Partial<UserData>) => {
     if (!userData) return;
@@ -86,7 +79,7 @@ export default function UserProfiles() {
 
   useEffect(() => {
     fetchUserData();
-  }, []);
+  }, [fetchUserData]);
 
   if (loading) {
     return (

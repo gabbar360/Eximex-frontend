@@ -267,15 +267,16 @@ const Calendar: React.FC = () => {
   );
 };
 
-const renderEventContent = (eventInfo: any) => {
-  const colorClass = `fc-bg-${eventInfo.event.extendedProps.calendar.toLowerCase()}`;
+const renderEventContent = (eventInfo: Record<string, unknown>) => {
+  const event = eventInfo.event as { extendedProps: { calendar: string }; title: string };
+  const colorClass = `fc-bg-${event.extendedProps.calendar.toLowerCase()}`;
   return (
     <div
       className={`event-fc-color flex fc-event-main ${colorClass} p-1 rounded-sm`}
     >
       <div className="fc-daygrid-event-dot"></div>
-      <div className="fc-event-time">{eventInfo.timeText}</div>
-      <div className="fc-event-title">{eventInfo.event.title}</div>
+      <div className="fc-event-time">{eventInfo.timeText as string}</div>
+      <div className="fc-event-title">{event.title}</div>
     </div>
   );
 };

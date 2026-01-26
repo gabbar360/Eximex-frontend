@@ -1,5 +1,5 @@
-import { useDispatch, useSelector } from 'react-redux';
-import React, { useState, useEffect, useRef } from 'react';
+import { useDispatch } from 'react-redux';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { fetchVgmById, createVgm, updateVgm } from '../../features/vgmSlice';
@@ -37,7 +37,7 @@ const AddEditVgm: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { id } = useParams();
   const isEdit = !!id && id !== 'create';
-  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Record<string, unknown> | null>(null);
 
   const [formData, setFormData] = useState<VgmFormData>({
     piInvoiceId: parseInt(searchParams.get('piInvoiceId') || '0') || 0,
@@ -177,7 +177,7 @@ const AddEditVgm: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleOrderSelect = (orderId: number, orderData: any) => {
+  const handleOrderSelect = (orderId: number, orderData: Record<string, unknown>) => {
     setSelectedOrder(orderData);
     setFormData((prev) => ({
       ...prev,
@@ -185,13 +185,7 @@ const AddEditVgm: React.FC = () => {
     }));
   };
 
-  useEffect(() => {
-    if (isEdit && id && id !== 'create') {
-      fetchVgmData();
-    }
-  }, [id, isEdit]);
-
-  const fetchVgmData = async () => {
+  const fetchVgmData = useCallback(async () => {
     if (!id || id === 'create') {
       setLoading(false);
       return;
@@ -227,7 +221,13 @@ const AddEditVgm: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [dispatch, id]);
+
+  useEffect(() => {
+    if (isEdit && id && id !== 'create') {
+      fetchVgmData();
+    }
+  }, [id, isEdit, fetchVgmData]);
 
   const handleInputChange = (field: keyof VgmFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));

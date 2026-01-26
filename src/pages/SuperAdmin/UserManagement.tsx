@@ -12,7 +12,6 @@ import {
   HiPlus,
   HiPencil,
   HiTrash,
-  HiEye,
   HiArrowLeft,
   HiCheckCircle,
   HiUsers,
@@ -24,17 +23,16 @@ import { useDebounce } from '../../utils/useDebounce';
 
 const UserManagement: React.FC = () => {
   const dispatch = useDispatch();
-  const { users, loading, error, pagination } = useSelector(
-    (state: any) => state.userManagement
+  const { users, loading, pagination } = useSelector(
+    (state: Record<string, unknown>) => state.userManagement as { users: Record<string, unknown>[]; loading: boolean; pagination: Record<string, unknown> }
   );
-  const { roles } = useSelector((state: any) => state.role);
+  const { roles } = useSelector((state: Record<string, unknown>) => state.role as { roles: Record<string, unknown>[] });
 
   const [showForm, setShowForm] = useState(false);
-  const [editingUser, setEditingUser] = useState(null);
+  const [editingUser, setEditingUser] = useState<Record<string, unknown> | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [confirmDelete, setConfirmDelete] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState<Record<string, unknown> | null>(null);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -43,19 +41,19 @@ const UserManagement: React.FC = () => {
     companyId: '',
     isActive: true,
   });
-  const [companies, setCompanies] = useState([]);
+  const [companies, setCompanies] = useState<Record<string, unknown>[]>([]);
 
   useEffect(() => {
     dispatch(
       fetchUsers({
         page: currentPage,
-        limit: pageSize,
+        limit: 10,
         search: '',
       })
     );
     dispatch(getAllRoles());
     fetchCompanies();
-  }, [dispatch, currentPage, pageSize]);
+  }, [dispatch, currentPage]);
 
   // Initial load
   useEffect(() => {
@@ -73,7 +71,7 @@ const UserManagement: React.FC = () => {
       dispatch(
         fetchUsers({
           page: 1,
-          limit: pageSize,
+          limit: 10,
           search: value,
         })
       );
@@ -123,7 +121,7 @@ const UserManagement: React.FC = () => {
       dispatch(
         fetchUsers({
           page: currentPage,
-          limit: pageSize,
+          limit: 10,
           search: searchTerm,
         })
       );
@@ -132,7 +130,7 @@ const UserManagement: React.FC = () => {
     }
   };
 
-  const handleDeleteClick = (user: any) => {
+  const handleDeleteClick = (user: Record<string, unknown>) => {
     setConfirmDelete(user);
   };
 
@@ -145,7 +143,7 @@ const UserManagement: React.FC = () => {
         dispatch(
           fetchUsers({
             page: currentPage,
-            limit: pageSize,
+            limit: 10,
             search: searchTerm,
           })
         );
@@ -168,7 +166,7 @@ const UserManagement: React.FC = () => {
     setShowForm(false);
   };
 
-  const handleEdit = (user: any) => {
+  const handleEdit = (user: Record<string, unknown>) => {
     setEditingUser(user);
     setFormData({
       firstName: user.name?.split(' ')[0] || '',
@@ -289,7 +287,7 @@ const UserManagement: React.FC = () => {
                     required
                   >
                     <option value="">Select a role</option>
-                    {roles?.map((role: any) => (
+                    {roles?.map((role: Record<string, unknown>) => (
                       <option key={role.id} value={role.id}>
                         {role.displayName}
                       </option>
@@ -309,7 +307,7 @@ const UserManagement: React.FC = () => {
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                   >
                     <option value="">Select a company (optional)</option>
-                    {companies?.map((company: any) => (
+                    {companies?.map((company: Record<string, unknown>) => (
                       <option key={company.id} value={company.id}>
                         {company.name}
                       </option>
@@ -463,7 +461,7 @@ const UserManagement: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {users.map((user: any) => (
+                  {users.map((user: Record<string, unknown>) => (
                     <tr
                       key={user.id}
                       className="hover:bg-gray-50 transition-colors"
@@ -536,13 +534,13 @@ const UserManagement: React.FC = () => {
             <Pagination
               current={currentPage}
               total={pagination.total}
-              pageSize={pageSize}
+              pageSize={10}
               onChange={(page) => {
                 setCurrentPage(page);
                 dispatch(
                   fetchUsers({
                     page: page,
-                    limit: pageSize,
+                    limit: 10,
                     search: searchTerm,
                   })
                 );

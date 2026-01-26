@@ -29,16 +29,22 @@ const Notifications: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { notifications, loading, unreadCount, pagination } = useSelector(
-    (state: any) => state.notification
+    (state: {
+      notification: {
+        notifications: Record<string, unknown>[];
+        loading: boolean;
+        unreadCount: number;
+        pagination: { total: number };
+      };
+    }) => state.notification
   );
   const [searchTerm, setSearchTerm] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
 
   useEffect(() => {
     dispatch(getNotifications({ page: currentPage, limit: pageSize }));
-  }, [dispatch, currentPage, pageSize]);
+  }, [dispatch, currentPage]);
 
   const { debouncedCallback: debouncedSearch } = useDebounce(
     (value: string) => {
@@ -53,7 +59,7 @@ const Notifications: React.FC = () => {
       setCurrentPage(1);
       debouncedSearch(value);
     },
-    [debouncedSearch, pageSize]
+    [debouncedSearch]
   );
 
   const handleMarkAllAsRead = () => {
@@ -69,10 +75,10 @@ const Notifications: React.FC = () => {
     if (!confirmDelete) return;
 
     try {
-      await dispatch(deleteNotification(confirmDelete) as any).unwrap();
+      await dispatch(deleteNotification(confirmDelete) as Record<string, unknown>).unwrap();
       setConfirmDelete(null);
       toast.success('Notification deleted successfully');
-    } catch (error: any) {
+    } catch {
       toast.error('Failed to delete notification');
     }
   };
@@ -120,7 +126,11 @@ const Notifications: React.FC = () => {
     return `${Math.floor(diffInMinutes / 1440)}d ago`;
   };
 
-  const filteredNotifications = notifications.filter((notification: any) => {
+  const filteredNotifications = notifications.filter((notification: {
+    title: string;
+    message: string;
+    type: string;
+  }) => {
     if (!searchTerm) return true;
     return (
       notification.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -242,7 +252,15 @@ const Notifications: React.FC = () => {
                   </div>
                 </div>
                 <div className="divide-y divide-gray-100">
-                  {filteredNotifications.map((notification: any) => (
+                  {filteredNotifications.map((notification: {
+                    id: number;
+                    type: string;
+                    title: string;
+                    message: string;
+                    isRead: boolean;
+                    createdAt: string;
+                    sender?: { name: string };
+                  }) => (
                     <div
                       key={notification.id}
                       className={`p-4 hover:bg-gray-50 transition-colors ${
@@ -312,7 +330,15 @@ const Notifications: React.FC = () => {
 
               {/* Mobile Card View */}
               <div className="lg:hidden divide-y divide-gray-100">
-                {filteredNotifications.map((notification: any) => (
+                {filteredNotifications.map((notification: {
+                  id: number;
+                  type: string;
+                  title: string;
+                  message: string;
+                  isRead: boolean;
+                  createdAt: string;
+                  sender?: { name: string };
+                }) => (
                   <div
                     key={notification.id}
                     className={`p-4 ${

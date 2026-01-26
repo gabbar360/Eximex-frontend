@@ -244,7 +244,7 @@ const partySlice = createSlice({
         }
         state.successMessage = payload.message;
       })
-      .addCase(deleteParty.rejected, (state, { payload }) => {
+      .addCase(deleteParty.rejected, (state) => {
         state.loading = false;
         state.error = null; // Don't set global error for delete
       })

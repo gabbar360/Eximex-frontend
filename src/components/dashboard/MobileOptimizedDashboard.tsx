@@ -1,8 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  TrendingUp,
-  TrendingDown,
   ShoppingCart,
   People,
   AttachMoney,
@@ -25,11 +23,9 @@ import { fetchParties } from '../../features/partySlice';
 import { fetchPiInvoices } from '../../features/piSlice';
 import { getShipments } from '../../features/shipmentSlice';
 import { fetchPackingLists } from '../../features/packingListSlice';
-import { fetchVgmDocuments } from '../../features/vgmSlice';
 import { fetchPurchaseOrders } from '../../features/purchaseOrderSlice';
-import { toast } from 'react-toastify';
 
-const MobileMetricCard = ({ title, value, icon }: any) => {
+const MobileMetricCard = ({ title, value, icon }: Record<string, unknown>) => {
   return (
     <div className="dashboard-metric-card bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 p-2 sm:p-3 h-14 sm:h-16">
       <div className="flex items-center justify-between">
@@ -55,7 +51,7 @@ const MobileChartCard = ({
   icon,
   children,
   height = 250,
-}: any) => (
+}: Record<string, unknown>) => (
   <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-3 sm:p-4 lg:p-6">
     <div className="flex items-start justify-between mb-3 sm:mb-4">
       <div className="flex items-center space-x-2 sm:space-x-3">
@@ -89,16 +85,16 @@ const MobileChartCard = ({
 
 export default function MobileOptimizedDashboard() {
   const dispatch = useDispatch();
-  const currentUser = useSelector((state: any) => state.user.user);
-  const { orders = [] } = useSelector((state: any) => state.order);
-  const { products = [] } = useSelector((state: any) => state.product);
-  const { parties = [] } = useSelector((state: any) => state.party);
-  const { piInvoices = [] } = useSelector((state: any) => state.pi);
-  const { shipments = [] } = useSelector((state: any) => state.shipment);
-  const { packingLists = [] } = useSelector((state: any) => state.packingList);
-  const { vgmDocuments = [] } = useSelector((state: any) => state.vgm);
+  const currentUser = useSelector((state: Record<string, unknown>) => state.user.user);
+  const { orders = [] } = useSelector((state: Record<string, unknown>) => state.order);
+  const { products = [] } = useSelector((state: Record<string, unknown>) => state.product);
+  const { parties = [] } = useSelector((state: Record<string, unknown>) => state.party);
+  const { piInvoices = [] } = useSelector((state: Record<string, unknown>) => state.pi);
+  const { shipments = [] } = useSelector((state: Record<string, unknown>) => state.shipment);
+  const { packingLists = [] } = useSelector((state: Record<string, unknown>) => state.packingList);
+  const { vgmDocuments = [] } = useSelector((state: Record<string, unknown>) => state.vgm);
   const { purchaseOrders = [] } = useSelector(
-    (state: any) => state.purchaseOrder
+    (state: Record<string, unknown>) => state.purchaseOrder
   );
 
   useEffect(() => {
@@ -108,9 +104,8 @@ export default function MobileOptimizedDashboard() {
     dispatch(fetchPiInvoices());
     dispatch(getShipments({}));
     dispatch(fetchPackingLists());
-    // dispatch(fetchVgmDocuments()); // Temporarily disabled due to 500 error
     dispatch(fetchPurchaseOrders());
-  }, []); // Empty dependency array to run only once
+  }, [dispatch]);
 
   const stats = useMemo(
     () => ({

@@ -13,17 +13,17 @@ import { Pagination } from 'antd';
 import { toast } from 'react-toastify';
 import { fetchOrders } from '../../features/orderSlice';
 import { deleteShipment } from '../../features/shipmentSlice';
-import { useDebounce } from '../../utils/useDebounce';
+
 
 const ShipmentManagement: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { orders = [], loading = false } = useSelector(
-    (state: any) => state.order || {}
+    (state: { order: { orders: Record<string, unknown>[]; loading: boolean } }) => state.order || {}
   );
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const pageSize = 10;
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   useEffect(() => {
@@ -49,7 +49,7 @@ const ShipmentManagement: React.FC = () => {
       setConfirmDelete(null);
       // Refresh orders to update the UI
       dispatch(fetchOrders());
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.log('Delete shipment error:', error);
       toast.error(error || 'Failed to delete shipment');
     }
@@ -65,7 +65,7 @@ const ShipmentManagement: React.FC = () => {
   };
 
   // Filter orders to show only those with shipment details and match search term
-  const filteredOrders = orders.filter((order: any) => {
+  const filteredOrders = orders.filter((order: Record<string, unknown>) => {
     // Check if order has shipment details
     const hasShipmentDetails =
       order.shipment &&
@@ -196,7 +196,7 @@ const ShipmentManagement: React.FC = () => {
                 </div>
               </div>
               <div className="divide-y divide-white/20">
-                {paginatedOrders.map((order: any) => {
+                {paginatedOrders.map((order: Record<string, unknown>) => {
                   const hasShipmentDetails =
                     order.shipment &&
                     (order.shipment.bookingNumber ||
@@ -316,7 +316,7 @@ const ShipmentManagement: React.FC = () => {
                     </div>
                   </div>
                   <div className="divide-y divide-white/20">
-                    {paginatedOrders.map((order: any) => {
+                    {paginatedOrders.map((order: Record<string, unknown>) => {
                       const hasShipmentDetails =
                         order.shipment &&
                         (order.shipment.bookingNumber ||

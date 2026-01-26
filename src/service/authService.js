@@ -42,14 +42,13 @@ const logout = async () => {
   } catch (error) {
     console.warn('Logout request failed:', error);
     // Don't throw error, just log it
-  } finally {
-    // Always clear localStorage regardless of API success/failure
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('selectedOrderId');
-    localStorage.removeItem('theme');
-    return { message: 'Logged out successfully' };
   }
+  // Always clear localStorage regardless of API success/failure
+  localStorage.removeItem('accessToken');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('selectedOrderId');
+  localStorage.removeItem('theme');
+  return { message: 'Logged out successfully' };
 };
 
 const getCurrentUser = async () => {

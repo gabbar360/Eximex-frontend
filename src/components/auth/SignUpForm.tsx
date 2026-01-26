@@ -5,7 +5,7 @@ import * as Yup from 'yup';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
 import { registerUser } from '../../features/authSlice';
-import { EyeCloseIcon, EyeIcon } from '../../icons';
+
 import { HiEye, HiEyeOff } from 'react-icons/hi';
 
 export default function SignUpForm() {
@@ -32,8 +32,8 @@ export default function SignUpForm() {
   });
 
   const handleSubmit = async (
-    values,
-    { setSubmitting, setFieldError, setStatus }
+    values: typeof initialValues,
+    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }
   ) => {
     try {
       setStatus(null);
@@ -82,7 +82,7 @@ export default function SignUpForm() {
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
               >
-                {({ isSubmitting, status, values }) => (
+                {({ isSubmitting, values }) => (
                   <Form className="auth-form-fields space-y-3">
                     <div className="auth-form-field">
                       <label className="block text-xs font-semibold text-gray-700 mb-1">

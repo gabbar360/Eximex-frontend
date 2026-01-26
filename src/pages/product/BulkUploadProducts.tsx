@@ -15,7 +15,6 @@ import {
 } from 'react-icons/hi2';
 import {
   bulkUploadProducts,
-  downloadTemplate,
   clearBulkUploadResult,
 } from '../../features/productSlice';
 import { getAllCategories } from '../../features/categorySlice';

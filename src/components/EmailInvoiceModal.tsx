@@ -1,6 +1,7 @@
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
+import { emailInvoice } from '../features/piSlice';
 
 interface EmailInvoiceModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ const EmailInvoiceModal: React.FC<EmailInvoiceModalProps> = ({
   invoiceId,
   defaultEmail = '',
 }) => {
+  const dispatch = useDispatch();
   const [email, setEmail] = useState(defaultEmail);
   const [loading, setLoading] = useState(false);
 
@@ -30,7 +32,7 @@ const EmailInvoiceModal: React.FC<EmailInvoiceModalProps> = ({
       await dispatch(emailInvoice(invoiceId, email)).unwrap();
       toast.success('Invoice sent successfully');
       onClose();
-    } catch (error) {
+    } catch {
       toast.error('Failed to send invoice');
     } finally {
       setLoading(false);

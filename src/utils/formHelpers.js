@@ -122,7 +122,7 @@ export const handleFormSubmit = async (
 export const createValidationSchemas = (Yup) => ({
   required: Yup.string().required('Required'),
   email: Yup.string().email('Invalid email address'),
-  phone: Yup.string().matches(/^[\d+\-\(\)\s]*$/, 'Invalid phone number'),
+  phone: Yup.string().matches(/^[\d+\-()\s]*$/, 'Invalid phone number'),
   url: Yup.string().url('Invalid URL'),
   number: Yup.number().typeError('Must be a number'),
   positiveNumber: Yup.number()

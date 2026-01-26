@@ -18,7 +18,7 @@ interface UserData {
         name: string;
         displayName: string;
         description?: string;
-        permissions?: any;
+        permissions?: Record<string, unknown>;
         isActive: boolean;
         isSystem: boolean;
         createdAt: string;
@@ -46,7 +46,7 @@ export default function UserMetaCard({
   userData,
   onUpdate,
 }: UserMetaCardProps) {
-  const { isOpen, openModal, closeModal } = useModal();
+  const { isOpen, closeModal } = useModal();
   const [formData, setFormData] = useState({
     name: '',
     email: '',

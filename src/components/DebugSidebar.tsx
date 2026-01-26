@@ -6,8 +6,8 @@ const DebugSidebar = () => {
   const [apiResult, setApiResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const currentUser = useSelector((state: any) => state.user.user);
-  const { sidebarMenu } = useSelector((state: any) => state.userPermission);
+  const currentUser = useSelector((state: Record<string, unknown>) => state.user.user);
+  const { sidebarMenu } = useSelector((state: Record<string, unknown>) => state.userPermission);
 
   const testAPI = async () => {
     setLoading(true);
@@ -18,7 +18,7 @@ const DebugSidebar = () => {
       setApiResult(result);
     } catch (err) {
       console.error('Direct API call error:', err);
-      setError(err.message);
+      setError((err as Error).message);
     } finally {
       setLoading(false);
     }

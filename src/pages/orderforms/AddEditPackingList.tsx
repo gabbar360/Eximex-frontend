@@ -1,4 +1,4 @@
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { HiCheckCircle, HiArrowLeft, HiPlus, HiTrash } from 'react-icons/hi';
@@ -27,15 +27,9 @@ const AddEditPackingList = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showToTheOrder, setShowToTheOrder] = useState(false);
 
-  // Dropdown states
-  const [productNameSearch, setProductNameSearch] = useState({});
-
-  const [sealTypeSearch, setSealTypeSearch] = useState({});
   const [showSealTypeDropdown, setShowSealTypeDropdown] = useState({});
   const sealTypeRefs = useRef({});
   const [showProductNameDropdown, setShowProductNameDropdown] = useState({});
-
-  const sealTypeRef = useRef(null);
   const productNameRefs = useRef({});
   const orderSelectorRef = useRef(null);
 

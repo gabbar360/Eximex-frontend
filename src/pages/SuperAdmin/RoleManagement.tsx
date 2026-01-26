@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import {
   getAllRoles,
@@ -12,29 +11,26 @@ import {
   HiPlus,
   HiPencil,
   HiTrash,
-  HiEye,
   HiArrowLeft,
   HiCheckCircle,
   HiUserGroup,
 } from 'react-icons/hi';
 import { HiMagnifyingGlass } from 'react-icons/hi2';
 import { Pagination } from 'antd';
-import axiosInstance from '../../utils/axiosInstance';
 import { useDebounce } from '../../utils/useDebounce';
 
 const RoleManagement: React.FC = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const { roles, loading, error, pagination } = useSelector(
-    (state: any) => state.role
+  const { roles, loading, pagination } = useSelector(
+    (state: Record<string, unknown>) => state.role as { roles: Record<string, unknown>[]; loading: boolean; pagination: Record<string, unknown> }
   );
 
   const [showForm, setShowForm] = useState(false);
-  const [editingRole, setEditingRole] = useState(null);
+  const [editingRole, setEditingRole] = useState<Record<string, unknown> | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [confirmDelete, setConfirmDelete] = useState(null);
+  const pageSize = 10;
+  const [confirmDelete, setConfirmDelete] = useState<Record<string, unknown> | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     displayName: '',
@@ -109,7 +105,7 @@ const RoleManagement: React.FC = () => {
     }
   };
 
-  const handleDeleteClick = (role: any) => {
+  const handleDeleteClick = (role: Record<string, unknown>) => {
     setConfirmDelete(role);
   };
 
@@ -142,7 +138,7 @@ const RoleManagement: React.FC = () => {
     setShowForm(false);
   };
 
-  const handleEdit = (role: any) => {
+  const handleEdit = (role: Record<string, unknown>) => {
     setEditingRole(role);
     setFormData({
       name: role.name,
@@ -364,7 +360,7 @@ const RoleManagement: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {roles.map((role: any) => (
+                  {roles.map((role: Record<string, unknown>) => (
                     <tr
                       key={role.id}
                       className="hover:bg-gray-50 transition-colors"

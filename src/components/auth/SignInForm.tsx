@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { EyeCloseIcon, EyeIcon } from '../../icons';
-import { HiEye, HiEyeOff } from 'react-icons/hi';
-import { FcGoogle } from 'react-icons/fc';
 import { useDispatch } from 'react-redux';
-import { loginUser, googleLogin } from '../../features/authSlice';
+import { HiEye, HiEyeOff } from 'react-icons/hi';
+import { loginUser } from '../../features/authSlice';
 import { setUser } from '../../features/userSlice';
 import { toast } from 'react-toastify';
 

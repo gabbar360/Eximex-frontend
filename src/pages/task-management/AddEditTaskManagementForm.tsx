@@ -38,13 +38,21 @@ const AddEditTaskManagementForm: React.FC = () => {
   const dispatch = useDispatch();
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
-  const { staffList, currentTask, loading } = useSelector(
-    (state: any) => state.taskManagement
+  const { staffList, currentTask } = useSelector(
+    (state: Record<string, unknown>) => state.taskManagement as { staffList: Record<string, unknown>[]; currentTask: Record<string, unknown> }
   );
 
   const isEditMode = Boolean(id);
   const [submitting, setSubmitting] = useState(false);
-  const [task, setTask] = useState<any>({});
+  const [task, setTask] = useState<{
+    title: string;
+    description: string;
+    type: string;
+    priority: string;
+    dueDate: string;
+    assignedTo: string;
+    slaHours: string;
+  }>({} as Record<string, string>);
 
   // Dropdown states
   const [typeSearch, setTypeSearch] = useState('');
@@ -54,9 +62,9 @@ const AddEditTaskManagementForm: React.FC = () => {
   const [showAssigneeDropdown, setShowAssigneeDropdown] = useState(false);
   const [showPriorityDropdown, setShowPriorityDropdown] = useState(false);
 
-  const typeRef = useRef(null);
-  const assigneeRef = useRef(null);
-  const priorityRef = useRef(null);
+  const typeRef = useRef<HTMLDivElement>(null);
+  const assigneeRef = useRef<HTMLDivElement>(null);
+  const priorityRef = useRef<HTMLDivElement>(null);
 
   const isAdmin = ['ADMIN', 'SUPER_ADMIN'].includes(user?.role?.name);
 
@@ -146,14 +154,14 @@ const AddEditTaskManagementForm: React.FC = () => {
 
   // Close dropdowns when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (typeRef.current && !typeRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (typeRef.current && !typeRef.current.contains(event.target as Node)) {
         setShowTypeDropdown(false);
       }
-      if (assigneeRef.current && !assigneeRef.current.contains(event.target)) {
+      if (assigneeRef.current && !assigneeRef.current.contains(event.target as Node)) {
         setShowAssigneeDropdown(false);
       }
-      if (priorityRef.current && !priorityRef.current.contains(event.target)) {
+      if (priorityRef.current && !priorityRef.current.contains(event.target as Node)) {
         setShowPriorityDropdown(false);
       }
     };
@@ -236,8 +244,8 @@ const AddEditTaskManagementForm: React.FC = () => {
       }
 
       setTimeout(() => navigate('/task-management'), 1500);
-    } catch (error: any) {
-      toast.error(error || 'Operation failed');
+    } catch (error: unknown) {
+      toast.error(error as string || 'Operation failed');
     } finally {
       setSubmitting(false);
     }
@@ -385,12 +393,12 @@ const AddEditTaskManagementForm: React.FC = () => {
                       options={[
                         { id: '', name: 'Select Staff Member' },
                         ...staffList
-                          .filter((staff: any) =>
+                          .filter((staff: { id: number; name: string; email: string }) =>
                             `${staff.name} (${staff.email})`
                               .toLowerCase()
                               .includes(assigneeSearch.toLowerCase())
                           )
-                          .map((staff: any) => ({
+                          .map((staff: { id: number; name: string; email: string }) => ({
                             id: staff.id,
                             name: `${staff.name} (${staff.email})`,
                           })),

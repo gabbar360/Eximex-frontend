@@ -19,11 +19,11 @@ const VgmManagement: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { orders = [], loading = false } = useSelector(
-    (state: any) => state.order || {}
+    (state: { order: { orders: Record<string, unknown>[]; loading: boolean } }) => state.order || {}
   );
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const pageSize = 10;
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   useEffect(() => {
@@ -48,13 +48,13 @@ const VgmManagement: React.FC = () => {
       setConfirmDelete(null);
       // Refresh orders to update the UI
       dispatch(fetchOrders());
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.log('Delete VGM error:', error);
       toast.error(error || 'Failed to delete VGM document');
     }
   };
 
-  const handlePDFDownload = async (order: any) => {
+  const handlePDFDownload = async (order: Record<string, unknown>) => {
     try {
       toast.info('Preparing VGM PDF download...', { autoClose: 2000 });
       const vgmId = order.piInvoice?.vgmDocuments?.[0]?.id;
@@ -92,7 +92,7 @@ const VgmManagement: React.FC = () => {
     }
   };
 
-  const filteredOrders = orders.filter((order: any) => {
+  const filteredOrders = orders.filter((order: Record<string, unknown>) => {
     const hasVgm =
       order.piInvoice?.vgmDocuments && order.piInvoice.vgmDocuments.length > 0;
     if (!hasVgm) return false;
@@ -209,7 +209,7 @@ const VgmManagement: React.FC = () => {
                   </div>
                 </div>
                 <div className="divide-y divide-white/20">
-                  {paginatedOrders.map((order: any) => {
+                  {paginatedOrders.map((order: Record<string, unknown>) => {
                     const vgmDoc = order.piInvoice?.vgmDocuments?.[0];
                     const hasVgm = vgmDoc && Object.keys(vgmDoc).length > 0;
                     const vgmWeight = vgmDoc?.verifiedGrossMass || 0;

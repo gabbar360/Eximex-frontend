@@ -13,7 +13,7 @@ interface UserData {
         name: string;
         displayName: string;
         description?: string;
-        permissions?: any;
+        permissions?: Record<string, unknown>;
         isActive: boolean;
         isSystem: boolean;
         createdAt: string;

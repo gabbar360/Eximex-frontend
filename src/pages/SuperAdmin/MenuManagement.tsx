@@ -24,7 +24,6 @@ import {
   deleteSubmenu,
   clearError,
 } from '../../features/menuSlice';
-import axiosInstance from '../../utils/axiosInstance';
 import { useDebounce } from '../../utils/useDebounce';
 
 const MenuManagement = () => {
@@ -36,12 +35,11 @@ const MenuManagement = () => {
   const [showForm, setShowForm] = useState(false);
   const [isSubmenuModal, setIsSubmenuModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
-  const [selectedMenuId, setSelectedMenuId] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [deleteType, setDeleteType] = useState('menu');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const pageSize = 10;
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -125,7 +123,6 @@ const MenuManagement = () => {
 
   const handleAddSubmenu = (menuId) => {
     resetForm();
-    setSelectedMenuId(menuId);
     setIsSubmenuModal(true);
     setFormData({ ...formData, menuId: menuId.toString() });
     setShowForm(true);
@@ -157,7 +154,6 @@ const MenuManagement = () => {
       menuId: '',
     });
     setEditingItem(null);
-    setSelectedMenuId(null);
     setIsSubmenuModal(false);
     setShowForm(false);
   };

@@ -37,7 +37,7 @@ interface CompanyFormData {
 }
 
 interface CompanySetupFormProps {
-  editingCompany?: any;
+  editingCompany?: Record<string, unknown>;
   onClose?: () => void;
   isSuperAdmin?: boolean;
 }
@@ -49,8 +49,8 @@ export default function CompanySetupForm({
 }: CompanySetupFormProps) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, error } = useSelector((state: any) => state.company || {});
-  const user = useSelector((state: any) => state.user.user);
+  const { loading } = useSelector((state: Record<string, unknown>) => state.company || {});
+  const user = useSelector((state: Record<string, unknown>) => state.user.user);
 
   // Redirect if user already has a company assigned (but not for SuperAdmin)
   useEffect(() => {
@@ -267,7 +267,7 @@ export default function CompanySetupForm({
           }
         });
 
-        const resultAction = await dispatch(createCompany(formData)).unwrap();
+        await dispatch(createCompany(formData)).unwrap();
 
         // Refresh user data to include the new company
         try {
@@ -282,18 +282,26 @@ export default function CompanySetupForm({
         toast.success('Company created successfully!');
         navigate('/dashboard');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('API Error:', error);
 
-      if (error?.response?.data?.errors) {
-        setFieldErrors(error.response.data.errors);
-        toast.error('Please check the highlighted fields');
+      if (error && typeof error === 'object' && 'response' in error) {
+        const apiError = error as Record<string, unknown>;
+        const response = apiError.response as Record<string, unknown>;
+        const data = response?.data as Record<string, unknown>;
+        
+        if (data?.errors) {
+          setFieldErrors(data.errors as { [key: string]: string });
+          toast.error('Please check the highlighted fields');
+        } else {
+          const errorMessage =
+            (data?.message as string) ||
+            (apiError?.message as string) ||
+            'Failed to create company. Please try again.';
+          toast.error(errorMessage);
+        }
       } else {
-        const errorMessage =
-          error?.response?.data?.message ||
-          error?.message ||
-          'Failed to create company. Please try again.';
-        toast.error(errorMessage);
+        toast.error('Failed to create company. Please try again.');
       }
     }
   };

@@ -1,12 +1,10 @@
 import React, {
   useRef,
   useEffect,
-  useCallback,
   useMemo,
   useState,
 } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes } from '@fortawesome/free-solid-svg-icons';
+
 import { HiChevronDown, HiMagnifyingGlass } from 'react-icons/hi2';
 import Label from '../form/Label';
 
@@ -24,9 +22,8 @@ interface ProductRowProps {
   idx: number;
   data: ProductAdded;
   onChange: (idx: number, field: keyof ProductAdded, value: string) => void;
-  onRemove: (idx: number) => void;
-  categories: any[];
-  products: any[];
+  categories: Record<string, unknown>[];
+  products: Record<string, unknown>[];
   selectedCategory: string;
   selectedSubcategory: string;
   setSelectedCategory: (value: string) => void;
@@ -36,14 +33,12 @@ interface ProductRowProps {
     quantity: string,
     unit: string
   ) => number;
-  calculateQuantityFromWeight: (productId: string, weightKg: string) => string;
 }
 
 const ProductRow: React.FC<ProductRowProps> = ({
   idx,
   data,
   onChange,
-  onRemove,
   categories,
   products,
   selectedCategory,
@@ -51,10 +46,9 @@ const ProductRow: React.FC<ProductRowProps> = ({
   setSelectedCategory,
   setSelectedSubcategory,
   calculateTotalWeight,
-  calculateQuantityFromWeight,
 }) => {
   const prod = products.find(
-    (p) => p.id.toString() === data.productId.toString()
+    (p) => (p.id as string).toString() === data.productId.toString()
   );
   const currentCategoryId = data.categoryId || selectedCategory;
   const currentSubcategoryId = data.subcategoryId || selectedSubcategory;
@@ -73,13 +67,27 @@ const ProductRow: React.FC<ProductRowProps> = ({
   const [showProductDropdown, setShowProductDropdown] = useState(false);
   const [showUnitDropdown, setShowUnitDropdown] = useState(false);
 
-  const categoryRef = useRef(null);
-  const subcategoryRef = useRef(null);
-  const productRef = useRef(null);
-  const unitRef = useRef(null);
+  const categoryRef = useRef<HTMLDivElement>(null);
+  const subcategoryRef = useRef<HTMLDivElement>(null);
+  const productRef = useRef<HTMLDivElement>(null);
+  const unitRef = useRef<HTMLDivElement>(null);
 
   // Custom Dropdown Component
-  const SearchableDropdown = ({
+  const SearchableDropdown: React.FC<{
+    label: string;
+    value: string;
+    options: Record<string, unknown>[];
+    onSelect: (value: string) => void;
+    searchValue: string;
+    onSearchChange: (value: string) => void;
+    isOpen: boolean;
+    onToggle: () => void;
+    placeholder: string;
+    disabled?: boolean;
+    dropdownRef: React.RefObject<HTMLDivElement>;
+    displayKey?: string;
+    valueKey?: string;
+  }> = ({
     label,
     value,
     options,
@@ -95,7 +103,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
     valueKey = 'id',
   }) => {
     const selectedOption = options.find(
-      (opt) => opt[valueKey]?.toString() === value?.toString()
+      (opt) => (opt[valueKey] as string)?.toString() === value?.toString()
     );
 
     return (
@@ -111,7 +119,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
           <span
             className={`text-sm ${selectedOption ? 'text-slate-900' : 'text-slate-500'}`}
           >
-            {selectedOption ? selectedOption[displayKey] : placeholder}
+            {selectedOption ? (selectedOption[displayKey] as string) : placeholder}
           </span>
           <HiChevronDown
             className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
@@ -145,18 +153,18 @@ const ProductRow: React.FC<ProductRowProps> = ({
               ) : (
                 options.map((option) => (
                   <div
-                    key={option[valueKey]}
+                    key={option[valueKey] as string}
                     className={`px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm transition-colors duration-150 ${
-                      option[valueKey]?.toString() === value?.toString()
+                      (option[valueKey] as string)?.toString() === value?.toString()
                         ? 'bg-slate-100 text-slate-900 font-medium'
                         : 'text-slate-700'
                     }`}
                     onClick={() => {
-                      onSelect(option[valueKey]);
+                      onSelect(option[valueKey] as string);
                       onToggle();
                     }}
                   >
-                    {option[displayKey]}
+                    {option[displayKey] as string}
                   </div>
                 ))
               )}
@@ -177,24 +185,24 @@ const ProductRow: React.FC<ProductRowProps> = ({
     if (weightRef.current) {
       weightRef.current.value = data.quantityByWeight || '';
     }
-  }, [data.productId]);
+  }, [data.productId, data.quantity, data.rate, data.quantityByWeight]);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (categoryRef.current && !categoryRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (categoryRef.current && !categoryRef.current.contains(event.target as Node)) {
         setShowCategoryDropdown(false);
       }
       if (
         subcategoryRef.current &&
-        !subcategoryRef.current.contains(event.target)
+        !subcategoryRef.current.contains(event.target as Node)
       ) {
         setShowSubcategoryDropdown(false);
       }
-      if (productRef.current && !productRef.current.contains(event.target)) {
+      if (productRef.current && !productRef.current.contains(event.target as Node)) {
         setShowProductDropdown(false);
       }
-      if (unitRef.current && !unitRef.current.contains(event.target)) {
+      if (unitRef.current && !unitRef.current.contains(event.target as Node)) {
         setShowUnitDropdown(false);
       }
     };
@@ -204,14 +212,14 @@ const ProductRow: React.FC<ProductRowProps> = ({
   }, []);
 
   const selectedCategoryData = categories.find(
-    (c) => c.id.toString() === currentCategoryId
+    (c) => (c.id as string).toString() === currentCategoryId
   );
-  const filteredSubcategories = selectedCategoryData?.subcategories || [];
+  const filteredSubcategories = (selectedCategoryData?.subcategories as Record<string, unknown>[]) || [];
 
   const filteredProducts = products.filter((p) => {
-    const productCategoryId = p.categoryId || p.category?.id;
+    const productCategoryId = (p.categoryId as string) || (p.category as { id: string })?.id;
     const productSubCategoryId =
-      p.subCategoryId || p.subcategoryId || p.subCategory?.id;
+      (p.subCategoryId as string) || (p.subcategoryId as string) || (p.subCategory as { id: string })?.id;
 
     const categoryMatch =
       !currentCategoryId ||
@@ -222,35 +230,6 @@ const ProductRow: React.FC<ProductRowProps> = ({
 
     return categoryMatch && subcategoryMatch;
   });
-
-  const handleQuantityByWeightChange = useCallback(
-    (weight: string) => {
-      onChange(idx, 'quantityByWeight', weight);
-      if (data.productId && weight && !isNaN(parseFloat(weight))) {
-        const calculatedQty = calculateQuantityFromWeight(
-          data.productId,
-          weight
-        );
-        if (calculatedQty && quantityRef.current) {
-          quantityRef.current.value = calculatedQty;
-          onChange(idx, 'quantity', calculatedQty);
-        }
-      }
-    },
-    [onChange, idx, data.productId, calculateQuantityFromWeight]
-  );
-
-  const getCalculationDetails = () => {
-    if (!data.quantityByWeight || !prod?.packingConfig) return null;
-    const weight = parseFloat(data.quantityByWeight);
-    const boxes = weight / prod.packingConfig.weightPerBox;
-    const totalUnits = boxes * prod.packingConfig.unitsPerBox;
-    return {
-      boxes: boxes.toFixed(2),
-      totalUnits: totalUnits.toFixed(2),
-      unitType: data.unit || prod.units[0],
-    };
-  };
 
   const totalWeight = useMemo(() => {
     return data.productId && data.quantity && data.unit
@@ -264,7 +243,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
       !data.quantity ||
       !data.unit ||
       data.unit.toLowerCase() !== 'square meter' ||
-      !prod?.packagingHierarchyData?.dynamicFields
+      !(prod?.packagingHierarchyData as { dynamicFields?: Record<string, unknown> })?.dynamicFields
     ) {
       return null;
     }
@@ -272,9 +251,9 @@ const ProductRow: React.FC<ProductRowProps> = ({
     const quantity = parseFloat(data.quantity);
     if (isNaN(quantity) || quantity <= 0) return null;
 
-    const packagingData = prod.packagingHierarchyData.dynamicFields;
-    const sqmPerBox = packagingData['Square MeterPerBox'] || 0;
-    const boxesPerPallet = packagingData['BoxPerPallet'] || 0;
+    const packagingData = (prod.packagingHierarchyData as { dynamicFields: Record<string, unknown> }).dynamicFields;
+    const sqmPerBox = (packagingData['Square MeterPerBox'] as number) || 0;
+    const boxesPerPallet = (packagingData['BoxPerPallet'] as number) || 0;
 
     if (!sqmPerBox || !boxesPerPallet) return null;
 
@@ -292,7 +271,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
     data.productId,
     data.quantity,
     data.unit,
-    prod?.packagingHierarchyData?.dynamicFields,
+    prod?.packagingHierarchyData,
   ]);
 
   useEffect(() => {
@@ -527,7 +506,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
               const availableUnits = [];
 
               if (packagingHierarchy.length > 0) {
-                packagingHierarchy.forEach((level, levelIdx) => {
+                packagingHierarchy.forEach((level) => {
                   availableUnits.push({
                     id: level.from,
                     name: level.from,

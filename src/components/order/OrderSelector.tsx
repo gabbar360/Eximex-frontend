@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { fetchOrders } from '../../features/orderSlice';
 import { HiChevronDown, HiMagnifyingGlass } from 'react-icons/hi2';
@@ -125,23 +125,7 @@ const OrderSelector: React.FC<OrderSelectorProps> = ({
     );
   };
 
-  useEffect(() => {
-    loadOrders();
-  }, []);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (orderRef.current && !orderRef.current.contains(event.target)) {
-        setShowOrderDropdown(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const loadOrders = async () => {
+  const loadOrders = useCallback(async () => {
     try {
       setLoading(true);
       const response = await dispatch(fetchOrders()).unwrap();
@@ -157,32 +141,21 @@ const OrderSelector: React.FC<OrderSelectorProps> = ({
       if (Array.isArray(ordersList) && filterType) {
         ordersList = ordersList.filter((order) => {
           switch (filterType) {
-            case 'vgm':
-              return (
-                !order.piInvoice?.vgmDocuments ||
-                order.piInvoice.vgmDocuments.length === 0
-              );
-            case 'shipment':
-              // Show orders that don't have any shipment details
-              return (
-                !order.shipment ||
-                (!order.shipment.bookingNumber &&
-                  !order.shipment.bookingDate &&
-                  !order.shipment.vesselVoyageInfo &&
-                  !order.shipment.wayBillNumber &&
-                  !order.shipment.truckNumber)
-              );
-            case 'packingList':
-              // Show orders that don't have packing lists created
-              const hasPackingListArray =
-                order.packingLists && order.packingLists.length > 0;
+            case 'vgm': {
+              const hasVgm = order.piInvoice?.vgmDocuments && order.piInvoice.vgmDocuments.length > 0;
+              return !hasVgm;
+            }
+            case 'shipment': {
+              const hasShipment = order.shipment && (order.shipment.bookingNumber || order.shipment.bookingDate || order.shipment.vesselVoyageInfo || order.shipment.wayBillNumber || order.shipment.truckNumber);
+              return !hasShipment;
+            }
+            case 'packingList': {
+              const hasPackingListArray = order.packingLists && order.packingLists.length > 0;
               const hasPackingListId = order.packingListId;
-              const hasPiPackingLists =
-                order.piInvoice?.packingLists &&
-                order.piInvoice.packingLists.length > 0;
-              const hasPackingList =
-                hasPackingListArray || hasPackingListId || hasPiPackingLists;
+              const hasPiPackingLists = order.piInvoice?.packingLists && order.piInvoice.packingLists.length > 0;
+              const hasPackingList = hasPackingListArray || hasPackingListId || hasPiPackingLists;
               return !hasPackingList;
+            }
             default:
               return true;
           }
@@ -196,7 +169,23 @@ const OrderSelector: React.FC<OrderSelectorProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [dispatch, filterType]);
+
+  useEffect(() => {
+    loadOrders();
+  }, [loadOrders]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (orderRef.current && !orderRef.current.contains(event.target)) {
+        setShowOrderDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <div ref={orderRef}>

@@ -11,12 +11,18 @@ import { useDebounce } from '../../utils/useDebounce';
 const MyTasks: React.FC = () => {
   const dispatch = useDispatch();
   const { tasks, loading, pagination } = useSelector(
-    (state: any) => state.taskManagement
+    (state: {
+      taskManagement: {
+        tasks: Record<string, unknown>[];
+        loading: boolean;
+        pagination: Record<string, unknown>;
+      };
+    }) => state.taskManagement
   );
 
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize] = useState(10);
   const [statusFilter, setStatusFilter] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('');
 
@@ -53,7 +59,7 @@ const MyTasks: React.FC = () => {
       setCurrentPage(1);
       debouncedSearch(value);
     },
-    [debouncedSearch, pageSize, statusFilter, priorityFilter]
+    [debouncedSearch]
   );
 
   const handleStatusUpdate = async (taskId: number, newStatus: string) => {
@@ -62,8 +68,8 @@ const MyTasks: React.FC = () => {
         updateTask({ taskId, taskData: { status: newStatus } })
       ).unwrap();
       toast.success(result.message || 'Task updated successfully');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update task status');
+    } catch (error: unknown) {
+      toast.error((error as Error).message || 'Failed to update task status');
     }
   };
 
@@ -204,36 +210,36 @@ const MyTasks: React.FC = () => {
                   </div>
                 </div>
                 <div className="divide-y divide-gray-200">
-                  {tasks.map((task: any) => (
+                  {tasks.map((task: Record<string, unknown>) => (
                     <div key={task.id} className="p-4 hover:bg-gray-50">
                       <div className="grid grid-cols-6 gap-3 items-center">
                         <div>
                           <h3 className="font-semibold text-slate-900">
-                            {task.title}
+                            {task.title as string}
                           </h3>
                           {task.description && (
                             <p className="text-sm text-slate-600 mt-1 truncate">
-                              {task.description}
+                              {task.description as string}
                             </p>
                           )}
                         </div>
                         <div className="text-sm text-slate-700">
-                          {task.assigner?.name}
+                          {(task.assigner as { name: string })?.name}
                         </div>
                         <div>
                           <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(task.priority)}`}
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(task.priority as string)}`}
                           >
-                            {task.priority}
+                            {task.priority as string}
                           </span>
                         </div>
                         <div>
                           <select
-                            value={task.status}
+                            value={task.status as string}
                             onChange={(e) =>
-                              handleStatusUpdate(task.id, e.target.value)
+                              handleStatusUpdate(task.id as number, e.target.value)
                             }
-                            className={`px-2 py-1 rounded-full text-xs font-medium border-0 ${getStatusColor(task.status)}`}
+                            className={`px-2 py-1 rounded-full text-xs font-medium border-0 ${getStatusColor(task.status as string)}`}
                           >
                             <option value="PENDING">Pending</option>
                             <option value="IN_PROGRESS">In Progress</option>
@@ -242,7 +248,7 @@ const MyTasks: React.FC = () => {
                         </div>
                         <div className="text-sm text-slate-700">
                           {task.dueDate
-                            ? new Date(task.dueDate).toLocaleDateString()
+                            ? new Date(task.dueDate as string).toLocaleDateString()
                             : '-'}
                         </div>
                         <div className="flex items-center justify-end">
@@ -260,7 +266,7 @@ const MyTasks: React.FC = () => {
 
               {/* Mobile Card View */}
               <div className="lg:hidden divide-y divide-gray-200">
-                {tasks.map((task: any) => (
+                {tasks.map((task: Record<string, unknown>) => (
                   <div key={task.id} className="p-4">
                     <div className="flex items-start justify-between mb-3">
                       <div>

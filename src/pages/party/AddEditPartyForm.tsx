@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   getPartyById,
@@ -32,7 +32,7 @@ const fetchCurrencies = async () => {
     );
     const data = await response.json();
     return Object.keys(data.rates).map((code) => ({ code, name: code }));
-  } catch (error) {
+  } catch {
     return [];
   }
 };
@@ -47,11 +47,6 @@ const AddEditPartyForm = () => {
   const [loading, setLoading] = useState(isEditMode);
   const [submitting, setSubmitting] = useState(false);
   const [currencies, setCurrencies] = useState([]);
-  const [locationData, setLocationData] = useState({
-    country: '',
-    state: '',
-    city: '',
-  });
   const [currencySearch, setCurrencySearch] = useState('');
   const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
   const currencyRef = useRef(null);
@@ -174,8 +169,8 @@ const AddEditPartyForm = () => {
           setLoading(true);
           const response = await dispatch(getPartyById(Number(id))).unwrap();
           setParty(response.data || response);
-        } catch (err) {
-          toast.error(err.message);
+        } catch {
+          toast.error((err as Error).message);
           if (err.response?.status === 401) {
             setTimeout(() => navigate('/login'), 2000);
           }

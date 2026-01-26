@@ -1,4 +1,4 @@
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Formik, Form } from 'formik';
@@ -13,7 +13,7 @@ import {
   updateProduct,
   addProduct,
 } from '../../features/productSlice';
-import { HiArrowLeft, HiCheckCircle, HiCube } from 'react-icons/hi2';
+import { HiArrowLeft, HiCheckCircle } from 'react-icons/hi2';
 
 import BasicProductInfo from '../../components/product/BasicProductInfo';
 import PackagingDetails from '../../components/product/PackagingDetails';
@@ -21,94 +21,102 @@ import PackagingPreview from '../../components/product/PackagingPreview';
 import PackagingCalculations from '../../components/product/PackagingCalculations';
 
 // Weight display component with unit conversion
-const WeightDisplay = ({
-  weight,
-  unit,
-  materialWeight,
-  materialUnit,
-  totalBoxes,
-}) => {
-  const [displayUnit, setDisplayUnit] = useState(unit);
+// const WeightDisplay: React.FC<{
+//   weight: number;
+//   unit: string;
+//   materialWeight: number;
+//   materialUnit: string;
+//   totalBoxes: number;
+// }> = ({ weight, unit, materialWeight, materialUnit, totalBoxes }) => {
+//   const [displayUnit, setDisplayUnit] = useState(unit);
 
-  // Convert weight to display unit
-  const convertWeight = (weight, fromUnit, toUnit) => {
-    // Convert to kg first
-    let weightInKg;
-    switch (fromUnit) {
-      case 'g':
-        weightInKg = weight / 1000;
-        break;
-      case 'lb':
-        weightInKg = weight * 0.45359237;
-        break;
-      case 'oz':
-        weightInKg = weight * 0.0283495;
-        break;
-      default:
-        weightInKg = weight; // kg
-    }
+//   // Convert weight to display unit
+//   const convertWeight = (weight: number, fromUnit: string, toUnit: string) => {
+//     // Convert to kg first
+//     let weightInKg;
+//     switch (fromUnit) {
+//       case 'g':
+//         weightInKg = weight / 1000;
+//         break;
+//       case 'lb':
+//         weightInKg = weight * 0.45359237;
+//         break;
+//       case 'oz':
+//         weightInKg = weight * 0.0283495;
+//         break;
+//       default:
+//         weightInKg = weight; // kg
+//     }
 
-    // Convert from kg to target unit
-    switch (toUnit) {
-      case 'g':
-        return weightInKg * 1000;
-      case 'lb':
-        return weightInKg / 0.45359237;
-      case 'oz':
-        return weightInKg / 0.0283495;
-      default:
-        return weightInKg; // kg
-    }
-  };
+//     // Convert from kg to target unit
+//     switch (toUnit) {
+//       case 'g':
+//         return weightInKg * 1000;
+//       case 'lb':
+//         return weightInKg / 0.45359237;
+//       case 'oz':
+//         return weightInKg / 0.0283495;
+//       default:
+//         return weightInKg; // kg
+//     }
+//   };
 
-  // Calculate converted weights
-  const convertedWeight = convertWeight(weight, unit, displayUnit);
+//   // Calculate converted weights
+//   const convertedWeight = convertWeight(weight, unit, displayUnit);
 
-  // Calculate material weight if provided
-  let convertedMaterialText = '';
-  if (materialWeight > 0 && totalBoxes > 0) {
-    const totalMaterialWeight = materialWeight * totalBoxes;
-    const convertedMaterialWeight = convertWeight(
-      totalMaterialWeight,
-      materialUnit,
-      displayUnit
-    );
-    convertedMaterialText = ` (Includes ${convertedMaterialWeight.toFixed(
-      2
-    )} ${displayUnit} box material)`;
-  }
+//   // Calculate material weight if provided
+//   let convertedMaterialText = '';
+//   if (materialWeight > 0 && totalBoxes > 0) {
+//     const totalMaterialWeight = materialWeight * totalBoxes;
+//     const convertedMaterialWeight = convertWeight(
+//       totalMaterialWeight,
+//       materialUnit,
+//       displayUnit
+//     );
+//     convertedMaterialText = ` (Includes ${convertedMaterialWeight.toFixed(
+//       2
+//     )} ${displayUnit} box material)`;
+//   }
 
-  return (
-    <>
-      <div>
-        {weight > 0
-          ? `${convertedWeight.toFixed(
-              2
-            )} ${displayUnit}${convertedMaterialText}`
-          : 'N/A'}
-      </div>
-      <div className="mt-1">
-        <select
-          value={displayUnit}
-          onChange={(e) => setDisplayUnit(e.target.value)}
-          className="ml-1 text-xs border border-gray-300 rounded px-1 py-0.5 dark:bg-gray-700 dark:border-gray-600"
-        >
-          <option value="kg">Show in kg</option>
-          <option value="g">Show in g</option>
-          <option value="lb">Show in lb</option>
-          <option value="oz">Show in oz</option>
-        </select>
-      </div>
-    </>
-  );
-};
+//   return (
+//     <>
+//       <div>
+//         {weight > 0
+//           ? `${convertedWeight.toFixed(
+//               2
+//             )} ${displayUnit}${convertedMaterialText}`
+//           : 'N/A'}
+//       </div>
+//       <div className="mt-1">
+//         <select
+//           value={displayUnit}
+//           onChange={(e) => setDisplayUnit(e.target.value)}
+//           className="ml-1 text-xs border border-gray-300 rounded px-1 py-0.5 dark:bg-gray-700 dark:border-gray-600"
+//         >
+//           <option value="kg">Show in kg</option>
+//           <option value="g">Show in g</option>
+//           <option value="lb">Show in lb</option>
+//           <option value="oz">Show in oz</option>
+//         </select>
+//       </div>
+//     </>
+//   );
+// };
 
 const AddEditProductForm = () => {
+  console.log('🔄 AddEditProductForm: Component function called');
+  
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams();
   const isEdit = Boolean(id);
   const dispatch = useDispatch();
+
+  console.log('📍 Current state:', { 
+    pathname: location.pathname, 
+    id, 
+    isEdit 
+  });
 
   // Check if we should render this component
   const [forceHide, setForceHide] = useState(false);
@@ -119,7 +127,7 @@ const AddEditProductForm = () => {
 
   // Listen for force navigation events
   useEffect(() => {
-    const handleForceNavigation = (event) => {
+    const handleForceNavigation = (event: CustomEvent) => {
       const targetPath = event.detail;
       if (
         !targetPath.startsWith('/edit-product/') &&
@@ -138,29 +146,43 @@ const AddEditProductForm = () => {
       window.removeEventListener('forceNavigation', handleForceNavigation);
   }, []);
 
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState<Record<string, unknown>[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
 
+  console.log('📊 State values:', {
+    categoriesLength: categories.length,
+    categoriesLoading,
+    forceHide
+  });
+
   type ProductType = {
-    [key: string]: any;
+    [key: string]: unknown;
     packagingHierarchyData?: {
       dynamicFields?: {
-        [key: string]: any;
+        [key: string]: unknown;
       };
     };
   };
 
   const [product, setProduct] = useState<ProductType | null>(null);
 
-  const [subcategories, setSubcategories] = useState([]);
+  const [subcategories, setSubcategories] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(false);
-  const [packagingHierarchy, setPackagingHierarchy] = useState([]);
+  const [packagingHierarchy, setPackagingHierarchy] = useState<Record<string, unknown>[]>([]);
   const [trackVolume, setTrackVolume] = useState(false);
   const [loadingCategory, setLoadingCategory] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
+    console.log('🔍 fetchCategories called:', { categoriesLoading, categoriesLength: categories.length });
+    
+    if (categoriesLoading || categories.length > 0) {
+      console.log('⏭️ fetchCategories: Skipping - already loading or loaded');
+      return;
+    }
+    
     try {
+      console.log('📡 fetchCategories: Starting API call');
       setCategoriesLoading(true);
       // Fetch all categories without pagination for dropdown
       const response = await dispatch(
@@ -169,68 +191,25 @@ const AddEditProductForm = () => {
       // Handle different response structures
       const categoriesData =
         response?.data?.data || response?.data || response || [];
-      console.log('Fetched categories:', categoriesData);
+      console.log('✅ fetchCategories: Success, got', categoriesData.length, 'categories');
       setCategories(categoriesData);
     } catch (error) {
-      console.error('Failed to fetch categories:', error);
+      console.error('❌ fetchCategories: Failed:', error);
       toast.error(error);
       // Set empty array on error to prevent undefined issues
       setCategories([]);
     } finally {
+      console.log('🏁 fetchCategories: Finished');
       setCategoriesLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchCategories();
-    if (isEdit) {
-      fetchProduct();
-    }
-  }, [isEdit, id]);
-
-  // Debug logging
-  useEffect(() => {
-    console.log('Categories loaded:', categories);
-    console.log('Categories loading:', categoriesLoading);
-  }, [categories, categoriesLoading]);
-
-  // Handle category loading completion for edit mode
-  useEffect(() => {
-    if (
-      isEdit &&
-      product &&
-      categories &&
-      categories.length > 0 &&
-      product.categoryId
-    ) {
-      // Ensure subcategories and category details are loaded when categories become available
-      loadSubcategories(product.categoryId);
-      fetchCategoryDetails(product.categoryId);
-    }
-  }, [categories, product, isEdit]);
-
-  const fetchProduct = async () => {
-    try {
-      setLoading(true);
-      const response = await dispatch(getProductById(id)).unwrap();
-      setProduct(response.data);
-      if (response.data.categoryId) {
-        setSelectedCategoryId(response.data.categoryId.toString());
-        loadSubcategories(response.data.categoryId);
-        fetchCategoryDetails(response.data.categoryId);
-      }
-    } catch (error) {
-      console.error('Fetch product error:', error);
-      toast.error(error);
-      navigate('/products');
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [dispatch, categoriesLoading, categories.length]);
 
   const loadSubcategories = useCallback(
-    (categoryId) => {
+    (categoryId: string | number) => {
+      console.log('📁 loadSubcategories called:', { categoryId, categoriesLength: categories.length });
+      
       if (!categoryId || !categories || categories.length === 0) {
+        console.log('⏭️ loadSubcategories: Skipping - no categoryId or categories');
         setSubcategories([]);
         return;
       }
@@ -245,8 +224,10 @@ const AddEditProductForm = () => {
         selectedCategory.subcategories &&
         Array.isArray(selectedCategory.subcategories)
       ) {
+        console.log('✅ loadSubcategories: Found', selectedCategory.subcategories.length, 'subcategories');
         setSubcategories(selectedCategory.subcategories);
       } else {
+        console.log('⚠️ loadSubcategories: No subcategories found');
         setSubcategories([]);
       }
     },
@@ -254,31 +235,110 @@ const AddEditProductForm = () => {
   );
 
   // Fetch category details including packaging hierarchy
-  const fetchCategoryDetails = useCallback(async (categoryId) => {
-    if (!categoryId) return;
+  const fetchCategoryDetails = useCallback(async (categoryId: string | number) => {
+    console.log('📄 fetchCategoryDetails called:', { categoryId, loadingCategory });
+    
+    if (!categoryId) {
+      console.log('⏭️ fetchCategoryDetails: Skipping - no categoryId');
+      return;
+    }
 
     try {
+      console.log('📡 fetchCategoryDetails: Starting API call');
       setLoadingCategory(true);
       const categoryData = await dispatch(getCategoryById(categoryId)).unwrap();
 
       if (categoryData && categoryData.packagingHierarchy) {
+        console.log('✅ fetchCategoryDetails: Got packaging hierarchy:', categoryData.packagingHierarchy.length);
         setPackagingHierarchy(categoryData.packagingHierarchy);
         setTrackVolume(categoryData.trackVolume || false);
       } else {
+        console.log('⚠️ fetchCategoryDetails: No packaging hierarchy');
         setPackagingHierarchy([]);
         setTrackVolume(false);
       }
       setLoadingCategory(false);
     } catch (error) {
-      console.error('Failed to fetch category details:', error);
+      console.error('❌ fetchCategoryDetails: Failed:', error);
       setPackagingHierarchy([]);
       setTrackVolume(false);
       setLoadingCategory(false);
     }
-  }, []);
+  }, [dispatch]);
+
+  const fetchProduct = useCallback(async () => {
+    if (!id) return;
+    
+    try {
+      setLoading(true);
+      const response = await dispatch(getProductById(id)).unwrap();
+      setProduct(response.data);
+      if (response.data.categoryId) {
+        setSelectedCategoryId(response.data.categoryId.toString());
+      }
+    } catch (error) {
+      console.error('Fetch product error:', error);
+      toast.error(error);
+      navigate('/products');
+    } finally {
+      setLoading(false);
+    }
+  }, [dispatch, id, navigate]);
+
+  useEffect(() => {
+    console.log('🎯 useEffect[fetchCategories]: Triggered');
+    fetchCategories();
+  }, [fetchCategories]);
+
+  useEffect(() => {
+    console.log('🎯 useEffect[fetchProduct]: Triggered', { isEdit, id });
+    if (isEdit && id) {
+      fetchProduct();
+    }
+  }, [isEdit, id, fetchProduct]);
+
+  // Debug logging
+  // useEffect(() => {
+  //   console.log('Categories loaded:', categories);
+  //   console.log('Categories loading:', categoriesLoading);
+  // }, [categories, categoriesLoading]);
+
+  // Handle category loading completion for edit mode
+  useEffect(() => {
+    console.log('🎯 useEffect[categoryCompletion]: Triggered', {
+      isEdit,
+      hasProduct: !!product,
+      categoriesLength: categories.length,
+      productCategoryId: product?.categoryId,
+      selectedCategoryId
+    });
+    
+    if (
+      isEdit &&
+      product &&
+      categories &&
+      categories.length > 0 &&
+      product.categoryId &&
+      selectedCategoryId !== product.categoryId.toString()
+    ) {
+      console.log('🔄 Loading subcategories and category details for:', product.categoryId);
+      // Ensure subcategories and category details are loaded when categories become available
+      loadSubcategories(product.categoryId);
+      fetchCategoryDetails(product.categoryId);
+    }
+  }, [categories.length, product?.categoryId, isEdit, selectedCategoryId, loadSubcategories, fetchCategoryDetails]);
+
+  // Load category details when product is loaded (for edit mode)
+  useEffect(() => {
+    if (isEdit && product && product.categoryId && categories.length > 0) {
+      console.log('🔄 Product loaded, loading category details for:', product.categoryId);
+      loadSubcategories(product.categoryId);
+      fetchCategoryDetails(product.categoryId);
+    }
+  }, [product?.id, categories.length, isEdit, loadSubcategories, fetchCategoryDetails]);
 
   // Weight unit conversion functions
-  const convertToKg = (weight, unit) => {
+  const convertToKg = (weight: number | string, unit: string) => {
     if (!weight) return 0;
     weight = parseFloat(weight);
 
@@ -296,7 +356,7 @@ const AddEditProductForm = () => {
     }
   };
 
-  const convertFromKg = (weightInKg, targetUnit) => {
+  const convertFromKg = (weightInKg: number, targetUnit: string) => {
     if (!weightInKg) return 0;
 
     switch (targetUnit) {
@@ -373,6 +433,18 @@ const AddEditProductForm = () => {
 
   // Dynamically build initial values based on packaging hierarchy
   const initialValues = useMemo(() => {
+    console.log('🧮 initialValues: Computing', {
+      isEdit,
+      hasProduct: !!product,
+      categoriesLoading,
+      packagingHierarchyLength: packagingHierarchy.length
+    });
+    
+    // Prevent re-computation if essential data is not ready
+    if (isEdit && (!product || categoriesLoading)) {
+      console.log('⏭️ initialValues: Returning null - data not ready');
+      return null;
+    }
     const baseValues = {
       name: product?.name || '',
       sku: product?.sku || '',
@@ -512,10 +584,11 @@ const AddEditProductForm = () => {
       baseValues.volumeHeight = product?.volumeHeight || '';
     }
 
+    console.log('✅ initialValues: Computed successfully');
     return baseValues;
-  }, [product, packagingHierarchy, trackVolume, isEdit]);
+  }, [product?.id, packagingHierarchy, trackVolume, isEdit, selectedCategoryId, categoriesLoading]);
 
-  const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
+  const handleSubmit = async (values: Record<string, unknown>, { setSubmitting, setFieldError }: { setSubmitting: (isSubmitting: boolean) => void; setFieldError: (field: string, message: string) => void }) => {
     try {
       setSubmitting(true);
 
@@ -596,15 +669,15 @@ const AddEditProductForm = () => {
               : 'g';
 
           // Apply unit correction logic for both create and edit modes
-          const fromWeight = values[weightField]
-            ? parseFloat(values[weightField])
-            : null;
-          const shouldOverrideFromUnit =
-            values[weightUnitField] === 'kg' &&
-            fromWeight &&
-            fromWeight < 100 &&
-            (level.from.toLowerCase() === 'pieces' ||
-              level.from.toLowerCase() === 'pack');
+          // const fromWeight = values[weightField]
+          //   ? parseFloat(values[weightField])
+          //   : null;
+          // const shouldOverrideFromUnit =
+          //   values[weightUnitField] === 'kg' &&
+          //   fromWeight &&
+          //   fromWeight < 100 &&
+          //   (level.from.toLowerCase() === 'pieces' ||
+          //     level.from.toLowerCase() === 'pack');
 
           acc[weightUnitField] = values[weightUnitField] || defaultFromUnit;
 
@@ -738,21 +811,22 @@ const AddEditProductForm = () => {
     }
   };
 
+  console.log('🎨 Render decision:', {
+    shouldRender,
+    hasInitialValues: !!initialValues,
+    loading,
+    categoriesLoading,
+    hasProduct: !!product
+  });
+
   // Don't render if not on correct route
   if (!shouldRender) {
-    console.log(
-      'AddEditProductForm: Not rendering, current path:',
-      location.pathname
-    );
+    console.log('❌ Not rendering - shouldRender is false');
     return null;
   }
 
-  console.log(
-    'AddEditProductForm: Rendering, current path:',
-    location.pathname
-  );
-
-  if (!initialValues || loading || categoriesLoading) {
+  if (!initialValues || loading || categoriesLoading || (isEdit && !product)) {
+    console.log('⏳ Showing loading screen');
     return (
       <div className="min-h-screen flex justify-center items-center bg-gray-50">
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8 text-center">
@@ -762,6 +836,8 @@ const AddEditProductForm = () => {
       </div>
     );
   }
+
+  console.log('✅ Rendering main component');
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -884,4 +960,4 @@ const AddEditProductForm = () => {
   );
 };
 
-export default AddEditProductForm;
+export default React.memo(AddEditProductForm);
