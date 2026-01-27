@@ -507,7 +507,8 @@ const PerformaInvoice: React.FC = () => {
                             {new Intl.NumberFormat('en-US', {
                               style: 'currency',
                               currency: ((pi.currency as string) || 'USD'),
-                              maximumFractionDigits: 0,
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
                             }).format((pi.totalAmount as number) || 0)}
                           </div>
 
@@ -758,7 +759,8 @@ const PerformaInvoice: React.FC = () => {
                                 {new Intl.NumberFormat('en-US', {
                                   style: 'currency',
                                   currency: pi.currency || 'USD',
-                                  maximumFractionDigits: 0,
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
                                 }).format(pi.totalAmount || 0)}
                               </div>
 
