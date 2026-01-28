@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
+import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -55,12 +55,12 @@ export default function CompanySetupForm({
 }: CompanySetupFormProps) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading } = useSelector((state: Record<string, unknown>) => state.company || {});
-  const user = useSelector((state: Record<string, unknown>) => state.user.user);
+  const { loading } = useSelector((state: Record<string, unknown>) => (state.company as Record<string, unknown>) || {}) as { loading?: boolean };
+  const user = useSelector((state: Record<string, unknown>) => (state.user as Record<string, unknown>)?.user) as Record<string, unknown> | undefined;
 
   // Redirect if user already has a company assigned (but not for SuperAdmin)
   useEffect(() => {
-    if (user && (user.company || user.companyId) && !isSuperAdmin) {
+    if (user && ((user as any).company || (user as any).companyId) && !isSuperAdmin) {
       navigate('/dashboard');
       return;
     }
@@ -97,9 +97,9 @@ export default function CompanySetupForm({
     if (editingCompany) {
       // Handle bank details from new bankDetails array or legacy fields
       let bankDetails = [];
-      if (editingCompany.bankDetails && editingCompany.bankDetails.length > 0) {
+      if (editingCompany.bankDetails && Array.isArray(editingCompany.bankDetails) && editingCompany.bankDetails.length > 0) {
         // Use new bankDetails array
-        bankDetails = editingCompany.bankDetails.map(bank => ({
+        bankDetails = (editingCompany.bankDetails as any[]).map((bank: any) => ({
           bank_name: bank.bankName || '',
           bank_address: bank.bankAddress || '',
           account_number: bank.accountNumber || '',
@@ -109,34 +109,34 @@ export default function CompanySetupForm({
       } else {
         // Fallback to legacy fields if bankDetails array is empty
         bankDetails = [{
-          bank_name: editingCompany.bankName || '',
-          bank_address: editingCompany.bankAddress || '',
-          account_number: editingCompany.accountNumber || '',
-          ifsc_code: editingCompany.ifscCode || '',
-          swift_code: editingCompany.swiftCode || '',
+          bank_name: (editingCompany.bankName as string) || '',
+          bank_address: (editingCompany.bankAddress as string) || '',
+          account_number: (editingCompany.accountNumber as string) || '',
+          ifsc_code: (editingCompany.ifscCode as string) || '',
+          swift_code: (editingCompany.swiftCode as string) || '',
         }];
       }
       
       setForm({
-        name: editingCompany.name || '',
+        name: (editingCompany.name as string) || '',
         logo: null,
         signature: null,
         industry: '',
         website: '',
-        address: editingCompany.address || '',
-        phone_no: editingCompany.phoneNo || '',
-        email: editingCompany.email || '',
-        gst_number: editingCompany.gstNumber || '',
-        iec_number: editingCompany.iecNumber || '',
-        currencies: editingCompany.currencies || [],
-        default_currency: editingCompany.defaultCurrency || 'USD',
-        allowed_units: editingCompany.allowedUnits || [
+        address: (editingCompany.address as string) || '',
+        phone_no: (editingCompany.phoneNo as string) || '',
+        email: (editingCompany.email as string) || '',
+        gst_number: (editingCompany.gstNumber as string) || '',
+        iec_number: (editingCompany.iecNumber as string) || '',
+        currencies: (editingCompany.currencies as string[]) || [],
+        default_currency: (editingCompany.defaultCurrency as string) || 'USD',
+        allowed_units: (editingCompany.allowedUnits as string[]) || [
           'sqm',
           'kg',
           'pcs',
           'box',
         ],
-        plan_id: editingCompany.planId || 'trial',
+        plan_id: (editingCompany.planId as string) || 'trial',
         bank_details: bankDetails,
       });
     }
@@ -145,8 +145,8 @@ export default function CompanySetupForm({
   // Show message if user has assigned company (but allow SuperAdmin)
   if (
     user &&
-    user.companyId &&
-    user.role?.name !== 'SUPER_ADMIN' &&
+    (user as any).companyId &&
+    (user as any).role?.name !== 'SUPER_ADMIN' &&
     !isSuperAdmin
   ) {
     return (
@@ -310,7 +310,7 @@ export default function CompanySetupForm({
         const formData = new FormData();
         const excludedFields = ['industry', 'website'];
 
-        Object.entries(form).forEach(([key, value]) => {
+        (Object.entries(form) as [string, any][]).forEach(([key, value]) => {
           if (excludedFields.includes(key)) return;
 
           if (key === 'logo' && value) {
@@ -448,23 +448,23 @@ export default function CompanySetupForm({
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     Company Logo
                   </label>
-                  {editingCompany?.logo && (
+                  {(editingCompany?.logo && typeof editingCompany.logo === 'string') ? (
                     <div className="mb-3">
                       <img
                         src={
-                          editingCompany.logo.startsWith('http')
-                            ? editingCompany.logo
+                          (editingCompany.logo as string).startsWith('http')
+                            ? (editingCompany.logo as string)
                             : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${editingCompany.logo}`
                         }
                         alt="Current Logo"
                         className="h-20 w-auto border rounded-lg"
                         onError={(e) => {
-                          e.currentTarget.style.display = 'none';
+                          (e.currentTarget as HTMLImageElement).style.display = 'none';
                         }}
                       />
                       <p className="text-xs text-gray-500 mt-1">Current logo</p>
                     </div>
-                  )}
+                  ) : null}
                   <input
                     type="file"
                     name="logo"
@@ -473,7 +473,7 @@ export default function CompanySetupForm({
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    {editingCompany?.logo
+                    {editingCompany?.logo && typeof editingCompany.logo === 'string'
                       ? 'Upload new logo to replace current one'
                       : 'Upload company logo (PNG, JPG)'}
                   </p>
@@ -483,25 +483,25 @@ export default function CompanySetupForm({
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     Company Signature
                   </label>
-                  {editingCompany?.signature && (
+                  {(editingCompany?.signature && typeof editingCompany.signature === 'string') ? (
                     <div className="mb-3">
                       <img
                         src={
-                          editingCompany.signature.startsWith('http')
-                            ? editingCompany.signature
+                          (editingCompany.signature as string).startsWith('http')
+                            ? (editingCompany.signature as string)
                             : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${editingCompany.signature}`
                         }
                         alt="Current Signature"
                         className="h-16 w-auto border rounded-lg"
                         onError={(e) => {
-                          e.currentTarget.style.display = 'none';
+                          (e.currentTarget as HTMLImageElement).style.display = 'none';
                         }}
                       />
                       <p className="text-xs text-gray-500 mt-1">
                         Current signature
                       </p>
                     </div>
-                  )}
+                  ) : null}
                   <input
                     type="file"
                     name="signature"
@@ -510,7 +510,7 @@ export default function CompanySetupForm({
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    {editingCompany?.signature
+                    {editingCompany?.signature && typeof editingCompany.signature === 'string'
                       ? 'Upload new signature to replace current one'
                       : 'Upload authorized signature (PNG, JPG)'}
                   </p>
