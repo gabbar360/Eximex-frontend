@@ -14,6 +14,19 @@ import { useNavigate } from 'react-router-dom';
 import { Image } from 'antd';
 import { EyeOutlined } from '@ant-design/icons';
 
+interface BankDetail {
+  id: number;
+  companyId: number;
+  bankName: string;
+  bankAddress: string;
+  accountNumber: string;
+  ifscCode: string;
+  swiftCode: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface UserData {
   id: number;
   name: string;
@@ -26,11 +39,7 @@ interface UserData {
     id: number;
     name: string;
     address?: string;
-    bankName?: string;
-    bankAddress?: string;
-    accountNumber?: string;
-    ifscCode?: string;
-    swiftCode?: string;
+    bankDetails?: BankDetail[];
   };
 }
 

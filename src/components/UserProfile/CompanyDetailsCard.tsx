@@ -1,6 +1,19 @@
 import { Image } from 'antd';
 import { EyeOutlined } from '@ant-design/icons';
 
+interface BankDetail {
+  id: number;
+  companyId: number;
+  bankName: string;
+  bankAddress: string;
+  accountNumber: string;
+  ifscCode: string;
+  swiftCode: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface CompanyData {
   id: number;
   name: string;
@@ -14,11 +27,7 @@ interface CompanyData {
   currencies?: string[];
   defaultCurrency?: string;
   allowedUnits?: string[];
-  bankName?: string;
-  bankAddress?: string;
-  accountNumber?: string;
-  ifscCode?: string;
-  swiftCode?: string;
+  bankDetails?: BankDetail[];
   isActive?: boolean;
   planId?: string;
 }
@@ -66,40 +75,6 @@ export default function CompanyDetailsCard({
             {companyData?.iecNumber || 'N/A'}
           </p>
         </div>
-        <div>
-          <p className="text-sm font-medium text-slate-500 mb-1">Bank Name</p>
-          <p className="text-slate-800 font-medium">
-            {companyData?.bankName || 'N/A'}
-          </p>
-        </div>
-        <div>
-          <p className="text-sm font-medium text-slate-500 mb-1">
-            Account Number
-          </p>
-          <p className="text-slate-800 font-medium">
-            {companyData?.accountNumber || 'N/A'}
-          </p>
-        </div>
-        <div>
-          <p className="text-sm font-medium text-slate-500 mb-1">IFSC Code</p>
-          <p className="text-slate-800 font-medium">
-            {companyData?.ifscCode || 'N/A'}
-          </p>
-        </div>
-        <div>
-          <p className="text-sm font-medium text-slate-500 mb-1">SWIFT Code</p>
-          <p className="text-slate-800 font-medium">
-            {companyData?.swiftCode || 'N/A'}
-          </p>
-        </div>
-        <div>
-          <p className="text-sm font-medium text-slate-500 mb-1">
-            Bank Address
-          </p>
-          <p className="text-slate-800 font-medium">
-            {companyData?.bankAddress || 'N/A'}
-          </p>
-        </div>
         <div className="md:col-span-2">
           <p className="text-sm font-medium text-slate-500 mb-1">
             Company Address
@@ -109,6 +84,46 @@ export default function CompanyDetailsCard({
           </p>
         </div>
       </div>
+
+      {/* Bank Details */}
+      {companyData?.bankDetails && companyData.bankDetails.length > 0 && (
+        <div className="border-t border-gray-200 pt-6">
+          <h4 className="text-sm font-semibold text-slate-700 mb-4 uppercase tracking-wide">
+            Bank Details
+          </h4>
+          <div className="space-y-6">
+            {companyData.bankDetails.map((bank, index) => (
+              <div key={bank.id} className="bg-gray-50 rounded-lg p-4">
+                <h5 className="text-sm font-medium text-slate-600 mb-3">
+                  Bank Account {index + 1}
+                </h5>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+                  <div>
+                    <p className="text-xs font-medium text-slate-500 mb-1">Bank Name</p>
+                    <p className="text-slate-800 font-medium text-sm">{bank.bankName}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-slate-500 mb-1">Account Number</p>
+                    <p className="text-slate-800 font-medium text-sm">{bank.accountNumber}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-slate-500 mb-1">IFSC Code</p>
+                    <p className="text-slate-800 font-medium text-sm">{bank.ifscCode}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-slate-500 mb-1">SWIFT Code</p>
+                    <p className="text-slate-800 font-medium text-sm">{bank.swiftCode}</p>
+                  </div>
+                  <div className="md:col-span-2">
+                    <p className="text-xs font-medium text-slate-500 mb-1">Bank Address</p>
+                    <p className="text-slate-800 font-medium text-sm">{bank.bankAddress}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Company Signature */}
       {companyData?.signature && (
