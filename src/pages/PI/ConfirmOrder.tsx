@@ -48,14 +48,13 @@ const ConfirmOrder: React.FC = () => {
       if (paymentReceived && paymentAmount) {
         const payment = parseFloat(paymentAmount);
         const currentTotal = piData.totalAmount || piData.total || 0;
-        const updatedTotalAmount = currentTotal - payment;
 
         try {
           await dispatch(
             updatePiAmount({
               id,
               amountData: {
-                totalAmount: updatedTotalAmount,
+                totalAmount: currentTotal,
                 advanceAmount: payment,
               },
             })
@@ -66,7 +65,7 @@ const ConfirmOrder: React.FC = () => {
               updatePiInvoice({
                 id,
                 piData: {
-                  totalAmount: updatedTotalAmount,
+                  totalAmount: currentTotal,
                   advanceAmount: payment,
                 },
               })
@@ -76,7 +75,7 @@ const ConfirmOrder: React.FC = () => {
           }
         }
 
-        toast.success(`Payment of $${paymentAmount} confirmed successfully`);
+        toast.success(`Advance payment of $${paymentAmount} recorded successfully`);
       } else {
         toast.success('Order confirmed successfully');
       }
