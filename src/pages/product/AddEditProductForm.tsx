@@ -20,88 +20,6 @@ import PackagingDetails from '../../components/product/PackagingDetails';
 import PackagingPreview from '../../components/product/PackagingPreview';
 import PackagingCalculations from '../../components/product/PackagingCalculations';
 
-// Weight display component with unit conversion
-// const WeightDisplay: React.FC<{
-//   weight: number;
-//   unit: string;
-//   materialWeight: number;
-//   materialUnit: string;
-//   totalBoxes: number;
-// }> = ({ weight, unit, materialWeight, materialUnit, totalBoxes }) => {
-//   const [displayUnit, setDisplayUnit] = useState(unit);
-
-//   // Convert weight to display unit
-//   const convertWeight = (weight: number, fromUnit: string, toUnit: string) => {
-//     // Convert to kg first
-//     let weightInKg;
-//     switch (fromUnit) {
-//       case 'g':
-//         weightInKg = weight / 1000;
-//         break;
-//       case 'lb':
-//         weightInKg = weight * 0.45359237;
-//         break;
-//       case 'oz':
-//         weightInKg = weight * 0.0283495;
-//         break;
-//       default:
-//         weightInKg = weight; // kg
-//     }
-
-//     // Convert from kg to target unit
-//     switch (toUnit) {
-//       case 'g':
-//         return weightInKg * 1000;
-//       case 'lb':
-//         return weightInKg / 0.45359237;
-//       case 'oz':
-//         return weightInKg / 0.0283495;
-//       default:
-//         return weightInKg; // kg
-//     }
-//   };
-
-//   // Calculate converted weights
-//   const convertedWeight = convertWeight(weight, unit, displayUnit);
-
-//   // Calculate material weight if provided
-//   let convertedMaterialText = '';
-//   if (materialWeight > 0 && totalBoxes > 0) {
-//     const totalMaterialWeight = materialWeight * totalBoxes;
-//     const convertedMaterialWeight = convertWeight(
-//       totalMaterialWeight,
-//       materialUnit,
-//       displayUnit
-//     );
-//     convertedMaterialText = ` (Includes ${convertedMaterialWeight.toFixed(
-//       2
-//     )} ${displayUnit} box material)`;
-//   }
-
-//   return (
-//     <>
-//       <div>
-//         {weight > 0
-//           ? `${convertedWeight.toFixed(
-//               2
-//             )} ${displayUnit}${convertedMaterialText}`
-//           : 'N/A'}
-//       </div>
-//       <div className="mt-1">
-//         <select
-//           value={displayUnit}
-//           onChange={(e) => setDisplayUnit(e.target.value)}
-//           className="ml-1 text-xs border border-gray-300 rounded px-1 py-0.5 dark:bg-gray-700 dark:border-gray-600"
-//         >
-//           <option value="kg">Show in kg</option>
-//           <option value="g">Show in g</option>
-//           <option value="lb">Show in lb</option>
-//           <option value="oz">Show in oz</option>
-//         </select>
-//       </div>
-//     </>
-//   );
-// };
 
 const AddEditProductForm = () => {
   console.log('🔄 AddEditProductForm: Component function called');
@@ -296,13 +214,6 @@ const AddEditProductForm = () => {
       fetchProduct();
     }
   }, [isEdit, id, fetchProduct]);
-
-  // Debug logging
-  // useEffect(() => {
-  //   console.log('Categories loaded:', categories);
-  //   console.log('Categories loading:', categoriesLoading);
-  // }, [categories, categoriesLoading]);
-
   // Handle category loading completion for edit mode
   useEffect(() => {
     console.log('🎯 useEffect[categoryCompletion]: Triggered', {
@@ -667,18 +578,6 @@ const AddEditProductForm = () => {
             level.to.toLowerCase() === 'pallet'
               ? 'kg'
               : 'g';
-
-          // Apply unit correction logic for both create and edit modes
-          // const fromWeight = values[weightField]
-          //   ? parseFloat(values[weightField])
-          //   : null;
-          // const shouldOverrideFromUnit =
-          //   values[weightUnitField] === 'kg' &&
-          //   fromWeight &&
-          //   fromWeight < 100 &&
-          //   (level.from.toLowerCase() === 'pieces' ||
-          //     level.from.toLowerCase() === 'pack');
-
           acc[weightUnitField] = values[weightUnitField] || defaultFromUnit;
 
           // Add 'to' unit weight fields with proper unit conversion

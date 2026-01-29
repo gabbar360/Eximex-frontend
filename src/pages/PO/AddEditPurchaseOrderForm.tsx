@@ -85,7 +85,6 @@ const AddEditPurchaseOrderForm: React.FC = () => {
   }) => state.party);
 
   // Company and vendor data
-  const [company, setCompany] = useState<Company | null>(null);
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [suppliers, setSuppliers] = useState<Vendor[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -363,15 +362,6 @@ const AddEditPurchaseOrderForm: React.FC = () => {
     calculateTotals();
   }, [items, calculateTotals]);
 
-  // const addNewItem = () => {
-  //   const newItem: PoItem = {
-  //     key: Date.now().toString(),
-  //     itemDescription: '',
-  //     quantity: 0,
-  //     rate: 0,
-  //   };
-  //   setItems([...items, newItem]);
-  // };
 
   const addProductToItems = () => {
     if (
