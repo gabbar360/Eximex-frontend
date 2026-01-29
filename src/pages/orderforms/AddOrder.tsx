@@ -188,13 +188,11 @@ const AddOrder = () => {
       [field]: value,
     }));
 
-    // Auto-calculate balance amount
+    // Keep balance amount same as total amount
     if (field === 'advanceAmount' && selectedPI) {
-      const advance = parseFloat(value) || 0;
-      const balance = selectedPI.totalAmount - advance;
       setOrderData((prev) => ({
         ...prev,
-        balanceAmount: balance.toString(),
+        balanceAmount: selectedPI.totalAmount.toString(),
       }));
     }
   };
@@ -244,30 +242,29 @@ const AddOrder = () => {
       const result = await dispatch(createOrder(orderPayload)).unwrap();
       console.log('Order created successfully:', result);
 
-      // Step 2: Update PI total amount if advance payment is provided
+      // Step 2: Update PI with advance amount if provided
       if (orderData.advanceAmount && parseFloat(orderData.advanceAmount) > 0) {
         const advancePayment = parseFloat(orderData.advanceAmount);
         const currentTotal = selectedPI.totalAmount || 0;
-        const updatedTotalAmount = currentTotal - advancePayment;
 
-        console.log('Updating PI total amount:', {
+        console.log('Updating PI with advance amount:', {
           original: currentTotal,
           advance: advancePayment,
-          updated: updatedTotalAmount,
+          totalRemains: currentTotal,
         });
 
-        // Update PI total amount in backend using Redux
+        // Update PI with advance amount but keep total amount same
         try {
           await dispatch(
             updatePiAmount({
               id: selectedPI.id,
               amountData: {
-                totalAmount: updatedTotalAmount,
+                totalAmount: currentTotal,
                 advanceAmount: advancePayment,
               },
             })
           ).unwrap();
-          console.log('PI amount updated successfully');
+          console.log('PI advance amount updated successfully');
         } catch (error) {
           console.error('Failed to update PI amount:', error);
           toast.error(error || 'Failed to update PI amount');
@@ -275,7 +272,7 @@ const AddOrder = () => {
         }
 
         toast.success(
-          `Advance payment of $${orderData.advanceAmount} processed successfully`
+          `Advance payment of $${orderData.advanceAmount} recorded successfully`
         );
       }
 
@@ -431,7 +428,7 @@ const AddOrder = () => {
                       orderData.advanceAmount &&
                       parseFloat(orderData.advanceAmount) > 0 && (
                         <p className="text-xs text-slate-600 mt-1">
-                          This amount will be deducted from PI total
+                          This advance amount will be recorded separately
                         </p>
                       )}
                   </div>
@@ -453,7 +450,7 @@ const AddOrder = () => {
                       orderData.advanceAmount &&
                       parseFloat(orderData.advanceAmount) > 0 && (
                         <p className="text-xs text-slate-600 mt-1">
-                          Remaining balance after advance payment
+                          Total amount remains unchanged
                         </p>
                       )}
                   </div>
