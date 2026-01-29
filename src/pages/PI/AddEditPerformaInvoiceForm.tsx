@@ -363,6 +363,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   const dispatch = useDispatch();
   const { categories } = useSelector((state: any) => state.category);
   const { products } = useSelector((state: any) => state.product);
+  const { user } = useSelector((state: any) => state.auth); // Get current user
   const [companies, setCompanies] = useState<Company[]>([]);
 
   // Close dropdowns when clicking outside
@@ -403,6 +404,9 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         !balancePaymentTermRef.current.contains(event.target)
       ) {
         setShowBalancePaymentTermDropdown(false);
+      }
+      if (bankRef.current && !bankRef.current.contains(event.target)) {
+        setShowBankDropdown(false);
       }
     };
 
@@ -525,8 +529,15 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   const [showPreCarriageDropdown, setShowPreCarriageDropdown] = useState(false);
   const [showBalancePaymentTermDropdown, setShowBalancePaymentTermDropdown] =
     useState(false);
+  const [showBankDropdown, setShowBankDropdown] = useState(false);
+
+  // Bank details state
+  const [selectedBankId, setSelectedBankId] = useState<string>('');
+  const [bankSearch, setBankSearch] = useState('');
+  const [companyBanks, setCompanyBanks] = useState<any[]>([]);
 
   const companyRef = useRef(null);
+  const bankRef = useRef(null);
   const containerTypeRef = useRef(null);
   const paymentTermRef = useRef(null);
   const deliveryTermRef = useRef(null);
@@ -654,6 +665,13 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   // Load existing PI data if in edit mode
   useEffect(() => {
     loadDefaultData();
+    
+    // Load current user's company bank details
+    if (user?.company?.bankDetails) {
+      console.log('Loading bank details from user company:', user.company.bankDetails);
+      setCompanyBanks(user.company.bankDetails);
+    }
+    
     if (isEditMode) {
       setLoading(true);
       try {
@@ -705,6 +723,9 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
 
               // Set notes
               setNotes(pi.notes || '');
+
+              // Set selected bank
+              setSelectedBankId(pi.selectedBankId?.toString() || '');
 
               // Store original PI status
               setOriginalPiStatus(pi.status || '');
@@ -826,13 +847,13 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
     }
   }, [id, isEditMode]);
 
-  const handleCompanyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setCompanyId(e.target.value);
-    const selectedParty = companies.find((c) => c.id == e.target.value);
+  const handleCompanyChange = (companyId: string) => {
+    setCompanyId(companyId);
+    const selectedParty = companies.find((c) => c.id == companyId);
     if (selectedParty) {
       setCompany({
         id: selectedParty.id,
-        name: selectedParty.name,
+        name: selectedParty.companyName || selectedParty.name,
         status: selectedParty.status || 'active',
         contactPerson: selectedParty.contactPerson || '',
         address: selectedParty.address || '',
@@ -840,8 +861,15 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         email: selectedParty.email || '',
         phone: selectedParty.phone || '',
       });
+      
+      // Bank details come from current user's company (already loaded in useEffect)
+      console.log('Company selected:', selectedParty.companyName);
+      console.log('Available bank details:', companyBanks.length);
+      
+      setSelectedBankId(''); // Reset bank selection when company changes
     } else {
       setCompany(null);
+      setSelectedBankId('');
     }
   };
 
@@ -1637,6 +1665,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         country: company?.country || '',
         email: company?.email || '',
         phone: company?.phone || '',
+        selectedBankId: selectedBankId || null,
         paymentTerm: paymentTerm || '',
         advancePercentage: advancePercentage || '',
         balancePaymentTerm: balancePaymentTerm || '',
@@ -1718,6 +1747,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         country: company?.country || '',
         email: company?.email || '',
         phone: company?.phone || '',
+        selectedBankId: selectedBankId || null,
         paymentTerm,
         advancePercentage,
         balancePaymentTerm,
@@ -1988,26 +2018,8 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                             name: comp.companyName,
                           }))}
                         onSelect={(companyId) => {
-                          setCompanyId(companyId);
+                          handleCompanyChange(companyId);
                           setCompanySearch('');
-                          const selectedParty = companies.find(
-                            (c) => c.id == companyId
-                          );
-                          if (selectedParty) {
-                            setCompany({
-                              id: selectedParty.id,
-                              name:
-                                selectedParty.companyName || selectedParty.name,
-                              status: selectedParty.status || 'active',
-                              contactPerson: selectedParty.contactPerson || '',
-                              address: selectedParty.address || '',
-                              country: selectedParty.country || '',
-                              email: selectedParty.email || '',
-                              phone: selectedParty.phone || '',
-                            });
-                          } else {
-                            setCompany(null);
-                          }
                         }}
                         searchValue={companySearch}
                         onSearchChange={setCompanySearch}
@@ -2139,6 +2151,42 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                       {validationErrors.address && (
                         <p className="text-red-500 text-sm mt-1">
                           Address is required
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <Label htmlFor="bankDetails">Select Bank Details</Label>
+                      <SearchableDropdown
+                        label="Bank Details"
+                        value={selectedBankId}
+                        options={companyBanks
+                          .filter((bank) =>
+                            (bank.bankName || '')
+                              .toLowerCase()
+                              .includes(bankSearch.toLowerCase()) ||
+                            (bank.accountNumber || '')
+                              .toLowerCase()
+                              .includes(bankSearch.toLowerCase())
+                          )
+                          .map((bank) => ({
+                            id: bank.id || bank.bankName,
+                            name: `${bank.bankName} - ${bank.accountNumber}`,
+                          }))}
+                        onSelect={(bankId) => {
+                          setSelectedBankId(bankId);
+                          setBankSearch('');
+                        }}
+                        searchValue={bankSearch}
+                        onSearchChange={setBankSearch}
+                        isOpen={showBankDropdown}
+                        onToggle={() => setShowBankDropdown(!showBankDropdown)}
+                        placeholder={companyBanks.length > 0 ? "Choose Bank Details" : "No bank details available"}
+                        disabled={companyBanks.length === 0}
+                        dropdownRef={bankRef}
+                      />
+                      {companyBanks.length === 0 && companyId && (
+                        <p className="text-sm text-gray-500 mt-1">
+                          No bank details found for selected company
                         </p>
                       )}
                     </div>

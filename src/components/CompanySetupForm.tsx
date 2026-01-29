@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
+import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -10,9 +10,19 @@ import {
   FaChevronLeft,
   FaBuilding,
   FaUniversity,
+  FaPlus,
+  FaTrash,
 } from 'react-icons/fa';
 import { HiOfficeBuilding } from 'react-icons/hi';
 import axiosInstance from '../utils/axiosInstance';
+
+interface BankDetail {
+  bank_name: string;
+  bank_address: string;
+  account_number: string;
+  ifsc_code: string;
+  swift_code: string;
+}
 
 interface CompanyFormData {
   name: string;
@@ -29,11 +39,7 @@ interface CompanyFormData {
   default_currency: string;
   allowed_units: string[];
   plan_id: string;
-  bank_name: string;
-  bank_address: string;
-  account_number: string;
-  ifsc_code: string;
-  swift_code: string;
+  bank_details: BankDetail[];
 }
 
 interface CompanySetupFormProps {
@@ -49,12 +55,12 @@ export default function CompanySetupForm({
 }: CompanySetupFormProps) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading } = useSelector((state: Record<string, unknown>) => state.company || {});
-  const user = useSelector((state: Record<string, unknown>) => state.user.user);
+  const { loading } = useSelector((state: Record<string, unknown>) => (state.company as Record<string, unknown>) || {}) as { loading?: boolean };
+  const user = useSelector((state: Record<string, unknown>) => (state.user as Record<string, unknown>)?.user) as Record<string, unknown> | undefined;
 
   // Redirect if user already has a company assigned (but not for SuperAdmin)
   useEffect(() => {
-    if (user && (user.company || user.companyId) && !isSuperAdmin) {
+    if (user && ((user as any).company || (user as any).companyId) && !isSuperAdmin) {
       navigate('/dashboard');
       return;
     }
@@ -75,11 +81,13 @@ export default function CompanySetupForm({
     default_currency: '',
     allowed_units: [],
     plan_id: 'trial',
-    bank_name: '',
-    bank_address: '',
-    account_number: '',
-    ifsc_code: '',
-    swift_code: '',
+    bank_details: [{
+      bank_name: '',
+      bank_address: '',
+      account_number: '',
+      ifsc_code: '',
+      swift_code: '',
+    }],
   });
 
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
@@ -87,31 +95,49 @@ export default function CompanySetupForm({
   // Populate form with editing company data
   useEffect(() => {
     if (editingCompany) {
+      // Handle bank details from new bankDetails array or legacy fields
+      let bankDetails = [];
+      if (editingCompany.bankDetails && Array.isArray(editingCompany.bankDetails) && editingCompany.bankDetails.length > 0) {
+        // Use new bankDetails array
+        bankDetails = (editingCompany.bankDetails as any[]).map((bank: any) => ({
+          bank_name: bank.bankName || '',
+          bank_address: bank.bankAddress || '',
+          account_number: bank.accountNumber || '',
+          ifsc_code: bank.ifscCode || '',
+          swift_code: bank.swiftCode || '',
+        }));
+      } else {
+        // Fallback to legacy fields if bankDetails array is empty
+        bankDetails = [{
+          bank_name: (editingCompany.bankName as string) || '',
+          bank_address: (editingCompany.bankAddress as string) || '',
+          account_number: (editingCompany.accountNumber as string) || '',
+          ifsc_code: (editingCompany.ifscCode as string) || '',
+          swift_code: (editingCompany.swiftCode as string) || '',
+        }];
+      }
+      
       setForm({
-        name: editingCompany.name || '',
+        name: (editingCompany.name as string) || '',
         logo: null,
         signature: null,
         industry: '',
         website: '',
-        address: editingCompany.address || '',
-        phone_no: editingCompany.phoneNo || '',
-        email: editingCompany.email || '',
-        gst_number: editingCompany.gstNumber || '',
-        iec_number: editingCompany.iecNumber || '',
-        currencies: editingCompany.currencies || [],
-        default_currency: editingCompany.defaultCurrency || 'USD',
-        allowed_units: editingCompany.allowedUnits || [
+        address: (editingCompany.address as string) || '',
+        phone_no: (editingCompany.phoneNo as string) || '',
+        email: (editingCompany.email as string) || '',
+        gst_number: (editingCompany.gstNumber as string) || '',
+        iec_number: (editingCompany.iecNumber as string) || '',
+        currencies: (editingCompany.currencies as string[]) || [],
+        default_currency: (editingCompany.defaultCurrency as string) || 'USD',
+        allowed_units: (editingCompany.allowedUnits as string[]) || [
           'sqm',
           'kg',
           'pcs',
           'box',
         ],
-        plan_id: editingCompany.planId || 'trial',
-        bank_name: editingCompany.bankName || '',
-        bank_address: editingCompany.bankAddress || '',
-        account_number: editingCompany.accountNumber || '',
-        ifsc_code: editingCompany.ifscCode || '',
-        swift_code: editingCompany.swiftCode || '',
+        plan_id: (editingCompany.planId as string) || 'trial',
+        bank_details: bankDetails,
       });
     }
   }, [editingCompany]);
@@ -119,8 +145,8 @@ export default function CompanySetupForm({
   // Show message if user has assigned company (but allow SuperAdmin)
   if (
     user &&
-    user.companyId &&
-    user.role?.name !== 'SUPER_ADMIN' &&
+    (user as any).companyId &&
+    (user as any).role?.name !== 'SUPER_ADMIN' &&
     !isSuperAdmin
   ) {
     return (
@@ -167,6 +193,37 @@ export default function CompanySetupForm({
     }
   };
 
+  const handleBankChange = (index: number, field: keyof BankDetail, value: string) => {
+    setForm(prev => ({
+      ...prev,
+      bank_details: prev.bank_details.map((bank, i) => 
+        i === index ? { ...bank, [field]: value } : bank
+      )
+    }));
+  };
+
+  const addBankDetail = () => {
+    setForm(prev => ({
+      ...prev,
+      bank_details: [...prev.bank_details, {
+        bank_name: '',
+        bank_address: '',
+        account_number: '',
+        ifsc_code: '',
+        swift_code: '',
+      }]
+    }));
+  };
+
+  const removeBankDetail = (index: number) => {
+    if (form.bank_details.length > 1) {
+      setForm(prev => ({
+        ...prev,
+        bank_details: prev.bank_details.filter((_, i) => i !== index)
+      }));
+    }
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -185,12 +242,14 @@ export default function CompanySetupForm({
     if (!form.iec_number.trim()) errors.iec_number = 'IEC number is required';
     if (!form.default_currency)
       errors.default_currency = 'Please select a currency';
-    if (!form.bank_name.trim()) errors.bank_name = 'Bank name is required';
-    if (!form.account_number.trim())
-      errors.account_number = 'Account number is required';
-    if (!form.bank_address.trim())
-      errors.bank_address = 'Bank address is required';
-    if (!form.ifsc_code.trim()) errors.ifsc_code = 'IFSC code is required';
+    
+    // Validate bank details
+    form.bank_details.forEach((bank, index) => {
+      if (!bank.bank_name.trim()) errors[`bank_name_${index}`] = 'Bank name is required';
+      if (!bank.account_number.trim()) errors[`account_number_${index}`] = 'Account number is required';
+      if (!bank.bank_address.trim()) errors[`bank_address_${index}`] = 'Bank address is required';
+      if (!bank.ifsc_code.trim()) errors[`ifsc_code_${index}`] = 'IFSC code is required';
+    });
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
@@ -211,11 +270,7 @@ export default function CompanySetupForm({
         formData.append('gstNumber', form.gst_number);
         formData.append('iecNumber', form.iec_number);
         formData.append('defaultCurrency', form.default_currency);
-        formData.append('bankName', form.bank_name);
-        formData.append('accountNumber', form.account_number);
-        formData.append('ifscCode', form.ifsc_code);
-        formData.append('bankAddress', form.bank_address);
-        formData.append('swiftCode', form.swift_code);
+        formData.append('bankDetails', JSON.stringify(form.bank_details));
 
         // Add files if selected
         if (form.logo) {
@@ -255,11 +310,13 @@ export default function CompanySetupForm({
         const formData = new FormData();
         const excludedFields = ['industry', 'website'];
 
-        Object.entries(form).forEach(([key, value]) => {
+        (Object.entries(form) as [string, any][]).forEach(([key, value]) => {
           if (excludedFields.includes(key)) return;
 
           if (key === 'logo' && value) {
             formData.append(key, value);
+          } else if (key === 'bank_details') {
+            formData.append(key, JSON.stringify(value));
           } else if (Array.isArray(value)) {
             formData.append(key, JSON.stringify(value));
           } else if (value) {
@@ -391,23 +448,23 @@ export default function CompanySetupForm({
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     Company Logo
                   </label>
-                  {editingCompany?.logo && (
+                  {(editingCompany?.logo && typeof editingCompany.logo === 'string') ? (
                     <div className="mb-3">
                       <img
                         src={
-                          editingCompany.logo.startsWith('http')
-                            ? editingCompany.logo
+                          (editingCompany.logo as string).startsWith('http')
+                            ? (editingCompany.logo as string)
                             : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${editingCompany.logo}`
                         }
                         alt="Current Logo"
                         className="h-20 w-auto border rounded-lg"
                         onError={(e) => {
-                          e.currentTarget.style.display = 'none';
+                          (e.currentTarget as HTMLImageElement).style.display = 'none';
                         }}
                       />
                       <p className="text-xs text-gray-500 mt-1">Current logo</p>
                     </div>
-                  )}
+                  ) : null}
                   <input
                     type="file"
                     name="logo"
@@ -416,7 +473,7 @@ export default function CompanySetupForm({
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    {editingCompany?.logo
+                    {editingCompany?.logo && typeof editingCompany.logo === 'string'
                       ? 'Upload new logo to replace current one'
                       : 'Upload company logo (PNG, JPG)'}
                   </p>
@@ -426,25 +483,25 @@ export default function CompanySetupForm({
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     Company Signature
                   </label>
-                  {editingCompany?.signature && (
+                  {(editingCompany?.signature && typeof editingCompany.signature === 'string') ? (
                     <div className="mb-3">
                       <img
                         src={
-                          editingCompany.signature.startsWith('http')
-                            ? editingCompany.signature
+                          (editingCompany.signature as string).startsWith('http')
+                            ? (editingCompany.signature as string)
                             : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${editingCompany.signature}`
                         }
                         alt="Current Signature"
                         className="h-16 w-auto border rounded-lg"
                         onError={(e) => {
-                          e.currentTarget.style.display = 'none';
+                          (e.currentTarget as HTMLImageElement).style.display = 'none';
                         }}
                       />
                       <p className="text-xs text-gray-500 mt-1">
                         Current signature
                       </p>
                     </div>
-                  )}
+                  ) : null}
                   <input
                     type="file"
                     name="signature"
@@ -453,7 +510,7 @@ export default function CompanySetupForm({
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    {editingCompany?.signature
+                    {editingCompany?.signature && typeof editingCompany.signature === 'string'
                       ? 'Upload new signature to replace current one'
                       : 'Upload authorized signature (PNG, JPG)'}
                   </p>
@@ -539,119 +596,145 @@ export default function CompanySetupForm({
 
             {/* Banking Information */}
             <div className="border-t pt-6">
-              <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                <FaUniversity className="text-slate-600" />
-                Banking Information
-              </h3>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Bank Name *
-                  </label>
-                  <input
-                    name="bank_name"
-                    value={form.bank_name}
-                    onChange={handleChange}
-                    placeholder="Enter bank name"
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent ${
-                      fieldErrors.bank_name
-                        ? 'border-red-500'
-                        : 'border-gray-300'
-                    }`}
-                    required
-                  />
-                  {fieldErrors.bank_name && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {fieldErrors.bank_name}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Account Number *
-                  </label>
-                  <input
-                    name="account_number"
-                    value={form.account_number}
-                    onChange={handleChange}
-                    placeholder="Enter account number"
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent ${
-                      fieldErrors.account_number
-                        ? 'border-red-500'
-                        : 'border-gray-300'
-                    }`}
-                    required
-                  />
-                  {fieldErrors.account_number && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {fieldErrors.account_number}
-                    </p>
-                  )}
-                </div>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                  <FaUniversity className="text-slate-600" />
+                  Banking Information
+                </h3>
+                <button
+                  type="button"
+                  onClick={addBankDetail}
+                  className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors"
+                >
+                  <FaPlus className="w-4 h-4" />
+                  Add Bank
+                </button>
               </div>
+              
+              {form.bank_details.map((bank, index) => (
+                <div key={index} className="border border-gray-200 rounded-lg p-6 mb-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-md font-medium text-slate-700">
+                      Bank Details {index + 1}
+                    </h4>
+                    {form.bank_details.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeBankDetail(index)}
+                        className="flex items-center gap-2 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                      >
+                        <FaTrash className="w-3 h-3" />
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Bank Name *
+                      </label>
+                      <input
+                        value={bank.bank_name}
+                        onChange={(e) => handleBankChange(index, 'bank_name', e.target.value)}
+                        placeholder="Enter bank name"
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent ${
+                          fieldErrors[`bank_name_${index}`]
+                            ? 'border-red-500'
+                            : 'border-gray-300'
+                        }`}
+                        required
+                      />
+                      {fieldErrors[`bank_name_${index}`] && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {fieldErrors[`bank_name_${index}`]}
+                        </p>
+                      )}
+                    </div>
 
-              <div className="mt-6">
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Bank Address *
-                </label>
-                <textarea
-                  name="bank_address"
-                  value={form.bank_address}
-                  onChange={handleChange}
-                  placeholder="Enter bank address"
-                  rows={2}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent ${
-                    fieldErrors.bank_address
-                      ? 'border-red-500'
-                      : 'border-gray-300'
-                  }`}
-                  required
-                />
-                {fieldErrors.bank_address && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {fieldErrors.bank_address}
-                  </p>
-                )}
-              </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Account Number *
+                      </label>
+                      <input
+                        value={bank.account_number}
+                        onChange={(e) => handleBankChange(index, 'account_number', e.target.value)}
+                        placeholder="Enter account number"
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent ${
+                          fieldErrors[`account_number_${index}`]
+                            ? 'border-red-500'
+                            : 'border-gray-300'
+                        }`}
+                        required
+                      />
+                      {fieldErrors[`account_number_${index}`] && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {fieldErrors[`account_number_${index}`]}
+                        </p>
+                      )}
+                    </div>
+                  </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    IFSC Code *
-                  </label>
-                  <input
-                    name="ifsc_code"
-                    value={form.ifsc_code}
-                    onChange={handleChange}
-                    placeholder="SBIN0001234"
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent ${
-                      fieldErrors.ifsc_code
-                        ? 'border-red-500'
-                        : 'border-gray-300'
-                    }`}
-                    required
-                  />
-                  {fieldErrors.ifsc_code && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {fieldErrors.ifsc_code}
-                    </p>
-                  )}
+                  <div className="mt-6">
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Bank Address *
+                    </label>
+                    <textarea
+                      value={bank.bank_address}
+                      onChange={(e) => handleBankChange(index, 'bank_address', e.target.value)}
+                      placeholder="Enter bank address"
+                      rows={2}
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent ${
+                        fieldErrors[`bank_address_${index}`]
+                          ? 'border-red-500'
+                          : 'border-gray-300'
+                      }`}
+                      required
+                    />
+                    {fieldErrors[`bank_address_${index}`] && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {fieldErrors[`bank_address_${index}`]}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        IFSC Code *
+                      </label>
+                      <input
+                        value={bank.ifsc_code}
+                        onChange={(e) => handleBankChange(index, 'ifsc_code', e.target.value)}
+                        placeholder="SBIN0001234"
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent ${
+                          fieldErrors[`ifsc_code_${index}`]
+                            ? 'border-red-500'
+                            : 'border-gray-300'
+                        }`}
+                        required
+                      />
+                      {fieldErrors[`ifsc_code_${index}`] && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {fieldErrors[`ifsc_code_${index}`]}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        SWIFT Code
+                      </label>
+                      <input
+                        value={bank.swift_code}
+                        onChange={(e) => handleBankChange(index, 'swift_code', e.target.value)}
+                        placeholder="SBININBB123"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    SWIFT Code
-                  </label>
-                  <input
-                    name="swift_code"
-                    value={form.swift_code}
-                    onChange={handleChange}
-                    placeholder="SBININBB123"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
+              ))}
             </div>
 
             {/* Submit Buttons */}
