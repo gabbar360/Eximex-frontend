@@ -30,10 +30,6 @@ const BulkUploadProducts = () => {
   const fileInputRef = useRef(null);
 
   const { loading: uploading, result, error } = bulkUpload;
-
-  // Get result data properly
-  const uploadResult = result?.data || result;
-
   // Sanitize user input to prevent XSS
   const sanitizeInput = (input) => {
     if (!input) return '';
