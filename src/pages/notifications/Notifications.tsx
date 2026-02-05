@@ -41,6 +41,7 @@ const Notifications: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   useEffect(() => {
     dispatch(getNotifications({ page: currentPage, limit: pageSize }));
