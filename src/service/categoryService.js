@@ -74,10 +74,7 @@ export const createCategory = async (categoryData) => {
 };
 
 export const updateCategory = async (id, category) => {
-  const response = await axiosInstance.put(
-    `/update/category/${id}`,
-    category
-  );
+  const response = await axiosInstance.put(`/update/category/${id}`, category);
   return {
     data: response.data.data,
     message: response.data.message,

@@ -4,7 +4,6 @@ import TwoColumnImageGrid from '../../components/ui/images/TwoColumnImageGrid';
 import ThreeColumnImageGrid from '../../components/ui/images/ThreeColumnImageGrid';
 import ComponentCard from '../../components/common/ComponentCard';
 
-
 export default function Images() {
   return (
     <>

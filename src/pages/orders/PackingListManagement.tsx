@@ -22,7 +22,9 @@ const PackingListManagement: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { orders = [], loading = false } = useSelector(
-    (state: { order?: { orders: Record<string, unknown>[]; loading: boolean } }) => state.order || {}
+    (state: {
+      order?: { orders: Record<string, unknown>[]; loading: boolean };
+    }) => state.order || {}
   );
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -69,7 +71,7 @@ const PackingListManagement: React.FC = () => {
       dispatch(fetchOrders());
     } catch (error: unknown) {
       console.log('Delete packing list error:', error);
-      toast.error(error as string || 'Failed to delete packing list');
+      toast.error((error as string) || 'Failed to delete packing list');
     }
   };
 
@@ -271,7 +273,10 @@ const PackingListManagement: React.FC = () => {
                   const hasPackingList = packingLists.length > 0;
 
                   const containers = packingLists.reduce(
-                    (acc: Record<string, unknown>[], pl: Record<string, unknown>) => {
+                    (
+                      acc: Record<string, unknown>[],
+                      pl: Record<string, unknown>
+                    ) => {
                       if (pl.notes?.containers) {
                         return [...acc, ...pl.notes.containers];
                       }
@@ -426,7 +431,10 @@ const PackingListManagement: React.FC = () => {
                       const hasPackingList = packingLists.length > 0;
 
                       const containers = packingLists.reduce(
-                        (acc: Record<string, unknown>[], pl: Record<string, unknown>) => {
+                        (
+                          acc: Record<string, unknown>[],
+                          pl: Record<string, unknown>
+                        ) => {
                           if (pl.notes?.containers) {
                             return [...acc, ...pl.notes.containers];
                           }

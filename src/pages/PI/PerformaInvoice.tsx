@@ -242,7 +242,8 @@ const PerformaInvoice: React.FC = () => {
 
     const matchesStatus =
       filterStatus === 'all' ||
-      ((pi.status as string) && (pi.status as string).toLowerCase() === filterStatus.toLowerCase());
+      ((pi.status as string) &&
+        (pi.status as string).toLowerCase() === filterStatus.toLowerCase());
 
     return matchesStatus;
   });
@@ -433,12 +434,12 @@ const PerformaInvoice: React.FC = () => {
                 </div>
                 <div className="divide-y divide-white/20">
                   {filteredPIs.map((pi: Record<string, unknown>) => {
-                    const statusConfig = getStatusConfig((pi.status as string));
+                    const statusConfig = getStatusConfig(pi.status as string);
                     const StatusIcon = statusConfig.icon;
 
                     return (
                       <div
-                        key={(pi.id as string)}
+                        key={pi.id as string}
                         className="p-4 hover:bg-white/50 transition-all duration-300"
                       >
                         <div
@@ -453,30 +454,33 @@ const PerformaInvoice: React.FC = () => {
                             <HiDocumentText className="w-4 h-4 text-slate-600 flex-shrink-0" />
                             <span
                               className="text-slate-800 font-medium truncate"
-                              title={(pi.piNumber as string)}
+                              title={pi.piNumber as string}
                             >
-                              {(pi.piNumber as string)}
+                              {pi.piNumber as string}
                             </span>
                           </div>
 
                           {/* Client */}
                           <div
                             className="text-slate-700 text-sm truncate"
-                            title={((pi.party as Record<string, unknown>)?.companyName as string)}
+                            title={
+                              (pi.party as Record<string, unknown>)
+                                ?.companyName as string
+                            }
                           >
-                            {((pi.party as Record<string, unknown>)?.companyName as string) || '-'}
+                            {((pi.party as Record<string, unknown>)
+                              ?.companyName as string) || '-'}
                           </div>
 
                           {/* Date */}
                           <div className="text-slate-700 text-sm">
-                            {new Date((pi.invoiceDate as string)).toLocaleDateString(
-                              'en-US',
-                              {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric',
-                              }
-                            )}
+                            {new Date(
+                              pi.invoiceDate as string
+                            ).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                            })}
                           </div>
 
                           {/* Status */}
@@ -485,19 +489,20 @@ const PerformaInvoice: React.FC = () => {
                               className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${statusConfig.bg} ${statusConfig.color} ${statusConfig.border}`}
                             >
                               <StatusIcon className="w-3 h-3 mr-1" />
-                              {((pi.status as string)?.charAt(0).toUpperCase() +
-                                (pi.status as string)?.slice(1))}
+                              {(pi.status as string)?.charAt(0).toUpperCase() +
+                                (pi.status as string)?.slice(1)}
                             </span>
                           </div>
 
                           {/* Items */}
                           <div className="text-slate-700 text-sm">
-                            {((pi._count as Record<string, unknown>)?.products as number) || 0}
+                            {((pi._count as Record<string, unknown>)
+                              ?.products as number) || 0}
                           </div>
 
                           {/* Payment */}
                           <div className="text-slate-700 text-sm">
-                            {paymentTermNames[(pi.paymentTerm as string)] ||
+                            {paymentTermNames[pi.paymentTerm as string] ||
                               (pi.paymentTerm as string) ||
                               '-'}
                           </div>
@@ -506,7 +511,7 @@ const PerformaInvoice: React.FC = () => {
                           <div className="text-slate-700 text-sm font-medium">
                             {new Intl.NumberFormat('en-US', {
                               style: 'currency',
-                              currency: ((pi.currency as string) || 'USD'),
+                              currency: (pi.currency as string) || 'USD',
                               minimumFractionDigits: 2,
                               maximumFractionDigits: 2,
                             }).format((pi.totalAmount as number) || 0)}
@@ -516,11 +521,13 @@ const PerformaInvoice: React.FC = () => {
                           <div className="flex items-center justify-end">
                             <div className="relative dropdown-container">
                               <button
-                                data-dropdown-id={(pi.id as string)}
+                                data-dropdown-id={pi.id as string}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setOpenDropdown(
-                                    openDropdown === (pi.id as string) ? null : (pi.id as string)
+                                    openDropdown === (pi.id as string)
+                                      ? null
+                                      : (pi.id as string)
                                   );
                                 }}
                                 className="p-2 rounded-lg text-slate-500 hover:bg-gray-100 transition-all duration-300"
@@ -531,7 +538,7 @@ const PerformaInvoice: React.FC = () => {
                               {openDropdown === (pi.id as string) && (
                                 <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-[9999] backdrop-blur-sm">
                                   <Link
-                                    to={`/pi-details/${(pi.id as string)}`}
+                                    to={`/pi-details/${pi.id as string}`}
                                     className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-all duration-200 border-b border-gray-50 last:border-b-0"
                                     onClick={() => setOpenDropdown(null)}
                                   >
@@ -543,7 +550,7 @@ const PerformaInvoice: React.FC = () => {
                                     </span>
                                   </Link>
                                   <Link
-                                    to={`/edit-pi/${(pi.id as string)}`}
+                                    to={`/edit-pi/${pi.id as string}`}
                                     className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-emerald-50 transition-all duration-200 border-b border-gray-50 last:border-b-0"
                                     onClick={() => setOpenDropdown(null)}
                                   >
@@ -558,7 +565,7 @@ const PerformaInvoice: React.FC = () => {
                                     onClick={async () => {
                                       setOpenDropdown(null);
                                       try {
-                                        setDownloadingPdf((pi.id as string));
+                                        setDownloadingPdf(pi.id as string);
                                         toast.info(
                                           'Preparing PDF download...',
                                           {
@@ -566,7 +573,7 @@ const PerformaInvoice: React.FC = () => {
                                           }
                                         );
                                         await dispatch(
-                                          downloadPiInvoicePdf((pi.id as string))
+                                          downloadPiInvoicePdf(pi.id as string)
                                         ).unwrap();
                                         toast.success(
                                           'PDF downloaded successfully'
@@ -581,7 +588,9 @@ const PerformaInvoice: React.FC = () => {
                                         setDownloadingPdf(null);
                                       }
                                     }}
-                                    disabled={downloadingPdf === (pi.id as string)}
+                                    disabled={
+                                      downloadingPdf === (pi.id as string)
+                                    }
                                     className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-blue-50 transition-all duration-200 w-full text-left disabled:opacity-50 border-b border-gray-50 last:border-b-0"
                                   >
                                     <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
@@ -599,7 +608,7 @@ const PerformaInvoice: React.FC = () => {
                                     onClick={() => {
                                       setOpenDropdown(null);
                                       navigate(
-                                        `/proforma-invoices/${(pi.id as string)}/email`
+                                        `/proforma-invoices/${pi.id as string}/email`
                                       );
                                     }}
                                     className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 hover:bg-indigo-50 transition-all duration-200 w-full text-left border-b border-gray-50 last:border-b-0"
@@ -614,7 +623,7 @@ const PerformaInvoice: React.FC = () => {
                                   <button
                                     onClick={() => {
                                       setOpenDropdown(null);
-                                      setConfirmDelete((pi.id as string));
+                                      setConfirmDelete(pi.id as string);
                                     }}
                                     className="flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 w-full text-left"
                                   >

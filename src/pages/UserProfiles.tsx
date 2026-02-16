@@ -1,4 +1,4 @@
-import { useDispatch} from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useState, useEffect, useCallback } from 'react';
 import UserInfoCard from '../components/UserProfile/UserInfoCard';
 import CompanyDetailsCard from '../components/UserProfile/CompanyDetailsCard';

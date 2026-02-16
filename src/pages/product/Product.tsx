@@ -53,9 +53,10 @@ const Product: React.FC = () => {
   const categoryRef = useRef(null);
   const subcategoryRef = useRef(null);
 
-  const { categories } = useSelector((state: {
-    category: { categories: Record<string, unknown>[] };
-  }) => state.category);
+  const { categories } = useSelector(
+    (state: { category: { categories: Record<string, unknown>[] } }) =>
+      state.category
+  );
 
   // SearchableDropdown Component
   const SearchableDropdown = ({
@@ -239,7 +240,8 @@ const Product: React.FC = () => {
   const availableSubCategories = useMemo(() => {
     if (!selectedCategory || !categories) return [];
     const category = categories.find(
-      (cat: { id: number; subcategories?: Record<string, unknown>[] }) => cat.id.toString() === selectedCategory
+      (cat: { id: number; subcategories?: Record<string, unknown>[] }) =>
+        cat.id.toString() === selectedCategory
     );
     return category?.subcategories || [];
   }, [selectedCategory, categories]);
@@ -354,10 +356,15 @@ const Product: React.FC = () => {
                                   .toLowerCase()
                                   .includes(subcategorySearch.toLowerCase())
                               )
-                              .map((subCategory: { id: number; name: string }) => ({
-                                id: subCategory.id,
-                                name: subCategory.name,
-                              })),
+                              .map(
+                                (subCategory: {
+                                  id: number;
+                                  name: string;
+                                }) => ({
+                                  id: subCategory.id,
+                                  name: subCategory.name,
+                                })
+                              ),
                           ]}
                           onSelect={(value) => {
                             setSelectedSubCategory(value);

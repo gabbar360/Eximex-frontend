@@ -19,7 +19,9 @@ const VgmManagement: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { orders = [], loading = false } = useSelector(
-    (state: { order: { orders: Record<string, unknown>[]; loading: boolean } }) => state.order || {}
+    (state: {
+      order: { orders: Record<string, unknown>[]; loading: boolean };
+    }) => state.order || {}
   );
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);

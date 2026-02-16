@@ -37,7 +37,10 @@ const AddEditVgm: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { id } = useParams();
   const isEdit = !!id && id !== 'create';
-  const [selectedOrder, setSelectedOrder] = useState<Record<string, unknown> | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
 
   const [formData, setFormData] = useState<VgmFormData>({
     piInvoiceId: parseInt(searchParams.get('piInvoiceId') || '0') || 0,
@@ -177,7 +180,10 @@ const AddEditVgm: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleOrderSelect = (orderId: number, orderData: Record<string, unknown>) => {
+  const handleOrderSelect = (
+    orderId: number,
+    orderData: Record<string, unknown>
+  ) => {
     setSelectedOrder(orderData);
     setFormData((prev) => ({
       ...prev,

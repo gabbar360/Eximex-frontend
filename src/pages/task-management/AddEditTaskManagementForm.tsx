@@ -39,7 +39,11 @@ const AddEditTaskManagementForm: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const { staffList, currentTask } = useSelector(
-    (state: Record<string, unknown>) => state.taskManagement as { staffList: Record<string, unknown>[]; currentTask: Record<string, unknown> }
+    (state: Record<string, unknown>) =>
+      state.taskManagement as {
+        staffList: Record<string, unknown>[];
+        currentTask: Record<string, unknown>;
+      }
   );
 
   const isEditMode = Boolean(id);
@@ -158,10 +162,16 @@ const AddEditTaskManagementForm: React.FC = () => {
       if (typeRef.current && !typeRef.current.contains(event.target as Node)) {
         setShowTypeDropdown(false);
       }
-      if (assigneeRef.current && !assigneeRef.current.contains(event.target as Node)) {
+      if (
+        assigneeRef.current &&
+        !assigneeRef.current.contains(event.target as Node)
+      ) {
         setShowAssigneeDropdown(false);
       }
-      if (priorityRef.current && !priorityRef.current.contains(event.target as Node)) {
+      if (
+        priorityRef.current &&
+        !priorityRef.current.contains(event.target as Node)
+      ) {
         setShowPriorityDropdown(false);
       }
     };
@@ -245,7 +255,7 @@ const AddEditTaskManagementForm: React.FC = () => {
 
       setTimeout(() => navigate('/task-management'), 1500);
     } catch (error: unknown) {
-      toast.error(error as string || 'Operation failed');
+      toast.error((error as string) || 'Operation failed');
     } finally {
       setSubmitting(false);
     }
@@ -393,15 +403,26 @@ const AddEditTaskManagementForm: React.FC = () => {
                       options={[
                         { id: '', name: 'Select Staff Member' },
                         ...staffList
-                          .filter((staff: { id: number; name: string; email: string }) =>
-                            `${staff.name} (${staff.email})`
-                              .toLowerCase()
-                              .includes(assigneeSearch.toLowerCase())
+                          .filter(
+                            (staff: {
+                              id: number;
+                              name: string;
+                              email: string;
+                            }) =>
+                              `${staff.name} (${staff.email})`
+                                .toLowerCase()
+                                .includes(assigneeSearch.toLowerCase())
                           )
-                          .map((staff: { id: number; name: string; email: string }) => ({
-                            id: staff.id,
-                            name: `${staff.name} (${staff.email})`,
-                          })),
+                          .map(
+                            (staff: {
+                              id: number;
+                              name: string;
+                              email: string;
+                            }) => ({
+                              id: staff.id,
+                              name: `${staff.name} (${staff.email})`,
+                            })
+                          ),
                       ]}
                       onSelect={(value) => {
                         setFieldValue('assignedTo', value);

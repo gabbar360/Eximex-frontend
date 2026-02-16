@@ -16,10 +16,7 @@ import {
 import { toast } from 'react-toastify';
 
 import { useDispatch } from 'react-redux';
-import {
-  getPiInvoiceById,
-  downloadPiInvoicePdf,
-} from '../../features/piSlice';
+import { getPiInvoiceById, downloadPiInvoicePdf } from '../../features/piSlice';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
 const PIDetails: React.FC = () => {
@@ -46,8 +43,6 @@ const PIDetails: React.FC = () => {
 
     if (id) fetchPIDetails();
   }, [id, dispatch]);
-
-
 
   if (loading) {
     return (
@@ -77,10 +72,14 @@ const PIDetails: React.FC = () => {
     ddp: 'DDP',
   };
 
-  const currentTotalAmount = (piData as Record<string, unknown>)?.totalAmount as number || (piData as Record<string, unknown>)?.total as number || 0;
+  const currentTotalAmount =
+    ((piData as Record<string, unknown>)?.totalAmount as number) ||
+    ((piData as Record<string, unknown>)?.total as number) ||
+    0;
   const formattedAmount = new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: ((piData as Record<string, unknown>)?.currency as string) || 'USD',
+    currency:
+      ((piData as Record<string, unknown>)?.currency as string) || 'USD',
   }).format(currentTotalAmount);
 
   return (
@@ -107,7 +106,10 @@ const PIDetails: React.FC = () => {
               </div>
               <div>
                 <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 mb-1">
-                  {((piData as Record<string, unknown>)?.piNumber as string) || ((piData as Record<string, unknown>)?.invoiceNumber as string) || 'PI Invoice'}
+                  {((piData as Record<string, unknown>)?.piNumber as string) ||
+                    ((piData as Record<string, unknown>)
+                      ?.invoiceNumber as string) ||
+                    'PI Invoice'}
                 </h1>
               </div>
             </div>
@@ -197,7 +199,19 @@ const PIDetails: React.FC = () => {
                   Company Name
                 </span>
                 <span className="text-sm font-bold text-gray-900">
-                  {((piData as Record<string, unknown>)?.party as Record<string, unknown>)?.companyName as string || ((piData as Record<string, unknown>)?.company as Record<string, unknown>)?.name as string || 'N/A'}
+                  {((
+                    (piData as Record<string, unknown>)?.party as Record<
+                      string,
+                      unknown
+                    >
+                  )?.companyName as string) ||
+                    ((
+                      (piData as Record<string, unknown>)?.company as Record<
+                        string,
+                        unknown
+                      >
+                    )?.name as string) ||
+                    'N/A'}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -214,7 +228,10 @@ const PIDetails: React.FC = () => {
                 </span>
                 <span className="text-sm font-bold text-gray-900">
                   {new Date(
-                    ((piData as Record<string, unknown>)?.invoiceDate as string) || ((piData as Record<string, unknown>)?.date as string) || new Date().toISOString()
+                    ((piData as Record<string, unknown>)
+                      ?.invoiceDate as string) ||
+                      ((piData as Record<string, unknown>)?.date as string) ||
+                      new Date().toISOString()
                   ).toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',
@@ -227,7 +244,8 @@ const PIDetails: React.FC = () => {
                   Currency
                 </span>
                 <span className="text-sm font-bold text-gray-900">
-                  {((piData as Record<string, unknown>)?.currency as string) || 'USD'}
+                  {((piData as Record<string, unknown>)?.currency as string) ||
+                    'USD'}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -235,7 +253,8 @@ const PIDetails: React.FC = () => {
                   Contact Person
                 </span>
                 <span className="text-sm font-bold text-gray-900">
-                  {((piData as Record<string, unknown>)?.contactPerson as string) || 'N/A'}
+                  {((piData as Record<string, unknown>)
+                    ?.contactPerson as string) || 'N/A'}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -244,16 +263,28 @@ const PIDetails: React.FC = () => {
                 </span>
                 <span
                   className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${
-                    ((piData as Record<string, unknown>)?.status as string) === 'pending'
+                    ((piData as Record<string, unknown>)?.status as string) ===
+                    'pending'
                       ? 'bg-amber-50 text-amber-700 border-amber-200'
-                      : ((piData as Record<string, unknown>)?.status as string) === 'confirmed'
+                      : ((piData as Record<string, unknown>)
+                            ?.status as string) === 'confirmed'
                         ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                        : ((piData as Record<string, unknown>)?.status as string) === 'draft'
+                        : ((piData as Record<string, unknown>)
+                              ?.status as string) === 'draft'
                           ? 'bg-slate-50 text-slate-700 border-slate-200'
                           : 'bg-gray-50 text-gray-700 border-gray-200'
                   }`}
                 >
-                  {((((piData as Record<string, unknown>)?.status as string) || '').charAt(0).toUpperCase() + (((piData as Record<string, unknown>)?.status as string) || '').slice(1))}
+                  {(
+                    ((piData as Record<string, unknown>)?.status as string) ||
+                    ''
+                  )
+                    .charAt(0)
+                    .toUpperCase() +
+                    (
+                      ((piData as Record<string, unknown>)?.status as string) ||
+                      ''
+                    ).slice(1)}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -261,7 +292,8 @@ const PIDetails: React.FC = () => {
                   Email Address
                 </span>
                 <span className="text-sm font-bold text-slate-600 hover:text-slate-800 cursor-pointer">
-                  {((piData as Record<string, unknown>)?.email as string) || 'N/A'}
+                  {((piData as Record<string, unknown>)?.email as string) ||
+                    'N/A'}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -269,7 +301,8 @@ const PIDetails: React.FC = () => {
                   Phone Number
                 </span>
                 <span className="text-sm font-bold text-gray-900">
-                  {((piData as Record<string, unknown>)?.phone as string) || 'N/A'}
+                  {((piData as Record<string, unknown>)?.phone as string) ||
+                    'N/A'}
                 </span>
               </div>
               <div className="flex items-start justify-between p-3 bg-gray-50 rounded-lg">
@@ -277,7 +310,8 @@ const PIDetails: React.FC = () => {
                   Business Address
                 </span>
                 <span className="text-sm font-bold text-gray-900 text-right max-w-xs">
-                  {((piData as Record<string, unknown>)?.address as string) || 'N/A'}
+                  {((piData as Record<string, unknown>)?.address as string) ||
+                    'N/A'}
                 </span>
               </div>
             </div>
@@ -473,64 +507,66 @@ const PIDetails: React.FC = () => {
           <div className="p-4">
             {/* Mobile Card View */}
             <div className="block lg:hidden space-y-4">
-              {piData.products?.map((product: Record<string, unknown>, index: number) => (
-                <div
-                  key={product.id}
-                  className="bg-gray-50 rounded-lg p-5 border border-gray-200 hover:bg-gray-100 transition-colors duration-200"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <div className="font-bold text-gray-900 text-lg mb-1">
-                        {product.productName}
-                      </div>
-                      {product.productDescription && (
-                        <div className="text-sm text-gray-600 mb-2">
-                          {product.productDescription}
+              {piData.products?.map(
+                (product: Record<string, unknown>, index: number) => (
+                  <div
+                    key={product.id}
+                    className="bg-gray-50 rounded-lg p-5 border border-gray-200 hover:bg-gray-100 transition-colors duration-200"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <div className="font-bold text-gray-900 text-lg mb-1">
+                          {product.productName}
                         </div>
-                      )}
+                        {product.productDescription && (
+                          <div className="text-sm text-gray-600 mb-2">
+                            {product.productDescription}
+                          </div>
+                        )}
+                      </div>
+                      <div className="ml-3 text-right">
+                        <div className="text-lg font-bold text-slate-700">
+                          ${product.total.toFixed(2)}
+                        </div>
+                      </div>
                     </div>
-                    <div className="ml-3 text-right">
-                      <div className="text-lg font-bold text-slate-700">
-                        ${product.total.toFixed(2)}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-white p-3 rounded-lg">
+                        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                          HS Code
+                        </div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {product.hsCode || product.category?.hsnCode || 'N/A'}
+                        </div>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg">
+                        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                          Quantity
+                        </div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {product.quantity} {product.unit}
+                        </div>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg">
+                        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                          Rate
+                        </div>
+                        <div className="text-sm font-medium text-gray-900">
+                          ${product.rate.toFixed(2)}
+                        </div>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg">
+                        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                          Item #{index + 1}
+                        </div>
+                        <div className="text-sm font-medium text-slate-700">
+                          ${product.total.toFixed(2)}
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-white p-3 rounded-lg">
-                      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                        HS Code
-                      </div>
-                      <div className="text-sm font-medium text-gray-900">
-                        {product.hsCode || product.category?.hsnCode || 'N/A'}
-                      </div>
-                    </div>
-                    <div className="bg-white p-3 rounded-lg">
-                      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                        Quantity
-                      </div>
-                      <div className="text-sm font-medium text-gray-900">
-                        {product.quantity} {product.unit}
-                      </div>
-                    </div>
-                    <div className="bg-white p-3 rounded-lg">
-                      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                        Rate
-                      </div>
-                      <div className="text-sm font-medium text-gray-900">
-                        ${product.rate.toFixed(2)}
-                      </div>
-                    </div>
-                    <div className="bg-white p-3 rounded-lg">
-                      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                        Item #{index + 1}
-                      </div>
-                      <div className="text-sm font-medium text-slate-700">
-                        ${product.total.toFixed(2)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )) || (
+                )
+              ) || (
                 <div className="bg-gray-50 rounded-xl p-8 text-center text-gray-500">
                   <FontAwesomeIcon
                     icon={faBoxes}
@@ -564,58 +600,62 @@ const PIDetails: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {piData.products?.map((product: Record<string, unknown>, index: number) => (
-                    <tr
-                      key={product.id}
-                      className="hover:bg-gray-50 transition-colors duration-150"
-                    >
-                      <td className="py-5 px-6">
-                        <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <span className="text-slate-600 font-bold text-sm">
-                              #{index + 1}
-                            </span>
-                          </div>
-                          <div>
-                            <p className="font-bold text-gray-900 text-base mb-1">
-                              {product.productName}
-                            </p>
-                            {product.productDescription && (
-                              <p className="text-sm text-gray-600 leading-relaxed">
-                                {product.productDescription}
+                  {piData.products?.map(
+                    (product: Record<string, unknown>, index: number) => (
+                      <tr
+                        key={product.id}
+                        className="hover:bg-gray-50 transition-colors duration-150"
+                      >
+                        <td className="py-5 px-6">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <span className="text-slate-600 font-bold text-sm">
+                                #{index + 1}
+                              </span>
+                            </div>
+                            <div>
+                              <p className="font-bold text-gray-900 text-base mb-1">
+                                {product.productName}
                               </p>
-                            )}
+                              {product.productDescription && (
+                                <p className="text-sm text-gray-600 leading-relaxed">
+                                  {product.productDescription}
+                                </p>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="py-5 px-6">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-                          {product.hsCode || product.category?.hsnCode || 'N/A'}
-                        </span>
-                      </td>
-                      <td className="py-5 px-6 text-right">
-                        <div className="text-base font-semibold text-gray-900">
-                          {product.quantity}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {product.unit}
-                        </div>
-                      </td>
-                      <td className="py-5 px-6 text-right">
-                        <div className="text-base font-semibold text-gray-900">
-                          ${product.rate.toFixed(2)}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          per {product.unit}
-                        </div>
-                      </td>
-                      <td className="py-5 px-6 text-right">
-                        <div className="text-lg font-bold text-slate-700">
-                          ${product.total.toFixed(2)}
-                        </div>
-                      </td>
-                    </tr>
-                  )) || (
+                        </td>
+                        <td className="py-5 px-6">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                            {product.hsCode ||
+                              product.category?.hsnCode ||
+                              'N/A'}
+                          </span>
+                        </td>
+                        <td className="py-5 px-6 text-right">
+                          <div className="text-base font-semibold text-gray-900">
+                            {product.quantity}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {product.unit}
+                          </div>
+                        </td>
+                        <td className="py-5 px-6 text-right">
+                          <div className="text-base font-semibold text-gray-900">
+                            ${product.rate.toFixed(2)}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            per {product.unit}
+                          </div>
+                        </td>
+                        <td className="py-5 px-6 text-right">
+                          <div className="text-lg font-bold text-slate-700">
+                            ${product.total.toFixed(2)}
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  ) || (
                     <tr>
                       <td colSpan={5} className="py-12 text-center">
                         <div className="flex flex-col items-center">

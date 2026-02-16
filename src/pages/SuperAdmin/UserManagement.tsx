@@ -24,15 +24,29 @@ import { useDebounce } from '../../utils/useDebounce';
 const UserManagement: React.FC = () => {
   const dispatch = useDispatch();
   const { users, loading, pagination } = useSelector(
-    (state: Record<string, unknown>) => state.userManagement as { users: Record<string, unknown>[]; loading: boolean; pagination: Record<string, unknown> }
+    (state: Record<string, unknown>) =>
+      state.userManagement as {
+        users: Record<string, unknown>[];
+        loading: boolean;
+        pagination: Record<string, unknown>;
+      }
   );
-  const { roles } = useSelector((state: Record<string, unknown>) => state.role as { roles: Record<string, unknown>[] });
+  const { roles } = useSelector(
+    (state: Record<string, unknown>) =>
+      state.role as { roles: Record<string, unknown>[] }
+  );
 
   const [showForm, setShowForm] = useState(false);
-  const [editingUser, setEditingUser] = useState<Record<string, unknown> | null>(null);
+  const [editingUser, setEditingUser] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [confirmDelete, setConfirmDelete] = useState<Record<string, unknown> | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',

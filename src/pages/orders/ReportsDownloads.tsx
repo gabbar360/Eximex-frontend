@@ -15,7 +15,9 @@ import axiosInstance from '../../utils/axiosInstance';
 const ReportsDownloads: React.FC = () => {
   const dispatch = useDispatch();
   const { orders = [], loading = false } = useSelector(
-    (state: { order: { orders: Record<string, unknown>[]; loading: boolean } }) => state.order || {}
+    (state: {
+      order: { orders: Record<string, unknown>[]; loading: boolean };
+    }) => state.order || {}
   );
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -30,7 +32,9 @@ const ReportsDownloads: React.FC = () => {
     setCurrentPage(1);
   }, []);
 
-  const handleCommercialInvoiceDownload = async (order: Record<string, unknown>) => {
+  const handleCommercialInvoiceDownload = async (
+    order: Record<string, unknown>
+  ) => {
     const hasPackingList =
       order.piInvoice?.packingLists && order.piInvoice.packingLists.length > 0;
 

@@ -1,9 +1,4 @@
-import React, {
-  useRef,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import React, { useRef, useEffect, useMemo, useState } from 'react';
 
 import { HiChevronDown, HiMagnifyingGlass } from 'react-icons/hi2';
 import Label from '../form/Label';
@@ -119,7 +114,9 @@ const ProductRow: React.FC<ProductRowProps> = ({
           <span
             className={`text-sm ${selectedOption ? 'text-slate-900' : 'text-slate-500'}`}
           >
-            {selectedOption ? (selectedOption[displayKey] as string) : placeholder}
+            {selectedOption
+              ? (selectedOption[displayKey] as string)
+              : placeholder}
           </span>
           <HiChevronDown
             className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
@@ -155,7 +152,8 @@ const ProductRow: React.FC<ProductRowProps> = ({
                   <div
                     key={option[valueKey] as string}
                     className={`px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm transition-colors duration-150 ${
-                      (option[valueKey] as string)?.toString() === value?.toString()
+                      (option[valueKey] as string)?.toString() ===
+                      value?.toString()
                         ? 'bg-slate-100 text-slate-900 font-medium'
                         : 'text-slate-700'
                     }`}
@@ -190,7 +188,10 @@ const ProductRow: React.FC<ProductRowProps> = ({
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (categoryRef.current && !categoryRef.current.contains(event.target as Node)) {
+      if (
+        categoryRef.current &&
+        !categoryRef.current.contains(event.target as Node)
+      ) {
         setShowCategoryDropdown(false);
       }
       if (
@@ -199,7 +200,10 @@ const ProductRow: React.FC<ProductRowProps> = ({
       ) {
         setShowSubcategoryDropdown(false);
       }
-      if (productRef.current && !productRef.current.contains(event.target as Node)) {
+      if (
+        productRef.current &&
+        !productRef.current.contains(event.target as Node)
+      ) {
         setShowProductDropdown(false);
       }
       if (unitRef.current && !unitRef.current.contains(event.target as Node)) {
@@ -214,12 +218,16 @@ const ProductRow: React.FC<ProductRowProps> = ({
   const selectedCategoryData = categories.find(
     (c) => (c.id as string).toString() === currentCategoryId
   );
-  const filteredSubcategories = (selectedCategoryData?.subcategories as Record<string, unknown>[]) || [];
+  const filteredSubcategories =
+    (selectedCategoryData?.subcategories as Record<string, unknown>[]) || [];
 
   const filteredProducts = products.filter((p) => {
-    const productCategoryId = (p.categoryId as string) || (p.category as { id: string })?.id;
+    const productCategoryId =
+      (p.categoryId as string) || (p.category as { id: string })?.id;
     const productSubCategoryId =
-      (p.subCategoryId as string) || (p.subcategoryId as string) || (p.subCategory as { id: string })?.id;
+      (p.subCategoryId as string) ||
+      (p.subcategoryId as string) ||
+      (p.subCategory as { id: string })?.id;
 
     const categoryMatch =
       !currentCategoryId ||
@@ -243,7 +251,11 @@ const ProductRow: React.FC<ProductRowProps> = ({
       !data.quantity ||
       !data.unit ||
       data.unit.toLowerCase() !== 'square meter' ||
-      !(prod?.packagingHierarchyData as { dynamicFields?: Record<string, unknown> })?.dynamicFields
+      !(
+        prod?.packagingHierarchyData as {
+          dynamicFields?: Record<string, unknown>;
+        }
+      )?.dynamicFields
     ) {
       return null;
     }
@@ -251,7 +263,9 @@ const ProductRow: React.FC<ProductRowProps> = ({
     const quantity = parseFloat(data.quantity);
     if (isNaN(quantity) || quantity <= 0) return null;
 
-    const packagingData = (prod.packagingHierarchyData as { dynamicFields: Record<string, unknown> }).dynamicFields;
+    const packagingData = (
+      prod.packagingHierarchyData as { dynamicFields: Record<string, unknown> }
+    ).dynamicFields;
     const sqmPerBox = (packagingData['Square MeterPerBox'] as number) || 0;
     const boxesPerPallet = (packagingData['BoxPerPallet'] as number) || 0;
 
@@ -267,12 +281,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
       boxesPerPallet,
       calculatedFor: quantity,
     };
-  }, [
-    data.productId,
-    data.quantity,
-    data.unit,
-    prod?.packagingHierarchyData,
-  ]);
+  }, [data.productId, data.quantity, data.unit, prod?.packagingHierarchyData]);
 
   useEffect(() => {
     if (packagingCalculation) {

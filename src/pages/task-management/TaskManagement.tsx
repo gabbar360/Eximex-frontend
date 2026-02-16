@@ -189,7 +189,9 @@ const TaskManagement: React.FC = () => {
   );
 
   const handleStatusUpdate = async (taskId: number, newStatus: string) => {
-    const task = tasks.find((t: Record<string, unknown>) => (t.id as number) === taskId);
+    const task = tasks.find(
+      (t: Record<string, unknown>) => (t.id as number) === taskId
+    );
     setConfirmStatusChange({
       taskId,
       newStatus,
@@ -431,93 +433,107 @@ const TaskManagement: React.FC = () => {
                     </div>
                   </div>
                   <div className="divide-y divide-gray-200">
-                    {tasks.map((task: { id: number; title: string; description?: string; type?: string; assignee?: { name: string }; assigner?: { name: string }; priority: string; status: string; dueDate?: string }) => (
-                      <div key={task.id} className="p-4 hover:bg-gray-50">
-                        <div
-                          className="grid gap-3 items-center"
-                          style={{
-                            gridTemplateColumns:
-                              '2fr 1fr 1.2fr 1.2fr 0.8fr 1fr 1fr 0.8fr',
-                          }}
-                        >
-                          <div>
-                            <h3 className="font-semibold text-slate-900">
-                              {task.title}
-                            </h3>
-                            {task.description && (
-                              <p className="text-sm text-slate-600 mt-1 truncate">
-                                {task.description}
-                              </p>
-                            )}
-                          </div>
-                          <div className="text-sm text-slate-700">
-                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                              {task.type?.replace('_', ' ')}
-                            </span>
-                          </div>
-                          <div className="text-sm text-slate-700">
-                            {task.assignee?.name}
-                          </div>
-                          <div className="text-sm text-slate-700">
-                            {task.assigner?.name}
-                          </div>
-                          <div>
-                            <span
-                              className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(task.priority)}`}
-                            >
-                              {task.priority}
-                            </span>
-                          </div>
-                          <div>
-                            {!isAdmin ? (
-                              <select
-                                value={task.status}
-                                onChange={(e) =>
-                                  handleStatusUpdate(task.id, e.target.value)
-                                }
-                                className={`px-2 py-1 rounded-full text-xs font-medium border-0 ${getStatusColor(task.status)}`}
-                                disabled={task.status === 'COMPLETED'}
-                              >
-                                <option value="PENDING">Pending</option>
-                                <option value="IN_PROGRESS">In Progress</option>
-                                <option value="ON_HOLD">On Hold</option>
-                                <option value="COMPLETED">Completed</option>
-                                <option value="CANCELLED">Cancelled</option>
-                              </select>
-                            ) : (
-                              <span
-                                className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}
-                              >
-                                {task.status.replace('_', ' ')}
+                    {tasks.map(
+                      (task: {
+                        id: number;
+                        title: string;
+                        description?: string;
+                        type?: string;
+                        assignee?: { name: string };
+                        assigner?: { name: string };
+                        priority: string;
+                        status: string;
+                        dueDate?: string;
+                      }) => (
+                        <div key={task.id} className="p-4 hover:bg-gray-50">
+                          <div
+                            className="grid gap-3 items-center"
+                            style={{
+                              gridTemplateColumns:
+                                '2fr 1fr 1.2fr 1.2fr 0.8fr 1fr 1fr 0.8fr',
+                            }}
+                          >
+                            <div>
+                              <h3 className="font-semibold text-slate-900">
+                                {task.title}
+                              </h3>
+                              {task.description && (
+                                <p className="text-sm text-slate-600 mt-1 truncate">
+                                  {task.description}
+                                </p>
+                              )}
+                            </div>
+                            <div className="text-sm text-slate-700">
+                              <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                {task.type?.replace('_', ' ')}
                               </span>
-                            )}
-                          </div>
-                          <div className="text-sm text-slate-700">
-                            {task.dueDate
-                              ? new Date(task.dueDate).toLocaleDateString()
-                              : '-'}
-                          </div>
-                          <div className="flex items-center justify-end space-x-2">
-                            {isAdmin && (
-                              <>
-                                <Link
-                                  to={`/task-management/edit-task/${task.id}`}
-                                  className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-600 transition-all duration-300"
+                            </div>
+                            <div className="text-sm text-slate-700">
+                              {task.assignee?.name}
+                            </div>
+                            <div className="text-sm text-slate-700">
+                              {task.assigner?.name}
+                            </div>
+                            <div>
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(task.priority)}`}
+                              >
+                                {task.priority}
+                              </span>
+                            </div>
+                            <div>
+                              {!isAdmin ? (
+                                <select
+                                  value={task.status}
+                                  onChange={(e) =>
+                                    handleStatusUpdate(task.id, e.target.value)
+                                  }
+                                  className={`px-2 py-1 rounded-full text-xs font-medium border-0 ${getStatusColor(task.status)}`}
+                                  disabled={task.status === 'COMPLETED'}
                                 >
-                                  <HiPencil className="w-4 h-4" />
-                                </Link>
-                                <button
-                                  onClick={() => handleDeleteClick(task.id)}
-                                  className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
+                                  <option value="PENDING">Pending</option>
+                                  <option value="IN_PROGRESS">
+                                    In Progress
+                                  </option>
+                                  <option value="ON_HOLD">On Hold</option>
+                                  <option value="COMPLETED">Completed</option>
+                                  <option value="CANCELLED">Cancelled</option>
+                                </select>
+                              ) : (
+                                <span
+                                  className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}
                                 >
-                                  <HiTrash className="w-4 h-4" />
-                                </button>
-                              </>
-                            )}
+                                  {task.status.replace('_', ' ')}
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-sm text-slate-700">
+                              {task.dueDate
+                                ? new Date(task.dueDate).toLocaleDateString()
+                                : '-'}
+                            </div>
+                            <div className="flex items-center justify-end space-x-2">
+                              {isAdmin && (
+                                <>
+                                  <Link
+                                    to={`/task-management/edit-task/${task.id}`}
+                                    className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-600 transition-all duration-300"
+                                  >
+                                    <HiPencil className="w-4 h-4" />
+                                  </Link>
+                                  <button
+                                    onClick={() => handleDeleteClick(task.id)}
+                                    className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
+                                  >
+                                    <HiTrash className="w-4 h-4" />
+                                  </button>
+                                </>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      )
+                    )}
                   </div>
                 </div>
               </div>

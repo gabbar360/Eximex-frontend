@@ -99,24 +99,44 @@ export default function CompanyDetailsCard({
                 </h5>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
                   <div>
-                    <p className="text-xs font-medium text-slate-500 mb-1">Bank Name</p>
-                    <p className="text-slate-800 font-medium text-sm">{bank.bankName}</p>
+                    <p className="text-xs font-medium text-slate-500 mb-1">
+                      Bank Name
+                    </p>
+                    <p className="text-slate-800 font-medium text-sm">
+                      {bank.bankName}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-xs font-medium text-slate-500 mb-1">Account Number</p>
-                    <p className="text-slate-800 font-medium text-sm">{bank.accountNumber}</p>
+                    <p className="text-xs font-medium text-slate-500 mb-1">
+                      Account Number
+                    </p>
+                    <p className="text-slate-800 font-medium text-sm">
+                      {bank.accountNumber}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-xs font-medium text-slate-500 mb-1">IFSC Code</p>
-                    <p className="text-slate-800 font-medium text-sm">{bank.ifscCode}</p>
+                    <p className="text-xs font-medium text-slate-500 mb-1">
+                      IFSC Code
+                    </p>
+                    <p className="text-slate-800 font-medium text-sm">
+                      {bank.ifscCode}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-xs font-medium text-slate-500 mb-1">SWIFT Code</p>
-                    <p className="text-slate-800 font-medium text-sm">{bank.swiftCode}</p>
+                    <p className="text-xs font-medium text-slate-500 mb-1">
+                      SWIFT Code
+                    </p>
+                    <p className="text-slate-800 font-medium text-sm">
+                      {bank.swiftCode}
+                    </p>
                   </div>
                   <div className="md:col-span-2">
-                    <p className="text-xs font-medium text-slate-500 mb-1">Bank Address</p>
-                    <p className="text-slate-800 font-medium text-sm">{bank.bankAddress}</p>
+                    <p className="text-xs font-medium text-slate-500 mb-1">
+                      Bank Address
+                    </p>
+                    <p className="text-slate-800 font-medium text-sm">
+                      {bank.bankAddress}
+                    </p>
                   </div>
                 </div>
               </div>

@@ -665,13 +665,16 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   // Load existing PI data if in edit mode
   useEffect(() => {
     loadDefaultData();
-    
+
     // Load current user's company bank details
     if (user?.company?.bankDetails) {
-      console.log('Loading bank details from user company:', user.company.bankDetails);
+      console.log(
+        'Loading bank details from user company:',
+        user.company.bankDetails
+      );
       setCompanyBanks(user.company.bankDetails);
     }
-    
+
     if (isEditMode) {
       setLoading(true);
       try {
@@ -861,11 +864,11 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         email: selectedParty.email || '',
         phone: selectedParty.phone || '',
       });
-      
+
       // Bank details come from current user's company (already loaded in useEffect)
       console.log('Company selected:', selectedParty.companyName);
       console.log('Available bank details:', companyBanks.length);
-      
+
       setSelectedBankId(''); // Reset bank selection when company changes
     } else {
       setCompany(null);
@@ -1328,9 +1331,15 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         productName: productName,
         hsCode: (() => {
           // Match PDF template HS Code logic exactly
-          if (product?.hsCode && product.hsCode !== 'N/A') return product.hsCode;
-          if (product?.hsnCode && product.hsnCode !== 'N/A') return product.hsnCode;
-          const category = categories.find(c => c.id.toString() === (currentProduct.categoryId || selectedCategory)?.toString());
+          if (product?.hsCode && product.hsCode !== 'N/A')
+            return product.hsCode;
+          if (product?.hsnCode && product.hsnCode !== 'N/A')
+            return product.hsnCode;
+          const category = categories.find(
+            (c) =>
+              c.id.toString() ===
+              (currentProduct.categoryId || selectedCategory)?.toString()
+          );
           if (category?.hsnCode) return category.hsnCode;
           if (product?.category?.hsnCode) return product.category.hsnCode;
           if (product?.hsCode) return product.hsCode;
@@ -2160,13 +2169,14 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                         label="Bank Details"
                         value={selectedBankId}
                         options={companyBanks
-                          .filter((bank) =>
-                            (bank.bankName || '')
-                              .toLowerCase()
-                              .includes(bankSearch.toLowerCase()) ||
-                            (bank.accountNumber || '')
-                              .toLowerCase()
-                              .includes(bankSearch.toLowerCase())
+                          .filter(
+                            (bank) =>
+                              (bank.bankName || '')
+                                .toLowerCase()
+                                .includes(bankSearch.toLowerCase()) ||
+                              (bank.accountNumber || '')
+                                .toLowerCase()
+                                .includes(bankSearch.toLowerCase())
                           )
                           .map((bank) => ({
                             id: bank.id || bank.bankName,
@@ -2180,7 +2190,11 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                         onSearchChange={setBankSearch}
                         isOpen={showBankDropdown}
                         onToggle={() => setShowBankDropdown(!showBankDropdown)}
-                        placeholder={companyBanks.length > 0 ? "Choose Bank Details" : "No bank details available"}
+                        placeholder={
+                          companyBanks.length > 0
+                            ? 'Choose Bank Details'
+                            : 'No bank details available'
+                        }
                         disabled={companyBanks.length === 0}
                         dropdownRef={bankRef}
                       />
@@ -2666,7 +2680,10 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                                 label="Balance Payment Term"
                                 value={balancePaymentTerm}
                                 options={[
-                                  { id: 'AGAINST SCAN BL', name: 'AGAINST SCAN BL' },
+                                  {
+                                    id: 'AGAINST SCAN BL',
+                                    name: 'AGAINST SCAN BL',
+                                  },
                                   {
                                     id: 'AGAINST DOCUMENTS',
                                     name: 'AGAINST DOCUMENTS',
@@ -3756,15 +3773,31 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                                     <td className="px-3 py-3 text-sm">
                                       {(() => {
                                         // Match PDF template HS Code logic exactly
-                                        if (productInfo?.hsCode && productInfo.hsCode !== 'N/A') return productInfo.hsCode;
-                                        if (productInfo?.hsnCode && productInfo.hsnCode !== 'N/A') return productInfo.hsnCode;
-                                        const category = categories.find(c => c.id.toString() === prod.categoryId?.toString());
-                                        if (category?.hsnCode) return category.hsnCode;
-                                        if (productInfo?.category?.hsnCode) return productInfo.category.hsnCode;
-                                        if (productInfo?.hsCode) return productInfo.hsCode;
-                                        if (productInfo?.hsnCode) return productInfo.hsnCode;
+                                        if (
+                                          productInfo?.hsCode &&
+                                          productInfo.hsCode !== 'N/A'
+                                        )
+                                          return productInfo.hsCode;
+                                        if (
+                                          productInfo?.hsnCode &&
+                                          productInfo.hsnCode !== 'N/A'
+                                        )
+                                          return productInfo.hsnCode;
+                                        const category = categories.find(
+                                          (c) =>
+                                            c.id.toString() ===
+                                            prod.categoryId?.toString()
+                                        );
+                                        if (category?.hsnCode)
+                                          return category.hsnCode;
+                                        if (productInfo?.category?.hsnCode)
+                                          return productInfo.category.hsnCode;
+                                        if (productInfo?.hsCode)
+                                          return productInfo.hsCode;
+                                        if (productInfo?.hsnCode)
+                                          return productInfo.hsnCode;
                                         return 'N/A';
-                                      })()} 
+                                      })()}
                                     </td>
                                     <td className="px-3 py-3 text-sm text-right font-medium">
                                       {prod.quantity}
