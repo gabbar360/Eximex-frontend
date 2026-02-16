@@ -142,18 +142,30 @@ const OrderSelector: React.FC<OrderSelectorProps> = ({
         ordersList = ordersList.filter((order) => {
           switch (filterType) {
             case 'vgm': {
-              const hasVgm = order.piInvoice?.vgmDocuments && order.piInvoice.vgmDocuments.length > 0;
+              const hasVgm =
+                order.piInvoice?.vgmDocuments &&
+                order.piInvoice.vgmDocuments.length > 0;
               return !hasVgm;
             }
             case 'shipment': {
-              const hasShipment = order.shipment && (order.shipment.bookingNumber || order.shipment.bookingDate || order.shipment.vesselVoyageInfo || order.shipment.wayBillNumber || order.shipment.truckNumber);
+              const hasShipment =
+                order.shipment &&
+                (order.shipment.bookingNumber ||
+                  order.shipment.bookingDate ||
+                  order.shipment.vesselVoyageInfo ||
+                  order.shipment.wayBillNumber ||
+                  order.shipment.truckNumber);
               return !hasShipment;
             }
             case 'packingList': {
-              const hasPackingListArray = order.packingLists && order.packingLists.length > 0;
+              const hasPackingListArray =
+                order.packingLists && order.packingLists.length > 0;
               const hasPackingListId = order.packingListId;
-              const hasPiPackingLists = order.piInvoice?.packingLists && order.piInvoice.packingLists.length > 0;
-              const hasPackingList = hasPackingListArray || hasPackingListId || hasPiPackingLists;
+              const hasPiPackingLists =
+                order.piInvoice?.packingLists &&
+                order.piInvoice.packingLists.length > 0;
+              const hasPackingList =
+                hasPackingListArray || hasPackingListId || hasPiPackingLists;
               return !hasPackingList;
             }
             default:

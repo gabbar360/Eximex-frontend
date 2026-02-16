@@ -26,7 +26,9 @@ import { toast } from 'react-toastify';
 
 const PurchaseOrders: React.FC = () => {
   const dispatch = useDispatch();
-  const [purchaseOrders, setPurchaseOrders] = useState<Record<string, unknown>[]>([]);
+  const [purchaseOrders, setPurchaseOrders] = useState<
+    Record<string, unknown>[]
+  >([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
@@ -64,8 +66,6 @@ const PurchaseOrders: React.FC = () => {
   useEffect(() => {
     loadPurchaseOrders();
   }, [loadPurchaseOrders]);
-
-
 
   const handleConfirmDelete = async () => {
     if (!confirmDelete) return;
@@ -110,14 +110,14 @@ const PurchaseOrders: React.FC = () => {
   const filteredPurchaseOrders = Array.isArray(purchaseOrders)
     ? purchaseOrders.filter(
         (po: Record<string, unknown>) =>
-          ((po?.poNumber as string)?.toLowerCase().includes(searchTerm.toLowerCase())) ||
-          ((po?.vendorName as string)?.toLowerCase().includes(searchTerm.toLowerCase()))
+          (po?.poNumber as string)
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          (po?.vendorName as string)
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase())
       )
     : [];
-
-
-
-
 
   const handleSearch = useCallback((value: string) => {
     setSearchTerm(value);
@@ -277,119 +277,132 @@ const PurchaseOrders: React.FC = () => {
                     </div>
                   </div>
                   <div className="divide-y divide-white/20">
-                    {filteredPurchaseOrders.map((po: Record<string, unknown>) => {
-                      const statusConfig = getStatusConfig((po.status as string));
-                      const StatusIcon = statusConfig.icon;
+                    {filteredPurchaseOrders.map(
+                      (po: Record<string, unknown>) => {
+                        const statusConfig = getStatusConfig(
+                          po.status as string
+                        );
+                        const StatusIcon = statusConfig.icon;
 
-                      return (
-                        <div
-                          key={(po.id as string)}
-                          className="p-4 hover:bg-white/50 transition-all duration-300"
-                        >
+                        return (
                           <div
-                            className="grid gap-2 items-center"
-                            style={{
-                              gridTemplateColumns:
-                                '1.5fr 1.2fr 1fr 1fr 1fr 1fr 0.8fr',
-                            }}
+                            key={po.id as string}
+                            className="p-4 hover:bg-white/50 transition-all duration-300"
                           >
-                            {/* PO Number */}
-                            <div className="flex items-center gap-2">
-                              <HiDocumentText className="w-4 h-4 text-slate-600 flex-shrink-0" />
-                              <span
-                                className="text-slate-800 font-medium truncate"
-                                title={(po.poNumber as string)}
-                              >
-                                {(po.poNumber as string)}
-                              </span>
-                            </div>
-
-                            {/* Supplier */}
                             <div
-                              className="text-slate-700 text-sm truncate"
-                              title={(po.vendorName as string)}
+                              className="grid gap-2 items-center"
+                              style={{
+                                gridTemplateColumns:
+                                  '1.5fr 1.2fr 1fr 1fr 1fr 1fr 0.8fr',
+                              }}
                             >
-                              {(po.vendorName as string) || '-'}
-                            </div>
+                              {/* PO Number */}
+                              <div className="flex items-center gap-2">
+                                <HiDocumentText className="w-4 h-4 text-slate-600 flex-shrink-0" />
+                                <span
+                                  className="text-slate-800 font-medium truncate"
+                                  title={po.poNumber as string}
+                                >
+                                  {po.poNumber as string}
+                                </span>
+                              </div>
 
-                            {/* Date */}
-                            <div className="text-slate-700 text-sm">
-                              {(po.poDate as string)
-                                ? new Date((po.poDate as string)).toLocaleDateString(
-                                    'en-US',
-                                    {
+                              {/* Supplier */}
+                              <div
+                                className="text-slate-700 text-sm truncate"
+                                title={po.vendorName as string}
+                              >
+                                {(po.vendorName as string) || '-'}
+                              </div>
+
+                              {/* Date */}
+                              <div className="text-slate-700 text-sm">
+                                {(po.poDate as string)
+                                  ? new Date(
+                                      po.poDate as string
+                                    ).toLocaleDateString('en-US', {
                                       month: 'short',
                                       day: 'numeric',
                                       year: 'numeric',
-                                    }
-                                  )
-                                : '-'}
-                            </div>
+                                    })
+                                  : '-'}
+                              </div>
 
-                            {/* Status */}
-                            <div>
-                              <span
-                                className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${statusConfig.bg} ${statusConfig.color} ${statusConfig.border}`}
-                              >
-                                <StatusIcon className="w-3 h-3 mr-1" />
-                                {((po.status as string)?.charAt(0).toUpperCase() +
-                                  (po.status as string)?.slice(1)) || 'Draft'}
-                              </span>
-                            </div>
+                              {/* Status */}
+                              <div>
+                                <span
+                                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${statusConfig.bg} ${statusConfig.color} ${statusConfig.border}`}
+                                >
+                                  <StatusIcon className="w-3 h-3 mr-1" />
+                                  {(po.status as string)
+                                    ?.charAt(0)
+                                    .toUpperCase() +
+                                    (po.status as string)?.slice(1) || 'Draft'}
+                                </span>
+                              </div>
 
-                            {/* Type */}
-                            <div className="text-slate-700 text-sm">
-                              <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
-                                DOMESTIC
-                              </span>
-                            </div>
+                              {/* Type */}
+                              <div className="text-slate-700 text-sm">
+                                <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
+                                  DOMESTIC
+                                </span>
+                              </div>
 
-                            {/* Amount */}
-                            <div className="text-slate-700 text-sm font-medium">
-                              {(po.totalAmount as number) && (po.currency as string)
-                                ? new Intl.NumberFormat('en-US', {
-                                    style: 'currency',
-                                    currency: (po.currency as string),
-                                    maximumFractionDigits: 0,
-                                  }).format((po.totalAmount as number))
-                                : '-'}
-                            </div>
+                              {/* Amount */}
+                              <div className="text-slate-700 text-sm font-medium">
+                                {(po.totalAmount as number) &&
+                                (po.currency as string)
+                                  ? new Intl.NumberFormat('en-US', {
+                                      style: 'currency',
+                                      currency: po.currency as string,
+                                      maximumFractionDigits: 0,
+                                    }).format(po.totalAmount as number)
+                                  : '-'}
+                              </div>
 
-                            {/* Actions */}
-                            <div className="flex items-center justify-end space-x-2">
-                              <button
-                                onClick={async () =>
-                                  await handleDownload((po.id as string), (po.poNumber as string))
-                                }
-                                disabled={downloadingPdf === (po.id as string)}
-                                className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-blue-600 transition-all duration-300"
-                                title="Download PDF"
-                              >
-                                {downloadingPdf === (po.id as string) ? (
-                                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-300 border-t-blue-600"></div>
-                                ) : (
-                                  <HiArrowDownTray className="w-4 h-4" />
-                                )}
-                              </button>
-                              <Link
-                                to={`/purchase-orders/edit/${(po.id as string)}`}
-                                className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-600 transition-all duration-300"
-                                title="Edit"
-                              >
-                                <HiPencil className="w-4 h-4" />
-                              </Link>
-                              <button
-                                onClick={() => setConfirmDelete((po.id as string))}
-                                className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
-                                title="Delete"
-                              >
-                                <HiTrash className="w-4 h-4" />
-                              </button>
+                              {/* Actions */}
+                              <div className="flex items-center justify-end space-x-2">
+                                <button
+                                  onClick={async () =>
+                                    await handleDownload(
+                                      po.id as string,
+                                      po.poNumber as string
+                                    )
+                                  }
+                                  disabled={
+                                    downloadingPdf === (po.id as string)
+                                  }
+                                  className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-blue-600 transition-all duration-300"
+                                  title="Download PDF"
+                                >
+                                  {downloadingPdf === (po.id as string) ? (
+                                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-300 border-t-blue-600"></div>
+                                  ) : (
+                                    <HiArrowDownTray className="w-4 h-4" />
+                                  )}
+                                </button>
+                                <Link
+                                  to={`/purchase-orders/edit/${po.id as string}`}
+                                  className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-600 transition-all duration-300"
+                                  title="Edit"
+                                >
+                                  <HiPencil className="w-4 h-4" />
+                                </Link>
+                                <button
+                                  onClick={() =>
+                                    setConfirmDelete(po.id as string)
+                                  }
+                                  className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
+                                  title="Delete"
+                                >
+                                  <HiTrash className="w-4 h-4" />
+                                </button>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      }
+                    )}
                   </div>
                 </div>
               </div>

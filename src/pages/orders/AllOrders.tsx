@@ -24,7 +24,9 @@ import { fetchOrders, deleteOrder } from '../../features/orderSlice';
 const AllOrders: React.FC = () => {
   const dispatch = useDispatch();
   const { orders = [], loading = false } = useSelector(
-    (state: { order?: { orders: Record<string, unknown>[]; loading: boolean } }) => state.order || {}
+    (state: {
+      order?: { orders: Record<string, unknown>[]; loading: boolean };
+    }) => state.order || {}
   );
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -152,7 +154,7 @@ const AllOrders: React.FC = () => {
       setConfirmDelete(null);
     } catch (error: unknown) {
       console.log('Delete error:', error);
-      toast.error(error as string || 'Failed to delete order');
+      toast.error((error as string) || 'Failed to delete order');
     }
   };
 
@@ -177,29 +179,31 @@ const AllOrders: React.FC = () => {
     };
   }, [openDropdown]);
 
-  const filteredOrders = orders.filter((order: {
-    orderNumber?: string;
-    piInvoice?: {
-      party?: { companyName?: string };
-    };
-    orderStatus?: string;
-  }) => {
-    if (!order) return false;
+  const filteredOrders = orders.filter(
+    (order: {
+      orderNumber?: string;
+      piInvoice?: {
+        party?: { companyName?: string };
+      };
+      orderStatus?: string;
+    }) => {
+      if (!order) return false;
 
-    const matchesSearch =
-      !searchTerm ||
-      order.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.piInvoice?.party?.companyName
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase());
+      const matchesSearch =
+        !searchTerm ||
+        order.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.piInvoice?.party?.companyName
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase());
 
-    const matchesStatus =
-      filterStatus === 'all' ||
-      (order.orderStatus &&
-        order.orderStatus.toLowerCase() === filterStatus.toLowerCase());
+      const matchesStatus =
+        filterStatus === 'all' ||
+        (order.orderStatus &&
+          order.orderStatus.toLowerCase() === filterStatus.toLowerCase());
 
-    return matchesSearch && matchesStatus;
-  });
+      return matchesSearch && matchesStatus;
+    }
+  );
 
   const getStatusConfig = (status: string) => {
     switch (status?.toLowerCase()) {

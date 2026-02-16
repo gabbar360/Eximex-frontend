@@ -34,10 +34,7 @@ export const getPiInvoiceById = async (id) => {
 };
 
 export const updatePiInvoice = async (id, piData) => {
-  const response = await axiosInstance.put(
-    `/update/pi-invoice/${id}`,
-    piData
-  );
+  const response = await axiosInstance.put(`/update/pi-invoice/${id}`, piData);
   return {
     data: response.data.data,
     message: response.data.message,
@@ -95,10 +92,7 @@ export const updatePiStatus = async (id, status) => {
 };
 
 export const updatePiAmount = async (id, amountData) => {
-  const response = await axiosInstance.put(
-    `/${id}/update-amount`,
-    amountData
-  );
+  const response = await axiosInstance.put(`/${id}/update-amount`, amountData);
   return response.data;
 };
 

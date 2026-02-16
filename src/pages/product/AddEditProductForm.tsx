@@ -20,20 +20,19 @@ import PackagingDetails from '../../components/product/PackagingDetails';
 import PackagingPreview from '../../components/product/PackagingPreview';
 import PackagingCalculations from '../../components/product/PackagingCalculations';
 
-
 const AddEditProductForm = () => {
   console.log('🔄 AddEditProductForm: Component function called');
-  
+
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams();
   const isEdit = Boolean(id);
   const dispatch = useDispatch();
 
-  console.log('📍 Current state:', { 
-    pathname: location.pathname, 
-    id, 
-    isEdit 
+  console.log('📍 Current state:', {
+    pathname: location.pathname,
+    id,
+    isEdit,
   });
 
   // Check if we should render this component
@@ -70,7 +69,7 @@ const AddEditProductForm = () => {
   console.log('📊 State values:', {
     categoriesLength: categories.length,
     categoriesLoading,
-    forceHide
+    forceHide,
   });
 
   type ProductType = {
@@ -84,21 +83,28 @@ const AddEditProductForm = () => {
 
   const [product, setProduct] = useState<ProductType | null>(null);
 
-  const [subcategories, setSubcategories] = useState<Record<string, unknown>[]>([]);
+  const [subcategories, setSubcategories] = useState<Record<string, unknown>[]>(
+    []
+  );
   const [loading, setLoading] = useState(false);
-  const [packagingHierarchy, setPackagingHierarchy] = useState<Record<string, unknown>[]>([]);
+  const [packagingHierarchy, setPackagingHierarchy] = useState<
+    Record<string, unknown>[]
+  >([]);
   const [trackVolume, setTrackVolume] = useState(false);
   const [loadingCategory, setLoadingCategory] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
 
   const fetchCategories = useCallback(async () => {
-    console.log('🔍 fetchCategories called:', { categoriesLoading, categoriesLength: categories.length });
-    
+    console.log('🔍 fetchCategories called:', {
+      categoriesLoading,
+      categoriesLength: categories.length,
+    });
+
     if (categoriesLoading || categories.length > 0) {
       console.log('⏭️ fetchCategories: Skipping - already loading or loaded');
       return;
     }
-    
+
     try {
       console.log('📡 fetchCategories: Starting API call');
       setCategoriesLoading(true);
@@ -109,7 +115,11 @@ const AddEditProductForm = () => {
       // Handle different response structures
       const categoriesData =
         response?.data?.data || response?.data || response || [];
-      console.log('✅ fetchCategories: Success, got', categoriesData.length, 'categories');
+      console.log(
+        '✅ fetchCategories: Success, got',
+        categoriesData.length,
+        'categories'
+      );
       setCategories(categoriesData);
     } catch (error) {
       console.error('❌ fetchCategories: Failed:', error);
@@ -124,10 +134,15 @@ const AddEditProductForm = () => {
 
   const loadSubcategories = useCallback(
     (categoryId: string | number) => {
-      console.log('📁 loadSubcategories called:', { categoryId, categoriesLength: categories.length });
-      
+      console.log('📁 loadSubcategories called:', {
+        categoryId,
+        categoriesLength: categories.length,
+      });
+
       if (!categoryId || !categories || categories.length === 0) {
-        console.log('⏭️ loadSubcategories: Skipping - no categoryId or categories');
+        console.log(
+          '⏭️ loadSubcategories: Skipping - no categoryId or categories'
+        );
         setSubcategories([]);
         return;
       }
@@ -142,7 +157,11 @@ const AddEditProductForm = () => {
         selectedCategory.subcategories &&
         Array.isArray(selectedCategory.subcategories)
       ) {
-        console.log('✅ loadSubcategories: Found', selectedCategory.subcategories.length, 'subcategories');
+        console.log(
+          '✅ loadSubcategories: Found',
+          selectedCategory.subcategories.length,
+          'subcategories'
+        );
         setSubcategories(selectedCategory.subcategories);
       } else {
         console.log('⚠️ loadSubcategories: No subcategories found');
@@ -153,40 +172,51 @@ const AddEditProductForm = () => {
   );
 
   // Fetch category details including packaging hierarchy
-  const fetchCategoryDetails = useCallback(async (categoryId: string | number) => {
-    console.log('📄 fetchCategoryDetails called:', { categoryId, loadingCategory });
-    
-    if (!categoryId) {
-      console.log('⏭️ fetchCategoryDetails: Skipping - no categoryId');
-      return;
-    }
+  const fetchCategoryDetails = useCallback(
+    async (categoryId: string | number) => {
+      console.log('📄 fetchCategoryDetails called:', {
+        categoryId,
+        loadingCategory,
+      });
 
-    try {
-      console.log('📡 fetchCategoryDetails: Starting API call');
-      setLoadingCategory(true);
-      const categoryData = await dispatch(getCategoryById(categoryId)).unwrap();
+      if (!categoryId) {
+        console.log('⏭️ fetchCategoryDetails: Skipping - no categoryId');
+        return;
+      }
 
-      if (categoryData && categoryData.packagingHierarchy) {
-        console.log('✅ fetchCategoryDetails: Got packaging hierarchy:', categoryData.packagingHierarchy.length);
-        setPackagingHierarchy(categoryData.packagingHierarchy);
-        setTrackVolume(categoryData.trackVolume || false);
-      } else {
-        console.log('⚠️ fetchCategoryDetails: No packaging hierarchy');
+      try {
+        console.log('📡 fetchCategoryDetails: Starting API call');
+        setLoadingCategory(true);
+        const categoryData = await dispatch(
+          getCategoryById(categoryId)
+        ).unwrap();
+
+        if (categoryData && categoryData.packagingHierarchy) {
+          console.log(
+            '✅ fetchCategoryDetails: Got packaging hierarchy:',
+            categoryData.packagingHierarchy.length
+          );
+          setPackagingHierarchy(categoryData.packagingHierarchy);
+          setTrackVolume(categoryData.trackVolume || false);
+        } else {
+          console.log('⚠️ fetchCategoryDetails: No packaging hierarchy');
+          setPackagingHierarchy([]);
+          setTrackVolume(false);
+        }
+        setLoadingCategory(false);
+      } catch (error) {
+        console.error('❌ fetchCategoryDetails: Failed:', error);
         setPackagingHierarchy([]);
         setTrackVolume(false);
+        setLoadingCategory(false);
       }
-      setLoadingCategory(false);
-    } catch (error) {
-      console.error('❌ fetchCategoryDetails: Failed:', error);
-      setPackagingHierarchy([]);
-      setTrackVolume(false);
-      setLoadingCategory(false);
-    }
-  }, [dispatch]);
+    },
+    [dispatch]
+  );
 
   const fetchProduct = useCallback(async () => {
     if (!id) return;
-    
+
     try {
       setLoading(true);
       const response = await dispatch(getProductById(id)).unwrap();
@@ -221,9 +251,9 @@ const AddEditProductForm = () => {
       hasProduct: !!product,
       categoriesLength: categories.length,
       productCategoryId: product?.categoryId,
-      selectedCategoryId
+      selectedCategoryId,
     });
-    
+
     if (
       isEdit &&
       product &&
@@ -232,21 +262,40 @@ const AddEditProductForm = () => {
       product.categoryId &&
       selectedCategoryId !== product.categoryId.toString()
     ) {
-      console.log('🔄 Loading subcategories and category details for:', product.categoryId);
+      console.log(
+        '🔄 Loading subcategories and category details for:',
+        product.categoryId
+      );
       // Ensure subcategories and category details are loaded when categories become available
       loadSubcategories(product.categoryId);
       fetchCategoryDetails(product.categoryId);
     }
-  }, [categories.length, product?.categoryId, isEdit, selectedCategoryId, loadSubcategories, fetchCategoryDetails]);
+  }, [
+    categories.length,
+    product?.categoryId,
+    isEdit,
+    selectedCategoryId,
+    loadSubcategories,
+    fetchCategoryDetails,
+  ]);
 
   // Load category details when product is loaded (for edit mode)
   useEffect(() => {
     if (isEdit && product && product.categoryId && categories.length > 0) {
-      console.log('🔄 Product loaded, loading category details for:', product.categoryId);
+      console.log(
+        '🔄 Product loaded, loading category details for:',
+        product.categoryId
+      );
       loadSubcategories(product.categoryId);
       fetchCategoryDetails(product.categoryId);
     }
-  }, [product?.id, categories.length, isEdit, loadSubcategories, fetchCategoryDetails]);
+  }, [
+    product?.id,
+    categories.length,
+    isEdit,
+    loadSubcategories,
+    fetchCategoryDetails,
+  ]);
 
   // Weight unit conversion functions
   const convertToKg = (weight: number | string, unit: string) => {
@@ -348,9 +397,9 @@ const AddEditProductForm = () => {
       isEdit,
       hasProduct: !!product,
       categoriesLoading,
-      packagingHierarchyLength: packagingHierarchy.length
+      packagingHierarchyLength: packagingHierarchy.length,
     });
-    
+
     // Prevent re-computation if essential data is not ready
     if (isEdit && (!product || categoriesLoading)) {
       console.log('⏭️ initialValues: Returning null - data not ready');
@@ -497,9 +546,25 @@ const AddEditProductForm = () => {
 
     console.log('✅ initialValues: Computed successfully');
     return baseValues;
-  }, [product?.id, packagingHierarchy, trackVolume, isEdit, selectedCategoryId, categoriesLoading]);
+  }, [
+    product?.id,
+    packagingHierarchy,
+    trackVolume,
+    isEdit,
+    selectedCategoryId,
+    categoriesLoading,
+  ]);
 
-  const handleSubmit = async (values: Record<string, unknown>, { setSubmitting, setFieldError }: { setSubmitting: (isSubmitting: boolean) => void; setFieldError: (field: string, message: string) => void }) => {
+  const handleSubmit = async (
+    values: Record<string, unknown>,
+    {
+      setSubmitting,
+      setFieldError,
+    }: {
+      setSubmitting: (isSubmitting: boolean) => void;
+      setFieldError: (field: string, message: string) => void;
+    }
+  ) => {
     try {
       setSubmitting(true);
 
@@ -715,7 +780,7 @@ const AddEditProductForm = () => {
     hasInitialValues: !!initialValues,
     loading,
     categoriesLoading,
-    hasProduct: !!product
+    hasProduct: !!product,
   });
 
   // Don't render if not on correct route

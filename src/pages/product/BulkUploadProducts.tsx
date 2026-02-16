@@ -39,7 +39,7 @@ const BulkUploadProducts = () => {
         '>': '&gt;',
         '"': '&quot;',
         "'": '&#x27;',
-        '&': '&amp;'
+        '&': '&amp;',
       };
       return escapeMap[match];
     });

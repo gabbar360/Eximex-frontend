@@ -22,15 +22,26 @@ import { useDebounce } from '../../utils/useDebounce';
 const RoleManagement: React.FC = () => {
   const dispatch = useDispatch();
   const { roles, loading, pagination } = useSelector(
-    (state: Record<string, unknown>) => state.role as { roles: Record<string, unknown>[]; loading: boolean; pagination: Record<string, unknown> }
+    (state: Record<string, unknown>) =>
+      state.role as {
+        roles: Record<string, unknown>[];
+        loading: boolean;
+        pagination: Record<string, unknown>;
+      }
   );
 
   const [showForm, setShowForm] = useState(false);
-  const [editingRole, setEditingRole] = useState<Record<string, unknown> | null>(null);
+  const [editingRole, setEditingRole] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
-  const [confirmDelete, setConfirmDelete] = useState<Record<string, unknown> | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     displayName: '',

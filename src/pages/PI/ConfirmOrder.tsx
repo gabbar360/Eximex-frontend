@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faArrowLeft,
-  faCheck,
-} from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
 import {
@@ -75,7 +72,9 @@ const ConfirmOrder: React.FC = () => {
           }
         }
 
-        toast.success(`Advance payment of $${paymentAmount} recorded successfully`);
+        toast.success(
+          `Advance payment of $${paymentAmount} recorded successfully`
+        );
       } else {
         toast.success('Order confirmed successfully');
       }

@@ -37,13 +37,23 @@ const Cprospect = () => {
     parties = [],
     loading = false,
     pagination = {},
-  } = useSelector((state: { party: { parties: Record<string, unknown>[]; loading: boolean; pagination: Record<string, unknown> } }) => state.party || {});
+  } = useSelector(
+    (state: {
+      party: {
+        parties: Record<string, unknown>[];
+        loading: boolean;
+        pagination: Record<string, unknown>;
+      };
+    }) => state.party || {}
+  );
   const [searchTerm, setSearchTerm] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [wasSearching, setWasSearching] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const [stageDropdowns, setStageDropdowns] = useState<Record<string, boolean>>({});
+  const [stageDropdowns, setStageDropdowns] = useState<Record<string, boolean>>(
+    {}
+  );
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
@@ -126,16 +136,19 @@ const Cprospect = () => {
   };
 
   // Debounced search function
-  const { debouncedCallback: debouncedSearch } = useDebounce((value: string) => {
-    setWasSearching(true);
-    const params = {
-      search: value,
-      page: 1,
-      limit: pageSize,
-    };
-    setCurrentPage(1);
-    dispatch(fetchParties(params));
-  }, 500);
+  const { debouncedCallback: debouncedSearch } = useDebounce(
+    (value: string) => {
+      setWasSearching(true);
+      const params = {
+        search: value,
+        page: 1,
+        limit: pageSize,
+      };
+      setCurrentPage(1);
+      dispatch(fetchParties(params));
+    },
+    500
+  );
 
   const handleSearch = useCallback(
     (value: string) => {

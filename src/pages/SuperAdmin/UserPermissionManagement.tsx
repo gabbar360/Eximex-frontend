@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  Table,
-  Pagination,
-} from 'antd';
+import { Table, Pagination } from 'antd';
 import { toast } from 'react-toastify';
 import {
   HiShieldCheck,
@@ -29,8 +26,9 @@ import { useDebounce } from '../../utils/useDebounce';
 
 const UserPermissionManagement = () => {
   const dispatch = useDispatch();
-  const { allUsersPermissions, loading, error, pagination } =
-    useSelector((state) => state.userPermission);
+  const { allUsersPermissions, loading, error, pagination } = useSelector(
+    (state) => state.userPermission
+  );
   const { menus } = useSelector((state) => state.menu);
 
   const [showForm, setShowForm] = useState(false);
@@ -290,8 +288,6 @@ const UserPermissionManagement = () => {
     setSelectAll(false);
     setShowForm(false);
   };
-
-
 
   if (showForm) {
     return (

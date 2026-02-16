@@ -5,7 +5,10 @@ import { HiClock, HiArrowLeft } from 'react-icons/hi2';
 import { clearUser } from '../features/userSlice';
 
 const OnboardingModal: React.FC = () => {
-  const user = useSelector((state: Record<string, unknown>) => (state.user as { user: Record<string, unknown> }).user);
+  const user = useSelector(
+    (state: Record<string, unknown>) =>
+      (state.user as { user: Record<string, unknown> }).user
+  );
   const navigate = useNavigate();
   const dispatch = useDispatch();
 

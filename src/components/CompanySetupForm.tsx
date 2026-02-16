@@ -55,12 +55,22 @@ export default function CompanySetupForm({
 }: CompanySetupFormProps) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading } = useSelector((state: Record<string, unknown>) => (state.company as Record<string, unknown>) || {}) as { loading?: boolean };
-  const user = useSelector((state: Record<string, unknown>) => (state.user as Record<string, unknown>)?.user) as Record<string, unknown> | undefined;
+  const { loading } = useSelector(
+    (state: Record<string, unknown>) =>
+      (state.company as Record<string, unknown>) || {}
+  ) as { loading?: boolean };
+  const user = useSelector(
+    (state: Record<string, unknown>) =>
+      (state.user as Record<string, unknown>)?.user
+  ) as Record<string, unknown> | undefined;
 
   // Redirect if user already has a company assigned (but not for SuperAdmin)
   useEffect(() => {
-    if (user && ((user as any).company || (user as any).companyId) && !isSuperAdmin) {
+    if (
+      user &&
+      ((user as any).company || (user as any).companyId) &&
+      !isSuperAdmin
+    ) {
       navigate('/dashboard');
       return;
     }
@@ -81,13 +91,15 @@ export default function CompanySetupForm({
     default_currency: '',
     allowed_units: [],
     plan_id: 'trial',
-    bank_details: [{
-      bank_name: '',
-      bank_address: '',
-      account_number: '',
-      ifsc_code: '',
-      swift_code: '',
-    }],
+    bank_details: [
+      {
+        bank_name: '',
+        bank_address: '',
+        account_number: '',
+        ifsc_code: '',
+        swift_code: '',
+      },
+    ],
   });
 
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
@@ -97,26 +109,34 @@ export default function CompanySetupForm({
     if (editingCompany) {
       // Handle bank details from new bankDetails array or legacy fields
       let bankDetails = [];
-      if (editingCompany.bankDetails && Array.isArray(editingCompany.bankDetails) && editingCompany.bankDetails.length > 0) {
+      if (
+        editingCompany.bankDetails &&
+        Array.isArray(editingCompany.bankDetails) &&
+        editingCompany.bankDetails.length > 0
+      ) {
         // Use new bankDetails array
-        bankDetails = (editingCompany.bankDetails as any[]).map((bank: any) => ({
-          bank_name: bank.bankName || '',
-          bank_address: bank.bankAddress || '',
-          account_number: bank.accountNumber || '',
-          ifsc_code: bank.ifscCode || '',
-          swift_code: bank.swiftCode || '',
-        }));
+        bankDetails = (editingCompany.bankDetails as any[]).map(
+          (bank: any) => ({
+            bank_name: bank.bankName || '',
+            bank_address: bank.bankAddress || '',
+            account_number: bank.accountNumber || '',
+            ifsc_code: bank.ifscCode || '',
+            swift_code: bank.swiftCode || '',
+          })
+        );
       } else {
         // Fallback to legacy fields if bankDetails array is empty
-        bankDetails = [{
-          bank_name: (editingCompany.bankName as string) || '',
-          bank_address: (editingCompany.bankAddress as string) || '',
-          account_number: (editingCompany.accountNumber as string) || '',
-          ifsc_code: (editingCompany.ifscCode as string) || '',
-          swift_code: (editingCompany.swiftCode as string) || '',
-        }];
+        bankDetails = [
+          {
+            bank_name: (editingCompany.bankName as string) || '',
+            bank_address: (editingCompany.bankAddress as string) || '',
+            account_number: (editingCompany.accountNumber as string) || '',
+            ifsc_code: (editingCompany.ifscCode as string) || '',
+            swift_code: (editingCompany.swiftCode as string) || '',
+          },
+        ];
       }
-      
+
       setForm({
         name: (editingCompany.name as string) || '',
         logo: null,
@@ -193,33 +213,40 @@ export default function CompanySetupForm({
     }
   };
 
-  const handleBankChange = (index: number, field: keyof BankDetail, value: string) => {
-    setForm(prev => ({
+  const handleBankChange = (
+    index: number,
+    field: keyof BankDetail,
+    value: string
+  ) => {
+    setForm((prev) => ({
       ...prev,
-      bank_details: prev.bank_details.map((bank, i) => 
+      bank_details: prev.bank_details.map((bank, i) =>
         i === index ? { ...bank, [field]: value } : bank
-      )
+      ),
     }));
   };
 
   const addBankDetail = () => {
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
-      bank_details: [...prev.bank_details, {
-        bank_name: '',
-        bank_address: '',
-        account_number: '',
-        ifsc_code: '',
-        swift_code: '',
-      }]
+      bank_details: [
+        ...prev.bank_details,
+        {
+          bank_name: '',
+          bank_address: '',
+          account_number: '',
+          ifsc_code: '',
+          swift_code: '',
+        },
+      ],
     }));
   };
 
   const removeBankDetail = (index: number) => {
     if (form.bank_details.length > 1) {
-      setForm(prev => ({
+      setForm((prev) => ({
         ...prev,
-        bank_details: prev.bank_details.filter((_, i) => i !== index)
+        bank_details: prev.bank_details.filter((_, i) => i !== index),
       }));
     }
   };
@@ -242,13 +269,17 @@ export default function CompanySetupForm({
     if (!form.iec_number.trim()) errors.iec_number = 'IEC number is required';
     if (!form.default_currency)
       errors.default_currency = 'Please select a currency';
-    
+
     // Validate bank details
     form.bank_details.forEach((bank, index) => {
-      if (!bank.bank_name.trim()) errors[`bank_name_${index}`] = 'Bank name is required';
-      if (!bank.account_number.trim()) errors[`account_number_${index}`] = 'Account number is required';
-      if (!bank.bank_address.trim()) errors[`bank_address_${index}`] = 'Bank address is required';
-      if (!bank.ifsc_code.trim()) errors[`ifsc_code_${index}`] = 'IFSC code is required';
+      if (!bank.bank_name.trim())
+        errors[`bank_name_${index}`] = 'Bank name is required';
+      if (!bank.account_number.trim())
+        errors[`account_number_${index}`] = 'Account number is required';
+      if (!bank.bank_address.trim())
+        errors[`bank_address_${index}`] = 'Bank address is required';
+      if (!bank.ifsc_code.trim())
+        errors[`ifsc_code_${index}`] = 'IFSC code is required';
     });
 
     if (Object.keys(errors).length > 0) {
@@ -346,7 +377,7 @@ export default function CompanySetupForm({
         const apiError = error as Record<string, unknown>;
         const response = apiError.response as Record<string, unknown>;
         const data = response?.data as Record<string, unknown>;
-        
+
         if (data?.errors) {
           setFieldErrors(data.errors as { [key: string]: string });
           toast.error('Please check the highlighted fields');
@@ -448,7 +479,8 @@ export default function CompanySetupForm({
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     Company Logo
                   </label>
-                  {(editingCompany?.logo && typeof editingCompany.logo === 'string') ? (
+                  {editingCompany?.logo &&
+                  typeof editingCompany.logo === 'string' ? (
                     <div className="mb-3">
                       <img
                         src={
@@ -459,7 +491,8 @@ export default function CompanySetupForm({
                         alt="Current Logo"
                         className="h-20 w-auto border rounded-lg"
                         onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).style.display = 'none';
+                          (e.currentTarget as HTMLImageElement).style.display =
+                            'none';
                         }}
                       />
                       <p className="text-xs text-gray-500 mt-1">Current logo</p>
@@ -473,7 +506,8 @@ export default function CompanySetupForm({
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    {editingCompany?.logo && typeof editingCompany.logo === 'string'
+                    {editingCompany?.logo &&
+                    typeof editingCompany.logo === 'string'
                       ? 'Upload new logo to replace current one'
                       : 'Upload company logo (PNG, JPG)'}
                   </p>
@@ -483,18 +517,22 @@ export default function CompanySetupForm({
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     Company Signature
                   </label>
-                  {(editingCompany?.signature && typeof editingCompany.signature === 'string') ? (
+                  {editingCompany?.signature &&
+                  typeof editingCompany.signature === 'string' ? (
                     <div className="mb-3">
                       <img
                         src={
-                          (editingCompany.signature as string).startsWith('http')
+                          (editingCompany.signature as string).startsWith(
+                            'http'
+                          )
                             ? (editingCompany.signature as string)
                             : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${editingCompany.signature}`
                         }
                         alt="Current Signature"
                         className="h-16 w-auto border rounded-lg"
                         onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).style.display = 'none';
+                          (e.currentTarget as HTMLImageElement).style.display =
+                            'none';
                         }}
                       />
                       <p className="text-xs text-gray-500 mt-1">
@@ -510,7 +548,8 @@ export default function CompanySetupForm({
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    {editingCompany?.signature && typeof editingCompany.signature === 'string'
+                    {editingCompany?.signature &&
+                    typeof editingCompany.signature === 'string'
                       ? 'Upload new signature to replace current one'
                       : 'Upload authorized signature (PNG, JPG)'}
                   </p>
@@ -610,9 +649,12 @@ export default function CompanySetupForm({
                   Add Bank
                 </button>
               </div>
-              
+
               {form.bank_details.map((bank, index) => (
-                <div key={index} className="border border-gray-200 rounded-lg p-6 mb-4">
+                <div
+                  key={index}
+                  className="border border-gray-200 rounded-lg p-6 mb-4"
+                >
                   <div className="flex items-center justify-between mb-4">
                     <h4 className="text-md font-medium text-slate-700">
                       Bank Details {index + 1}
@@ -628,7 +670,7 @@ export default function CompanySetupForm({
                       </button>
                     )}
                   </div>
-                  
+
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -636,7 +678,9 @@ export default function CompanySetupForm({
                       </label>
                       <input
                         value={bank.bank_name}
-                        onChange={(e) => handleBankChange(index, 'bank_name', e.target.value)}
+                        onChange={(e) =>
+                          handleBankChange(index, 'bank_name', e.target.value)
+                        }
                         placeholder="Enter bank name"
                         className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent ${
                           fieldErrors[`bank_name_${index}`]
@@ -658,7 +702,13 @@ export default function CompanySetupForm({
                       </label>
                       <input
                         value={bank.account_number}
-                        onChange={(e) => handleBankChange(index, 'account_number', e.target.value)}
+                        onChange={(e) =>
+                          handleBankChange(
+                            index,
+                            'account_number',
+                            e.target.value
+                          )
+                        }
                         placeholder="Enter account number"
                         className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent ${
                           fieldErrors[`account_number_${index}`]
@@ -681,7 +731,9 @@ export default function CompanySetupForm({
                     </label>
                     <textarea
                       value={bank.bank_address}
-                      onChange={(e) => handleBankChange(index, 'bank_address', e.target.value)}
+                      onChange={(e) =>
+                        handleBankChange(index, 'bank_address', e.target.value)
+                      }
                       placeholder="Enter bank address"
                       rows={2}
                       className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent ${
@@ -705,7 +757,9 @@ export default function CompanySetupForm({
                       </label>
                       <input
                         value={bank.ifsc_code}
-                        onChange={(e) => handleBankChange(index, 'ifsc_code', e.target.value)}
+                        onChange={(e) =>
+                          handleBankChange(index, 'ifsc_code', e.target.value)
+                        }
                         placeholder="SBIN0001234"
                         className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent ${
                           fieldErrors[`ifsc_code_${index}`]
@@ -727,7 +781,9 @@ export default function CompanySetupForm({
                       </label>
                       <input
                         value={bank.swift_code}
-                        onChange={(e) => handleBankChange(index, 'swift_code', e.target.value)}
+                        onChange={(e) =>
+                          handleBankChange(index, 'swift_code', e.target.value)
+                        }
                         placeholder="SBININBB123"
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                       />

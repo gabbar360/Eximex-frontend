@@ -237,7 +237,10 @@ const MyTasks: React.FC = () => {
                           <select
                             value={task.status as string}
                             onChange={(e) =>
-                              handleStatusUpdate(task.id as number, e.target.value)
+                              handleStatusUpdate(
+                                task.id as number,
+                                e.target.value
+                              )
                             }
                             className={`px-2 py-1 rounded-full text-xs font-medium border-0 ${getStatusColor(task.status as string)}`}
                           >
@@ -248,7 +251,9 @@ const MyTasks: React.FC = () => {
                         </div>
                         <div className="text-sm text-slate-700">
                           {task.dueDate
-                            ? new Date(task.dueDate as string).toLocaleDateString()
+                            ? new Date(
+                                task.dueDate as string
+                              ).toLocaleDateString()
                             : '-'}
                         </div>
                         <div className="flex items-center justify-end">

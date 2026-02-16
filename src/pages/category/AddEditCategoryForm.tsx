@@ -6,9 +6,7 @@ import {
   updateCategory,
   getAllCategories,
 } from '../../features/categorySlice';
-import {
-  fetchPackagingHierarchy,
-} from '../../features/packagingSlice';
+import { fetchPackagingHierarchy } from '../../features/packagingSlice';
 import { useDispatch } from 'react-redux';
 import PackagingDetailsSection from '../../components/form/PackagingDetailsSection';
 import { toast } from 'react-toastify';
@@ -18,23 +16,15 @@ import {
   HiCheckCircle,
   HiPlus,
   HiTrash,
-  HiDocumentText
+  HiDocumentText,
 } from 'react-icons/hi2';
-import {
-  MdCategory,
-  MdDescription,
-} from 'react-icons/md';
-import {
-  FaCubes,
-  FaLayerGroup,
-  FaBarcode,
-} from 'react-icons/fa';
-import {  BiPackage } from 'react-icons/bi';
+import { MdCategory, MdDescription } from 'react-icons/md';
+import { FaCubes, FaLayerGroup, FaBarcode } from 'react-icons/fa';
+import { BiPackage } from 'react-icons/bi';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
 
 // TypeScript interfaces
-
 
 // Unit Dropdown Component
 const UnitDropdown: React.FC<{
@@ -188,10 +178,12 @@ const AddEditCategoryForm: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [category, setCategory] = useState<Record<string, unknown>>({});
-  const [subcategories, setSubcategories] = useState<Record<string, unknown>[]>([
-    { name: '', hsn_code: '', desc: '', useParentHsnCode: false },
-  ]);
-  const [packagingLevels, setPackagingLevels] = useState<Record<string, unknown>[]>([]);
+  const [subcategories, setSubcategories] = useState<Record<string, unknown>[]>(
+    [{ name: '', hsn_code: '', desc: '', useParentHsnCode: false }]
+  );
+  const [packagingLevels, setPackagingLevels] = useState<
+    Record<string, unknown>[]
+  >([]);
 
   const fetchCategory = React.useCallback(async () => {
     try {
@@ -236,16 +228,12 @@ const AddEditCategoryForm: React.FC = () => {
           const packagingResponse = await dispatch(
             fetchPackagingHierarchy(id)
           ).unwrap();
-          if (
-            packagingResponse.success &&
-            packagingResponse.data.length > 0
-          ) {
+          if (packagingResponse.success && packagingResponse.data.length > 0) {
             setPackagingLevels(
               packagingResponse.data.map((level: Record<string, unknown>) => ({
                 parentUnitId: level.parentUnitId,
                 childUnitId: level.childUnitId,
-                conversionQuantity:
-                  level.quantity || level.conversionQuantity,
+                conversionQuantity: level.quantity || level.conversionQuantity,
               }))
             );
           }
@@ -295,7 +283,10 @@ const AddEditCategoryForm: React.FC = () => {
       if (isEditMode) {
         // Filter valid packaging levels and ensure conversionQuantity is set
         const validPackagingLevels = packagingLevels
-          .filter((level: Record<string, unknown>) => level.parentUnitId && level.childUnitId)
+          .filter(
+            (level: Record<string, unknown>) =>
+              level.parentUnitId && level.childUnitId
+          )
           .map((level: Record<string, unknown>) => ({
             ...level,
             conversionQuantity: level.conversionQuantity || 1, // Default to 1 if not set
@@ -339,7 +330,10 @@ const AddEditCategoryForm: React.FC = () => {
 
         // Filter valid packaging levels and ensure conversionQuantity is set
         const validPackagingLevels = packagingLevels
-          .filter((level: Record<string, unknown>) => level.parentUnitId && level.childUnitId)
+          .filter(
+            (level: Record<string, unknown>) =>
+              level.parentUnitId && level.childUnitId
+          )
           .map((level: Record<string, unknown>) => ({
             ...level,
             conversionQuantity: level.conversionQuantity || 1, // Default to 1 if not set

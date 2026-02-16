@@ -7,7 +7,9 @@ export class NotificationSound {
   private static getAudioContext(): AudioContext {
     if (!this.audioContext) {
       this.audioContext = new (
-        window.AudioContext || (window as unknown & { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+        window.AudioContext ||
+        (window as unknown & { webkitAudioContext: typeof AudioContext })
+          .webkitAudioContext
       )();
     }
     return this.audioContext;
@@ -100,7 +102,11 @@ export class NotificationSound {
 
   // Check if audio is supported
   public static isSupported(): boolean {
-    return !!(window.AudioContext || (window as unknown & { webkitAudioContext: typeof AudioContext }).webkitAudioContext);
+    return !!(
+      window.AudioContext ||
+      (window as unknown & { webkitAudioContext: typeof AudioContext })
+        .webkitAudioContext
+    );
   }
 }
 

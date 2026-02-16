@@ -41,7 +41,6 @@ interface DashboardStats {
 }
 
 const SuperAdminOverview: React.FC = () => {
-
   const dispatch = useDispatch();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);

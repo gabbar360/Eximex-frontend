@@ -12,7 +12,9 @@ const SetPassword: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [token, setToken] = useState<string | null>(null);
-  const [userInfo, setUserInfo] = useState<Record<string, unknown> | null>(null);
+  const [userInfo, setUserInfo] = useState<Record<string, unknown> | null>(
+    null
+  );
   const [isValidToken, setIsValidToken] = useState<boolean | null>(null);
 
   const [searchParams] = useSearchParams();
@@ -106,8 +108,6 @@ const SetPassword: React.FC = () => {
           password: formData.password,
         }),
       });
-
-
     } finally {
       setIsLoading(false);
     }

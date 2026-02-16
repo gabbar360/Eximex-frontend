@@ -11,16 +11,8 @@ import {
   HiMagnifyingGlass,
   HiSparkles,
 } from 'react-icons/hi2';
-import {
-  MdCategory,
-  MdViewList,
-  MdDescription,
-} from 'react-icons/md';
-import {
-  FaLayerGroup,
-  FaBarcode,
-  FaCubes,
-} from 'react-icons/fa';
+import { MdCategory, MdViewList, MdDescription } from 'react-icons/md';
+import { FaLayerGroup, FaBarcode, FaCubes } from 'react-icons/fa';
 import { BiCategory, BiPackage } from 'react-icons/bi';
 import { Pagination } from 'antd';
 import { useDebounce } from '../../utils/useDebounce';
@@ -49,21 +41,37 @@ const CategoryRow: React.FC<{
         : 'bg-gray-100 dark:bg-gray-700/30';
 
   const filteredSubcategories =
-    (category.subcategories as Record<string, unknown>[])?.filter((sub: Record<string, unknown>) => {
-      const matchesSub =
-        (sub.name as string).toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (sub.hsn_code as string)?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (sub.desc as string)?.toLowerCase().includes(searchTerm.toLowerCase());
+    (category.subcategories as Record<string, unknown>[])?.filter(
+      (sub: Record<string, unknown>) => {
+        const matchesSub =
+          (sub.name as string)
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          (sub.hsn_code as string)
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          (sub.desc as string)
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase());
 
-      const hasMatchingChildren = (sub.subcategories as Record<string, unknown>[])?.some(
-        (child: Record<string, unknown>) =>
-          (child.name as string).toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (child.hsn_code as string)?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (child.desc as string)?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+        const hasMatchingChildren = (
+          sub.subcategories as Record<string, unknown>[]
+        )?.some(
+          (child: Record<string, unknown>) =>
+            (child.name as string)
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase()) ||
+            (child.hsn_code as string)
+              ?.toLowerCase()
+              .includes(searchTerm.toLowerCase()) ||
+            (child.desc as string)
+              ?.toLowerCase()
+              .includes(searchTerm.toLowerCase())
+        );
 
-      return matchesSub || hasMatchingChildren;
-    }) || [];
+        return matchesSub || hasMatchingChildren;
+      }
+    ) || [];
 
   return (
     <React.Fragment>
@@ -77,10 +85,10 @@ const CategoryRow: React.FC<{
             <BiCategory className="w-4 h-4 text-slate-600 flex-shrink-0" />
             <span
               className="text-slate-800 font-medium truncate"
-              title={(category.name as string)}
+              title={category.name as string}
             >
               {level > 0 && '↳ '}
-              {(category.name as string)}
+              {category.name as string}
             </span>
           </div>
 
@@ -89,38 +97,50 @@ const CategoryRow: React.FC<{
             {(category.useParentHsnCode as boolean) ? (
               <span className="italic text-slate-500">(Parent's HSN)</span>
             ) : (
-              (category.hsn_code as string) || (category.hsnCode as string) || '-'
+              (category.hsn_code as string) ||
+              (category.hsnCode as string) ||
+              '-'
             )}
           </div>
 
           {/* Description Column */}
           <div
             className="text-slate-700 text-sm truncate"
-            title={(category.description as string) || (category.desc as string)}
+            title={
+              (category.description as string) || (category.desc as string)
+            }
           >
-            {(category.description as string) || (category.desc as string) || '-'}
+            {(category.description as string) ||
+              (category.desc as string) ||
+              '-'}
           </div>
 
           {/* Primary Unit Column */}
           <div className="text-slate-700 text-sm">
-            {(category.primary_unit as string) || (category.primaryUnit as string) || '-'}
+            {(category.primary_unit as string) ||
+              (category.primaryUnit as string) ||
+              '-'}
           </div>
 
           {/* Secondary Unit Column */}
           <div className="text-slate-700 text-sm">
-            {(category.secondary_unit as string) || (category.secondaryUnit as string) || '-'}
+            {(category.secondary_unit as string) ||
+              (category.secondaryUnit as string) ||
+              '-'}
           </div>
 
           {/* Subcategories Column */}
           <div className="text-slate-700 text-sm">
             {filteredSubcategories.length > 0 ? (
               <button
-                onClick={() => toggleExpand((category.id as string))}
+                onClick={() => toggleExpand(category.id as string)}
                 className="text-slate-600 hover:text-slate-800 font-medium flex items-center gap-1"
               >
                 <span>{filteredSubcategories.length}</span>
                 <span>
-                  {expandedCategories.includes((category.id as string)) ? '▼' : '►'}
+                  {expandedCategories.includes(category.id as string)
+                    ? '▼'
+                    : '►'}
                 </span>
               </button>
             ) : (
@@ -131,13 +151,13 @@ const CategoryRow: React.FC<{
           {/* Actions Column */}
           <div className="flex items-center justify-end space-x-2">
             <Link
-              to={`/edit-category/${(category.id as string)}`}
+              to={`/edit-category/${category.id as string}`}
               className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-emerald-600 transition-all duration-300"
             >
               <HiPencil className="w-4 h-4" />
             </Link>
             <button
-              onClick={() => handleDeleteClick((category.id as string))}
+              onClick={() => handleDeleteClick(category.id as string)}
               className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
             >
               <HiTrash className="w-4 h-4" />
@@ -145,10 +165,10 @@ const CategoryRow: React.FC<{
           </div>
         </div>
       </div>
-      {expandedCategories.includes((category.id as string)) &&
+      {expandedCategories.includes(category.id as string) &&
         filteredSubcategories.map((subcategory: Record<string, unknown>) => (
           <CategoryRow
-            key={(subcategory.id as string)}
+            key={subcategory.id as string}
             category={subcategory}
             level={level + 1}
             expandedCategories={expandedCategories}
@@ -365,7 +385,7 @@ const Category: React.FC = () => {
                 <div className="divide-y divide-white/20">
                   {categories.map((category: Record<string, unknown>) => (
                     <CategoryRow
-                      key={(category.id as string)}
+                      key={category.id as string}
                       category={category}
                       level={0}
                       expandedCategories={expandedCategories}
@@ -417,7 +437,7 @@ const Category: React.FC = () => {
                     <div className="divide-y divide-white/20">
                       {categories.map((category: Record<string, unknown>) => (
                         <CategoryRow
-                          key={(category.id as string)}
+                          key={category.id as string}
                           category={category}
                           level={0}
                           expandedCategories={expandedCategories}

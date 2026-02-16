@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ComponentCard from '../../components/common/ComponentCard';
-import {
-  fetchLedger,
-} from '../../features/accountingSlice';
+import { fetchLedger } from '../../features/accountingSlice';
 import { useTheme } from '../../context/ThemeContext';
 
 const Ledger = () => {

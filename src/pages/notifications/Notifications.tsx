@@ -76,7 +76,9 @@ const Notifications: React.FC = () => {
     if (!confirmDelete) return;
 
     try {
-      await dispatch(deleteNotification(confirmDelete) as Record<string, unknown>).unwrap();
+      await dispatch(
+        deleteNotification(confirmDelete) as Record<string, unknown>
+      ).unwrap();
       setConfirmDelete(null);
       toast.success('Notification deleted successfully');
     } catch {
@@ -127,18 +129,16 @@ const Notifications: React.FC = () => {
     return `${Math.floor(diffInMinutes / 1440)}d ago`;
   };
 
-  const filteredNotifications = notifications.filter((notification: {
-    title: string;
-    message: string;
-    type: string;
-  }) => {
-    if (!searchTerm) return true;
-    return (
-      notification.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      notification.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      notification.type.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  });
+  const filteredNotifications = notifications.filter(
+    (notification: { title: string; message: string; type: string }) => {
+      if (!searchTerm) return true;
+      return (
+        notification.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        notification.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        notification.type.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+  );
 
   return (
     <>
@@ -253,7 +253,88 @@ const Notifications: React.FC = () => {
                   </div>
                 </div>
                 <div className="divide-y divide-gray-100">
-                  {filteredNotifications.map((notification: {
+                  {filteredNotifications.map(
+                    (notification: {
+                      id: number;
+                      type: string;
+                      title: string;
+                      message: string;
+                      isRead: boolean;
+                      createdAt: string;
+                      sender?: { name: string };
+                    }) => (
+                      <div
+                        key={notification.id}
+                        className={`p-4 hover:bg-gray-50 transition-colors ${
+                          !notification.isRead
+                            ? 'bg-blue-50/50 border-l-4 border-l-blue-500'
+                            : ''
+                        }`}
+                      >
+                        <div className="grid grid-cols-6 gap-3 items-center">
+                          {/* Type Column */}
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl">
+                              {getNotificationIcon(notification.type)}
+                            </span>
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(notification.type)}`}
+                            >
+                              {notification.type.replace('_', ' ')}
+                            </span>
+                          </div>
+
+                          {/* Message Column */}
+                          <div className="col-span-2">
+                            <h3
+                              className={`font-semibold text-sm mb-1 ${
+                                !notification.isRead
+                                  ? 'text-gray-900'
+                                  : 'text-gray-700'
+                              }`}
+                            >
+                              {notification.title}
+                            </h3>
+                            <p className="text-gray-600 text-sm line-clamp-2">
+                              {notification.message}
+                            </p>
+                          </div>
+
+                          {/* From Column */}
+                          <div className="text-slate-700 text-sm">
+                            {notification.sender?.name || '-'}
+                          </div>
+
+                          {/* Time Column */}
+                          <div className="flex items-center gap-2">
+                            <span className="text-slate-700 text-sm">
+                              {formatTimeAgo(notification.createdAt)}
+                            </span>
+                            {!notification.isRead && (
+                              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                            )}
+                          </div>
+
+                          {/* Actions Column */}
+                          <div className="flex items-center justify-end">
+                            <button
+                              onClick={() => handleDeleteClick(notification.id)}
+                              className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
+                            >
+                              <HiTrash className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
+
+              {/* Mobile Card View */}
+              <div className="lg:hidden divide-y divide-gray-100">
+                {filteredNotifications.map(
+                  (notification: {
                     id: number;
                     type: string;
                     title: string;
@@ -264,139 +345,62 @@ const Notifications: React.FC = () => {
                   }) => (
                     <div
                       key={notification.id}
-                      className={`p-4 hover:bg-gray-50 transition-colors ${
+                      className={`p-4 ${
                         !notification.isRead
                           ? 'bg-blue-50/50 border-l-4 border-l-blue-500'
                           : ''
                       }`}
                     >
-                      <div className="grid grid-cols-6 gap-3 items-center">
-                        {/* Type Column */}
-                        <div className="flex items-center gap-2">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
                           <span className="text-xl">
                             {getNotificationIcon(notification.type)}
                           </span>
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(notification.type)}`}
-                          >
-                            {notification.type.replace('_', ' ')}
-                          </span>
+                          <div>
+                            <h3
+                              className={`font-semibold text-sm ${
+                                !notification.isRead
+                                  ? 'text-gray-900'
+                                  : 'text-gray-700'
+                              }`}
+                            >
+                              {notification.title}
+                            </h3>
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(notification.type)}`}
+                            >
+                              {notification.type.replace('_', ' ')}
+                            </span>
+                          </div>
                         </div>
-
-                        {/* Message Column */}
-                        <div className="col-span-2">
-                          <h3
-                            className={`font-semibold text-sm mb-1 ${
-                              !notification.isRead
-                                ? 'text-gray-900'
-                                : 'text-gray-700'
-                            }`}
-                          >
-                            {notification.title}
-                          </h3>
-                          <p className="text-gray-600 text-sm line-clamp-2">
-                            {notification.message}
-                          </p>
-                        </div>
-
-                        {/* From Column */}
-                        <div className="text-slate-700 text-sm">
-                          {notification.sender?.name || '-'}
-                        </div>
-
-                        {/* Time Column */}
                         <div className="flex items-center gap-2">
-                          <span className="text-slate-700 text-sm">
+                          <span className="text-xs text-gray-500">
                             {formatTimeAgo(notification.createdAt)}
                           </span>
                           {!notification.isRead && (
                             <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                           )}
-                        </div>
-
-                        {/* Actions Column */}
-                        <div className="flex items-center justify-end">
                           <button
                             onClick={() => handleDeleteClick(notification.id)}
-                            className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-red-600 transition-all duration-300"
+                            className="p-1.5 rounded text-slate-500 hover:text-red-600"
                           >
-                            <HiTrash className="w-4 h-4" />
+                            <HiTrash className="w-3 h-3" />
                           </button>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
 
-              {/* Mobile Card View */}
-              <div className="lg:hidden divide-y divide-gray-100">
-                {filteredNotifications.map((notification: {
-                  id: number;
-                  type: string;
-                  title: string;
-                  message: string;
-                  isRead: boolean;
-                  createdAt: string;
-                  sender?: { name: string };
-                }) => (
-                  <div
-                    key={notification.id}
-                    className={`p-4 ${
-                      !notification.isRead
-                        ? 'bg-blue-50/50 border-l-4 border-l-blue-500'
-                        : ''
-                    }`}
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <span className="text-xl">
-                          {getNotificationIcon(notification.type)}
-                        </span>
-                        <div>
-                          <h3
-                            className={`font-semibold text-sm ${
-                              !notification.isRead
-                                ? 'text-gray-900'
-                                : 'text-gray-700'
-                            }`}
-                          >
-                            {notification.title}
-                          </h3>
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(notification.type)}`}
-                          >
-                            {notification.type.replace('_', ' ')}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500">
-                          {formatTimeAgo(notification.createdAt)}
-                        </span>
-                        {!notification.isRead && (
-                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                        )}
-                        <button
-                          onClick={() => handleDeleteClick(notification.id)}
-                          className="p-1.5 rounded text-slate-500 hover:text-red-600"
-                        >
-                          <HiTrash className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </div>
-
-                    <p className="text-gray-600 text-sm mb-2">
-                      {notification.message}
-                    </p>
-
-                    {notification.sender && (
-                      <p className="text-xs text-gray-500">
-                        From: {notification.sender.name}
+                      <p className="text-gray-600 text-sm mb-2">
+                        {notification.message}
                       </p>
-                    )}
-                  </div>
-                ))}
+
+                      {notification.sender && (
+                        <p className="text-xs text-gray-500">
+                          From: {notification.sender.name}
+                        </p>
+                      )}
+                    </div>
+                  )
+                )}
               </div>
             </div>
           )}

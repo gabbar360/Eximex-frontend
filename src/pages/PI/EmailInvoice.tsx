@@ -47,9 +47,9 @@ const EmailInvoice: React.FC = () => {
       // await dispatch(emailInvoice(id, email)).unwrap();
       toast.success('Invoice sent successfully');
       navigate(-1);
-      } catch {
-        toast.error('Failed to send invoice');
-      } finally {
+    } catch {
+      toast.error('Failed to send invoice');
+    } finally {
       setLoading(false);
     }
   };

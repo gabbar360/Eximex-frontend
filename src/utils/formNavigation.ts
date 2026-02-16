@@ -34,7 +34,10 @@ export const getFormTitle = (formType: string, isEdit: boolean) => {
   return titles[formType as keyof typeof titles] || 'Form';
 };
 
-export const validateOrderSelection = (selectedOrder: unknown, isEdit: boolean) => {
+export const validateOrderSelection = (
+  selectedOrder: unknown,
+  isEdit: boolean
+) => {
   if (!isEdit && !selectedOrder) {
     return 'Please select an order first';
   }

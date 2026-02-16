@@ -333,18 +333,21 @@ const ViewInvoice: React.FC = () => {
             {/* Mobile Card View */}
             <div className="block sm:hidden space-y-3">
               {(order.piInvoice?.products || []).map(
-                (product: {
-                  id?: string;
-                  productName?: string;
-                  productDescription?: string;
-                  hsCode?: string;
-                  category?: { hsnCode?: string };
-                  subcategory?: { hsnCode?: string };
-                  quantity?: number;
-                  unit?: string;
-                  rate?: number;
-                  total?: number;
-                }, index: number) => (
+                (
+                  product: {
+                    id?: string;
+                    productName?: string;
+                    productDescription?: string;
+                    hsCode?: string;
+                    category?: { hsnCode?: string };
+                    subcategory?: { hsnCode?: string };
+                    quantity?: number;
+                    unit?: string;
+                    rate?: number;
+                    total?: number;
+                  },
+                  index: number
+                ) => (
                   <div
                     key={product.id || index}
                     className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700"
@@ -435,18 +438,21 @@ const ViewInvoice: React.FC = () => {
                 </thead>
                 <tbody>
                   {(order.piInvoice?.products || []).map(
-                    (product: {
-                      id?: string;
-                      productName?: string;
-                      productDescription?: string;
-                      hsCode?: string;
-                      category?: { hsnCode?: string };
-                      subcategory?: { hsnCode?: string };
-                      quantity?: number;
-                      unit?: string;
-                      rate?: number;
-                      total?: number;
-                    }, index: number) => (
+                    (
+                      product: {
+                        id?: string;
+                        productName?: string;
+                        productDescription?: string;
+                        hsCode?: string;
+                        category?: { hsnCode?: string };
+                        subcategory?: { hsnCode?: string };
+                        quantity?: number;
+                        unit?: string;
+                        rate?: number;
+                        total?: number;
+                      },
+                      index: number
+                    ) => (
                       <tr key={product.id || index}>
                         <td className="border border-gray-300 dark:border-gray-700 px-3 sm:px-4 py-2 sm:py-3 text-gray-900 dark:text-white">
                           <div>

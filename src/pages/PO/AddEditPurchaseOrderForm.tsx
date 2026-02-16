@@ -80,9 +80,9 @@ const AddEditPurchaseOrderForm: React.FC = () => {
   });
 
   // Redux state
-  const { parties } = useSelector((state: {
-    party: { parties: Vendor[] };
-  }) => state.party);
+  const { parties } = useSelector(
+    (state: { party: { parties: Vendor[] } }) => state.party
+  );
 
   // Company and vendor data
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -216,9 +216,10 @@ const AddEditPurchaseOrderForm: React.FC = () => {
   };
 
   // Redux state for categories
-  const { categories } = useSelector((state: {
-    category: { categories: Record<string, unknown>[] };
-  }) => state.category);
+  const { categories } = useSelector(
+    (state: { category: { categories: Record<string, unknown>[] } }) =>
+      state.category
+  );
 
   const calculateTotals = useCallback(() => {
     const subTotal = items.reduce((sum, item) => sum + (item.amount || 0), 0);
@@ -233,7 +234,9 @@ const AddEditPurchaseOrderForm: React.FC = () => {
     supplierName: Yup.string().required('Supplier name is required'),
   });
 
-  const [formData, setFormData] = useState<Record<string, unknown> | null>(null);
+  const [formData, setFormData] = useState<Record<string, unknown> | null>(
+    null
+  );
 
   const getInitialValues = () => ({
     poNumber: formData?.poNumber || '',
@@ -286,7 +289,9 @@ const AddEditPurchaseOrderForm: React.FC = () => {
         }
       } catch (error: unknown) {
         console.error('Error loading products:', error);
-        toast.error(`Failed to load products: ${(error as Error).message || error}`);
+        toast.error(
+          `Failed to load products: ${(error as Error).message || error}`
+        );
         setProducts([]);
       }
 
@@ -297,7 +302,9 @@ const AddEditPurchaseOrderForm: React.FC = () => {
         console.log('Parties response:', partiesResponse);
       } catch (error: unknown) {
         console.error('Error loading parties:', error);
-        toast.error(`Failed to load suppliers: ${(error as Error).message || error}`);
+        toast.error(
+          `Failed to load suppliers: ${(error as Error).message || error}`
+        );
       }
 
       try {
@@ -320,7 +327,9 @@ const AddEditPurchaseOrderForm: React.FC = () => {
         }
       } catch (error: unknown) {
         console.error('Error loading PO data:', error);
-        toast.error(`Failed to load purchase order: ${(error as Error).message || error}`);
+        toast.error(
+          `Failed to load purchase order: ${(error as Error).message || error}`
+        );
       } finally {
         setLoading(false);
       }
@@ -361,7 +370,6 @@ const AddEditPurchaseOrderForm: React.FC = () => {
   useEffect(() => {
     calculateTotals();
   }, [items, calculateTotals]);
-
 
   const addProductToItems = () => {
     if (
@@ -486,7 +494,10 @@ const AddEditPurchaseOrderForm: React.FC = () => {
   //   }
   // };
 
-  const handleSubmit = async (values: Record<string, unknown>, { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }) => {
+  const handleSubmit = async (
+    values: Record<string, unknown>,
+    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }
+  ) => {
     if (items.length === 0) {
       toast.error('Please add at least one item');
       setSubmitting(false);
@@ -1069,14 +1080,12 @@ const AddEditPurchaseOrderForm: React.FC = () => {
                               const availableUnits = [];
 
                               if (packagingHierarchy.length > 0) {
-                                packagingHierarchy.forEach(
-                                  (level) => {
-                                    availableUnits.push({
-                                      id: level.from,
-                                      name: level.from,
-                                    });
-                                  }
-                                );
+                                packagingHierarchy.forEach((level) => {
+                                  availableUnits.push({
+                                    id: level.from,
+                                    name: level.from,
+                                  });
+                                });
 
                                 const lastLevel =
                                   packagingHierarchy[

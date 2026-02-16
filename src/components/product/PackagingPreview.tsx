@@ -103,13 +103,7 @@ const PackagingPreview: React.FC<PackagingPreviewProps> = ({
         setFieldValue('grossWeightPerBox', parseFloat(grossWeight.toFixed(2)));
       }
     }
-  }, [
-    packagingHierarchy,
-    values,
-    setFieldValue,
-    convertToKg,
-    convertFromKg,
-  ]);
+  }, [packagingHierarchy, values, setFieldValue, convertToKg, convertFromKg]);
 
   if (packagingHierarchy.length === 0) return null;
 

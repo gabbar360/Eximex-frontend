@@ -85,14 +85,30 @@ const MobileChartCard = ({
 
 export default function MobileOptimizedDashboard() {
   const dispatch = useDispatch();
-  const currentUser = useSelector((state: Record<string, unknown>) => state.user.user);
-  const { orders = [] } = useSelector((state: Record<string, unknown>) => state.order);
-  const { products = [] } = useSelector((state: Record<string, unknown>) => state.product);
-  const { parties = [] } = useSelector((state: Record<string, unknown>) => state.party);
-  const { piInvoices = [] } = useSelector((state: Record<string, unknown>) => state.pi);
-  const { shipments = [] } = useSelector((state: Record<string, unknown>) => state.shipment);
-  const { packingLists = [] } = useSelector((state: Record<string, unknown>) => state.packingList);
-  const { vgmDocuments = [] } = useSelector((state: Record<string, unknown>) => state.vgm);
+  const currentUser = useSelector(
+    (state: Record<string, unknown>) => state.user.user
+  );
+  const { orders = [] } = useSelector(
+    (state: Record<string, unknown>) => state.order
+  );
+  const { products = [] } = useSelector(
+    (state: Record<string, unknown>) => state.product
+  );
+  const { parties = [] } = useSelector(
+    (state: Record<string, unknown>) => state.party
+  );
+  const { piInvoices = [] } = useSelector(
+    (state: Record<string, unknown>) => state.pi
+  );
+  const { shipments = [] } = useSelector(
+    (state: Record<string, unknown>) => state.shipment
+  );
+  const { packingLists = [] } = useSelector(
+    (state: Record<string, unknown>) => state.packingList
+  );
+  const { vgmDocuments = [] } = useSelector(
+    (state: Record<string, unknown>) => state.vgm
+  );
   const { purchaseOrders = [] } = useSelector(
     (state: Record<string, unknown>) => state.purchaseOrder
   );

@@ -52,7 +52,9 @@ type NavItem = {
 };
 
 // Convert sidebar menu from backend to NavItem format
-const convertSidebarMenuToNavItems = (sidebarMenu: Record<string, unknown>[]): NavItem[] => {
+const convertSidebarMenuToNavItems = (
+  sidebarMenu: Record<string, unknown>[]
+): NavItem[] => {
   if (!sidebarMenu || sidebarMenu.length === 0) {
     return [];
   }
@@ -147,8 +149,12 @@ const Sidebar: React.FC = () => {
   const dispatch = useDispatch();
   const { logout } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const currentUser = useSelector((state: Record<string, unknown>) => state.user.user);
-  const { sidebarMenu } = useSelector((state: Record<string, unknown>) => state.userPermission);
+  const currentUser = useSelector(
+    (state: Record<string, unknown>) => state.user.user
+  );
+  const { sidebarMenu } = useSelector(
+    (state: Record<string, unknown>) => state.userPermission
+  );
   const { theme } = useTheme();
 
   const userRole = currentUser?.role?.name || null;

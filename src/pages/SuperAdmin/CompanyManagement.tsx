@@ -17,8 +17,14 @@ const CompanyManagement: React.FC = () => {
   const [companies, setCompanies] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [editingCompany, setEditingCompany] = useState<Record<string, unknown> | null>(null);
-  const [confirmDelete, setConfirmDelete] = useState<Record<string, unknown> | null>(null);
+  const [editingCompany, setEditingCompany] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
@@ -29,26 +35,25 @@ const CompanyManagement: React.FC = () => {
     totalPages: 0,
   });
 
-  const fetchCompanies = React.useCallback(async (
-    page = currentPage,
-    limit = pageSize,
-    search = searchTerm
-  ) => {
-    try {
-      setLoading(true);
-      const response = await axiosInstance.get('/super-admin/companies', {
-        params: { page, limit, search },
-      });
-      setCompanies(response.data.data.data || response.data.data);
-      if (response.data.data.pagination) {
-        setPagination(response.data.data.pagination);
+  const fetchCompanies = React.useCallback(
+    async (page = currentPage, limit = pageSize, search = searchTerm) => {
+      try {
+        setLoading(true);
+        const response = await axiosInstance.get('/super-admin/companies', {
+          params: { page, limit, search },
+        });
+        setCompanies(response.data.data.data || response.data.data);
+        if (response.data.data.pagination) {
+          setPagination(response.data.data.pagination);
+        }
+      } catch {
+        toast.error('Failed to fetch companies');
+      } finally {
+        setLoading(false);
       }
-    } catch {
-      toast.error('Failed to fetch companies');
-    } finally {
-      setLoading(false);
-    }
-  }, [currentPage, pageSize, searchTerm]);
+    },
+    [currentPage, pageSize, searchTerm]
+  );
 
   useEffect(() => {
     fetchCompanies();
