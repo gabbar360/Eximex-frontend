@@ -16,7 +16,6 @@ import {
   HiBuildingOffice2,
   HiUsers,
   HiPhone,
-  HiEllipsisVertical,
   HiChevronDown,
   HiSparkles,
   HiStar,
@@ -50,7 +49,6 @@ const Cprospect = () => {
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [wasSearching, setWasSearching] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [stageDropdowns, setStageDropdowns] = useState<Record<string, boolean>>(
     {}
   );
@@ -87,9 +85,6 @@ const Cprospect = () => {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (openDropdown && !event.target.closest('.dropdown-container')) {
-        setOpenDropdown(null);
-      }
       if (!event.target.closest('.stage-dropdown')) {
         setStageDropdowns({});
       }
@@ -97,7 +92,7 @@ const Cprospect = () => {
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [openDropdown]);
+  }, []);
 
   // Load data
   useEffect(() => {
@@ -253,39 +248,39 @@ const Cprospect = () => {
                 <table className="w-full">
                   <thead>
                     <tr>
-                      <th className="bg-gray-50 border-b border-gray-200 p-4 text-left">
-                        <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                      <th className="bg-gray-50 border-b border-gray-200 p-4 text-center">
+                        <div className="flex items-center justify-center gap-2 text-sm font-semibold text-slate-700">
                           <HiBuildingOffice2 className="w-4 h-4 text-slate-600" />
                           <span>Company</span>
                         </div>
                       </th>
 
-                      <th className="bg-gray-50 border-b border-gray-200 p-4 text-left">
-                        <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                      <th className="bg-gray-50 border-b border-gray-200 p-4 text-center">
+                        <div className="flex items-center justify-center gap-2 text-sm font-semibold text-slate-700">
                           <HiPhone className="w-4 h-4 text-slate-600" />
                           <span>Phone</span>
                         </div>
                       </th>
-                      <th className="bg-gray-50 border-b border-gray-200 p-4 text-left">
-                        <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                      <th className="bg-gray-50 border-b border-gray-200 p-4 text-center">
+                        <div className="flex items-center justify-center gap-2 text-sm font-semibold text-slate-700">
                           <MdBadge className="w-4 h-4 text-slate-600" />
                           <span>Role</span>
                         </div>
                       </th>
-                      <th className="bg-gray-50 border-b border-gray-200 p-4 text-left">
-                        <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                      <th className="bg-gray-50 border-b border-gray-200 p-4 text-center">
+                        <div className="flex items-center justify-center gap-2 text-sm font-semibold text-slate-700">
                           <HiChevronDown className="w-4 h-4 text-slate-600" />
                           <span>Stage</span>
                         </div>
                       </th>
-                      <th className="bg-gray-50 border-b border-gray-200 p-4 text-left">
-                        <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                      <th className="bg-gray-50 border-b border-gray-200 p-4 text-center">
+                        <div className="flex items-center justify-center gap-2 text-sm font-semibold text-slate-700">
                           <span className="w-2 h-2 rounded-full bg-slate-600"></span>
                           <span>Status</span>
                         </div>
                       </th>
-                      <th className="bg-gray-50 border-b border-gray-200 p-4 text-right">
-                        <div className="flex items-center justify-end gap-2 text-sm font-semibold text-slate-700">
+                      <th className="bg-gray-50 border-b border-gray-200 p-4 text-center">
+                        <div className="flex items-center justify-center gap-2 text-sm font-semibold text-slate-700">
                           <HiSparkles className="w-4 h-4 text-slate-600" />
                           <span>Actions</span>
                         </div>
@@ -300,8 +295,8 @@ const Cprospect = () => {
                           className="hover:bg-gray-50 transition-colors"
                           data-contact-id={contact.id}
                         >
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <div className="flex items-center justify-center">
                               <div className="flex-shrink-0 w-10 h-10">
                                 <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
                                   <HiBuildingOffice2 className="w-5 h-5 text-slate-600" />
@@ -317,19 +312,19 @@ const Cprospect = () => {
                             </div>
                           </td>
 
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
                             <div className="text-sm text-slate-900">
                               {contact.phone || '-'}
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
                               {contact.role}
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
                             {contact.role?.toLowerCase() === 'customer' ? (
-                              <div className="relative stage-dropdown">
+                              <div className="relative stage-dropdown flex justify-center">
                                 <button
                                   onClick={() =>
                                     setStageDropdowns((prev) => ({
@@ -397,10 +392,10 @@ const Cprospect = () => {
                                 )}
                               </div>
                             ) : (
-                              <div className="text-sm text-slate-500">-</div>
+                              <div className="text-sm text-slate-500 text-center">-</div>
                             )}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
                             <span
                               className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                                 contact.status
@@ -418,52 +413,29 @@ const Cprospect = () => {
                               {contact.status ? 'Active' : 'Inactive'}
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <div className="relative dropdown-container">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setOpenDropdown(
-                                    openDropdown === contact.id
-                                      ? null
-                                      : contact.id
-                                  );
-                                }}
-                                className="text-slate-400 hover:text-slate-600 p-2 rounded-lg hover:bg-slate-100 transition-colors"
+                          <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                            <div className="flex items-center justify-end gap-1">
+                              <Link
+                                to={`/view-party/${contact.id}`}
+                                className="p-1.5 rounded-lg text-slate-600 hover:bg-slate-100 transition-all duration-200"
+                                title="View Details"
                               >
-                                <HiEllipsisVertical className="w-5 h-5" />
+                                <HiEye className="w-4 h-4" />
+                              </Link>
+                              <Link
+                                to={`/edit-contact/${contact.id}`}
+                                className="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-all duration-200"
+                                title="Edit Contact"
+                              >
+                                <HiPencil className="w-4 h-4" />
+                              </Link>
+                              <button
+                                onClick={() => handleDeleteClick(contact.id)}
+                                className="p-1.5 rounded-lg text-red-600 hover:bg-red-50 transition-all duration-200"
+                                title="Delete"
+                              >
+                                <HiTrash className="w-4 h-4" />
                               </button>
-
-                              {openDropdown === contact.id && (
-                                <div className="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 w-48">
-                                  <Link
-                                    to={`/view-party/${contact.id}`}
-                                    className="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-                                    onClick={() => setOpenDropdown(null)}
-                                  >
-                                    <HiEye className="w-4 h-4 text-slate-500" />
-                                    <span>View Details</span>
-                                  </Link>
-                                  <Link
-                                    to={`/edit-contact/${contact.id}`}
-                                    className="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-                                    onClick={() => setOpenDropdown(null)}
-                                  >
-                                    <HiPencil className="w-4 h-4 text-slate-500" />
-                                    <span>Edit Contact</span>
-                                  </Link>
-                                  <button
-                                    onClick={() => {
-                                      setOpenDropdown(null);
-                                      handleDeleteClick(contact.id);
-                                    }}
-                                    className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left transition-colors"
-                                  >
-                                    <HiTrash className="w-4 h-4" />
-                                    <span>Delete</span>
-                                  </button>
-                                </div>
-                              )}
                             </div>
                           </td>
                         </tr>
