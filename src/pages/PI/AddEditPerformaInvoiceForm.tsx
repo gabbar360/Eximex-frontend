@@ -155,9 +155,9 @@ type ContainerUtilization = {
 
 // Container static configurations
 const CONTAINER_CONFIGS: ContainerConfig[] = [
-  { type: '20 Feet', cbm: 28, maxWeight: 21000 },
-  { type: '40 Feet', cbm: 56, maxWeight: 26500 },
-  { type: '40 Feet HQ', cbm: 68, maxWeight: 26500 },
+  { type: '20 Feet', cbm: 33, maxWeight: 21000 },
+  { type: '40 Feet', cbm: 67, maxWeight: 26500 },
+  { type: '40 Feet HQ', cbm: 76, maxWeight: 26500 },
   { type: 'LCL', cbm: 0, maxWeight: 0 },
 ];
 
@@ -1114,13 +1114,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
     if (containerType && addedProducts.length > 0) {
       const utilization = calculateContainerUtilization();
       setContainerUtilization(utilization);
-      // Don't auto-update numberOfContainers in edit mode to preserve backend value
-      if (!isEditMode && utilization.recommendedContainers > 0) {
-        setNumberOfContainers(Math.max(utilization.recommendedContainers, 1));
-      }
-    } else if (!isEditMode) {
-      // Ensure numberOfContainers is never 0, but only in create mode
-      setNumberOfContainers(Math.max(numberOfContainers, 1));
+      // Don't auto-update numberOfContainers to preserve manually set values
     }
   };
 
@@ -1359,80 +1353,64 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
       };
 
       if (editingProductIndex !== null) {
-        // Update existing product in the selected container
-        const containerNum = numberOfContainers > 1 ? selectedContainer : 1;
-        const updatedContainerProducts = [
-          ...(containerProducts[containerNum] || []),
-        ];
-        const globalIndex = editingProductIndex;
+        // Update existing product
+        const updatedProducts = [...addedProducts];
+        updatedProducts[editingProductIndex] = productData;
+        setAddedProducts(updatedProducts);
 
-        // Find which container and local index this global index refers to
-        let currentIndex = 0;
-        let targetContainer = 1;
-        let localIndex = 0;
+        // Update container products if using multiple containers
+        if (numberOfContainers > 1) {
+          // Find which container and local index this global index refers to
+          let currentIndex = 0;
+          let targetContainer = 1;
+          let localIndex = 0;
 
-        for (let i = 1; i <= numberOfContainers; i++) {
-          const containerProds = containerProducts[i] || [];
-          if (currentIndex + containerProds.length > globalIndex) {
-            targetContainer = i;
-            localIndex = globalIndex - currentIndex;
-            break;
+          for (let i = 1; i <= numberOfContainers; i++) {
+            const containerProds = containerProducts[i] || [];
+            if (currentIndex + containerProds.length > editingProductIndex) {
+              targetContainer = i;
+              localIndex = editingProductIndex - currentIndex;
+              break;
+            }
+            currentIndex += containerProds.length;
           }
-          currentIndex += containerProds.length;
+
+          const targetContainerProducts = [...(containerProducts[targetContainer] || [])];
+          targetContainerProducts[localIndex] = productData;
+
+          setContainerProducts((prev) => ({
+            ...prev,
+            [targetContainer]: targetContainerProducts,
+          }));
         }
-
-        const targetContainerProducts = [
-          ...(containerProducts[targetContainer] || []),
-        ];
-        targetContainerProducts[localIndex] = productData;
-
-        setContainerProducts((prev) => ({
-          ...prev,
-          [targetContainer]: targetContainerProducts,
-        }));
-
-        // Update global addedProducts
-        const allProducts: ProductData[] = [];
-        for (let i = 1; i <= numberOfContainers; i++) {
-          if (i === targetContainer) {
-            allProducts.push(...targetContainerProducts);
-          } else {
-            allProducts.push(...(containerProducts[i] || []));
-          }
-        }
-        setAddedProducts(allProducts);
 
         setEditingProductIndex(null);
         toast.success('Product updated successfully!');
       } else {
-        // Add new product to selected container
-        const containerNum = numberOfContainers > 1 ? selectedContainer : 1;
-        const updatedContainerProducts = [
-          ...(containerProducts[containerNum] || []),
-          productData,
-        ];
+        // Add new product
+        const updatedProducts = [...addedProducts, productData];
+        setAddedProducts(updatedProducts);
 
-        setContainerProducts((prev) => ({
-          ...prev,
-          [containerNum]: updatedContainerProducts,
-        }));
+        // Update container products if using multiple containers
+        if (numberOfContainers > 1) {
+          const containerNum = selectedContainer;
+          const updatedContainerProducts = [
+            ...(containerProducts[containerNum] || []),
+            productData,
+          ];
 
-        // Update global addedProducts
-        const allProducts: ProductData[] = [];
-        for (let i = 1; i <= numberOfContainers; i++) {
-          if (i === containerNum) {
-            allProducts.push(...updatedContainerProducts);
-          } else {
-            allProducts.push(...(containerProducts[i] || []));
-          }
+          setContainerProducts((prev) => ({
+            ...prev,
+            [containerNum]: updatedContainerProducts,
+          }));
+
+          toast.success(`Product added to Container ${containerNum} successfully!`);
+        } else {
+          toast.success('Product added successfully!');
         }
-        setAddedProducts(allProducts);
-
-        toast.success(
-          `Product added to Container ${containerNum} successfully!`
-        );
       }
 
+      // Reset form
       setProductsAdded([
         {
           productId: '',
