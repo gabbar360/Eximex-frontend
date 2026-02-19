@@ -11,12 +11,13 @@ interface ProductAdded {
   categoryId?: string;
   subcategoryId?: string;
   quantityByWeight?: string;
+  selectedVariants?: Record<string, string>;
 }
 
 interface ProductRowProps {
   idx: number;
   data: ProductAdded;
-  onChange: (idx: number, field: keyof ProductAdded, value: string) => void;
+  onChange: (idx: number, field: keyof ProductAdded, value: string | any) => void;
   categories: Record<string, unknown>[];
   products: Record<string, unknown>[];
   selectedCategory: string;
@@ -57,15 +58,18 @@ const ProductRow: React.FC<ProductRowProps> = ({
   const [subcategorySearch, setSubcategorySearch] = useState('');
   const [productSearch, setProductSearch] = useState('');
   const [unitSearch, setUnitSearch] = useState('');
+  const [variantSearch, setVariantSearch] = useState('');
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [showSubcategoryDropdown, setShowSubcategoryDropdown] = useState(false);
   const [showProductDropdown, setShowProductDropdown] = useState(false);
   const [showUnitDropdown, setShowUnitDropdown] = useState(false);
+  const [showVariantDropdown, setShowVariantDropdown] = useState(false);
 
   const categoryRef = useRef<HTMLDivElement>(null);
   const subcategoryRef = useRef<HTMLDivElement>(null);
   const productRef = useRef<HTMLDivElement>(null);
   const unitRef = useRef<HTMLDivElement>(null);
+  const variantRef = useRef<HTMLDivElement>(null);
 
   // Custom Dropdown Component
   const SearchableDropdown: React.FC<{
@@ -208,6 +212,9 @@ const ProductRow: React.FC<ProductRowProps> = ({
       }
       if (unitRef.current && !unitRef.current.contains(event.target as Node)) {
         setShowUnitDropdown(false);
+      }
+      if (variantRef.current && !variantRef.current.contains(event.target as Node)) {
+        setShowVariantDropdown(false);
       }
     };
 
@@ -423,6 +430,36 @@ const ProductRow: React.FC<ProductRowProps> = ({
         </div>
       </div>
 
+      {/* Variant Selection - Only show if product has variants */}
+      {prod?.variants && prod.variants.length > 0 && (
+        <div className="mb-4">
+          <Label>Product Variants</Label>
+          <div className="space-y-3 p-3 bg-slate-50 dark:bg-slate-900 rounded border">
+            {prod.variants.map((variant: string) => (
+              <div key={variant} className="grid grid-cols-2 gap-3">
+                <div className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center">
+                  {variant}
+                </div>
+                <input
+                  type="text"
+                  value={data.selectedVariants?.[variant] || ''}
+                  onChange={(e) => {
+                    const currentVariants = data.selectedVariants || {};
+                    const updatedVariants = {
+                      ...currentVariants,
+                      [variant]: e.target.value
+                    };
+                    onChange(idx, 'selectedVariants', updatedVariants);
+                  }}
+                  placeholder={`Enter ${variant.toLowerCase()} value`}
+                  className="block w-full rounded-lg border border-gray-300 dark:border-gray-700 shadow-sm py-2 px-3 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Product Description */}
       {prod && (
         <div className="mb-4 p-3 bg-slate-50 dark:bg-slate-900 rounded">
@@ -432,6 +469,20 @@ const ProductRow: React.FC<ProductRowProps> = ({
             {prod.category?.hsnCode || prod.hsCode || 'N/A'} |{' '}
             <strong>Description:</strong> {prod.description || 'N/A'}
           </div>
+
+          {/* Show selected variants if available */}
+          {data.selectedVariants && Object.keys(data.selectedVariants).length > 0 && (
+            <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
+              <strong>Selected Variants:</strong>
+              <div className="ml-2">
+                {Object.entries(data.selectedVariants)
+                  .filter(([_, value]) => value.trim())
+                  .map(([type, value]) => (
+                    <div key={type}>{type}: {value}</div>
+                  ))}
+              </div>
+            </div>
+          )}
 
           {/* Dynamic Product Weight Information */}
           {(prod.packagingHierarchyData?.dynamicFields || prod.unitWeight) && (
