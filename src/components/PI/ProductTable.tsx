@@ -197,6 +197,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
                             />
                           </svg>
                         </button>
+
                         <button
                           type="button"
                           onClick={() => onDeleteProduct(index)}

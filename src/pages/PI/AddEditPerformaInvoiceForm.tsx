@@ -78,6 +78,7 @@ type ProductAdded = {
   categoryId?: string;
   subcategoryId?: string;
   quantityByWeight?: string;
+  selectedVariants?: Record<string, string>;
   packagingCalculation?: {
     totalBoxes: number;
     totalPallets: number;
@@ -102,6 +103,7 @@ type ProductData = {
   categoryId?: string;
   subcategoryId?: string;
   containerNumber?: number;
+  selectedVariants?: Record<string, string>;
   packagingCalculation?: {
     totalBoxes: number;
     totalPallets: number;
@@ -360,6 +362,9 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
   const [containerProducts, setContainerProducts] = useState<{
     [containerNumber: number]: ProductData[];
   }>({});
+  const [showDistributeModal, setShowDistributeModal] = useState<boolean>(false);
+  const [productToDistribute, setProductToDistribute] = useState<ProductData | null>(null);
+  const [distributionQuantities, setDistributionQuantities] = useState<{[containerNumber: number]: number}>({});
   const dispatch = useDispatch();
   const { categories } = useSelector((state: any) => state.category);
   const { products } = useSelector((state: any) => state.product);
@@ -770,6 +775,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                     categoryId: p.categoryId?.toString(),
                     subcategoryId: p.subcategoryId?.toString(),
                     containerNumber: p.containerNumber || 1,
+                    selectedVariants: p.selectedVariants || {},
                     packagingCalculation:
                       p.calculatedPallets &&
                       (p.unit === 'Square Meter' ||
@@ -1349,6 +1355,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         categoryId: currentProduct.categoryId || selectedCategory,
         subcategoryId: currentProduct.subcategoryId || selectedSubcategory,
         containerNumber: numberOfContainers > 1 ? selectedContainer : 1,
+        selectedVariants: currentProduct.selectedVariants || {},
         packagingCalculation: currentProduct.packagingCalculation,
       };
 
@@ -1430,7 +1437,63 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
     }
   };
 
-  const editProduct = (index: number) => {
+  // Handle product distribution from table
+  const handleDistributeFromTable = (index: number) => {
+    const product = addedProducts[index];
+    setProductToDistribute(product);
+    setShowDistributeModal(true);
+    
+    // Auto-distribute evenly by default
+    const quantityPerContainer = Math.floor(product.quantity / numberOfContainers);
+    const remainder = product.quantity % numberOfContainers;
+    
+    const newDistribution: {[key: number]: number} = {};
+    for (let i = 1; i <= numberOfContainers; i++) {
+      newDistribution[i] = quantityPerContainer + (i <= remainder ? 1 : 0);
+    }
+    setDistributionQuantities(newDistribution);
+  };
+
+  // Handle product distribution across containers
+  const handleDistributeProduct = () => {
+    if (!productToDistribute) return;
+
+    const totalDistributed = Object.values(distributionQuantities).reduce((sum, qty) => sum + (qty || 0), 0);
+    
+    if (totalDistributed !== productToDistribute.quantity) {
+      toast.error(`Total distributed quantity (${totalDistributed}) must equal product quantity (${productToDistribute.quantity})`);
+      return;
+    }
+
+    // Remove original product
+    const originalIndex = addedProducts.findIndex(p => p === productToDistribute);
+    const updatedProducts = [...addedProducts];
+    updatedProducts.splice(originalIndex, 1);
+
+    // Add distributed products
+    Object.entries(distributionQuantities).forEach(([containerNum, qty]) => {
+      if (qty && qty > 0) {
+        const containerNumber = parseInt(containerNum);
+        const distributedProduct: ProductData = {
+          ...productToDistribute,
+          quantity: qty,
+          total: qty * productToDistribute.rate,
+          totalWeight: (productToDistribute.totalWeight / productToDistribute.quantity) * qty,
+          containerNumber,
+        };
+        updatedProducts.push(distributedProduct);
+      }
+    });
+
+    setAddedProducts(updatedProducts);
+    setShowDistributeModal(false);
+    setProductToDistribute(null);
+    setDistributionQuantities({});
+    
+    toast.success('Product distributed across containers successfully!');
+  };
+
+  const editProductFromTable = (index: number) => {
     const product = addedProducts[index];
     const productInfo = products.find(
       (p) => p.id.toString() === product.productId.toString()
@@ -1461,6 +1524,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
         categoryId: categoryId,
         subcategoryId: subcategoryId,
         quantityByWeight: quantityByWeightValue,
+        selectedVariants: product.selectedVariants || {},
       },
     ]);
 
@@ -1475,6 +1539,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
           categoryId: categoryId,
           subcategoryId: subcategoryId,
           quantityByWeight: quantityByWeightValue,
+          selectedVariants: product.selectedVariants || {},
         },
       ]);
     }, 10);
@@ -1519,8 +1584,61 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
     setAddedProducts(allProducts);
   };
 
-  const removeProduct = (idx: number) =>
+  const editProduct = (index: number) => {
+    const product = addedProducts[index];
+    const productInfo = products.find(
+      (p) => p.id.toString() === product.productId.toString()
+    );
+
+    // Calculate quantityByWeight from the product's weight
+    const weight = product.totalWeight || 0;
+    const quantityByWeightValue = weight > 0 ? weight.toString() : '';
+
+    const categoryId = product.categoryId || productInfo?.categoryId || '';
+    const subcategoryId =
+      product.subcategoryId || productInfo?.subcategoryId || '';
+
+    // Set editing index first
+    setEditingProductIndex(index);
+
+    // Set the selected category and subcategory to trigger unit dropdown update
+    setSelectedCategory(categoryId);
+    setSelectedSubcategory(subcategoryId);
+
+    // Clear unit first to force dropdown refresh
+    setProductsAdded([
+      {
+        productId: product.productId,
+        quantity: product.quantity.toString(),
+        rate: product.rate.toString(),
+        unit: '', // Clear unit first
+        categoryId: categoryId,
+        subcategoryId: subcategoryId,
+        quantityByWeight: quantityByWeightValue,
+        selectedVariants: product.selectedVariants || {},
+      },
+    ]);
+
+    // Then set the unit after a brief delay to ensure dropdown is refreshed
+    setTimeout(() => {
+      setProductsAdded([
+        {
+          productId: product.productId,
+          quantity: product.quantity.toString(),
+          rate: product.rate.toString(),
+          unit: product.unit,
+          categoryId: categoryId,
+          subcategoryId: subcategoryId,
+          quantityByWeight: quantityByWeightValue,
+          selectedVariants: product.selectedVariants || {},
+        },
+      ]);
+    }, 10);
+  };
+
+  const removeProduct = (idx: number) => {
     setProductsAdded((prev) => prev.filter((_, i) => i !== idx));
+  };
 
   const updateProduct = useCallback(
     (idx: number, field: keyof ProductAdded, value: string | any) => {
@@ -1695,6 +1813,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
           total: product.total,
           totalWeight: product.totalWeight,
           containerNumber: product.containerNumber || 1,
+          selectedVariants: product.selectedVariants || {},
           packagingCalculation: product.packagingCalculation,
         })),
       };
@@ -1782,6 +1901,7 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
           total: product.total,
           totalWeight: product.totalWeight,
           containerNumber: product.containerNumber || 1,
+          selectedVariants: product.selectedVariants || {},
           packagingCalculation: product.packagingCalculation,
         })),
       };
@@ -2920,23 +3040,23 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                   )}
                   <div className="space-y-6">
                     {productsAdded.map((p, idx) => (
-                      <ProductRow
-                        key={`product-row-${idx}`}
-                        idx={idx}
-                        data={p}
-                        onChange={updateProduct}
-                        onRemove={removeProduct}
-                        categories={categories}
-                        products={products}
-                        selectedCategory={selectedCategory}
-                        selectedSubcategory={selectedSubcategory}
-                        setSelectedCategory={setSelectedCategory}
-                        setSelectedSubcategory={setSelectedSubcategory}
-                        calculateTotalWeight={calculateTotalWeightWrapper}
-                        calculateQuantityFromWeight={
-                          calculateQuantityFromWeightWrapper
-                        }
-                      />
+                        <ProductRow
+                          key={`product-row-${idx}`}
+                          idx={idx}
+                          data={p}
+                          onChange={updateProduct}
+                          onRemove={removeProduct}
+                          categories={categories}
+                          products={products}
+                          selectedCategory={selectedCategory}
+                          selectedSubcategory={selectedSubcategory}
+                          setSelectedCategory={setSelectedCategory}
+                          setSelectedSubcategory={setSelectedSubcategory}
+                          calculateTotalWeight={calculateTotalWeightWrapper}
+                          calculateQuantityFromWeight={
+                            calculateQuantityFromWeightWrapper
+                          }
+                        />
                     ))}
                   </div>
                   <div className="flex gap-4 mt-6">
@@ -2999,13 +3119,136 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                     editingProductIndex={editingProductIndex}
                     onEditProduct={editProduct}
                     onDeleteProduct={deleteProduct}
+                    onDistributeProduct={numberOfContainers > 1 ? handleDistributeFromTable : undefined}
+                    numberOfContainers={numberOfContainers}
                     formatCurrency={formatCurrency}
                     calculateTotalWeight={calculateTotalWeightWrapper}
                     calculateGrossWeight={calculateGrossWeightWrapper}
                     getCurrentTotals={getCurrentTotals}
                   />
 
-                  {/* CBM Summary Display */}
+                  {/* Product Distribution Modal */}
+                  {showDistributeModal && productToDistribute && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                        <div className="p-6">
+                          <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-xl font-bold text-gray-900">
+                              Distribute Product Across Containers
+                            </h2>
+                            <button
+                              onClick={() => {
+                                setShowDistributeModal(false);
+                                setProductToDistribute(null);
+                                setDistributionQuantities({});
+                              }}
+                              className="text-gray-400 hover:text-gray-600"
+                            >
+                              <FontAwesomeIcon icon={faTimes} size="lg" />
+                            </button>
+                          </div>
+
+                          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <h3 className="font-semibold text-blue-800 mb-2">
+                              {productToDistribute.name}
+                            </h3>
+                            <p className="text-blue-600 text-sm">
+                              Total Quantity: {productToDistribute.quantity} {productToDistribute.unit}
+                            </p>
+                            <p className="text-blue-600 text-sm">
+                              Rate: {formatCurrency(productToDistribute.rate, currency)}
+                            </p>
+                          </div>
+
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <h4 className="font-semibold text-gray-800">
+                                Distribute quantity across containers:
+                              </h4>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const quantityPerContainer = Math.floor(productToDistribute.quantity / numberOfContainers);
+                                  const remainder = productToDistribute.quantity % numberOfContainers;
+                                  const newDistribution: {[key: number]: number} = {};
+                                  for (let i = 1; i <= numberOfContainers; i++) {
+                                    newDistribution[i] = quantityPerContainer + (i <= remainder ? 1 : 0);
+                                  }
+                                  setDistributionQuantities(newDistribution);
+                                }}
+                                className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                              >
+                                Auto Distribute Evenly
+                              </button>
+                            </div>
+                            
+                            {Array.from({ length: numberOfContainers }, (_, index) => {
+                              const containerNum = index + 1;
+                              return (
+                                <div key={containerNum} className="p-3 border border-gray-200 rounded-lg">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <label className="font-medium text-gray-700">
+                                      Container {containerNum}
+                                    </label>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      max={productToDistribute.quantity}
+                                      value={distributionQuantities[containerNum] || ''}
+                                      onChange={(e) => {
+                                        const value = parseFloat(e.target.value) || 0;
+                                        setDistributionQuantities(prev => ({
+                                          ...prev,
+                                          [containerNum]: value
+                                        }));
+                                      }}
+                                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                                      placeholder="0"
+                                    />
+                                    <span className="text-sm text-gray-500">{productToDistribute.unit}</span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            
+                            <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                              <div className="flex justify-between text-sm">
+                                <span>Total Distributed:</span>
+                                <span className={`font-semibold ${
+                                  Object.values(distributionQuantities).reduce((sum, qty) => sum + (qty || 0), 0) === productToDistribute.quantity
+                                    ? 'text-green-600'
+                                    : 'text-red-600'
+                                }`}>
+                                  {Object.values(distributionQuantities).reduce((sum, qty) => sum + (qty || 0), 0)} / {productToDistribute.quantity} {productToDistribute.unit}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex justify-end gap-4 mt-6">
+                            <button
+                              onClick={() => {
+                                setShowDistributeModal(false);
+                                setProductToDistribute(null);
+                                setDistributionQuantities({});
+                              }}
+                              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={handleDistributeProduct}
+                              className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800"
+                            >
+                              Distribute Product
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   {addedProducts.length > 0 && (
                     <div className="mt-6 space-y-6">
                       {/* Overall CBM Summary */}

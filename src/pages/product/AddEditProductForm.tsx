@@ -93,6 +93,9 @@ const AddEditProductForm = () => {
   const [trackVolume, setTrackVolume] = useState(false);
   const [loadingCategory, setLoadingCategory] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
+  const [variants, setVariants] = useState<string[]>([]);
+  const [showVariantInput, setShowVariantInput] = useState(false);
+  const [variantInputValue, setVariantInputValue] = useState('');
 
   const fetchCategories = useCallback(async () => {
     console.log('🔍 fetchCategories called:', {
@@ -413,6 +416,7 @@ const AddEditProductForm = () => {
       currency: product?.currency || 'USD',
       categoryId: product?.categoryId || selectedCategoryId || '',
       subCategoryId: product?.subCategoryId || '',
+      variants: product?.variants || [],
       totalBoxes: product?.totalBoxes || 1,
       grossWeightPerBox: product?.grossWeightPerBox || '',
       grossWeightUnit: product?.grossWeightUnit || 'kg',
@@ -695,6 +699,7 @@ const AddEditProductForm = () => {
           trackVolume && values.volumeHeight
             ? parseFloat(values.volumeHeight)
             : null,
+        variants: values.variants || [],
       };
 
       // Build packagingHierarchyData with dynamicFields
@@ -877,6 +882,86 @@ const AddEditProductForm = () => {
                   convertFromKg={convertFromKg}
                   setFieldValue={setFieldValue}
                 />
+
+                {/* Variants Section */}
+                <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-semibold text-slate-800">Product Variants</h3>
+                    {!showVariantInput && (
+                      <button
+                        type="button"
+                        onClick={() => setShowVariantInput(true)}
+                        className="px-6 py-3 rounded-lg font-semibold text-white bg-slate-700 hover:bg-slate-800 transition-all duration-300 hover:shadow-lg shadow-sm"
+                      >
+                        Add Variant
+                      </button>
+                    )}
+                  </div>
+
+                  {showVariantInput && (
+                    <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                      <div className="flex gap-3">
+                        <input
+                          type="text"
+                          value={variantInputValue}
+                          onChange={(e) => setVariantInputValue(e.target.value)}
+                          placeholder="Enter variant name..."
+                          className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all"
+                          autoFocus
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (variantInputValue.trim()) {
+                              const newVariants = [...(values.variants || []), variantInputValue.trim()];
+                              setFieldValue('variants', newVariants);
+                              setVariantInputValue('');
+                              setShowVariantInput(false);
+                            }
+                          }}
+                          className="px-6 py-3 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-all font-medium"
+                        >
+                          Add
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setVariantInputValue('');
+                            setShowVariantInput(false);
+                          }}
+                          className="px-4 py-3 border border-gray-300 text-slate-600 rounded-lg hover:bg-gray-50 transition-all"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {values.variants && values.variants.length > 0 ? (
+                    <div className="space-y-3">
+                      {values.variants.map((variant, index) => (
+                        <div key={index} className="flex items-center justify-between bg-gray-50 p-4 rounded-lg border border-gray-200">
+                          <span className="text-slate-700 font-medium">{variant}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newVariants = values.variants.filter((_, i) => i !== index);
+                              setFieldValue('variants', newVariants);
+                            }}
+                            className="px-3 py-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-all duration-200 text-sm font-medium"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-slate-500">No variants added yet</p>
+                      <p className="text-slate-400 text-sm mt-1">Click "Add Variant" to create product variations</p>
+                    </div>
+                  )}
+                </div>
 
                 {/* Submit Buttons */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:gap-4 pt-6 border-t border-gray-200">
