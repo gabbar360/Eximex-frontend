@@ -248,13 +248,12 @@ const Cprospect = () => {
                 <table className="w-full">
                   <thead>
                     <tr>
-                      <th className="bg-gray-50 border-b border-gray-200 p-4 text-center">
-                        <div className="flex items-center justify-center gap-2 text-sm font-semibold text-slate-700">
+                      <th className="bg-gray-50 border-b border-gray-200 p-4 text-left">
+                        <div className="flex items-center pl-15 gap-2 text-sm font-semibold text-slate-700">
                           <HiBuildingOffice2 className="w-4 h-4 text-slate-600" />
                           <span>Company</span>
                         </div>
                       </th>
-
                       <th className="bg-gray-50 border-b border-gray-200 p-4 text-center">
                         <div className="flex items-center justify-center gap-2 text-sm font-semibold text-slate-700">
                           <HiPhone className="w-4 h-4 text-slate-600" />
@@ -295,8 +294,8 @@ const Cprospect = () => {
                           className="hover:bg-gray-50 transition-colors"
                           data-contact-id={contact.id}
                         >
-                          <td className="px-6 py-4 whitespace-nowrap text-center">
-                            <div className="flex items-center justify-center">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
                               <div className="flex-shrink-0 w-10 h-10">
                                 <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
                                   <HiBuildingOffice2 className="w-5 h-5 text-slate-600" />
@@ -304,8 +303,8 @@ const Cprospect = () => {
                               </div>
                               <div className="ml-4">
                                 <div className="text-sm font-semibold text-slate-900">
-                                  {contact.companyName?.length > 12
-                                    ? `${contact.companyName.substring(0, 12)}...`
+                                  {contact.companyName?.length > 20
+                                    ? `${contact.companyName.substring(0, 20)}...`
                                     : contact.companyName}
                                 </div>
                               </div>
@@ -414,7 +413,7 @@ const Cprospect = () => {
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                            <div className="flex items-center justify-end gap-1">
+                            <div className="flex items-center justify-center gap-1">
                               <Link
                                 to={`/view-party/${contact.id}`}
                                 className="p-1.5 rounded-lg text-slate-600 hover:bg-slate-100 transition-all duration-200"
