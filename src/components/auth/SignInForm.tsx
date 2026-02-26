@@ -105,7 +105,7 @@ export default function SignInForm() {
               <div className="auth-form-fields space-y-2 sm:space-y-3">
                 <div className="auth-form-field form-field-spacing">
                   <label className="block text-xs sm:text-sm font-semibold text-black mb-2">
-                    Business Email...
+                    Business Email
                   </label>
                   <input
                     type="email"
