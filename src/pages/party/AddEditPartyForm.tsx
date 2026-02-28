@@ -264,6 +264,7 @@ const AddEditPartyForm = () => {
     notes: party.notes || '',
     status: party.status !== undefined ? Boolean(party.status) : false,
     stage: party.stage || 'NEW', // Default to NEW for new contacts
+    partyType: party.partyType || 'domestic', // Default to domestic
   });
 
   // Custom Dropdown Component
@@ -397,7 +398,11 @@ const AddEditPartyForm = () => {
               country: Yup.string().required('Country is required'),
               // pincode: Yup.string().required('Pincode is required'),
               currency: Yup.string().required('Currency is required'),
-              gstNumber: Yup.string().required('GST Number is required'),
+              gstNumber: Yup.string().when('partyType', {
+                is: 'domestic',
+                then: (schema) => schema.required('GST Number is required'),
+                otherwise: (schema) => schema.notRequired(),
+              }),
             })}
             onSubmit={handleSubmit}
           >
@@ -608,27 +613,64 @@ const AddEditPartyForm = () => {
                     </div>
                   )}
 
-                  {/* GST Number */}
-                  <div>
-                    <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
-                      <HiDocumentText className="w-4 h-4 mr-2 text-slate-600" />
-                      GST Number / VAT
+                  {/* Party Type - Domestic/International */}
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-semibold text-slate-700 mb-3">
+                      Party Type
                     </label>
-                    <input
-                      name="gstNumber"
-                      type="text"
-                      placeholder="Enter GST number"
-                      value={values.gstNumber}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
-                    />
-                    {touched.gstNumber && errors.gstNumber && (
-                      <div className="text-sm text-red-500 mt-1">
-                        {errors.gstNumber}
-                      </div>
-                    )}
+                    <div className="flex gap-6">
+                      <label className="flex items-center space-x-3 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="partyType"
+                          value="domestic"
+                          checked={values.partyType === 'domestic'}
+                          onChange={handleChange}
+                          className="w-4 h-4 text-slate-600 border-gray-300 focus:ring-slate-200"
+                        />
+                        <span className="text-sm font-medium text-slate-700">
+                          Domestic
+                        </span>
+                      </label>
+                      <label className="flex items-center space-x-3 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="partyType"
+                          value="international"
+                          checked={values.partyType === 'international'}
+                          onChange={handleChange}
+                          className="w-4 h-4 text-slate-600 border-gray-300 focus:ring-slate-200"
+                        />
+                        <span className="text-sm font-medium text-slate-700">
+                          International
+                        </span>
+                      </label>
+                    </div>
                   </div>
+
+                  {/* GST Number - Only show for domestic */}
+                  {values.partyType === 'domestic' && (
+                    <div>
+                      <label className="flex items-center text-sm font-semibold text-slate-700 mb-3">
+                        <HiDocumentText className="w-4 h-4 mr-2 text-slate-600" />
+                        GST Number
+                      </label>
+                      <input
+                        name="gstNumber"
+                        type="text"
+                        placeholder="Enter GST number"
+                        value={values.gstNumber}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        className="w-full px-4 py-3 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-slate-200 focus:border-slate-500 transition-all duration-300 shadow-sm"
+                      />
+                      {touched.gstNumber && errors.gstNumber && (
+                        <div className="text-sm text-red-500 mt-1">
+                          {errors.gstNumber}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* Location - Country, State, City */}
                   <div className="md:col-span-2">
