@@ -6,6 +6,7 @@ import {
   HiUsers,
   HiPencil,
   HiTrash,
+  HiEye,
 } from 'react-icons/hi';
 import { HiMagnifyingGlass } from 'react-icons/hi2';
 import { Pagination } from 'antd';
@@ -22,6 +23,14 @@ const CompanyManagement: React.FC = () => {
     unknown
   > | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
+  const [viewingCompany, setViewingCompany] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
+  const [companyData, setCompanyData] = useState<Record<
     string,
     unknown
   > | null>(null);
@@ -88,6 +97,18 @@ const CompanyManagement: React.FC = () => {
 
   const handleDeleteClick = (company: Record<string, unknown>) => {
     setConfirmDelete(company);
+  };
+
+  const handleViewData = async (company: Record<string, unknown>) => {
+    try {
+      const response = await axiosInstance.get(
+        `/super-admin/companies/${company.id}/data`
+      );
+      setCompanyData(response.data.data);
+      setViewingCompany(company);
+    } catch (error) {
+      toast.error('Failed to fetch company data');
+    }
   };
 
   const handleConfirmDelete = async () => {
@@ -242,6 +263,13 @@ const CompanyManagement: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <div className="flex items-center justify-end gap-2">
                           <button
+                            onClick={() => handleViewData(company)}
+                            className="p-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-lg transition-all"
+                            title="View Company Data"
+                          >
+                            <HiEye className="w-4 h-4" />
+                          </button>
+                          <button
                             onClick={() => handleEdit(company)}
                             className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-all"
                             title="Edit Company"
@@ -309,6 +337,61 @@ const CompanyManagement: React.FC = () => {
                 className="px-6 py-3 rounded-lg bg-red-600 text-white hover:bg-red-700 shadow-lg"
               >
                 Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Company Data Modal */}
+      {viewingCompany && companyData && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-60 p-4">
+          <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full p-8 border border-gray-200 max-h-[80vh] overflow-y-auto">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-blue-600 flex items-center justify-center shadow-lg">
+                <HiOfficeBuilding className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 mb-2">
+                {viewingCompany.name} - Company Data
+              </h3>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-blue-50 p-4 rounded-lg text-center">
+                <div className="text-2xl font-bold text-blue-600">
+                  {companyData.stats?.products || 0}
+                </div>
+                <div className="text-sm text-blue-600">Products</div>
+              </div>
+              <div className="bg-green-50 p-4 rounded-lg text-center">
+                <div className="text-2xl font-bold text-green-600">
+                  {companyData.stats?.users || 0}
+                </div>
+                <div className="text-sm text-green-600">Users</div>
+              </div>
+              <div className="bg-purple-50 p-4 rounded-lg text-center">
+                <div className="text-2xl font-bold text-purple-600">
+                  {companyData.stats?.piInvoices || 0}
+                </div>
+                <div className="text-sm text-purple-600">PI Invoices</div>
+              </div>
+              <div className="bg-orange-50 p-4 rounded-lg text-center">
+                <div className="text-2xl font-bold text-orange-600">
+                  {companyData.stats?.orders || 0}
+                </div>
+                <div className="text-sm text-orange-600">Orders</div>
+              </div>
+            </div>
+
+            <div className="flex justify-center">
+              <button
+                onClick={() => {
+                  setViewingCompany(null);
+                  setCompanyData(null);
+                }}
+                className="px-6 py-3 rounded-lg border border-gray-300 text-slate-600 hover:bg-gray-50"
+              >
+                Close
               </button>
             </div>
           </div>
