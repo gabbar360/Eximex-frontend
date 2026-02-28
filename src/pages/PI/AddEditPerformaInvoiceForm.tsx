@@ -2792,8 +2792,8 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
                                     name: 'BEFORE DISPATCH',
                                   },
                                   {
-                                    id: 'Balance 70% Payment Term',
-                                    name: 'Balance 70% Payment Term',
+                                    id: '30 DAYS OF THE DELIVERY',
+                                    name: '30 DAYS OF THE DELIVERY',
                                   },
                                 ].filter((term) =>
                                   term.name
