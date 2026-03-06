@@ -1376,65 +1376,82 @@ const AddEditPackingList = () => {
                             <div className="absolute z-[9999] w-full bg-white border border-gray-200 rounded-lg shadow-xl mt-1">
                               <div className="max-h-60 overflow-y-auto">
                                 {(() => {
-                                  console.log(
-                                    'Rendering product dropdown for container:',
-                                    containerIndex
-                                  );
-                                  console.log('piProducts:', piProducts);
-                                  console.log(
-                                    'piProducts length:',
-                                    piProducts.length
-                                  );
-                                  return null;
+                                  // Get all already selected product names from all containers
+                                  const selectedProductNames = new Set();
+                                  packagingList.containers.forEach((container) => {
+                                    container.products.forEach((product) => {
+                                      if (product.productName) {
+                                        selectedProductNames.add(product.productName);
+                                      }
+                                    });
+                                  });
+
+                                  // Filter out already selected products
+                                  const availableProducts = piProducts.filter((piProduct) => {
+                                    const productName = piProduct.name || piProduct.productName || `Product ${piProducts.indexOf(piProduct) + 1}`;
+                                    return !selectedProductNames.has(productName);
+                                  });
+
+                                  console.log('Selected products:', Array.from(selectedProductNames));
+                                  console.log('Available products:', availableProducts.length, 'out of', piProducts.length);
+
+                                  if (availableProducts.length === 0) {
+                                    return (
+                                      <div className="px-4 py-3 text-slate-500 text-sm text-center">
+                                        All products from PI have been added
+                                      </div>
+                                    );
+                                  }
+
+                                  return availableProducts.map((piProduct, idx) => {
+                                    const productName =
+                                      piProduct.name ||
+                                      piProduct.productName ||
+                                      `Product ${piProducts.indexOf(piProduct) + 1}`;
+                                    const quantity =
+                                      piProduct.quantity || piProduct.qty || '';
+                                    const unit = piProduct.unit || 'Box';
+
+                                    return (
+                                      <div
+                                        key={piProducts.indexOf(piProduct)}
+                                        className="px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm transition-colors duration-150"
+                                        onClick={() => {
+                                          const selectedProduct = piProducts.find(
+                                            (p) =>
+                                              (p.name || p.productName) ===
+                                              productName
+                                          );
+
+                                          setProductForm((prev) => ({
+                                            ...prev,
+                                            productName,
+                                            quantity:
+                                              selectedProduct?.quantity ||
+                                              selectedProduct?.qty ||
+                                              '',
+                                            unit: selectedProduct?.unit || 'Box',
+                                            hsnCode:
+                                              selectedProduct?.category
+                                                ?.hsnCode ||
+                                              selectedProduct?.subcategory
+                                                ?.hsnCode ||
+                                              '',
+                                            productData: selectedProduct,
+                                            packedQuantity: '',
+                                          }));
+
+                                          setShowProductNameDropdown((prev) => ({
+                                            ...prev,
+                                            [containerIndex]: false,
+                                          }));
+                                        }}
+                                      >
+                                        {productName} (Qty: {quantity} {unit})
+                                      </div>
+                                    );
+                                  });
                                 })()}
-                                {piProducts.map((piProduct, idx) => {
-                                  const productName =
-                                    piProduct.name ||
-                                    piProduct.productName ||
-                                    `Product ${idx + 1}`;
-                                  const quantity =
-                                    piProduct.quantity || piProduct.qty || '';
-                                  const unit = piProduct.unit || 'Box';
-
-                                  return (
-                                    <div
-                                      key={idx}
-                                      className="px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm transition-colors duration-150"
-                                      onClick={() => {
-                                        const selectedProduct = piProducts.find(
-                                          (p) =>
-                                            (p.name || p.productName) ===
-                                            productName
-                                        );
-
-                                        setProductForm((prev) => ({
-                                          ...prev,
-                                          productName,
-                                          quantity:
-                                            selectedProduct?.quantity ||
-                                            selectedProduct?.qty ||
-                                            '',
-                                          unit: selectedProduct?.unit || 'Box',
-                                          hsnCode:
-                                            selectedProduct?.category
-                                              ?.hsnCode ||
-                                            selectedProduct?.subcategory
-                                              ?.hsnCode ||
-                                            '',
-                                          productData: selectedProduct,
-                                          packedQuantity: '',
-                                        }));
-
-                                        setShowProductNameDropdown((prev) => ({
-                                          ...prev,
-                                          [containerIndex]: false,
-                                        }));
-                                      }}
-                                    >
-                                      {productName} (Qty: {quantity} {unit})
-                                    </div>
-                                  );
-                                })}
                               </div>
                             </div>
                           )}
