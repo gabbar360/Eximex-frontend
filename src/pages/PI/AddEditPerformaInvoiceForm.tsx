@@ -1514,6 +1514,11 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
     setSelectedCategory(categoryId);
     setSelectedSubcategory(subcategoryId);
 
+    // Set the selected container to match the product's container
+    if (numberOfContainers > 1 && product.containerNumber) {
+      setSelectedContainer(product.containerNumber);
+    }
+
     // Clear unit first to force dropdown refresh
     setProductsAdded([
       {
@@ -1604,6 +1609,11 @@ const AddEditPerformaInvoiceForm: React.FC = () => {
     // Set the selected category and subcategory to trigger unit dropdown update
     setSelectedCategory(categoryId);
     setSelectedSubcategory(subcategoryId);
+
+    // Set the selected container to match the product's container
+    if (numberOfContainers > 1 && product.containerNumber) {
+      setSelectedContainer(product.containerNumber);
+    }
 
     // Clear unit first to force dropdown refresh
     setProductsAdded([
