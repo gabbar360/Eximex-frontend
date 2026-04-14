@@ -509,10 +509,12 @@ const UserManagement: React.FC = () => {
                           className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                             user.status === 'ACTIVE'
                               ? 'bg-green-100 text-green-800'
+                              : user.status === 'INVITED'
+                              ? 'bg-yellow-100 text-yellow-800'
                               : 'bg-red-100 text-red-800'
                           }`}
                         >
-                          {user.status === 'ACTIVE' ? 'Active' : 'Inactive'}
+                          {user.status === 'ACTIVE' ? 'Active' : user.status === 'INVITED' ? 'Invited' : 'Inactive'}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

@@ -98,16 +98,22 @@ const SetPassword: React.FC = () => {
 
     setIsLoading(true);
     try {
-      await fetch(`${API_URL}/invitation/set-password`, {
+      const response = await fetch(`${API_URL}/invitation/set-password`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          token,
-          password: formData.password,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, password: formData.password }),
       });
+      const data = await response.json();
+      if (response.ok) {
+        toast.success('Password set successfully! Please sign in.');
+        setTimeout(() => {
+          window.location.href = '/signin';
+        }, 1500);
+      } else {
+        toast.error(data.message || 'Failed to set password');
+      }
+    } catch {
+      toast.error('Something went wrong. Please try again.');
     } finally {
       setIsLoading(false);
     }
