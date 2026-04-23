@@ -28,8 +28,7 @@ const ResetPassword: React.FC = () => {
     const tokenFromUrl = searchParams.get('token');
     if (tokenFromUrl) {
       setToken(tokenFromUrl);
-      // Don't set as valid immediately, let the backend validate
-      validateToken(tokenFromUrl);
+      setIsValidToken(true);
     } else {
       setIsValidToken(false);
     }
